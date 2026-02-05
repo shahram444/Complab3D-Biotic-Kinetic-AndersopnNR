@@ -32,6 +32,7 @@
 #define COMPLAB3D_PROCESSORS_PART1_HH
 
 #include "../defineKinetics.hh"
+#include "../defineAbioticKinetics.hh"  // For abiotic (substrate-only) reactions
 #include <random>
 using namespace plb;
 typedef double T;
@@ -126,6 +127,196 @@ private:
     std::vector<T> vec1_mu_kns;
     plint solid, bb;
     plint dCloc, dBloc, maskLloc;
+};
+
+/* ============================================================================
+ * ABIOTIC KINETICS PROCESSOR
+ * ============================================================================
+ * Processes chemical reactions between substrates WITHOUT biomass.
+ * Used when biotic_mode=false but enable_abiotic_kinetics=true.
+ *
+ * Lattice order: [C0, C1, ..., Cn, dC0, dC1, ..., dCn, mask]
+ * Total lattices: 2*subsNum + 1
+ * ============================================================================
+ */
+template<typename T, template<typename U> class Descriptor>
+class run_abiotic_kinetics : public LatticeBoxProcessingFunctional3D<T,Descriptor>
+{
+public:
+    run_abiotic_kinetics(plint nx_, plint subsNum_, T dt_, plint solid_, plint bb_)
+    : nx(nx_), subsNum(subsNum_), dt(dt_), solid(solid_), bb(bb_),
+      dCloc(subsNum_), maskLloc(2*subsNum_)
+    {}
+
+    virtual void process(Box3D domain, std::vector<BlockLattice3D<T,Descriptor>*> lattices) {
+        Dot3D absoluteOffset = lattices[0]->getLocation();
+
+        for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+            plint absX = iX + absoluteOffset.x;
+            if (absX > 0 && absX < nx-1) {
+                for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+                    for (plint iZ=domain.z0; iZ<=domain.z1; ++iZ) {
+                        // Get mask value
+                        Dot3D maskOffset = computeRelativeDisplacement(*lattices[0], *lattices[maskLloc]);
+                        plint mask = util::roundToInt(lattices[maskLloc]->get(
+                            iX+maskOffset.x, iY+maskOffset.y, iZ+maskOffset.z).computeDensity());
+
+                        // Skip solid and bounce-back cells
+                        if (mask != solid && mask != bb) {
+                            // Get offsets for all lattices
+                            std::vector<Dot3D> vec_offset;
+                            for (plint iT=0; iT<maskLloc; ++iT) {
+                                vec_offset.push_back(computeRelativeDisplacement(*lattices[0], *lattices[iT]));
+                            }
+
+                            // Construct concentration vector
+                            std::vector<T> conc;
+                            for (plint iS=0; iS<subsNum; ++iS) {
+                                plint iXs = iX + vec_offset[iS].x;
+                                plint iYs = iY + vec_offset[iS].y;
+                                plint iZs = iZ + vec_offset[iS].z;
+                                T c0 = lattices[iS]->get(iXs, iYs, iZs).computeDensity();
+                                if (c0 < thrd) c0 = 0;
+                                conc.push_back(c0);
+                            }
+
+                            // Calculate abiotic reaction rates
+                            std::vector<T> subs_rate(subsNum, 0.0);
+                            defineAbioticRxnKinetics(conc, subs_rate, mask);
+
+                            // Update dC lattices
+                            for (plint iS=0; iS<subsNum; ++iS) {
+                                T dC = subs_rate[iS] * dt;
+                                if (dC > thrd || dC < -thrd) {
+                                    plint iXd = iX + vec_offset[iS+dCloc].x;
+                                    plint iYd = iY + vec_offset[iS+dCloc].y;
+                                    plint iZd = iZ + vec_offset[iS+dCloc].z;
+                                    Array<T,7> g;
+                                    lattices[iS+dCloc]->get(iXd, iYd, iZd).getPopulations(g);
+                                    g[0] += (T)(dC)/4;
+                                    g[1] += (T)(dC)/8;
+                                    g[2] += (T)(dC)/8;
+                                    g[3] += (T)(dC)/8;
+                                    g[4] += (T)(dC)/8;
+                                    g[5] += (T)(dC)/8;
+                                    g[6] += (T)(dC)/8;
+                                    lattices[iS+dCloc]->get(iXd, iYd, iZd).setPopulations(g);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    virtual BlockDomain::DomainT appliesTo() const {
+        return BlockDomain::bulkAndEnvelope;
+    }
+
+    virtual run_abiotic_kinetics<T,Descriptor>* clone() const {
+        return new run_abiotic_kinetics<T,Descriptor>(*this);
+    }
+
+    void getTypeOfModification(std::vector<modif::ModifT>& modified) const {
+        // dC lattices are modified
+        for (plint iT = dCloc; iT < maskLloc; ++iT) {
+            modified[iT] = modif::staticVariables;
+        }
+    }
+
+private:
+    plint nx, subsNum;
+    T dt;
+    plint solid, bb;
+    plint dCloc, maskLloc;
+};
+
+/* ============================================================================
+ * ABIOTIC KINETICS UPDATE PROCESSOR
+ * ============================================================================
+ * Applies the accumulated dC changes to substrate lattices.
+ * Called after run_abiotic_kinetics to update concentrations.
+ * ============================================================================
+ */
+template<typename T, template<typename U> class Descriptor>
+class update_abiotic_rxnLattices : public LatticeBoxProcessingFunctional3D<T,Descriptor>
+{
+public:
+    update_abiotic_rxnLattices(plint nx_, plint subsNum_, plint solid_, plint bb_)
+    : nx(nx_), subsNum(subsNum_), solid(solid_), bb(bb_),
+      dCloc(subsNum_), maskLloc(2*subsNum_)
+    {}
+
+    virtual void process(Box3D domain, std::vector<BlockLattice3D<T,Descriptor>*> lattices) {
+        Dot3D absoluteOffset = lattices[0]->getLocation();
+
+        for (plint iX=domain.x0; iX<=domain.x1; ++iX) {
+            plint absX = iX + absoluteOffset.x;
+            if (absX > 0 && absX < nx-1) {
+                for (plint iY=domain.y0; iY<=domain.y1; ++iY) {
+                    for (plint iZ=domain.z0; iZ<=domain.z1; ++iZ) {
+                        // Get mask value
+                        Dot3D maskOffset = computeRelativeDisplacement(*lattices[0], *lattices[maskLloc]);
+                        plint mask = util::roundToInt(lattices[maskLloc]->get(
+                            iX+maskOffset.x, iY+maskOffset.y, iZ+maskOffset.z).computeDensity());
+
+                        // Skip solid and bounce-back cells
+                        if (mask != solid && mask != bb) {
+                            std::vector<Dot3D> vec_offset;
+                            for (plint iT=0; iT<maskLloc; ++iT) {
+                                vec_offset.push_back(computeRelativeDisplacement(*lattices[0], *lattices[iT]));
+                            }
+
+                            // Apply dC to substrate concentrations
+                            for (plint iS=0; iS<subsNum; ++iS) {
+                                plint iXd = iX + vec_offset[iS+dCloc].x;
+                                plint iYd = iY + vec_offset[iS+dCloc].y;
+                                plint iZd = iZ + vec_offset[iS+dCloc].z;
+                                T dC = lattices[iS+dCloc]->get(iXd, iYd, iZd).computeDensity();
+
+                                if (dC > thrd || dC < -thrd) {
+                                    plint iXs = iX + vec_offset[iS].x;
+                                    plint iYs = iY + vec_offset[iS].y;
+                                    plint iZs = iZ + vec_offset[iS].z;
+                                    Array<T,7> g;
+                                    lattices[iS]->get(iXs, iYs, iZs).getPopulations(g);
+                                    g[0] += (T)(dC)/4;
+                                    g[1] += (T)(dC)/8;
+                                    g[2] += (T)(dC)/8;
+                                    g[3] += (T)(dC)/8;
+                                    g[4] += (T)(dC)/8;
+                                    g[5] += (T)(dC)/8;
+                                    g[6] += (T)(dC)/8;
+                                    lattices[iS]->get(iXs, iYs, iZs).setPopulations(g);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    virtual BlockDomain::DomainT appliesTo() const {
+        return BlockDomain::bulkAndEnvelope;
+    }
+
+    virtual update_abiotic_rxnLattices<T,Descriptor>* clone() const {
+        return new update_abiotic_rxnLattices<T,Descriptor>(*this);
+    }
+
+    void getTypeOfModification(std::vector<modif::ModifT>& modified) const {
+        // Substrate lattices are modified
+        for (plint iT = 0; iT < subsNum; ++iT) {
+            modified[iT] = modif::staticVariables;
+        }
+    }
+
+private:
+    plint nx, subsNum;
+    plint solid, bb;
+    plint dCloc, maskLloc;
 };
 
 template<typename T, template<typename U> class Descriptor>

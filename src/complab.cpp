@@ -36,7 +36,8 @@
  *
  * SIMULATION MODES:
  *   - biotic_mode: true/false (with/without microbes)
- *   - enable_kinetics: true/false (kinetics reactions on/off)
+ *   - enable_kinetics: true/false (biotic kinetics reactions on/off)
+ *   - enable_abiotic_kinetics: true/false (abiotic chemical reactions on/off)
  *   - enable_validation_diagnostics: true/false (detailed per-iteration output)
  *
  * OUTPUT FILES:
@@ -49,7 +50,8 @@
 
 #include "complab_functions.hh"
 #include "complab3d_processors.hh"
-#include "../defineKinetics.hh"  // For KineticsStats namespace - in project root
+#include "../defineKinetics.hh"        // For KineticsStats namespace - in project root
+#include "../defineAbioticKinetics.hh" // For abiotic kinetics (substrate-only reactions)
 
 #include <chrono>
 #include <string>
@@ -171,6 +173,7 @@ int main(int argc, char **argv) {
     // Biotic/Abiotic and Kinetics control
     bool biotic_mode = true;      // true = with microbes, false = abiotic transport only
     bool enable_kinetics = true;  // true = kinetics enabled, false = equilibrium only
+    bool enable_abiotic_kinetics = false;  // true = abiotic reactions (no microbes)
     bool enable_validation_diagnostics = false;  // true = detailed per-iteration diagnostics
 
     std::string str_mainDir=main_path;
@@ -195,7 +198,7 @@ int main(int argc, char **argv) {
         vec_c0, vec_left_btype, vec_right_btype, vec_left_bcondition, vec_right_bcondition, vec_b0_all, bio_left_btype, bio_right_btype, bio_left_bcondition, bio_right_bcondition,
         vec_Kc, vec_Kc_kns, vec_mu, vec_mu_kns, bmass_type, vec_b0_free, vec_b0_film, vec_Vmax, vec_Vmax_kns, track_performance, halfflag,
         useEquilibrium, eq_component_names, eq_logK_values, eq_stoich_matrix,
-        biotic_mode, enable_kinetics,
+        biotic_mode, enable_kinetics, enable_abiotic_kinetics,
         enable_validation_diagnostics);
     }
     catch (PlbIOException& exception) {
@@ -564,6 +567,13 @@ int main(int argc, char **argv) {
     }
     ptr_update_rxnLattices.push_back(&maskLattice);
 
+    // Abiotic kinetics lattices (substrates only, no biomass)
+    // Order: [C0, C1, ..., dC0, dC1, ..., mask]
+    std::vector< MultiBlockLattice3D<T, RXNDES>* > ptr_abiotic_kns_lattices;
+    for (plint iS = 0; iS < num_of_substrates; ++iS) { ptr_abiotic_kns_lattices.push_back(&vec_substr_lattices[iS]); }
+    for (plint iS = 0; iS < num_of_substrates; ++iS) { ptr_abiotic_kns_lattices.push_back(&dC[iS]); }
+    ptr_abiotic_kns_lattices.push_back(&maskLattice);
+
     std::vector< MultiBlockLattice3D<T, RXNDES>* > ptr_ca_lattices;
     for (plint iM = 0; iM < num_of_microbes; ++iM) {
         if (solver_type[iM]==2) {
@@ -787,7 +797,7 @@ int main(int argc, char **argv) {
         }
         if (track_performance == 1) { cnstime += global::timer("cns").getTime(); global::timer("cns").stop(); }
 
-        // Kinetics (only if enable_kinetics is true)
+        // Kinetics (biotic - only if enable_kinetics is true and biotic_mode)
         dC=dC0; dBp=dBp0; dBf=dBf0;
         if (enable_kinetics && kns_count > 0) {
             if (track_performance == 1) global::timer("kns").restart();
@@ -800,6 +810,18 @@ int main(int argc, char **argv) {
             applyProcessingFunctional(new update_rxnLattices<T,RXNDES>(nx, num_of_substrates, num_of_microbes, no_dynamics, bounce_back),
                                       vec_substr_lattices[0].getBoundingBox(), ptr_update_rxnLattices);
             if (track_performance == 1) { T rxntime=global::timer("rxn").getTime(); global::timer("rxn").stop(); if (kns_count>0) knstime+=rxntime; }
+        }
+
+        // Abiotic kinetics (substrate-only reactions without microbes)
+        if (enable_abiotic_kinetics) {
+            if (track_performance == 1) global::timer("abiotic_kns").restart();
+            // Calculate abiotic reaction rates
+            applyProcessingFunctional(new run_abiotic_kinetics<T,RXNDES>(nx, num_of_substrates, ade_dt, no_dynamics, bounce_back),
+                                      vec_substr_lattices[0].getBoundingBox(), ptr_abiotic_kns_lattices);
+            // Apply concentration changes
+            applyProcessingFunctional(new update_abiotic_rxnLattices<T,RXNDES>(nx, num_of_substrates, no_dynamics, bounce_back),
+                                      vec_substr_lattices[0].getBoundingBox(), ptr_abiotic_kns_lattices);
+            if (track_performance == 1) { knstime += global::timer("abiotic_kns").getTime(); global::timer("abiotic_kns").stop(); }
         }
 
         // Equilibrium chemistry (runs regardless of enable_kinetics - controlled separately)
@@ -843,6 +865,18 @@ int main(int argc, char **argv) {
                 }
             } else {
                 pcout << "DISABLED (enable_kinetics=" << enable_kinetics << ", kns_count=" << kns_count << ")\n";
+            }
+
+            pcout << "│ STEP 6.2b [ABIOTIC KINETICS]: ";
+            if (enable_abiotic_kinetics) {
+                pcout << "ACTIVE (substrate-only reactions)\n";
+                for (plint iS = 0; iS < std::min((plint)2, num_of_substrates); ++iS) {
+                    T cMid = vec_substr_lattices[iS].get(midX, midY, midZ).computeDensity();
+                    pcout << "│   " << vec_subs_names[iS] << " @center: C=" << std::scientific
+                          << cMid << std::fixed << "\n";
+                }
+            } else {
+                pcout << "DISABLED\n";
             }
 
             pcout << "│ STEP 6.3 [EQUILIBRIUM]: ";
@@ -1026,7 +1060,8 @@ int main(int argc, char **argv) {
     pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
     pcout << "║ SIMULATION MODE:                                                         ║\n";
     pcout << "║   Biotic mode:      " << (biotic_mode ? "YES (with microbes)" : "NO (abiotic)") << "\n";
-    pcout << "║   Kinetics:         " << (enable_kinetics ? "ENABLED" : "DISABLED") << "\n";
+    pcout << "║   Kinetics (biotic):" << (enable_kinetics ? " ENABLED" : " DISABLED") << "\n";
+    pcout << "║   Kinetics (abiotic):" << (enable_abiotic_kinetics ? "ENABLED" : "DISABLED") << "\n";
     pcout << "║   Equilibrium:      " << (useEquilibrium ? "ENABLED" : "DISABLED") << "\n";
     pcout << "║   Validation diag:  " << (enable_validation_diagnostics ? "ENABLED" : "DISABLED") << "\n";
     if (bfilm_count > 0) {

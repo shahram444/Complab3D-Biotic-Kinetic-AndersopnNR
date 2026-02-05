@@ -616,6 +616,8 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
     std::vector<T> &eq_logK_values, std::vector<std::vector<T>> &eq_stoich_matrix,
     // NEW: Biotic/Abiotic and Kinetics control
     bool &biotic_mode, bool &enable_kinetics,
+    // NEW: Abiotic kinetics (chemical reactions without microbes)
+    bool &enable_abiotic_kinetics,
     // NEW: Validation diagnostics option
     bool &enable_validation_diagnostics)
 
@@ -679,10 +681,36 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             enable_kinetics = true;  // Default to kinetics enabled
         }
 
-        // If abiotic mode, force disable kinetics
+        // ════════════════════════════════════════════════════════════════════════════
+        // ABIOTIC KINETICS OPTION
+        // ════════════════════════════════════════════════════════════════════════════
+        // Abiotic kinetics = chemical reactions between substrates WITHOUT microbes
+        // Examples: first-order decay, bimolecular reactions, radioactive decay
+        enable_abiotic_kinetics = false;  // Default: off
+
+        try {
+            std::string tmp;
+            doc["parameters"]["simulation_mode"]["enable_abiotic_kinetics"].read(tmp);
+            std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](unsigned char c){ return std::tolower(c); });
+            if (tmp.compare("yes")==0 || tmp.compare("true")==0 || tmp.compare("1")==0) {
+                enable_abiotic_kinetics = true;
+                pcout << "╔══════════════════════════════════════════════════════════════════════╗\n";
+                pcout << "║ ABIOTIC KINETICS: ENABLED                                            ║\n";
+                pcout << "║ Chemical reactions between substrates (no microbes)                  ║\n";
+                pcout << "╚══════════════════════════════════════════════════════════════════════╝\n";
+            }
+        }
+        catch (PlbIOException& exception) {
+            enable_abiotic_kinetics = false;
+        }
+
+        // If abiotic mode, disable biotic kinetics but allow abiotic kinetics
         if (!biotic_mode) {
-            enable_kinetics = false;
-            pcout << "Note: Kinetics disabled (abiotic mode)\n\n";
+            enable_kinetics = false;  // Disable biotic (Monod) kinetics
+            if (!enable_abiotic_kinetics) {
+                pcout << "Note: Biotic kinetics disabled (abiotic mode)\n";
+                pcout << "      Set enable_abiotic_kinetics=true for substrate reactions\n\n";
+            }
         }
 
         // ════════════════════════════════════════════════════════════════════════════
