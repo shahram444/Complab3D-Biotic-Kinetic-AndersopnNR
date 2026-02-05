@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<!--
+================================================================================
+TEST 1: PURE DIFFUSION (No Reactions)
+================================================================================
+PURPOSE:
+  Baseline test - tracer diffuses from left boundary, no chemical reactions.
+  This validates the transport solver without any kinetics.
+
+EQUATION:
+  dC/dt = D * nabla^2(C)
+
+VALIDATION:
+  At steady state, concentration profile should be LINEAR:
+  C(x) = C_left * (1 - x/L) = 1.0 * (1 - x/30)
+
+  Check output VTK files:
+  - C should decrease linearly from left (C=1.0) to right (C~0)
+  - No negative concentrations
+  - Total mass should be conserved
+
+EXPECTED OUTPUT:
+  Iteration 5000: Steady state reached
+  Left boundary: C = 1.0 mol/L
+  Right boundary: C approaching 0 (Neumann BC)
+  Middle (x=15): C ~ 0.5 mol/L
+================================================================================
+-->
+<parameters>
+    <path>
+        <src_path>src</src_path>
+        <input_path>input</input_path>
+        <output_path>output_abiotic_test1_diffusion</output_path>
+    </path>
+
+    <simulation_mode>
+        <biotic_mode>false</biotic_mode>
+        <enable_kinetics>false</enable_kinetics>
+        <enable_abiotic_kinetics>false</enable_abiotic_kinetics>
+        <enable_validation_diagnostics>false</enable_validation_diagnostics>
+    </simulation_mode>
+
+    <LB_numerics>
+        <domain>
+            <nx>30</nx>
+            <ny>10</ny>
+            <nz>10</nz>
+            <dx>1.0</dx>
+            <unit>um</unit>
+            <characteristic_length>10</characteristic_length>
+            <filename>geometry_open.dat</filename>
+            <material_numbers>
+                <pore>2</pore>
+                <solid>0</solid>
+                <bounce_back>1</bounce_back>
+            </material_numbers>
+        </domain>
+        <delta_P>0.0</delta_P>
+        <Peclet>0.0</Peclet>
+        <tau>0.8</tau>
+        <track_performance>false</track_performance>
+        <iteration>
+            <ade_max_iT>5000</ade_max_iT>
+            <ade_converge_iT>1e-10</ade_converge_iT>
+        </iteration>
+    </LB_numerics>
+
+    <chemistry>
+        <number_of_substrates>1</number_of_substrates>
+        <substrate0>
+            <name_of_substrates>Tracer</name_of_substrates>
+            <initial_concentration>0.0</initial_concentration>
+            <substrate_diffusion_coefficients>
+                <in_pore>1.0e-9</in_pore>
+            </substrate_diffusion_coefficients>
+            <left_boundary_type>Dirichlet</left_boundary_type>
+            <right_boundary_type>Neumann</right_boundary_type>
+            <left_boundary_condition>1.0</left_boundary_condition>
+            <right_boundary_condition>0.0</right_boundary_condition>
+        </substrate0>
+    </chemistry>
+
+    <microbiology>
+        <number_of_microbes>0</number_of_microbes>
+    </microbiology>
+
+    <equilibrium>
+        <enabled>false</enabled>
+    </equilibrium>
+
+    <IO>
+        <read_NS_file>false</read_NS_file>
+        <read_ADE_file>false</read_ADE_file>
+        <save_VTK_interval>1000</save_VTK_interval>
+        <save_CHK_interval>5000</save_CHK_interval>
+    </IO>
+</parameters>

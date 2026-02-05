@@ -1,0 +1,143 @@
+<?xml version="1.0" ?>
+<!--
+================================================================================
+TEST 5: SEQUENTIAL DECAY CHAIN (Radioactive Decay Series)
+================================================================================
+PURPOSE:
+  Test sequential first-order decay reactions: A -> B -> C
+  Models radioactive decay chains, multi-step degradation, etc.
+
+REACTIONS:
+  A -> B with k1  (parent decays to daughter)
+  B -> C with k2  (daughter decays to granddaughter)
+
+RATE LAWS:
+  dA/dt = -k1 * [A]
+  dB/dt = +k1 * [A] - k2 * [B]
+  dC/dt = +k2 * [B]
+
+PARAMETERS:
+  k1 = 2.0e-4 [1/s]  (A -> B decay rate)
+  k2 = 1.0e-4 [1/s]  (B -> C decay rate)
+
+  Half-lives:
+    t_1/2(A) = ln(2)/k1 = 3466 s
+    t_1/2(B) = ln(2)/k2 = 6932 s
+
+INITIAL CONDITIONS:
+  [A]_0 = 1.0 mol/L (only parent species present)
+  [B]_0 = 0.0 mol/L
+  [C]_0 = 0.0 mol/L
+
+ANALYTICAL SOLUTION (Bateman equations):
+  [A](t) = A_0 * exp(-k1*t)
+  [B](t) = A_0 * k1/(k2-k1) * (exp(-k1*t) - exp(-k2*t))
+  [C](t) = A_0 * (1 + (k1*exp(-k2*t) - k2*exp(-k1*t))/(k2-k1))
+
+VALIDATION:
+  Mass balance: [A] + [B] + [C] = 1.0 mol/L (constant)
+
+  At long times (t -> infinity):
+    [A] -> 0
+    [B] -> 0
+    [C] -> 1.0 mol/L (all mass ends up as C)
+
+  B should show a transient peak (grows then decays)
+
+KINETICS FILE: Use defineAbioticKinetics_test5.hh
+================================================================================
+-->
+<parameters>
+    <path>
+        <src_path>src</src_path>
+        <input_path>input</input_path>
+        <output_path>output_abiotic_test5_chain</output_path>
+    </path>
+
+    <simulation_mode>
+        <biotic_mode>false</biotic_mode>
+        <enable_kinetics>false</enable_kinetics>
+        <enable_abiotic_kinetics>true</enable_abiotic_kinetics>
+        <enable_validation_diagnostics>true</enable_validation_diagnostics>
+    </simulation_mode>
+
+    <LB_numerics>
+        <domain>
+            <nx>20</nx>
+            <ny>10</ny>
+            <nz>10</nz>
+            <dx>1.0</dx>
+            <unit>um</unit>
+            <characteristic_length>10</characteristic_length>
+            <filename>geometry_open.dat</filename>
+            <material_numbers>
+                <pore>2</pore>
+                <solid>0</solid>
+                <bounce_back>1</bounce_back>
+            </material_numbers>
+        </domain>
+        <delta_P>0.0</delta_P>
+        <Peclet>0.0</Peclet>
+        <tau>0.8</tau>
+        <track_performance>false</track_performance>
+        <iteration>
+            <ade_max_iT>50000</ade_max_iT>
+            <ade_converge_iT>1e-12</ade_converge_iT>
+        </iteration>
+    </LB_numerics>
+
+    <chemistry>
+        <number_of_substrates>3</number_of_substrates>
+
+        <substrate0>
+            <name_of_substrates>Parent_A</name_of_substrates>
+            <initial_concentration>1.0</initial_concentration>
+            <substrate_diffusion_coefficients>
+                <in_pore>1.0e-9</in_pore>
+            </substrate_diffusion_coefficients>
+            <left_boundary_type>Neumann</left_boundary_type>
+            <right_boundary_type>Neumann</right_boundary_type>
+            <left_boundary_condition>0.0</left_boundary_condition>
+            <right_boundary_condition>0.0</right_boundary_condition>
+        </substrate0>
+
+        <substrate1>
+            <name_of_substrates>Daughter_B</name_of_substrates>
+            <initial_concentration>0.0</initial_concentration>
+            <substrate_diffusion_coefficients>
+                <in_pore>1.0e-9</in_pore>
+            </substrate_diffusion_coefficients>
+            <left_boundary_type>Neumann</left_boundary_type>
+            <right_boundary_type>Neumann</right_boundary_type>
+            <left_boundary_condition>0.0</left_boundary_condition>
+            <right_boundary_condition>0.0</right_boundary_condition>
+        </substrate1>
+
+        <substrate2>
+            <name_of_substrates>GrandDaughter_C</name_of_substrates>
+            <initial_concentration>0.0</initial_concentration>
+            <substrate_diffusion_coefficients>
+                <in_pore>1.0e-9</in_pore>
+            </substrate_diffusion_coefficients>
+            <left_boundary_type>Neumann</left_boundary_type>
+            <right_boundary_type>Neumann</right_boundary_type>
+            <left_boundary_condition>0.0</left_boundary_condition>
+            <right_boundary_condition>0.0</right_boundary_condition>
+        </substrate2>
+    </chemistry>
+
+    <microbiology>
+        <number_of_microbes>0</number_of_microbes>
+    </microbiology>
+
+    <equilibrium>
+        <enabled>false</enabled>
+    </equilibrium>
+
+    <IO>
+        <read_NS_file>false</read_NS_file>
+        <read_ADE_file>false</read_ADE_file>
+        <save_VTK_interval>10000</save_VTK_interval>
+        <save_CHK_interval>50000</save_CHK_interval>
+    </IO>
+</parameters>
