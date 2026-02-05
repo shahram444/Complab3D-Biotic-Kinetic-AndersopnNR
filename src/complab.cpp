@@ -504,10 +504,17 @@ int main(int argc, char **argv) {
     dBp0=dBp; dBf0=dBf;
     
     MultiBlockLattice3D<T,RXNDES> totalbFilmLattice(nx, ny, nz, new AdvectionDiffusionBGKdynamics<T,RXNDES>(0.));
-    bmassDomainSetup(totalbFilmLattice, createLocalAdvectionDiffusionBoundaryCondition3D<T,RXNDES>(), geometry, bioOMEGAinPore[0], bioOMEGAinbFilm[0],
-                     pore_dynamics, bounce_back, no_dynamics, bio_dynamics, bio_left_btype[0], bio_right_btype[0], bio_left_bcondition[0], bio_right_bcondition[0]);
-    bmassDomainSetup(copybFilmLattice, createLocalAdvectionDiffusionBoundaryCondition3D<T,RXNDES>(), geometry, 0., 0.,
-                     pore_dynamics, bounce_back, no_dynamics, bio_dynamics, bio_left_btype[0], bio_right_btype[0], bio_left_bcondition[0], bio_right_bcondition[0]);
+    // Only setup biomass lattices if we have microbes (avoid out-of-bounds access in abiotic mode)
+    if (num_of_microbes > 0) {
+        bmassDomainSetup(totalbFilmLattice, createLocalAdvectionDiffusionBoundaryCondition3D<T,RXNDES>(), geometry, bioOMEGAinPore[0], bioOMEGAinbFilm[0],
+                         pore_dynamics, bounce_back, no_dynamics, bio_dynamics, bio_left_btype[0], bio_right_btype[0], bio_left_bcondition[0], bio_right_bcondition[0]);
+        bmassDomainSetup(copybFilmLattice, createLocalAdvectionDiffusionBoundaryCondition3D<T,RXNDES>(), geometry, 0., 0.,
+                         pore_dynamics, bounce_back, no_dynamics, bio_dynamics, bio_left_btype[0], bio_right_btype[0], bio_left_bcondition[0], bio_right_bcondition[0]);
+    } else {
+        // Abiotic mode: initialize lattices with default dynamics (no biomass)
+        setToConstant(totalbFilmLattice, totalbFilmLattice.getBoundingBox(), (T)0.0);
+        setToConstant(copybFilmLattice, copybFilmLattice.getBoundingBox(), (T)0.0);
+    }
 
     // Initialize biomass
     for (plint iM = 0; iM < bfilm_count; ++iM) {
@@ -813,7 +820,7 @@ int main(int argc, char **argv) {
         }
 
         // Abiotic kinetics (substrate-only reactions without microbes)
-        if (enable_abiotic_kinetics) {
+        if (enable_abiotic_kinetics && num_of_substrates > 0) {
             if (track_performance == 1) global::timer("abiotic_kns").restart();
             // Calculate abiotic reaction rates
             applyProcessingFunctional(new run_abiotic_kinetics<T,RXNDES>(nx, num_of_substrates, ade_dt, no_dynamics, bounce_back),
