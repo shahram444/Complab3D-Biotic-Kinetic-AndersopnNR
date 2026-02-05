@@ -4,29 +4,18 @@
     <path>
         <src_path>src</src_path>
         <input_path>input</input_path>
-        <output_path>output</output_path>
+        <output_path>output_planktonic</output_path>
     </path>
 
     <!-- ════════════════════════════════════════════════════════════════════════════
-         SIMULATION MODE CONTROL
+         SIMULATION MODE CONTROL (Planktonic Version)
          ════════════════════════════════════════════════════════════════════════════
-         biotic_mode: true/false or biotic/abiotic
-           - true/biotic: Full simulation with microbes, biomass, and kinetics
-           - false/abiotic: Transport only, no microbes (skips microbiology section)
-
-         enable_kinetics: true/false
-           - true: Kinetics reactions enabled (Monod growth, etc.)
-           - false: Kinetics disabled, only equilibrium chemistry runs
-           - Note: Automatically disabled when biotic_mode=false
-
+         biotic_mode: true (planktonic bacteria are biotic organisms)
+         enable_kinetics: true (Monod kinetics for planktonic growth)
          enable_validation_diagnostics: true/false
-           - true: Detailed per-iteration output showing data flow verification:
-                   * Collision, kinetics, equilibrium steps
-                   * Sample concentrations at domain center
-                   * Mass balance checks
-                   * dC and dB values at sample points
-           - false: Normal operation (no extra diagnostic output)
-           - Note: Adds computational overhead, use for debugging only!
+           - Detailed per-iteration output for debugging/validation
+           - Shows collision, kinetics, equilibrium steps with sample values
+           - Use for verifying code correctness (adds overhead)
     -->
     <simulation_mode>
         <biotic_mode>true</biotic_mode>
@@ -47,7 +36,7 @@
                 <pore>2</pore>
                 <solid>0</solid>
                 <bounce_back>1</bounce_back>
-                <microbe0>3 6</microbe0>
+                <microbe0>2</microbe0>
             </material_numbers>
         </domain>
         <delta_P>2.0e-3</delta_P>
@@ -68,65 +57,65 @@
 
     <chemistry>
         <number_of_substrates>5</number_of_substrates>
-        
+
         <substrate0>
             <name_of_substrates>DOC</name_of_substrates>
             <initial_concentration>0.1</initial_concentration>
             <substrate_diffusion_coefficients>
                 <in_pore>1.0e-9</in_pore>
-                <in_biofilm>2.0e-10</in_biofilm>
+                <in_biofilm>1.0e-9</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
             <left_boundary_condition>0.1</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate0>
-        
+
         <substrate1>
             <name_of_substrates>CO2</name_of_substrates>
             <initial_concentration>1.0e-5</initial_concentration>
             <substrate_diffusion_coefficients>
                 <in_pore>1.9e-9</in_pore>
-                <in_biofilm>3.8e-10</in_biofilm>
+                <in_biofilm>1.9e-9</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
             <left_boundary_condition>1.0e-5</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate1>
-        
+
         <substrate2>
             <name_of_substrates>HCO3</name_of_substrates>
             <initial_concentration>2.0e-3</initial_concentration>
             <substrate_diffusion_coefficients>
                 <in_pore>1.2e-9</in_pore>
-                <in_biofilm>2.4e-10</in_biofilm>
+                <in_biofilm>1.2e-9</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
             <left_boundary_condition>2.0e-3</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate2>
-        
+
         <substrate3>
             <name_of_substrates>CO3</name_of_substrates>
             <initial_concentration>1.0e-5</initial_concentration>
             <substrate_diffusion_coefficients>
                 <in_pore>0.9e-9</in_pore>
-                <in_biofilm>1.8e-10</in_biofilm>
+                <in_biofilm>0.9e-9</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
             <left_boundary_condition>1.0e-5</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate3>
-        
+
         <substrate4>
             <name_of_substrates>Hplus</name_of_substrates>
             <initial_concentration>1.0e-7</initial_concentration>
             <substrate_diffusion_coefficients>
                 <in_pore>9.3e-9</in_pore>
-                <in_biofilm>1.86e-9</in_biofilm>
+                <in_biofilm>9.3e-9</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
@@ -139,20 +128,20 @@
         <number_of_microbes>1</number_of_microbes>
         <maximum_biomass_density>100.0</maximum_biomass_density>
         <thrd_biofilm_fraction>0.1</thrd_biofilm_fraction>
-        <CA_method>half</CA_method>
-        
+        <CA_method>none</CA_method>
+
         <microbe0>
-            <name_of_microbes>Heterotroph</name_of_microbes>
-            <solver_type>CA</solver_type>
+            <name_of_microbes>Planktonic_Heterotroph</name_of_microbes>
+            <solver_type>LBM</solver_type>
             <reaction_type>kinetics</reaction_type>
-            <initial_densities>99.0 99.0</initial_densities>
+            <initial_densities>0.0 10.0</initial_densities>
             <decay_coefficient>1.0e-9</decay_coefficient>
-            <viscosity_ratio_in_biofilm>10.0</viscosity_ratio_in_biofilm>
+            <viscosity_ratio_in_biofilm>1.0</viscosity_ratio_in_biofilm>
             <half_saturation_constants>1.0e-5 0.0 0.0 0.0 0.0</half_saturation_constants>
             <maximum_uptake_flux>2.5 0.0 0.0 0.0 0.0</maximum_uptake_flux>
-            <left_boundary_type>Neumann</left_boundary_type>
+            <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>0.0</left_boundary_condition>
+            <left_boundary_condition>10.0</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </microbe0>
     </microbiology>
