@@ -102,29 +102,30 @@ The code supports two fundamental simulation modes controlled by the `<biotic_mo
 ║                                                                               ║
 ║   WHAT RUNS:                         WHAT IS SKIPPED:                         ║
 ║   ────────────                       ────────────────                         ║
-║   ✓ Navier-Stokes flow               ✗ Kinetics calculations                  ║
+║   ✓ Navier-Stokes flow               ✗ Biotic (Monod) kinetics                ║
 ║   ✓ Advection-diffusion transport    ✗ Biomass lattices                       ║
 ║   ✓ Equilibrium chemistry (optional) ✗ CA expansion                           ║
-║                                      ✗ Microbe XML parsing                    ║
+║   ✓ Abiotic kinetics (optional)      ✗ Microbe XML parsing                    ║
 ║                                                                               ║
 ║   USE CASES:                                                                  ║
 ║   ──────────                                                                  ║
 ║   • Testing transport without biology                                         ║
 ║   • Pure geochemistry simulations                                             ║
-║   • Debugging flow field                                                      ║
-║   • Studying conservative tracers                                             ║
+║   • Chemical decay (radioactive, photodegradation)                            ║
+║   • Bimolecular reactions (A + B → C)                                         ║
 ║   • Validating against analytical solutions                                   ║
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 ```
 
-**Code location:** `src/complab_functions.hh`, lines 636-686
+**Code location:** `src/complab_functions.hh`, lines 636-712
 
 When `biotic_mode=false`:
 1. `num_of_microbes` is set to 0
 2. Microbiology XML section is skipped
-3. Kinetics is automatically disabled
+3. Biotic kinetics is automatically disabled
 4. No biomass lattices are created
+5. **Abiotic kinetics can still be enabled** with `enable_abiotic_kinetics=true`
 
 ## 2.2 What is Biotic Mode?
 
@@ -169,19 +170,97 @@ biotic_mode = true, enable_kinetics = false
   → Biomass exists but doesn't grow
   → Useful for: testing equilibrium with static biofilm
 
-biotic_mode = false
-  → enable_kinetics is forced to false
-  → Pure transport (no biology at all)
+biotic_mode = false, enable_abiotic_kinetics = false
+  → Pure transport (no biology, no chemistry)
+
+biotic_mode = false, enable_abiotic_kinetics = true
+  → Transport + abiotic chemical reactions (NEW!)
+  → See Section 2.4 below
 ```
 
-**Code location:** `src/complab.cpp`, line 792-797
+**Code location:** `src/complab.cpp`, line 799-811
 
 ```cpp
-// Kinetics (only if enable_kinetics is true)
+// Kinetics (biotic - only if enable_kinetics is true)
 if (enable_kinetics && kns_count > 0) {
     applyProcessingFunctional(new run_kinetics<T,RXNDES>(...), ...);
 }
+// Abiotic kinetics (substrate-only reactions)
+if (enable_abiotic_kinetics) {
+    applyProcessingFunctional(new run_abiotic_kinetics<T,RXNDES>(...), ...);
+}
 ```
+
+## 2.4 Abiotic Kinetics (NEW!)
+
+**Abiotic kinetics** allows chemical reactions between substrates WITHOUT microorganisms. This is useful for:
+- First-order decay (radioactive decay, photodegradation)
+- Bimolecular reactions (A + B → C)
+- Chemical oxidation/reduction
+- Any substrate-only reaction
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                       ABIOTIC KINETICS MODE                                   ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║                                                                               ║
+║   ENABLED WHEN:                                                               ║
+║   ─────────────                                                               ║
+║   biotic_mode = false (or true)                                               ║
+║   enable_abiotic_kinetics = true                                              ║
+║                                                                               ║
+║   WHAT RUNS:                         WHAT IS SKIPPED:                         ║
+║   ────────────                       ────────────────                         ║
+║   ✓ Navier-Stokes flow               ✗ Biomass lattices (if abiotic)          ║
+║   ✓ Advection-diffusion transport    ✗ CA expansion (if abiotic)              ║
+║   ✓ Substrate-only reactions         ✗ Monod kinetics (if abiotic)            ║
+║   ✓ Equilibrium chemistry (optional)                                          ║
+║                                                                               ║
+║   EXAMPLE REACTIONS:                                                          ║
+║   ──────────────────                                                          ║
+║   • First-order decay:    A → products        dA/dt = -k × [A]                ║
+║   • Bimolecular:          A + B → C           dC/dt = k × [A] × [B]           ║
+║   • Reversible:           A ⇌ B               dA/dt = -k_f×[A] + k_r×[B]      ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+```
+
+### How to Enable Abiotic Kinetics
+
+**Step 1:** Set the XML options:
+```xml
+<simulation_mode>
+    <biotic_mode>false</biotic_mode>
+    <enable_abiotic_kinetics>true</enable_abiotic_kinetics>
+</simulation_mode>
+```
+
+**Step 2:** Modify `defineAbioticKinetics.hh` in the project root:
+
+```cpp
+// Example: First-order decay of substrate 0
+void defineAbioticRxnKinetics(
+    std::vector<double> C,           // Substrate concentrations [mol/L]
+    std::vector<double>& subsR,      // Reaction rates [mol/L/s] (output)
+    plb::plint mask                  // Cell type
+) {
+    // Initialize rates to zero
+    for (size_t i = 0; i < subsR.size(); ++i) {
+        subsR[i] = 0.0;
+    }
+
+    // First-order decay: dA/dt = -k × [A]
+    double k_decay = 1.0e-5;  // Rate constant [1/s]
+    double A = C[0];          // Concentration of substrate 0
+
+    subsR[0] = -k_decay * A;  // Negative = consumption
+}
+```
+
+**Code location:**
+- `defineAbioticKinetics.hh` (project root) - User-defined reactions
+- `src/complab3d_processors_part1.hh` lines 142-320 - Processor classes
+- `src/complab_functions.hh` lines 686-712 - XML parsing
 
 ---
 
