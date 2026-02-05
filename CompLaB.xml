@@ -7,6 +7,23 @@
         <output_path>output</output_path>
     </path>
 
+    <!-- ════════════════════════════════════════════════════════════════════════════
+         SIMULATION MODE CONTROL
+         ════════════════════════════════════════════════════════════════════════════
+         biotic_mode: true/false or biotic/abiotic
+           - true/biotic: Full simulation with microbes, biomass, and kinetics
+           - false/abiotic: Transport only, no microbes (skips microbiology section)
+
+         enable_kinetics: true/false
+           - true: Kinetics reactions enabled (Monod growth, etc.)
+           - false: Kinetics disabled, only equilibrium chemistry runs
+           - Note: Automatically disabled when biotic_mode=false
+    -->
+    <simulation_mode>
+        <biotic_mode>true</biotic_mode>
+        <enable_kinetics>true</enable_kinetics>
+    </simulation_mode>
+
     <LB_numerics>
         <domain>
             <nx>50</nx>
