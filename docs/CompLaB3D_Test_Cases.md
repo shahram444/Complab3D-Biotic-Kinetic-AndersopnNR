@@ -13,6 +13,7 @@
 | **TEST 1** | Abiotic | Pure diffusion (no flow) | ~2 min |
 | **TEST 2** | Abiotic | Advection-diffusion with flow | ~3 min |
 | **TEST 3** | Abiotic | Transport + Equilibrium chemistry | ~5 min |
+| **TEST 3b** | Abiotic | Abiotic kinetics (first-order decay) | ~3 min |
 | **TEST 4** | Biotic | Single biofilm with CA (fraction) | ~10 min |
 | **TEST 5** | Biotic | Single biofilm with CA (half) | ~8 min |
 | **TEST 6** | Biotic | Planktonic bacteria (LBM) | ~5 min |
@@ -429,6 +430,181 @@ EXPECTED BEHAVIOR:
     </IO>
 </parameters>
 ```
+
+---
+
+# TEST 3b: Abiotic Kinetics (First-Order Decay)
+
+## Scenario Description
+
+A tracer undergoes first-order decay as it is transported through the domain. No microorganisms - this is pure chemical decay (e.g., radioactive decay, photodegradation).
+
+```
+PHYSICAL SETUP:
+===============
+
+  C=1.0                                               C=0 (Neumann)
+    │                                                     │
+    │  ┌─────────────────────────────────────────────┐    │
+    │  │                                             │    │
+    ▼  │    Tracer decays as it flows →              │    ▼
+  ━━━━━│                                             │━━━━━
+  Inlet│         First-order decay: A → products     │Outlet
+  ━━━━━│                                             │━━━━━
+       │                                             │
+       └─────────────────────────────────────────────┘
+
+EQUATION:
+─────────
+∂C/∂t = D × ∇²C - u × ∇C - k × C
+
+Where:
+  C = tracer concentration [mol/L]
+  D = diffusion coefficient = 1.0e-9 m²/s
+  u = flow velocity
+  k = first-order decay rate = 1.0e-5 [1/s]
+
+REACTION:
+─────────
+A → products    (first-order decay)
+dA/dt = -k × [A]
+
+EXPECTED BEHAVIOR:
+──────────────────
+• Concentration decreases exponentially along flow direction
+• At steady state: C(x) = C_inlet × exp(-k × x / u)
+• Total mass in system decreases over time
+• Output concentration < Input concentration
+```
+
+## XML Configuration: test3b_abiotic_kinetics.xml
+
+```xml
+<?xml version="1.0" ?>
+<parameters>
+    <path>
+        <src_path>src</src_path>
+        <input_path>input</input_path>
+        <output_path>output_test3b_abiotic_kinetics</output_path>
+    </path>
+
+    <simulation_mode>
+        <biotic_mode>false</biotic_mode>
+        <enable_kinetics>false</enable_kinetics>
+        <enable_abiotic_kinetics>true</enable_abiotic_kinetics>
+        <enable_validation_diagnostics>true</enable_validation_diagnostics>
+    </simulation_mode>
+
+    <LB_numerics>
+        <domain>
+            <nx>30</nx>
+            <ny>20</ny>
+            <nz>20</nz>
+            <dx>1.0</dx>
+            <unit>um</unit>
+            <characteristic_length>20</characteristic_length>
+            <filename>geometry.dat</filename>
+            <material_numbers>
+                <pore>2</pore>
+                <solid>0</solid>
+                <bounce_back>1</bounce_back>
+            </material_numbers>
+        </domain>
+        <delta_P>1.0e-4</delta_P>
+        <Peclet>10.0</Peclet>
+        <tau>0.8</tau>
+        <track_performance>false</track_performance>
+        <iteration>
+            <ade_max_iT>5000</ade_max_iT>
+            <ade_VTI_iT>500</ade_VTI_iT>
+            <ade_CHK_iT>10000</ade_CHK_iT>
+        </iteration>
+    </LB_numerics>
+
+    <chemistry>
+        <substrates>
+            <A>   <!-- Decaying tracer -->
+                <concentration>0.0</concentration>
+                <D_pore>1.0e-9</D_pore>
+                <D_biofilm>5.0e-10</D_biofilm>
+                <left_boundary>
+                    <type>dirichlet</type>
+                    <value>1.0e-3</value>
+                </left_boundary>
+                <right_boundary>
+                    <type>neumann</type>
+                    <value>0.0</value>
+                </right_boundary>
+            </A>
+        </substrates>
+    </chemistry>
+
+    <equilibrium>
+        <enabled>false</enabled>
+    </equilibrium>
+
+    <IO>
+        <save_VTK_interval>500</save_VTK_interval>
+    </IO>
+</parameters>
+```
+
+## defineAbioticKinetics.hh for this test
+
+```cpp
+// First-order decay: A → products
+// Rate: dA/dt = -k × [A]
+
+namespace AbioticParams {
+    constexpr double k_decay = 1.0e-5;   // [1/s] first-order decay rate
+    constexpr double MIN_CONC = 1.0e-20;
+    constexpr double MAX_RATE_FRACTION = 0.5;
+    constexpr double dt_kinetics = 0.0075;
+}
+
+void defineAbioticRxnKinetics(
+    std::vector<double> C,           // Substrate concentrations [mol/L]
+    std::vector<double>& subsR,      // Reaction rates [mol/L/s] (output)
+    plb::plint mask
+) {
+    using namespace AbioticParams;
+
+    // Initialize all rates to zero
+    for (size_t i = 0; i < subsR.size(); ++i) {
+        subsR[i] = 0.0;
+    }
+
+    // First-order decay of substrate 0 (A)
+    if (C.size() > 0) {
+        double A = std::max(C[0], MIN_CONC);
+
+        // Rate law: dA/dt = -k × [A]
+        double dA_dt = -k_decay * A;
+
+        // Clamp to prevent negative concentrations
+        double max_rate = A * MAX_RATE_FRACTION / dt_kinetics;
+        if (-dA_dt > max_rate) {
+            dA_dt = -max_rate;
+        }
+
+        subsR[0] = dA_dt;
+    }
+}
+```
+
+## What to Observe
+
+1. **Concentration decreases along flow**
+   - Input: C = 1 mM
+   - Output: C < 1 mM (due to decay)
+
+2. **Exponential profile**
+   - At steady state: C(x) = C_0 × exp(-k × t_residence)
+   - Where t_residence = x / u
+
+3. **Validation output shows**
+   - STEP 6.2b [ABIOTIC KINETICS]: ACTIVE
+   - Concentrations at domain center
 
 ---
 
