@@ -1,8 +1,49 @@
 /* ============================================================================
- * CompLaB3D - 3D Biogeochemical Reactive Transport with LBM
- * University of Georgia
- * 
- * Complete main.cpp with integrated efficient debugging
+ * CompLaB3D - Three-Dimensional Biogeochemical Reactive Transport Solver
+ * ============================================================================
+ *
+ * Author:      Shahram Asgari
+ * Advisor:     Dr. Christof Meile
+ * Laboratory:  Meile Lab
+ * Institution: University of Georgia (UGA)
+ *
+ * ============================================================================
+ * CALCULATION FLOW (10 PHASES):
+ * ───────────────────────────────────────────────────────────────────────────
+ * PHASE 1:  Load XML configuration and validate inputs
+ * PHASE 2:  Geometry setup and preprocessing
+ * PHASE 3:  Navier-Stokes flow field simulation
+ *           └─ STEP 3.1: Initial pressure simulation → measure u₀
+ *           └─ STEP 3.2: Calculate permeability: k = (u₀ × ν × L) / ΔP₀
+ *           └─ STEP 3.3: Calculate target velocity: u_target = (Pe × D) / L
+ *           └─ STEP 3.4: Corrected pressure: ΔP_new = (u_target × ν × L) / k
+ *           └─ STEP 3.5: Second NS simulation → achieve target velocity
+ *           └─ STEP 3.6: Stability checks (Ma, CFL, τ)
+ * PHASE 4:  Reactive transport lattice setup (substrates + biomass)
+ * PHASE 5:  NS-ADE velocity field coupling
+ * PHASE 6:  Main simulation loop
+ *           └─ STEP 6.1: Collision step (LBM)
+ *           └─ STEP 6.2: Kinetics reactions (Monod, decay)
+ *           └─ STEP 6.3: Equilibrium chemistry solver
+ *           └─ STEP 6.4: Biomass expansion (CA/FD)
+ *           └─ STEP 6.5: Flow field update (if biofilm changed)
+ *           └─ STEP 6.6: Streaming step (LBM)
+ * PHASE 7:  Output VTI/CHK files
+ * PHASE 8:  Calculate moments and BTC analysis
+ * PHASE 9:  Write summary files
+ * PHASE 10: Finalize and cleanup
+ * ───────────────────────────────────────────────────────────────────────────
+ *
+ * SIMULATION MODES:
+ *   - biotic_mode: true/false (with/without microbes)
+ *   - enable_kinetics: true/false (kinetics reactions on/off)
+ *   - enable_validation_diagnostics: true/false (detailed per-iteration output)
+ *
+ * OUTPUT FILES:
+ *   - VTI: Concentration, biomass, velocity fields
+ *   - CHK: Binary checkpoints for restart
+ *   - CSV: BTC timeseries, domain properties, moments summary
+ *
  * ============================================================================
  */
 
@@ -69,8 +110,13 @@ int main(int argc, char **argv) {
     // ════════════════════════════════════════════════════════════════════════════
     pcout << "\n";
     pcout << "╔══════════════════════════════════════════════════════════════════════════╗\n";
-    pcout << "║     CompLaB3D - 3D Biogeochemical Reactive Transport with LBM           ║\n";
-    pcout << "║                    University of Georgia                                 ║\n";
+    pcout << "║                            CompLaB3D                                     ║\n";
+    pcout << "║       Three-Dimensional Biogeochemical Reactive Transport Solver        ║\n";
+    pcout << "║              Lattice Boltzmann Method (LBM) + Equilibrium                ║\n";
+    pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
+    pcout << "║  Author:  Shahram Asgari                                                 ║\n";
+    pcout << "║  Advisor: Dr. Christof Meile                                             ║\n";
+    pcout << "║  Lab:     Meile Lab, University of Georgia                               ║\n";
     pcout << "╚══════════════════════════════════════════════════════════════════════════╝\n\n";
 
     ImageWriter<T> image("leeloo");
@@ -125,6 +171,7 @@ int main(int argc, char **argv) {
     // Biotic/Abiotic and Kinetics control
     bool biotic_mode = true;      // true = with microbes, false = abiotic transport only
     bool enable_kinetics = true;  // true = kinetics enabled, false = equilibrium only
+    bool enable_validation_diagnostics = false;  // true = detailed per-iteration diagnostics
 
     std::string str_mainDir=main_path;
     if (std::to_string(str_mainDir.back()).compare("/")!=0) { str_mainDir+="/"; }
@@ -148,14 +195,15 @@ int main(int argc, char **argv) {
         vec_c0, vec_left_btype, vec_right_btype, vec_left_bcondition, vec_right_bcondition, vec_b0_all, bio_left_btype, bio_right_btype, bio_left_bcondition, bio_right_bcondition,
         vec_Kc, vec_Kc_kns, vec_mu, vec_mu_kns, bmass_type, vec_b0_free, vec_b0_film, vec_Vmax, vec_Vmax_kns, track_performance, halfflag,
         useEquilibrium, eq_component_names, eq_logK_values, eq_stoich_matrix,
-        biotic_mode, enable_kinetics);
+        biotic_mode, enable_kinetics,
+        enable_validation_diagnostics);
     }
     catch (PlbIOException& exception) {
         pcout << "  [ERROR] " << exception.what() << "\n";
         return -1;
     }
     if (erck!=0) { return -1; }
-    pcout << "  [OK] XML loaded successfully\n";
+    pcout << "  [OK] XML configuration loaded and validated\n";
 
     plint rxn_count = kns_count;
 
@@ -762,6 +810,70 @@ int main(int argc, char **argv) {
             if (track_performance == 1) { eqtime += global::timer("eq").getTime(); global::timer("eq").stop(); }
         }
 
+        // ════════════════════════════════════════════════════════════════════════════
+        // VALIDATION DIAGNOSTICS (per-iteration detailed output)
+        // ════════════════════════════════════════════════════════════════════════════
+        if (enable_validation_diagnostics && (iT % 100 == 0 || iT < 10)) {
+            pcout << "\n┌─────────────────────────────────────────────────────────────────────────┐\n";
+            pcout << "│ VALIDATION DIAGNOSTICS - Iteration " << iT << "                              │\n";
+            pcout << "├─────────────────────────────────────────────────────────────────────────┤\n";
+            pcout << "│ Time: " << std::scientific << std::setprecision(4) << iT*ade_dt << " s" << std::fixed << "\n";
+
+            // Step-by-step data flow verification
+            pcout << "├─────────────────────────────────────────────────────────────────────────┤\n";
+            pcout << "│ STEP 6.1 [COLLISION]: LBM collision completed                           │\n";
+
+            // Sample concentration at center of domain
+            plint midX = nx/2, midY = ny/2, midZ = nz/2;
+            pcout << "│ STEP 6.2 [KINETICS]: ";
+            if (enable_kinetics && kns_count > 0) {
+                pcout << "ACTIVE - " << kns_count << " reaction(s)\n";
+                // Show sample values
+                for (plint iS = 0; iS < std::min((plint)2, num_of_substrates); ++iS) {
+                    T cMid = vec_substr_lattices[iS].get(midX, midY, midZ).computeDensity();
+                    T dC_mid = dC[iS].get(midX, midY, midZ).computeDensity();
+                    pcout << "│   " << vec_subs_names[iS] << " @center: C=" << std::scientific
+                          << cMid << ", dC=" << dC_mid << std::fixed << "\n";
+                }
+                if (bfilm_count > 0) {
+                    T bMid = vec_bFilm_lattices[0].get(midX, midY, midZ).computeDensity();
+                    T dB_mid = dBf[0].get(midX, midY, midZ).computeDensity();
+                    pcout << "│   Biomass @center: B=" << std::scientific << bMid
+                          << ", dB=" << dB_mid << std::fixed << "\n";
+                }
+            } else {
+                pcout << "DISABLED (enable_kinetics=" << enable_kinetics << ", kns_count=" << kns_count << ")\n";
+            }
+
+            pcout << "│ STEP 6.3 [EQUILIBRIUM]: ";
+            if (useEquilibrium) {
+                pcout << "ACTIVE\n";
+                // Show sample equilibrium-adjusted values
+                for (plint iS = 0; iS < std::min((plint)2, num_of_substrates); ++iS) {
+                    T cMin = computeMin(*computeDensity(vec_substr_lattices[iS]));
+                    T cMax = computeMax(*computeDensity(vec_substr_lattices[iS]));
+                    pcout << "│   " << vec_subs_names[iS] << ": min=" << std::scientific
+                          << cMin << ", max=" << cMax << std::fixed << "\n";
+                }
+            } else {
+                pcout << "DISABLED\n";
+            }
+
+            // Mass balance check
+            pcout << "├─────────────────────────────────────────────────────────────────────────┤\n";
+            pcout << "│ MASS BALANCE CHECK:                                                     │\n";
+            for (plint iS = 0; iS < std::min((plint)2, num_of_substrates); ++iS) {
+                T totalMass = computeSum(*computeDensity(vec_substr_lattices[iS]));
+                pcout << "│   " << vec_subs_names[iS] << " total: " << std::scientific << totalMass << std::fixed << "\n";
+            }
+            if (bfilm_count > 0) {
+                T totalBiomass = computeSum(*computeDensity(totalbFilmLattice));
+                pcout << "│   Total biomass: " << std::scientific << totalBiomass << std::fixed << "\n";
+            }
+
+            pcout << "└─────────────────────────────────────────────────────────────────────────┘\n";
+        }
+
         // CA biomass expansion
         if (ca_count > 0) {
             applyProcessingFunctional(new updateLocalMaskNtotalLattices3D<T,RXNDES>(nx, ny, nz, caLlen, bounce_back, no_dynamics, bio_dynamics, pore_dynamics, thrd_bFilmFrac, max_bMassRho), vec_bFilm_lattices[0].getBoundingBox(), ptr_ca_lattices);
@@ -859,65 +971,100 @@ int main(int argc, char **argv) {
         if (track_performance == 1) { nstime += global::timer("cns").getTime(); global::timer("cns").stop(); }
         if (percolationFlag == 1) break;
     }
-    pcout << "\nEnd of simulation at iteration " << iT << "\n";
+    // ════════════════════════════════════════════════════════════════════════════
+    // PHASE 7: FINAL OUTPUT FILES
+    // ════════════════════════════════════════════════════════════════════════════
+    pcout << "\n┌────────────────────────────────────────────────────────────────────────┐\n";
+    pcout << "│ PHASE 7: WRITING FINAL OUTPUT FILES                                   │\n";
+    pcout << "└────────────────────────────────────────────────────────────────────────┘\n";
+
+    // Final output
+    if (track_performance == 0) {
+        pcout << "  Saving VTI and CHK files...\n";
+        for (plint iS = 0; iS < num_of_substrates; ++iS) {
+            writeAdvVTI(vec_substr_lattices[iS], iT, vec_subs_names[iS]+"_");
+            saveBinaryBlock(vec_substr_lattices[iS], str_outputDir+ade_filename+std::to_string(iS)+"_"+std::to_string(iT)+".chk");
+            pcout << "    [OK] " << vec_subs_names[iS] << " saved\n";
+        }
+        tmpIT0=0; tmpIT1=0;
+        for (plint iM = 0; iM < num_of_microbes; ++iM) {
+            if (bmass_type[iM]==1) {
+                writeAdvVTI(vec_bFilm_lattices[tmpIT0], iT, vec_microbes_names[iM]+"_");
+                saveBinaryBlock(vec_bFilm_lattices[tmpIT0], str_outputDir+bio_filename+std::to_string(iM)+"_"+std::to_string(iT)+".chk");
+                pcout << "    [OK] " << vec_microbes_names[iM] << " saved\n";
+                ++tmpIT0;
+            }
+            else {
+                writeAdvVTI(vec_bFree_lattices[tmpIT1], iT, vec_microbes_names[iM]+"_");
+                saveBinaryBlock(vec_bFree_lattices[tmpIT1], str_outputDir+bio_filename+std::to_string(iM)+"_"+std::to_string(iT)+".chk");
+                pcout << "    [OK] " << vec_microbes_names[iM] << " saved\n";
+                ++tmpIT1;
+            }
+        }
+        writeAdvVTI(maskLattice, iT, mask_filename+"_");
+        saveBinaryBlock(maskLattice, str_outputDir+mask_filename+"_"+std::to_string(iT)+".chk");
+        pcout << "    [OK] Mask lattice saved\n";
+        if (Pe > thrd) {
+            writeNsVTI(nsLattice, iT, "nsLattice_");
+            saveBinaryBlock(nsLattice, str_outputDir+ns_filename+".chk");
+            pcout << "    [OK] Flow field saved\n";
+        }
+    }
 
     // ════════════════════════════════════════════════════════════════════════════
-    // FINALIZE
+    // PHASE 8-9: SUMMARY AND STATISTICS
     // ════════════════════════════════════════════════════════════════════════════
     T TET = global::timer("total").getTime(); global::timer("total").stop();
 
     pcout << "\n╔══════════════════════════════════════════════════════════════════════════╗\n";
     pcout << "║                         SIMULATION COMPLETE                              ║\n";
     pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
-    pcout << "║ Iterations: " << iT << "   Sim time: " << std::scientific << iT*ade_dt << " s\n" << std::fixed;
-    pcout << "║ Wall clock: " << TET << " s (" << TET/3600 << " hours)\n";
+    pcout << "║ TIMING:                                                                  ║\n";
+    pcout << "║   Total iterations: " << iT << "\n";
+    pcout << "║   Simulated time:   " << std::scientific << iT*ade_dt << " s\n" << std::fixed;
+    pcout << "║   Wall clock:       " << TET << " s (" << TET/60 << " min)\n";
+    pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
+    pcout << "║ SIMULATION MODE:                                                         ║\n";
+    pcout << "║   Biotic mode:      " << (biotic_mode ? "YES (with microbes)" : "NO (abiotic)") << "\n";
+    pcout << "║   Kinetics:         " << (enable_kinetics ? "ENABLED" : "DISABLED") << "\n";
+    pcout << "║   Equilibrium:      " << (useEquilibrium ? "ENABLED" : "DISABLED") << "\n";
+    pcout << "║   Validation diag:  " << (enable_validation_diagnostics ? "ENABLED" : "DISABLED") << "\n";
     if (bfilm_count > 0) {
         T finalBmax = computeMax(*computeDensity(totalbFilmLattice));
         T totalGrowth = (diag_initial_biomass > 0) ? ((finalBmax - diag_initial_biomass) / diag_initial_biomass * 100.0) : 0.0;
-        pcout << "║ Final biomass: " << std::scientific << finalBmax << std::fixed << " kg/m3 (growth: " << totalGrowth << "%)\n";
-        pcout << "║ CA triggers: " << diag_ca_triggers << "   redistributions: " << diag_ca_redistributions << "\n";
+        pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
+        pcout << "║ BIOMASS RESULTS:                                                         ║\n";
+        pcout << "║   Initial max:      " << std::scientific << diag_initial_biomass << " kg/m³\n";
+        pcout << "║   Final max:        " << finalBmax << " kg/m³\n" << std::fixed;
+        pcout << "║   Growth:           " << totalGrowth << "%\n";
+        pcout << "║   CA triggers:      " << diag_ca_triggers << "\n";
+        pcout << "║   Redistributions:  " << diag_ca_redistributions << "\n";
+    }
+    pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
+    pcout << "║ FINAL CONCENTRATIONS:                                                    ║\n";
+    for (plint iS = 0; iS < num_of_substrates; ++iS) {
+        T sMin = computeMin(*computeDensity(vec_substr_lattices[iS]));
+        T sMax = computeMax(*computeDensity(vec_substr_lattices[iS]));
+        T sAvg = computeAverage(*computeDensity(vec_substr_lattices[iS]));
+        pcout << "║   " << vec_subs_names[iS] << ": min=" << std::scientific << sMin
+              << " avg=" << sAvg << " max=" << sMax << std::fixed << "\n";
     }
     pcout << "╚══════════════════════════════════════════════════════════════════════════╝\n";
 
     if (track_performance == 1) {
-        pcout << "\nTiming breakdown:\n";
-        pcout << "  NS:  " << nstime << " s\n";
-        pcout << "  ADE: " << adetime << " s\n";
-        pcout << "  C&S: " << cnstime << " s\n";
-        if (ca_count > 0) pcout << "  CA:  " << catime << " s\n";
-        if (kns_count > 0) pcout << "  KNS: " << knstime << " s\n";
-        if (useEquilibrium) pcout << "  EQ:  " << eqtime << " s\n";
+        pcout << "\n┌────────────────────────────────────────────────────────────────────────┐\n";
+        pcout << "│ PERFORMANCE TIMING BREAKDOWN                                           │\n";
+        pcout << "├────────────────────────────────────────────────────────────────────────┤\n";
+        pcout << "│   NS (flow):         " << nstime << " s\n";
+        pcout << "│   ADE (transport):   " << adetime << " s\n";
+        pcout << "│   Collide+Stream:    " << cnstime << " s\n";
+        if (ca_count > 0) pcout << "│   CA (biomass):      " << catime << " s\n";
+        if (kns_count > 0) pcout << "│   Kinetics:          " << knstime << " s\n";
+        if (useEquilibrium) pcout << "│   Equilibrium:       " << eqtime << " s\n";
+        pcout << "└────────────────────────────────────────────────────────────────────────┘\n";
     }
 
     if (useEquilibrium) eqSolver.printStatistics();
-    
-    // Final output
-    if (track_performance == 0) {
-        pcout << "\nWriting final VTI and CHK files...\n";
-        for (plint iS = 0; iS < num_of_substrates; ++iS) {
-            writeAdvVTI(vec_substr_lattices[iS], iT, vec_subs_names[iS]+"_");
-            saveBinaryBlock(vec_substr_lattices[iS], str_outputDir+ade_filename+std::to_string(iS)+"_"+std::to_string(iT)+".chk");
-        }
-        tmpIT0=0; tmpIT1=0;
-        for (plint iM = 0; iM < num_of_microbes; ++iM) {
-            if (bmass_type[iM]==1) { 
-                writeAdvVTI(vec_bFilm_lattices[tmpIT0], iT, vec_microbes_names[iM]+"_"); 
-                saveBinaryBlock(vec_bFilm_lattices[tmpIT0], str_outputDir+bio_filename+std::to_string(iM)+"_"+std::to_string(iT)+".chk");
-                ++tmpIT0; 
-            }
-            else { 
-                writeAdvVTI(vec_bFree_lattices[tmpIT1], iT, vec_microbes_names[iM]+"_"); 
-                saveBinaryBlock(vec_bFree_lattices[tmpIT1], str_outputDir+bio_filename+std::to_string(iM)+"_"+std::to_string(iT)+".chk");
-                ++tmpIT1; 
-            }
-        }
-        writeAdvVTI(maskLattice, iT, mask_filename+"_");
-        saveBinaryBlock(maskLattice, str_outputDir+mask_filename+"_"+std::to_string(iT)+".chk");
-        if (Pe > thrd) {
-            writeNsVTI(nsLattice, iT, "nsLattice_");
-            saveBinaryBlock(nsLattice, str_outputDir+ns_filename+".chk");
-        }
-    }
 
     // Free allocated memory
     free(main_path);
@@ -926,6 +1073,13 @@ int main(int argc, char **argv) {
     free(output_path);
     free(ns_filename);
 
-    pcout << "\nSimulation Finished!\n\n";
+    pcout << "\n╔══════════════════════════════════════════════════════════════════════════╗\n";
+    pcout << "║                       Simulation Finished!                               ║\n";
+    pcout << "║                                                                          ║\n";
+    pcout << "║  Author:  Shahram Asgari                                                 ║\n";
+    pcout << "║  Advisor: Dr. Christof Meile                                             ║\n";
+    pcout << "║  Lab:     Meile Lab, University of Georgia                               ║\n";
+    pcout << "╚══════════════════════════════════════════════════════════════════════════╝\n\n";
+
     return 0;
 }

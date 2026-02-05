@@ -615,7 +615,9 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
     bool &useEquilibrium, std::vector<std::string> &eq_component_names,
     std::vector<T> &eq_logK_values, std::vector<std::vector<T>> &eq_stoich_matrix,
     // NEW: Biotic/Abiotic and Kinetics control
-    bool &biotic_mode, bool &enable_kinetics)
+    bool &biotic_mode, bool &enable_kinetics,
+    // NEW: Validation diagnostics option
+    bool &enable_validation_diagnostics)
 
 {
 
@@ -681,6 +683,32 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
         if (!biotic_mode) {
             enable_kinetics = false;
             pcout << "Note: Kinetics disabled (abiotic mode)\n\n";
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // VALIDATION DIAGNOSTICS OPTION
+        // ════════════════════════════════════════════════════════════════════════════
+        // When enabled, prints detailed data flow and calculation verification at each iteration
+        enable_validation_diagnostics = false;  // Default: off (performance mode)
+
+        try {
+            std::string tmp;
+            doc["parameters"]["simulation_mode"]["enable_validation_diagnostics"].read(tmp);
+            std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](unsigned char c){ return std::tolower(c); });
+            if (tmp.compare("yes")==0 || tmp.compare("true")==0 || tmp.compare("1")==0) {
+                enable_validation_diagnostics = true;
+                pcout << "╔══════════════════════════════════════════════════════════════════════╗\n";
+                pcout << "║  VALIDATION DIAGNOSTICS: ENABLED                                     ║\n";
+                pcout << "║  Detailed per-iteration output for data flow verification            ║\n";
+                pcout << "║  WARNING: This adds overhead - use for debugging only!               ║\n";
+                pcout << "╚══════════════════════════════════════════════════════════════════════╝\n\n";
+            }
+            else if (tmp.compare("no")==0 || tmp.compare("false")==0 || tmp.compare("0")==0) {
+                enable_validation_diagnostics = false;
+            }
+        }
+        catch (PlbIOException& exception) {
+            enable_validation_diagnostics = false;  // Default to off
         }
 
         // terminate the simulation if inputs are undefined.
