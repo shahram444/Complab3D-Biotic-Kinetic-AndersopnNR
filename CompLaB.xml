@@ -18,10 +18,20 @@
            - true: Kinetics reactions enabled (Monod growth, etc.)
            - false: Kinetics disabled, only equilibrium chemistry runs
            - Note: Automatically disabled when biotic_mode=false
+
+         enable_validation_diagnostics: true/false
+           - true: Detailed per-iteration output showing data flow verification:
+                   * Collision, kinetics, equilibrium steps
+                   * Sample concentrations at domain center
+                   * Mass balance checks
+                   * dC and dB values at sample points
+           - false: Normal operation (no extra diagnostic output)
+           - Note: Adds computational overhead, use for debugging only!
     -->
     <simulation_mode>
         <biotic_mode>true</biotic_mode>
         <enable_kinetics>true</enable_kinetics>
+        <enable_validation_diagnostics>false</enable_validation_diagnostics>
     </simulation_mode>
 
     <LB_numerics>

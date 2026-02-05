@@ -12,10 +12,15 @@
          ════════════════════════════════════════════════════════════════════════════
          biotic_mode: true (planktonic bacteria are biotic organisms)
          enable_kinetics: true (Monod kinetics for planktonic growth)
+         enable_validation_diagnostics: true/false
+           - Detailed per-iteration output for debugging/validation
+           - Shows collision, kinetics, equilibrium steps with sample values
+           - Use for verifying code correctness (adds overhead)
     -->
     <simulation_mode>
         <biotic_mode>true</biotic_mode>
         <enable_kinetics>true</enable_kinetics>
+        <enable_validation_diagnostics>false</enable_validation_diagnostics>
     </simulation_mode>
 
     <LB_numerics>
