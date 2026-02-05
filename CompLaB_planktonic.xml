@@ -7,6 +7,17 @@
         <output_path>output_planktonic</output_path>
     </path>
 
+    <!-- ════════════════════════════════════════════════════════════════════════════
+         SIMULATION MODE CONTROL (Planktonic Version)
+         ════════════════════════════════════════════════════════════════════════════
+         biotic_mode: true (planktonic bacteria are biotic organisms)
+         enable_kinetics: true (Monod kinetics for planktonic growth)
+    -->
+    <simulation_mode>
+        <biotic_mode>true</biotic_mode>
+        <enable_kinetics>true</enable_kinetics>
+    </simulation_mode>
+
     <LB_numerics>
         <domain>
             <nx>50</nx>

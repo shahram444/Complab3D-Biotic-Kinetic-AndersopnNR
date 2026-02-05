@@ -612,8 +612,10 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
     std::vector<std::vector<T>> &vec_Vmax, std::vector<std::vector<T>> &vec_Vmax_kns,
     bool &track_performance, bool &halfflag,
     // Equilibrium chemistry parameters
-    bool &useEquilibrium, std::vector<std::string> &eq_component_names, 
-    std::vector<T> &eq_logK_values, std::vector<std::vector<T>> &eq_stoich_matrix)
+    bool &useEquilibrium, std::vector<std::string> &eq_component_names,
+    std::vector<T> &eq_logK_values, std::vector<std::vector<T>> &eq_stoich_matrix,
+    // NEW: Biotic/Abiotic and Kinetics control
+    bool &biotic_mode, bool &enable_kinetics)
 
 {
 
@@ -621,6 +623,65 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
     try {
         std::string fin("CompLaB.xml");
         XMLreader doc(fin);
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // BIOTIC/ABIOTIC MODE AND KINETICS CONTROL
+        // ════════════════════════════════════════════════════════════════════════════
+        // Default values
+        biotic_mode = true;      // Default: biotic simulation with microbes
+        enable_kinetics = true;  // Default: kinetics enabled
+
+        try {
+            std::string tmp;
+            doc["parameters"]["simulation_mode"]["biotic_mode"].read(tmp);
+            std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](unsigned char c){ return std::tolower(c); });
+            if (tmp.compare("yes")==0 || tmp.compare("true")==0 || tmp.compare("1")==0 || tmp.compare("biotic")==0) {
+                biotic_mode = true;
+                pcout << "\n╔══════════════════════════════════════════════════════════════════════╗\n";
+                pcout << "║ SIMULATION MODE: BIOTIC (with microbes/biomass)                      ║\n";
+                pcout << "╚══════════════════════════════════════════════════════════════════════╝\n";
+            }
+            else if (tmp.compare("no")==0 || tmp.compare("false")==0 || tmp.compare("0")==0 || tmp.compare("abiotic")==0) {
+                biotic_mode = false;
+                pcout << "\n╔══════════════════════════════════════════════════════════════════════╗\n";
+                pcout << "║ SIMULATION MODE: ABIOTIC (no microbes - transport only)              ║\n";
+                pcout << "╚══════════════════════════════════════════════════════════════════════╝\n";
+            }
+            else {
+                pcout << "biotic_mode (" << tmp << ") should be true/false or biotic/abiotic. Defaulting to biotic.\n";
+                biotic_mode = true;
+            }
+        }
+        catch (PlbIOException& exception) {
+            biotic_mode = true;  // Default to biotic mode
+        }
+
+        try {
+            std::string tmp;
+            doc["parameters"]["simulation_mode"]["enable_kinetics"].read(tmp);
+            std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](unsigned char c){ return std::tolower(c); });
+            if (tmp.compare("yes")==0 || tmp.compare("true")==0 || tmp.compare("1")==0) {
+                enable_kinetics = true;
+                pcout << "Kinetics reactions: ENABLED\n";
+            }
+            else if (tmp.compare("no")==0 || tmp.compare("false")==0 || tmp.compare("0")==0) {
+                enable_kinetics = false;
+                pcout << "Kinetics reactions: DISABLED (equilibrium solver only)\n";
+            }
+            else {
+                pcout << "enable_kinetics (" << tmp << ") should be true or false. Defaulting to true.\n";
+                enable_kinetics = true;
+            }
+        }
+        catch (PlbIOException& exception) {
+            enable_kinetics = true;  // Default to kinetics enabled
+        }
+
+        // If abiotic mode, force disable kinetics
+        if (!biotic_mode) {
+            enable_kinetics = false;
+            pcout << "Note: Kinetics disabled (abiotic mode)\n\n";
+        }
 
         // terminate the simulation if inputs are undefined.
         try {
@@ -656,7 +717,15 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             if (vec_rightBC.size()!=(unsigned)num_of_substrates) { pcout << "The length of right_boundary_condition vector does not match the num_of_substrates. Terminating the simulation.\n"; return -1;}
 
             // microbiology
-            doc["parameters"]["microbiology"]["number_of_microbes"].read(num_of_microbes);
+            // In abiotic mode, skip microbe parsing entirely
+            if (!biotic_mode) {
+                num_of_microbes = 0;
+                kns_count = 0; fd_count = 0; ca_count = 0; lb_count = 0;
+                pcout << "Abiotic mode: Skipping microbiology section\n";
+            }
+            else {
+                doc["parameters"]["microbiology"]["number_of_microbes"].read(num_of_microbes);
+            }
             kns_count = 0; fd_count = 0; ca_count = 0; lb_count = 0;  // Initialize all counters
 
             for (plint iT=0; iT<num_of_microbes; ++iT) {
@@ -888,6 +957,8 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
 
         // microbiology
         bmassDindex = 0;
+        // Skip microbiology parsing in abiotic mode
+        if (biotic_mode) {
         for (plint iT=0; iT<num_of_microbes; ++iT) {
             std::string bioname = "microbe"+std::to_string(iT);
             try {
@@ -998,6 +1069,7 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             else { pcout << "halfflag (" << tmp << ") should be either half or fraction. Terminating the simulation.\n"; return -1; }
         }
         catch (PlbIOException& exception) { halfflag=0; }
+        } // END if (biotic_mode) - microbiology section
 
         // IO
         try {

@@ -122,6 +122,10 @@ int main(int argc, char **argv) {
     std::vector<T> eq_logK_values;
     std::vector<std::vector<T>> eq_stoich_matrix;
 
+    // Biotic/Abiotic and Kinetics control
+    bool biotic_mode = true;      // true = with microbes, false = abiotic transport only
+    bool enable_kinetics = true;  // true = kinetics enabled, false = equilibrium only
+
     std::string str_mainDir=main_path;
     if (std::to_string(str_mainDir.back()).compare("/")!=0) { str_mainDir+="/"; }
     std::srand(std::time(nullptr));
@@ -143,7 +147,8 @@ int main(int argc, char **argv) {
         solver_type, fd_count, lb_count, ca_count, bfilm_count, bfree_count, kns_count, reaction_type,
         vec_c0, vec_left_btype, vec_right_btype, vec_left_bcondition, vec_right_bcondition, vec_b0_all, bio_left_btype, bio_right_btype, bio_left_bcondition, bio_right_bcondition,
         vec_Kc, vec_Kc_kns, vec_mu, vec_mu_kns, bmass_type, vec_b0_free, vec_b0_film, vec_Vmax, vec_Vmax_kns, track_performance, halfflag,
-        useEquilibrium, eq_component_names, eq_logK_values, eq_stoich_matrix);
+        useEquilibrium, eq_component_names, eq_logK_values, eq_stoich_matrix,
+        biotic_mode, enable_kinetics);
     }
     catch (PlbIOException& exception) {
         pcout << "  [ERROR] " << exception.what() << "\n";
@@ -734,22 +739,22 @@ int main(int argc, char **argv) {
         }
         if (track_performance == 1) { cnstime += global::timer("cns").getTime(); global::timer("cns").stop(); }
 
-        // Kinetics
+        // Kinetics (only if enable_kinetics is true)
         dC=dC0; dBp=dBp0; dBf=dBf0;
-        if (kns_count > 0) {
+        if (enable_kinetics && kns_count > 0) {
             if (track_performance == 1) global::timer("kns").restart();
             applyProcessingFunctional(new run_kinetics<T,RXNDES>(nx, num_of_substrates, kns_count, ade_dt, vec_Kc_kns, vec_mu_kns, no_dynamics, bounce_back),
                                       vec_substr_lattices[0].getBoundingBox(), ptr_kns_lattices);
             if (track_performance == 1) { knstime+=global::timer("kns").getTime(); global::timer("kns").stop(); }
         }
-        if (rxn_count > 0) {
+        if (enable_kinetics && rxn_count > 0) {
             if (track_performance == 1) global::timer("rxn").restart();
             applyProcessingFunctional(new update_rxnLattices<T,RXNDES>(nx, num_of_substrates, num_of_microbes, no_dynamics, bounce_back),
                                       vec_substr_lattices[0].getBoundingBox(), ptr_update_rxnLattices);
             if (track_performance == 1) { T rxntime=global::timer("rxn").getTime(); global::timer("rxn").stop(); if (kns_count>0) knstime+=rxntime; }
         }
 
-        // Equilibrium chemistry
+        // Equilibrium chemistry (runs regardless of enable_kinetics - controlled separately)
         if (useEquilibrium) {
             if (track_performance == 1) global::timer("eq").restart();
             applyProcessingFunctional(new run_equilibrium_biotic<T, RXNDES>(nx, num_of_substrates, eqSolver, no_dynamics, bounce_back),
