@@ -158,12 +158,13 @@ make
 
 ## 2.2 Simulation Mode Options
 
-The `<simulation_mode>` section controls three critical flags:
+The `<simulation_mode>` section controls four critical flags:
 
 ```xml
 <simulation_mode>
     <biotic_mode>true</biotic_mode>
     <enable_kinetics>true</enable_kinetics>
+    <enable_abiotic_kinetics>false</enable_abiotic_kinetics>
     <enable_validation_diagnostics>false</enable_validation_diagnostics>
 </simulation_mode>
 ```
@@ -187,9 +188,24 @@ The `<simulation_mode>` section controls three critical flags:
 | `true` | Monod kinetics reactions are calculated each iteration |
 | `false` | Kinetics disabled, only equilibrium chemistry runs |
 
-**Note:** When `biotic_mode=false`, kinetics is automatically disabled.
+**Note:** When `biotic_mode=false`, biotic (Monod) kinetics is automatically disabled.
 
-### Option 3: enable_validation_diagnostics
+### Option 3: enable_abiotic_kinetics
+
+| Value | Description |
+|-------|-------------|
+| `true` | Chemical reactions between substrates (no microbes) are enabled |
+| `false` | Abiotic kinetics disabled (default) |
+
+**When to use `enable_abiotic_kinetics`:**
+- First-order decay reactions (e.g., radioactive decay, photodegradation)
+- Bimolecular reactions (A + B → C)
+- Chemical oxidation/reduction reactions without biological catalysis
+
+**Note:** This option works with `biotic_mode=false` to enable substrate-only reactions.
+Customize reactions in `defineAbioticKinetics.hh`.
+
+### Option 4: enable_validation_diagnostics
 
 | Value | Description |
 |-------|-------------|
