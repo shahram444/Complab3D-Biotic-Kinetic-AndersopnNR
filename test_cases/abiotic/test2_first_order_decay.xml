@@ -1,0 +1,105 @@
+<?xml version="1.0" ?>
+<!--
+================================================================================
+TEST 2: FIRST-ORDER DECAY
+================================================================================
+PURPOSE:
+  Test first-order decay reaction: A -> products
+
+REACTION:
+  A -> products (irreversible)
+
+RATE LAW:
+  dA/dt = -k * [A]
+
+  where k = 1.0e-4 [1/s] (decay rate constant)
+
+ANALYTICAL SOLUTION:
+  [A](t) = [A]_0 * exp(-k*t)
+
+  Half-life: t_1/2 = ln(2)/k = 0.693/1e-4 = 6930 seconds
+
+VALIDATION:
+  Initial: [A] = 1.0 mol/L everywhere
+
+  At t = 6930 s (1 half-life): [A] should be ~0.5 mol/L
+  At t = 13860 s (2 half-lives): [A] should be ~0.25 mol/L
+
+  With dt = 0.0075 s and decay happening each iteration:
+  After 1000 iterations (7.5 s): [A] = 1.0 * exp(-1e-4 * 7.5) = 0.9993
+  After 10000 iterations (75 s): [A] = 1.0 * exp(-1e-4 * 75) = 0.9925
+
+  Check: Concentration decreases exponentially, never goes negative
+
+KINETICS FILE: Use defineAbioticKinetics_test2.hh
+================================================================================
+-->
+<parameters>
+    <path>
+        <src_path>src</src_path>
+        <input_path>input</input_path>
+        <output_path>output_abiotic_test2_decay</output_path>
+    </path>
+
+    <simulation_mode>
+        <biotic_mode>false</biotic_mode>
+        <enable_kinetics>false</enable_kinetics>
+        <enable_abiotic_kinetics>true</enable_abiotic_kinetics>
+        <enable_validation_diagnostics>true</enable_validation_diagnostics>
+    </simulation_mode>
+
+    <LB_numerics>
+        <domain>
+            <nx>20</nx>
+            <ny>10</ny>
+            <nz>10</nz>
+            <dx>1.0</dx>
+            <unit>um</unit>
+            <characteristic_length>10</characteristic_length>
+            <filename>geometry_open.dat</filename>
+            <material_numbers>
+                <pore>2</pore>
+                <solid>0</solid>
+                <bounce_back>1</bounce_back>
+            </material_numbers>
+        </domain>
+        <delta_P>0.0</delta_P>
+        <Peclet>0.0</Peclet>
+        <tau>0.8</tau>
+        <track_performance>false</track_performance>
+        <iteration>
+            <ade_max_iT>10000</ade_max_iT>
+            <ade_converge_iT>1e-12</ade_converge_iT>
+        </iteration>
+    </LB_numerics>
+
+    <chemistry>
+        <number_of_substrates>1</number_of_substrates>
+        <substrate0>
+            <name_of_substrates>Species_A</name_of_substrates>
+            <initial_concentration>1.0</initial_concentration>
+            <substrate_diffusion_coefficients>
+                <in_pore>1.0e-9</in_pore>
+            </substrate_diffusion_coefficients>
+            <left_boundary_type>Neumann</left_boundary_type>
+            <right_boundary_type>Neumann</right_boundary_type>
+            <left_boundary_condition>0.0</left_boundary_condition>
+            <right_boundary_condition>0.0</right_boundary_condition>
+        </substrate0>
+    </chemistry>
+
+    <microbiology>
+        <number_of_microbes>0</number_of_microbes>
+    </microbiology>
+
+    <equilibrium>
+        <enabled>false</enabled>
+    </equilibrium>
+
+    <IO>
+        <read_NS_file>false</read_NS_file>
+        <read_ADE_file>false</read_ADE_file>
+        <save_VTK_interval>2000</save_VTK_interval>
+        <save_CHK_interval>10000</save_CHK_interval>
+    </IO>
+</parameters>
