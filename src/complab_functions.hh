@@ -713,6 +713,9 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             }
         }
 
+        // NOTE: Validation that abiotic kinetics requires substrates is done
+        // after chemistry section parsing (see below around line 1023)
+
         // ════════════════════════════════════════════════════════════════════════════
         // VALIDATION DIAGNOSTICS OPTION
         // ════════════════════════════════════════════════════════════════════════════
@@ -775,6 +778,18 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             // microbiology
             // In abiotic mode, skip microbe parsing entirely
             if (!biotic_mode) {
+                // Check if user has microbes defined in XML but biotic_mode=false
+                try {
+                    plint xml_microbes = 0;
+                    doc["parameters"]["microbiology"]["number_of_microbes"].read(xml_microbes);
+                    if (xml_microbes > 0) {
+                        pcout << "╔══════════════════════════════════════════════════════════════════════╗\n";
+                        pcout << "║ WARNING: " << xml_microbes << " microbe(s) defined in XML but biotic_mode=false    ║\n";
+                        pcout << "║ Microbes will be IGNORED. Set biotic_mode=true to use them.         ║\n";
+                        pcout << "╚══════════════════════════════════════════════════════════════════════╝\n";
+                    }
+                } catch (...) { }  // No microbes section defined, which is expected in abiotic mode
+
                 num_of_microbes = 0;
                 kns_count = 0; fd_count = 0; ca_count = 0; lb_count = 0;
                 pcout << "Abiotic mode: Skipping microbiology section\n";
@@ -1010,6 +1025,16 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
         if (solute_poreD.size()!=(unsigned)num_of_substrates) { pcout << "The length of substrate_diffusion_coefficients in_pore vector does not match the num_of_substrates. Terminating the simulation.\n"; return -1; }
         if (solute_bFilmD.size()!=(unsigned)num_of_substrates) { pcout << "The length of substrate_diffusion_coefficients in_biofilm vector does not match the num_of_substrates. Terminating the simulation.\n"; return -1; }
         if (vec_subs_names.size()!=(unsigned)num_of_substrates) { pcout << "The length of name_of_substrates vector does not match the num_of_substrates. Terminating the simulation.\n"; return -1; }
+
+        // Validate abiotic kinetics requires at least one substrate
+        if (enable_abiotic_kinetics && num_of_substrates < 1) {
+            pcout << "╔══════════════════════════════════════════════════════════════════════╗\n";
+            pcout << "║ ERROR: enable_abiotic_kinetics=true but no substrates defined!       ║\n";
+            pcout << "║ Abiotic kinetics requires at least one substrate to react.           ║\n";
+            pcout << "║ Add substrates in <chemistry> section or set enable_abiotic_kinetics=false.║\n";
+            pcout << "╚══════════════════════════════════════════════════════════════════════╝\n";
+            return -1;
+        }
 
         // microbiology
         bmassDindex = 0;
