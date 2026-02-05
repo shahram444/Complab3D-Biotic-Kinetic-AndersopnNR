@@ -511,9 +511,10 @@ int main(int argc, char **argv) {
         bmassDomainSetup(copybFilmLattice, createLocalAdvectionDiffusionBoundaryCondition3D<T,RXNDES>(), geometry, 0., 0.,
                          pore_dynamics, bounce_back, no_dynamics, bio_dynamics, bio_left_btype[0], bio_right_btype[0], bio_left_bcondition[0], bio_right_bcondition[0]);
     } else {
-        // Abiotic mode: initialize lattices with default dynamics (no biomass)
-        setToConstant(totalbFilmLattice, totalbFilmLattice.getBoundingBox(), (T)0.0);
-        setToConstant(copybFilmLattice, copybFilmLattice.getBoundingBox(), (T)0.0);
+        // Abiotic mode: initialize lattices with zero density (no biomass)
+        Array<T,3> zeroVelocity(0., 0., 0.);
+        initializeAtEquilibrium(totalbFilmLattice, totalbFilmLattice.getBoundingBox(), (T)0.0, zeroVelocity);
+        initializeAtEquilibrium(copybFilmLattice, copybFilmLattice.getBoundingBox(), (T)0.0, zeroVelocity);
     }
 
     // Initialize biomass
