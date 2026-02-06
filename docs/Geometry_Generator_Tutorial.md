@@ -204,12 +204,57 @@ Convert microscopy images or CT scan slices to CompLaB3D geometry.
 3. **BLACK** (pixel < 128) = PORE space
 4. **WHITE** (pixel >= 128) = SOLID
 
-### Example Usage
+### Step-by-Step Guide
 
 ```
-Image folder path: /path/to/ct_slices
-Output name [converted]: my_rock_sample
+STEP 1: Select Image Folder
+-----------------------------------
+    Image folder path: /path/to/ct_slices
+
+STEP 2: Add Biofilm?
+-----------------------------------
+    Do you want to add biofilm to the converted geometry?
+    (Biofilm will be placed on grain/solid surfaces)
+
+    0 = No biofilm (abiotic domain only)
+    1 = Single species biofilm
+    2 = Two species biofilm (zoned)
+    3 = Three species biofilm (zoned)
+
+    Select (0-3) [0]: 1
+
+STEP 3: Biofilm Parameters (if biofilm selected)
+-----------------------------------
+    Biofilm thickness (voxels) [2]: 2
+    Coverage fraction (0.1-1.0) [0.7]: 0.7
+
+STEP 4: Output
+-----------------------------------
+    Output folder name [converted]: my_rock_sample
 ```
+
+### Biofilm Options Explained
+
+| Option | Description |
+|--------|-------------|
+| **0 - No biofilm** | Pure abiotic domain (solid + pore only) |
+| **1 - Single species** | One microbe type coats all grain surfaces |
+| **2 - Two species** | Domain split in half (X): species 1 in first half, species 2 in second half |
+| **3 - Three species** | Domain split in thirds (X): one species per zone |
+
+### Example: CT Scan with Biofilm
+
+```
+Image folder path: /data/ct_scan_sandstone
+Select (0-3) [0]: 2
+Biofilm thickness (voxels) [2]: 3
+Coverage fraction (0.1-1.0) [0.7]: 0.8
+Output folder name [converted]: sandstone_2species
+```
+
+This creates a geometry from CT images with two microbial species:
+- Species 1 (mask 3/6) in inlet region
+- Species 2 (mask 4/7) in outlet region
 
 ### Preparing Images
 
