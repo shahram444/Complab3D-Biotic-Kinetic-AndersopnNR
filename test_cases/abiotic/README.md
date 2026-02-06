@@ -33,17 +33,31 @@ See `docs/Geometry_Generator_Tutorial.md` for complete instructions.
 
 ## How to Run a Test
 
-### Step 1: Copy the kinetics file
+### IMPORTANT: Required Files
+
+The code compiles **both** biotic and abiotic processors. You need **BOTH** kinetics files in the **project root**:
+- `defineKinetics.hh` - Required for compilation (provides KineticsStats and defineRxnKinetics)
+- `defineAbioticKinetics.hh` - Your abiotic reactions
+
+### Step 1: Copy the kinetics file to PROJECT ROOT
 
 ```bash
+# Navigate to your project root (where src/ folder is located)
+cd /path/to/your/project
+
 # For Test 2 (First-Order Decay):
-cp test_cases/abiotic/defineAbioticKinetics_test2.hh src/defineAbioticKinetics.hh
+# Copy to PROJECT ROOT (NOT src/)
+cp test_cases/abiotic/defineAbioticKinetics_test2.hh defineAbioticKinetics.hh
+
+# VERIFY defineKinetics.hh exists in project root (required for compilation)
+ls defineKinetics.hh   # Should exist
+ls defineAbioticKinetics.hh   # Your test file
 ```
 
 ### Step 2: Recompile
 
 ```bash
-cd src
+cd build
 make clean
 make
 ```
@@ -51,7 +65,7 @@ make
 ### Step 3: Run the simulation
 
 ```bash
-./complab3d ../test_cases/abiotic/test2_first_order_decay.xml
+./complab test_cases/abiotic/test2_first_order_decay.xml
 ```
 
 ### Step 4: Check output
