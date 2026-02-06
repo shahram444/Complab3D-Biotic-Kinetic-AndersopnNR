@@ -213,48 +213,81 @@ STEP 1: Select Image Folder
 
 STEP 2: Add Biofilm?
 -----------------------------------
-    Do you want to add biofilm to the converted geometry?
-    (Biofilm will be placed on grain/solid surfaces)
-
     0 = No biofilm (abiotic domain only)
     1 = Single species biofilm
-    2 = Two species biofilm (zoned)
-    3 = Three species biofilm (zoned)
+    2 = Two species biofilm
+    3 = Three species biofilm
 
     Select (0-3) [0]: 1
 
-STEP 3: Biofilm Parameters (if biofilm selected)
+STEP 3: Biofilm Location/Distribution
+-----------------------------------
+    Where should biofilm be placed?
+
+    1 = All grain surfaces (uniform coating)
+    2 = Inlet region only (first 20% of X)
+    3 = Outlet region only (last 20% of X)
+    4 = Center region only (middle 40% of X)
+    5 = Random patches on surfaces
+    6 = Zoned by X (species separated along flow)  [only for 2-3 species]
+
+    Select (1-6) [1]: 1
+
+STEP 4: Biofilm Parameters
 -----------------------------------
     Biofilm thickness (voxels) [2]: 2
     Coverage fraction (0.1-1.0) [0.7]: 0.7
 
-STEP 4: Output
+STEP 5: Output
 -----------------------------------
     Output folder name [converted]: my_rock_sample
 ```
 
-### Biofilm Options Explained
+### Biofilm Species Options
 
 | Option | Description |
 |--------|-------------|
 | **0 - No biofilm** | Pure abiotic domain (solid + pore only) |
-| **1 - Single species** | One microbe type coats all grain surfaces |
-| **2 - Two species** | Domain split in half (X): species 1 in first half, species 2 in second half |
-| **3 - Three species** | Domain split in thirds (X): one species per zone |
+| **1 - Single species** | One microbe type |
+| **2 - Two species** | Two microbe types |
+| **3 - Three species** | Three microbe types |
 
-### Example: CT Scan with Biofilm
+### Biofilm Location Options
+
+| Option | Description |
+|--------|-------------|
+| **1 - All surfaces** | Uniform coating on all grain surfaces |
+| **2 - Inlet region** | Biofilm only in first 20% of domain (near x=0) |
+| **3 - Outlet region** | Biofilm only in last 20% of domain (near x=nx) |
+| **4 - Center region** | Biofilm only in middle 40% of domain |
+| **5 - Random patches** | Random spherical patches on surfaces |
+| **6 - Zoned by X** | Species separated along flow direction (2-3 species only) |
+
+### Example 1: CT Scan with Single Species at Inlet
 
 ```
 Image folder path: /data/ct_scan_sandstone
-Select (0-3) [0]: 2
+Select (0-3) [0]: 1
+Select (1-5) [1]: 2          # Inlet region only
 Biofilm thickness (voxels) [2]: 3
 Coverage fraction (0.1-1.0) [0.7]: 0.8
-Output folder name [converted]: sandstone_2species
+Output folder name [converted]: sandstone_inlet_biofilm
 ```
 
-This creates a geometry from CT images with two microbial species:
-- Species 1 (mask 3/6) in inlet region
-- Species 2 (mask 4/7) in outlet region
+### Example 2: CT Scan with Two Species Zoned
+
+```
+Image folder path: /data/ct_scan_sandstone
+Select (0-3) [0]: 2          # Two species
+Select (1-6) [1]: 6          # Zoned by X
+Biofilm thickness (voxels) [2]: 2
+Coverage fraction (0.1-1.0) [0.7]: 0.7
+Output folder name [converted]: sandstone_smtz
+```
+
+This creates:
+- Species 1 (mask 3/6) in first half of domain
+- Species 2 (mask 4/7) in second half of domain
 
 ### Preparing Images
 
