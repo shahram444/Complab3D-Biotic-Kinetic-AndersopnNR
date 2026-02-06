@@ -7,6 +7,18 @@ This directory contains **5 complete test cases** for validating the abiotic kin
 1. **XML configuration file** - Simulation parameters
 2. **defineAbioticKinetics_testN.hh** - Kinetics implementation for that test
 
+## Generating Geometry
+
+Use the geometry generator to create geometry files:
+
+```bash
+cd tools
+python geometry_generator.py
+# Select option 1: ABIOTIC Domain Generator
+```
+
+See `docs/Geometry_Generator_Tutorial.md` for complete instructions.
+
 ## Test Summary
 
 | Test | Reaction | Rate Law | Key Validation |
