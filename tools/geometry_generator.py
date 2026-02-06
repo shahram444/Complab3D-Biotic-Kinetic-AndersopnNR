@@ -1345,39 +1345,178 @@ def abiotic_generator_menu():
     print(f"  Ready for CompLaB3D!\n")
 
 def image_converter_menu():
-    """Convert image stack to geometry."""
+    """Convert image stack to geometry with optional biofilm."""
     print("\n" + "="*70)
     print("  IMAGE STACK CONVERTER")
     print("="*70)
 
-    folder = input("\n  Image folder path: ").strip()
+    # Step 1: Image folder
+    print("\n  STEP 1: Select Image Folder")
+    print("  " + "-" * 35)
+    folder = input("    Image folder path: ").strip()
     if not os.path.exists(folder):
-        print(f"  Folder not found: {folder}")
+        print(f"    Folder not found: {folder}")
         return
 
-    name = input("  Output name [converted]: ").strip() or "converted"
+    # Step 2: Add biofilm?
+    print("\n  STEP 2: Add Biofilm?")
+    print("  " + "-" * 35)
+    print("    Do you want to add biofilm to the converted geometry?")
+    print("    (Biofilm will be placed on grain/solid surfaces)")
+    print("")
+    print("    0 = No biofilm (abiotic domain only)")
+    print("    1 = Single species biofilm")
+    print("    2 = Two species biofilm (zoned)")
+    print("    3 = Three species biofilm (zoned)")
+
+    add_biofilm = input("\n    Select (0-3) [0]: ").strip() or "0"
+    add_biofilm = int(add_biofilm) if add_biofilm.isdigit() else 0
+
+    biofilm_thickness = 1
+    biofilm_coverage = 0.7
+
+    if add_biofilm > 0:
+        print("\n  STEP 3: Biofilm Parameters")
+        print("  " + "-" * 35)
+        biofilm_thickness = get_positive_int("    Biofilm thickness (voxels) [2]: ", 2)
+        biofilm_coverage = get_float_range("    Coverage fraction (0.1-1.0) [0.7]: ", 0.7, 0.1, 1.0)
+
+    # Step 4: Output name
+    print("\n  STEP 4: Output")
+    print("  " + "-" * 35)
+    name = input("    Output folder name [converted]: ").strip() or "converted"
     output_dir = f"{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
+    # Summary
+    print("\n  SUMMARY:")
+    print(f"    Input: {folder}")
+    print(f"    Biofilm: {['None', '1 species', '2 species', '3 species'][add_biofilm]}")
+    if add_biofilm > 0:
+        print(f"    Thickness: {biofilm_thickness} voxels")
+        print(f"    Coverage: {biofilm_coverage:.0%}")
+    print(f"    Output: {output_dir}")
+
+    confirm = input("\n    Proceed? (y/n) [y]: ").strip().lower() or "y"
+    if confirm != 'y':
+        print("    Cancelled.")
+        return
+
     print(f"\n  Converting images from: {folder}")
-    print(f"  Output: {output_dir}")
 
     try:
         geometry = load_image_stack(folder)
+        nx, ny, nz = geometry.shape
+        print(f"    Loaded geometry: {nx} x {ny} x {nz}")
 
+        # Add biofilm if requested
+        if add_biofilm >= 1:
+            print(f"    Adding biofilm (species: {add_biofilm})...")
+            if add_biofilm == 1:
+                geometry = place_biofilm_grain_coating(geometry, 0, biofilm_thickness, biofilm_coverage)
+            elif add_biofilm == 2:
+                # Two species: split domain in half along X
+                geometry = place_biofilm_two_zones_on_grains(geometry, biofilm_thickness, biofilm_coverage)
+            elif add_biofilm == 3:
+                # Three species: split domain in thirds along X
+                geometry = place_biofilm_three_zones_on_grains(geometry, biofilm_thickness, biofilm_coverage)
+
+        # Save files
         os.makedirs(output_dir, exist_ok=True)
         os.makedirs(os.path.join(output_dir, "input"), exist_ok=True)
         os.makedirs(os.path.join(output_dir, "images"), exist_ok=True)
 
         save_dat(geometry, os.path.join(output_dir, "input", "geometry.dat"))
         save_slice_images(geometry, os.path.join(output_dir, "images"))
+        save_color_slice_images(geometry, os.path.join(output_dir, "images"))
+
+        # Statistics
+        pore_count = np.sum(geometry == MAT.pore)
+        biofilm_count = sum(np.sum(geometry == i) for i in [3,4,5,6,7,8])
 
         print(f"\n  Conversion complete!")
         print(f"    Dimensions: {geometry.shape}")
-        print(f"    - geometry.dat saved")
-        print(f"    - slice images saved\n")
+        print(f"    Porosity: {pore_count/geometry.size:.1%}")
+        if biofilm_count > 0:
+            print(f"    Biofilm: {biofilm_count:,} voxels ({biofilm_count/geometry.size:.1%})")
+        print(f"    Output: {output_dir}/")
+        print(f"      - input/geometry.dat")
+        print(f"      - images/slice_*.png (B/W)")
+        print(f"      - images/color_slice_*.png (colored)\n")
+
+        # Generate figure
+        if HAS_MATPLOTLIB:
+            fig_path = os.path.join(output_dir, "geometry_converted")
+            title = "Converted from Images"
+            if add_biofilm > 0:
+                title += f" + {add_biofilm} species biofilm"
+            create_geometry_figure(geometry, fig_path, title)
 
     except Exception as e:
         print(f"  Error: {e}\n")
+
+
+def place_biofilm_two_zones_on_grains(geometry, thickness=2, coverage=0.7):
+    """Place two species biofilm on grain surfaces, split by X position."""
+    nx, ny, nz = geometry.shape
+    core1, fringe1 = MAT.get_microbe_masks(0)
+    core2, fringe2 = MAT.get_microbe_masks(1)
+    mid_x = nx // 2
+
+    # Find pore voxels adjacent to interface (grain surfaces)
+    for x in range(nx):
+        for y in range(ny):
+            for z in range(nz):
+                if geometry[x, y, z] == MAT.pore:
+                    is_surface = False
+                    for dx, dy, dz in [(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]:
+                        x2, y2, z2 = x+dx, y+dy, z+dz
+                        if 0 <= x2 < nx and 0 <= y2 < ny and 0 <= z2 < nz:
+                            if geometry[x2, y2, z2] == MAT.interface:
+                                is_surface = True
+                                break
+                    if is_surface and np.random.random() < coverage:
+                        if x < mid_x:
+                            geometry[x, y, z] = core1
+                        else:
+                            geometry[x, y, z] = core2
+
+    geometry = _mark_fringe(geometry, core1, fringe1)
+    geometry = _mark_fringe(geometry, core2, fringe2)
+    return geometry
+
+
+def place_biofilm_three_zones_on_grains(geometry, thickness=2, coverage=0.7):
+    """Place three species biofilm on grain surfaces, split by X position."""
+    nx, ny, nz = geometry.shape
+    core1, fringe1 = MAT.get_microbe_masks(0)
+    core2, fringe2 = MAT.get_microbe_masks(1)
+    core3, fringe3 = MAT.get_microbe_masks(2)
+    third = nx // 3
+
+    # Find pore voxels adjacent to interface (grain surfaces)
+    for x in range(nx):
+        for y in range(ny):
+            for z in range(nz):
+                if geometry[x, y, z] == MAT.pore:
+                    is_surface = False
+                    for dx, dy, dz in [(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]:
+                        x2, y2, z2 = x+dx, y+dy, z+dz
+                        if 0 <= x2 < nx and 0 <= y2 < ny and 0 <= z2 < nz:
+                            if geometry[x2, y2, z2] == MAT.interface:
+                                is_surface = True
+                                break
+                    if is_surface and np.random.random() < coverage:
+                        if x < third:
+                            geometry[x, y, z] = core1
+                        elif x < 2 * third:
+                            geometry[x, y, z] = core2
+                        else:
+                            geometry[x, y, z] = core3
+
+    geometry = _mark_fringe(geometry, core1, fringe1)
+    geometry = _mark_fringe(geometry, core2, fringe2)
+    geometry = _mark_fringe(geometry, core3, fringe3)
+    return geometry
 
 def interactive_menu():
     """Main menu - Choose between three generators."""
