@@ -1362,36 +1362,65 @@ def image_converter_menu():
     print("\n  STEP 2: Add Biofilm?")
     print("  " + "-" * 35)
     print("    Do you want to add biofilm to the converted geometry?")
-    print("    (Biofilm will be placed on grain/solid surfaces)")
     print("")
     print("    0 = No biofilm (abiotic domain only)")
     print("    1 = Single species biofilm")
-    print("    2 = Two species biofilm (zoned)")
-    print("    3 = Three species biofilm (zoned)")
+    print("    2 = Two species biofilm")
+    print("    3 = Three species biofilm")
 
     add_biofilm = input("\n    Select (0-3) [0]: ").strip() or "0"
     add_biofilm = int(add_biofilm) if add_biofilm.isdigit() else 0
 
-    biofilm_thickness = 1
+    biofilm_thickness = 2
     biofilm_coverage = 0.7
+    biofilm_location = 1  # Default: all surfaces
 
     if add_biofilm > 0:
-        print("\n  STEP 3: Biofilm Parameters")
+        # Step 3: Biofilm Location
+        print("\n  STEP 3: Biofilm Location/Distribution")
+        print("  " + "-" * 35)
+        print("    Where should biofilm be placed?")
+        print("")
+        print("    1 = All grain surfaces (uniform coating)")
+        print("    2 = Inlet region only (first 20% of X)")
+        print("    3 = Outlet region only (last 20% of X)")
+        print("    4 = Center region only (middle 40% of X)")
+        print("    5 = Random patches on surfaces")
+        if add_biofilm >= 2:
+            print("    6 = Zoned by X (species separated along flow)")
+
+        max_loc = 6 if add_biofilm >= 2 else 5
+        biofilm_location = input(f"\n    Select (1-{max_loc}) [1]: ").strip() or "1"
+        biofilm_location = int(biofilm_location) if biofilm_location.isdigit() else 1
+
+        # Step 4: Biofilm Parameters
+        print("\n  STEP 4: Biofilm Parameters")
         print("  " + "-" * 35)
         biofilm_thickness = get_positive_int("    Biofilm thickness (voxels) [2]: ", 2)
         biofilm_coverage = get_float_range("    Coverage fraction (0.1-1.0) [0.7]: ", 0.7, 0.1, 1.0)
 
-    # Step 4: Output name
-    print("\n  STEP 4: Output")
+    # Step 5: Output name
+    print("\n  STEP 5: Output")
     print("  " + "-" * 35)
     name = input("    Output folder name [converted]: ").strip() or "converted"
     output_dir = f"{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    # Location names for display
+    location_names = {
+        1: "All surfaces",
+        2: "Inlet region",
+        3: "Outlet region",
+        4: "Center region",
+        5: "Random patches",
+        6: "Zoned by X"
+    }
 
     # Summary
     print("\n  SUMMARY:")
     print(f"    Input: {folder}")
     print(f"    Biofilm: {['None', '1 species', '2 species', '3 species'][add_biofilm]}")
     if add_biofilm > 0:
+        print(f"    Location: {location_names.get(biofilm_location, 'Unknown')}")
         print(f"    Thickness: {biofilm_thickness} voxels")
         print(f"    Coverage: {biofilm_coverage:.0%}")
     print(f"    Output: {output_dir}")
@@ -1410,15 +1439,35 @@ def image_converter_menu():
 
         # Add biofilm if requested
         if add_biofilm >= 1:
-            print(f"    Adding biofilm (species: {add_biofilm})...")
+            print(f"    Adding biofilm (species: {add_biofilm}, location: {location_names.get(biofilm_location)})...")
+
             if add_biofilm == 1:
-                geometry = place_biofilm_grain_coating(geometry, 0, biofilm_thickness, biofilm_coverage)
+                # Single species - use location
+                if biofilm_location == 1:
+                    geometry = place_biofilm_grain_coating(geometry, 0, biofilm_thickness, biofilm_coverage)
+                elif biofilm_location == 2:
+                    geometry = place_biofilm_inlet(geometry, 0, biofilm_thickness, 0.2, biofilm_coverage)
+                elif biofilm_location == 3:
+                    geometry = place_biofilm_outlet(geometry, 0, biofilm_thickness, 0.2, biofilm_coverage)
+                elif biofilm_location == 4:
+                    geometry = place_biofilm_center(geometry, 0, biofilm_thickness, 0.4, biofilm_coverage)
+                elif biofilm_location == 5:
+                    geometry = place_biofilm_random_patches(geometry, 0, 20, 2, 5)
+
             elif add_biofilm == 2:
-                # Two species: split domain in half along X
-                geometry = place_biofilm_two_zones_on_grains(geometry, biofilm_thickness, biofilm_coverage)
+                # Two species
+                if biofilm_location == 6:
+                    geometry = place_biofilm_two_zones_on_grains(geometry, biofilm_thickness, biofilm_coverage)
+                else:
+                    # Both species in same location pattern
+                    geometry = place_biofilm_competing(geometry, biofilm_thickness, biofilm_coverage)
+
             elif add_biofilm == 3:
-                # Three species: split domain in thirds along X
-                geometry = place_biofilm_three_zones_on_grains(geometry, biofilm_thickness, biofilm_coverage)
+                # Three species
+                if biofilm_location == 6:
+                    geometry = place_biofilm_three_zones_on_grains(geometry, biofilm_thickness, biofilm_coverage)
+                else:
+                    geometry = place_biofilm_three_zones(geometry, biofilm_thickness, biofilm_coverage)
 
         # Save files
         os.makedirs(output_dir, exist_ok=True)
