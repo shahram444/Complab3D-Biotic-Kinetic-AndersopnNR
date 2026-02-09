@@ -19,7 +19,7 @@ def main():
     # Load stylesheet
     style_path = Path(__file__).parent / "styles" / "theme.qss"
     if style_path.exists():
-        app.setStyleSheet(style_path.read_text())
+        app.setStyleSheet(style_path.read_text(encoding="utf-8"))
 
     # Default font
     font = QFont("Segoe UI", 10)
