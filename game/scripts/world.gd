@@ -66,8 +66,10 @@ func generate(level_def: Dictionary) -> void:
 func _gen_soil(def: Dictionary) -> void:
 	# Wide channels between round grains - friendly, open
 	_fill_all(Tile.PORE)
-	var num = int(map_w * map_h * (1.0 - def.get("porosity", 0.6)) / 6.0)
 	var gs = def.get("grain", [2, 3])
+	var avg_r = (gs[0] + gs[1]) * 0.5
+	var avg_area = PI * avg_r * avg_r
+	var num = int(map_w * map_h * (1.0 - def.get("porosity", 0.6)) / maxf(avg_area, 4.0))
 	for _i in range(num):
 		var gx = _rng.randi_range(2, map_w - 3)
 		var gy = _rng.randi_range(2, map_h - 3)
@@ -120,19 +122,22 @@ func _gen_deep_sediment(def: Dictionary) -> void:
 			cx = prev.x
 			cy = prev.y
 
-	# Widen some passages
+	# Widen passages aggressively for better navigation
 	var map_copy = []
 	for y in range(map_h):
 		map_copy.append(map[y].duplicate())
 	for y in range(2, map_h - 2):
 		for x in range(2, map_w - 2):
-			if map_copy[y][x] == Tile.PORE and _rng.randf() < 0.35:
-				var d = _rng.randi_range(0, 3)
-				var dd = [Vector2i(0,-1),Vector2i(1,0),Vector2i(0,1),Vector2i(-1,0)]
-				var nx = x + dd[d].x
-				var ny = y + dd[d].y
-				if ny > 0 and ny < map_h-1 and nx > 0 and nx < map_w-1:
-					map[ny][nx] = Tile.PORE
+			if map_copy[y][x] == Tile.PORE and _rng.randf() < 0.6:
+				# Open up adjacent cells in 1-2 directions
+				var dirs = [Vector2i(0,-1),Vector2i(1,0),Vector2i(0,1),Vector2i(-1,0)]
+				var num_opens = 1 if _rng.randf() < 0.5 else 2
+				for _o in range(num_opens):
+					var d = _rng.randi_range(0, 3)
+					var nx = x + dirs[d].x
+					var ny = y + dirs[d].y
+					if ny > 0 and ny < map_h-1 and nx > 0 and nx < map_w-1:
+						map[ny][nx] = Tile.PORE
 	_add_borders()
 
 func _gen_methane_seeps(def: Dictionary) -> void:
@@ -279,7 +284,7 @@ func _ensure_connectivity() -> void:
 					visited[n] = true
 					queue.append(n)
 
-	# Connect isolated pores
+	# Connect isolated pores via 2-wide paths for better navigation
 	for y in range(1, map_h - 1):
 		for x in range(1, map_w - 1):
 			if is_walkable_tile(map[y][x]) and !visited.has(Vector2i(x, y)):
@@ -294,11 +299,14 @@ func _ensure_connectivity() -> void:
 						cy += 1 if cy < start.y else -1
 					cx = clampi(cx, 1, map_w - 2)
 					cy = clampi(cy, 1, map_h - 2)
+					# Carve 2-wide path for navigability
 					if map[cy][cx] == Tile.SOLID:
 						map[cy][cx] = Tile.PORE
+					if cy + 1 < map_h - 1 and map[cy + 1][cx] == Tile.SOLID:
+						map[cy + 1][cx] = Tile.PORE
 					visited[Vector2i(cx, cy)] = true
 
-	# Ensure right side reachable
+	# Ensure right side reachable via 2-wide path
 	var has_right = false
 	for y in range(1, map_h - 1):
 		if is_walkable_tile(map[y][map_w - 2]) and visited.has(Vector2i(map_w - 2, y)):
@@ -309,6 +317,8 @@ func _ensure_connectivity() -> void:
 		for x in range(map_w - 2, 0, -1):
 			if map[mid_y][x] == Tile.SOLID:
 				map[mid_y][x] = Tile.PORE
+			if mid_y + 1 < map_h - 1 and map[mid_y + 1][x] == Tile.SOLID:
+				map[mid_y + 1][x] = Tile.PORE
 			if visited.has(Vector2i(x, mid_y)):
 				break
 
