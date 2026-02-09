@@ -16,12 +16,12 @@ func _draw() -> void:
 	var sub_data = GameData.SUBSTRATES.get(sub_type, {})
 	var glow_color = Color.html(sub_data.get("glow", "#ffffff"))
 	var time = anim_timer
-	var bob = sin(time * 2.5) * 2.0
+	var bob = sin(time * 2.5) * 4.0
 
 	# Glow behind
-	var glow_size = 12.0 + sin(time * 3.0) * 2.0
-	var glow_offset = (10.0 - glow_size) * 0.5
-	draw_rect(Rect2(Vector2(glow_offset - 1, glow_offset - 1 + bob), Vector2(glow_size, glow_size)),
+	var glow_size = 24.0 + sin(time * 3.0) * 4.0
+	var glow_offset = (20.0 - glow_size) * 0.5
+	draw_rect(Rect2(Vector2(glow_offset - 2, glow_offset - 2 + bob), Vector2(glow_size, glow_size)),
 		Color(glow_color, 0.15))
 
 	# Sprite
@@ -35,5 +35,5 @@ func _draw() -> void:
 	if energy > 0:
 		var font = ThemeDB.fallback_font
 		if font:
-			draw_string(font, Vector2(10, -2 + bob), "+%d" % energy,
-				HORIZONTAL_ALIGNMENT_LEFT, -1, 5, Color(glow_color, 0.6))
+			draw_string(font, Vector2(20, -4 + bob), "+%d" % energy,
+				HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(glow_color, 0.6))

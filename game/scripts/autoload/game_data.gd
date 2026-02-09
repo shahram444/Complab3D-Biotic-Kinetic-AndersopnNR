@@ -3,9 +3,9 @@ extends Node
 ## Based on CompLaB3D pore-scale biogeochemical reactive transport research.
 
 # ── DISPLAY ──────────────────────────────────────────────────────────────────
-const TILE := 16
-const VIEW_W := 480
-const VIEW_H := 270
+const TILE := 32
+const VIEW_W := 960
+const VIEW_H := 540
 const COLS := 30
 const ROWS := 17
 
