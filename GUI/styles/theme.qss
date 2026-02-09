@@ -1,7 +1,7 @@
 /* CompLaB Studio 2.0 - COMSOL-Inspired Professional Theme
    Industrial simulation GUI styling - charcoal/slate/steel blue */
 
-/* ═══ Global ═══ */
+/* --- Global --- */
 QWidget {
     background-color: #2b2d30;
     color: #d4d4d4;
@@ -9,7 +9,7 @@ QWidget {
     font-size: 10pt;
 }
 
-/* ═══ Main Window ═══ */
+/* --- Main Window --- */
 QMainWindow {
     background-color: #1e1f22;
 }
@@ -24,7 +24,7 @@ QMainWindow::separator:hover {
     background-color: #4a8cc7;
 }
 
-/* ═══ Menu Bar ═══ */
+/* --- Menu Bar --- */
 QMenuBar {
     background-color: #2b2d30;
     border-bottom: 1px solid #3c3f41;
@@ -60,7 +60,7 @@ QMenu::separator {
     margin: 4px 8px;
 }
 
-/* ═══ Toolbar ═══ */
+/* --- Toolbar --- */
 QToolBar {
     background-color: #2b2d30;
     border-bottom: 1px solid #3c3f41;
@@ -85,7 +85,7 @@ QToolButton:pressed {
     background-color: #2d5f8a;
 }
 
-/* ═══ Dock / Panel Headers ═══ */
+/* --- Dock / Panel Headers --- */
 QDockWidget {
     titlebar-close-icon: none;
     titlebar-normal-icon: none;
@@ -99,7 +99,7 @@ QDockWidget::title {
     text-align: left;
 }
 
-/* ═══ Tree View (Model Builder) ═══ */
+/* --- Tree View (Model Builder) --- */
 QTreeWidget, QTreeView {
     background-color: #1e1f22;
     border: 1px solid #3c3f41;
@@ -137,7 +137,7 @@ QHeaderView::section {
     font-weight: bold;
 }
 
-/* ═══ Tab Widget ═══ */
+/* --- Tab Widget --- */
 QTabWidget::pane {
     border: 1px solid #3c3f41;
     background-color: #2b2d30;
@@ -164,7 +164,7 @@ QTabBar::tab:selected {
     border-bottom: 2px solid #4a8cc7;
 }
 
-/* ═══ Scroll Area ═══ */
+/* --- Scroll Area --- */
 QScrollArea {
     border: none;
     background-color: transparent;
@@ -211,7 +211,7 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
     width: 0;
 }
 
-/* ═══ Input Widgets ═══ */
+/* --- Input Widgets --- */
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
     background-color: #1e1f22;
     border: 1px solid #4a4d50;
@@ -258,7 +258,7 @@ QSpinBox::down-button, QDoubleSpinBox::down-button {
     background: transparent;
 }
 
-/* ═══ Push Buttons ═══ */
+/* --- Push Buttons --- */
 QPushButton {
     background-color: #3c3f41;
     border: 1px solid #4a4d50;
@@ -310,7 +310,7 @@ QPushButton[danger="true"]:hover {
     background-color: #7a3c3c;
 }
 
-/* ═══ Checkboxes & Radio ═══ */
+/* --- Checkboxes & Radio --- */
 QCheckBox, QRadioButton {
     spacing: 6px;
     color: #d4d4d4;
@@ -343,7 +343,7 @@ QRadioButton::indicator:checked {
     border-color: #3a7bb5;
 }
 
-/* ═══ Group Box ═══ */
+/* --- Group Box --- */
 QGroupBox {
     border: 1px solid #3c3f41;
     border-radius: 4px;
@@ -359,7 +359,7 @@ QGroupBox::title {
     color: #8cb4d8;
 }
 
-/* ═══ Tables ═══ */
+/* --- Tables --- */
 QTableWidget, QTableView {
     background-color: #1e1f22;
     alternate-background-color: #232427;
@@ -377,7 +377,7 @@ QTableCornerButton::section {
     border: 1px solid #3c3f41;
 }
 
-/* ═══ Splitter ═══ */
+/* --- Splitter --- */
 QSplitter::handle {
     background-color: #3c3f41;
 }
@@ -394,7 +394,7 @@ QSplitter::handle:hover {
     background-color: #4a8cc7;
 }
 
-/* ═══ Status Bar ═══ */
+/* --- Status Bar --- */
 QStatusBar {
     background-color: #2b2d30;
     border-top: 1px solid #3c3f41;
@@ -406,7 +406,7 @@ QStatusBar::item {
     border: none;
 }
 
-/* ═══ Text Edit / Plain Text ═══ */
+/* --- Text Edit / Plain Text --- */
 QTextEdit, QPlainTextEdit {
     background-color: #1e1f22;
     border: 1px solid #3c3f41;
@@ -415,7 +415,7 @@ QTextEdit, QPlainTextEdit {
     font-family: "Consolas", "Fira Code", "Source Code Pro", monospace;
 }
 
-/* ═══ Progress Bar ═══ */
+/* --- Progress Bar --- */
 QProgressBar {
     border: 1px solid #3c3f41;
     border-radius: 3px;
@@ -430,7 +430,7 @@ QProgressBar::chunk {
     border-radius: 2px;
 }
 
-/* ═══ Tooltip ═══ */
+/* --- Tooltip --- */
 QToolTip {
     background-color: #3c3f41;
     color: #d4d4d4;
@@ -439,12 +439,12 @@ QToolTip {
     font-size: 9pt;
 }
 
-/* ═══ Dialog ═══ */
+/* --- Dialog --- */
 QDialog {
     background-color: #2b2d30;
 }
 
-/* ═══ Label Variants ═══ */
+/* --- Label Variants --- */
 QLabel[heading="true"] {
     font-size: 14pt;
     font-weight: bold;
@@ -473,7 +473,7 @@ QLabel[section="true"] {
     margin-bottom: 4px;
 }
 
-/* ═══ Frame Separators ═══ */
+/* --- Frame Separators --- */
 QFrame[frameShape="4"] {
     color: #3c3f41;
     max-height: 1px;
@@ -484,7 +484,7 @@ QFrame[frameShape="5"] {
     max-width: 1px;
 }
 
-/* ═══ Collapsible Section Header ═══ */
+/* --- Collapsible Section Header --- */
 QPushButton[collapsible="true"] {
     background-color: #323436;
     border: none;
@@ -500,7 +500,7 @@ QPushButton[collapsible="true"]:hover {
     background-color: #3c3f41;
 }
 
-/* ═══ List Widget ═══ */
+/* --- List Widget --- */
 QListWidget {
     background-color: #1e1f22;
     border: 1px solid #3c3f41;
