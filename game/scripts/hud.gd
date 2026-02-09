@@ -18,7 +18,10 @@ func _draw() -> void:
 		GameData.State.TITLE: _draw_title()
 		GameData.State.NARRATIVE: _draw_narrative()
 		GameData.State.LEVEL_INTRO: _draw_level_intro()
-		GameData.State.PLAYING: _draw_hud()
+		GameData.State.PLAYING:
+			_draw_hud()
+			_draw_tutorial()
+			_draw_screen_effects()
 		GameData.State.PAUSED:
 			_draw_hud()
 			_draw_pause()
@@ -95,34 +98,96 @@ func _draw_title() -> void:
 
 func _draw_narrative() -> void:
 	draw_rect(Rect2(0, 0, 480, 270), Color.BLACK)
+
+	# Starfield background
+	var t = GameData.game_time
+	for i in range(40):
+		var sx = fmod(sin(i * 73.1) * 0.5 + 0.5, 1.0) * 480
+		var sy = fmod(cos(i * 97.3) * 0.5 + 0.5, 1.0) * 270
+		var blink = 0.5 + sin(t * 1.5 + i * 0.7) * 0.3
+		draw_rect(Rect2(sx, sy, 1, 1), Color(1, 1, 1, blink * 0.4))
+
 	var lines = GameData.NARRATIVE_LINES
-	var line_h = 12.0
-	var start_y = 270.0 - game_ref.story_scroll
+	var line_h = 14.0
+	var start_y = 280.0 - game_ref.story_scroll
 
 	for i in range(lines.size()):
 		var y = start_y + i * line_h
-		if y < -line_h or y > 280:
+		if y < -20 or y > 290:
 			continue
 		var alpha = 1.0
-		if y < 25:
-			alpha = clampf(y / 25.0, 0, 1)
-		if y > 245:
-			alpha = clampf((270.0 - y) / 25.0, 0, 1)
+		if y < 30:
+			alpha = clampf(y / 30.0, 0, 1)
+		if y > 240:
+			alpha = clampf((270.0 - y) / 30.0, 0, 1)
 
 		var line = lines[i]
 		var color = Color(0.78, 0.78, 0.91, alpha)
+		var fsize = 8
+
 		if "METHI" in line:
 			color = Color(0.16, 0.81, 0.69, alpha)
+			fsize = 11
+		elif "MICROBES" in line:
+			color = Color(0.37, 0.81, 0.37, alpha)
+			fsize = 12
 		elif "ENTER" in line:
 			color = Color(1, 0.84, 0, alpha)
 		elif "..." in line:
 			color = Color(0.37, 0.77, 0.92, alpha)
-		elif "mission" in line.to_lower() or "eat" in line.to_lower():
+		elif "mission" in line.to_lower():
+			color = Color(1, 0.84, 0, alpha)
+			fsize = 9
+		elif "eat" in line.to_lower() or "grow" in line.to_lower():
 			color = Color(0.37, 0.81, 0.37, alpha)
+			fsize = 9
 
-		_text(line, 240, y, color, 8, 1)
+		_text(line, 240, y, color, fsize, 1)
 
-	_text("ENTER to skip", 450, 258, Color(0.27, 0.27, 0.27), 6, 2)
+		# Draw inline illustrations at key story moments
+		if "invisible war" in line.to_lower() and alpha > 0.3:
+			_draw_narrative_scene_earth(240, y + 14, alpha)
+		elif "microbes" in line.to_upper() and line.strip_edges() == "The MICROBES." and alpha > 0.3:
+			_draw_narrative_scene_microbes(240, y + 14, alpha)
+		elif "pseudopods" in line.to_lower() and alpha > 0.3:
+			_draw_narrative_scene_methi(240, y + 14, alpha)
+
+	_text("ENTER to skip", 456, 258, Color(0.27, 0.27, 0.27, 0.5), 6, 2)
+
+func _draw_narrative_scene_earth(cx: float, y: float, alpha: float) -> void:
+	# Small pixel Earth with gas arrows rising
+	var w = 50.0
+	var x = cx - w * 0.5
+	# Ground layer
+	draw_rect(Rect2(x, y + 6, w, 12), Color(0.3, 0.2, 0.1, alpha * 0.6))
+	draw_rect(Rect2(x, y + 3, w, 4), Color(0.2, 0.5, 0.2, alpha * 0.5))
+	# Rising gas arrows (red for CH4)
+	for i in range(5):
+		var ax = x + 8 + i * 10
+		var ay = y + 2 - sin(GameData.game_time * 2 + i) * 3
+		draw_rect(Rect2(ax, ay, 2, 4), Color(1, 0.3, 0.3, alpha * 0.7))
+		draw_rect(Rect2(ax - 1, ay + 4, 4, 1), Color(1, 0.3, 0.3, alpha * 0.4))
+
+func _draw_narrative_scene_microbes(cx: float, y: float, alpha: float) -> void:
+	# Row of little microbe silhouettes
+	for i in range(7):
+		var mx = cx - 42 + i * 14
+		var my = y + 4 + sin(GameData.game_time * 3 + i * 1.2) * 2
+		var col = Color(0.16, 0.81, 0.69, alpha * 0.8) if i % 2 == 0 else Color(0.37, 0.81, 0.37, alpha * 0.7)
+		draw_rect(Rect2(mx, my, 6, 5), col)
+		draw_rect(Rect2(mx + 1, my - 1, 4, 1), col * Color(1,1,1,0.7))
+		draw_rect(Rect2(mx + 2, my + 1, 1, 1), Color(1, 1, 1, alpha * 0.9))
+
+func _draw_narrative_scene_methi(cx: float, y: float, alpha: float) -> void:
+	# Large METHI character preview
+	var tex = SpriteFactory.get_tex("methi_down")
+	if tex:
+		var bob = sin(GameData.game_time * 2) * 3
+		draw_texture_rect(tex, Rect2(cx - 16, y + 2 + bob, 32, 32), false,
+			Color(1, 1, 1, alpha * 0.9))
+		# Glow around character
+		draw_rect(Rect2(cx - 20, y - 2 + bob, 40, 40),
+			Color(0.16, 0.81, 0.69, alpha * 0.15))
 
 func _draw_level_intro() -> void:
 	var def = GameData.get_level_def()
@@ -180,7 +245,17 @@ func _draw_hud() -> void:
 	_text("HP", 4, hud_y + 2, Color(0.78, 0.78, 0.91), 6)
 	draw_rect(Rect2(20, hud_y + 3, 54, 7), Color(0.1, 0.1, 0.17))
 	var hw = maxf(0, (p.health / GameData.BAL["max_health"]) * 52)
-	var hc = Color(0.94, 0.27, 0.27) if p.health > 50 else (Color(0.94, 0.53, 0.27) if p.health > 25 else Color(0.94, 0.13, 0.13))
+	var hc: Color
+	if p.health > 60:
+		hc = Color(0.27, 0.87, 0.37)   # green
+	elif p.health > 35:
+		hc = Color(0.94, 0.77, 0.27)   # yellow
+	elif p.health > 15:
+		hc = Color(0.94, 0.43, 0.17)   # orange
+	else:
+		hc = Color(0.94, 0.13, 0.13)   # red (critical)
+		if sin(GameData.game_time * 8) > 0:
+			hc = Color(1, 0.3, 0.3)    # flash when critical
 	draw_rect(Rect2(21, hud_y + 4, hw, 5), hc)
 
 	# Energy bar
@@ -220,8 +295,33 @@ func _draw_hud() -> void:
 	elif p.can_ride_flow() and !p.can_divide():
 		_text("SHIFT: ride flow", 240, hud_y + 22, Color(0.4, 0.4, 0.6), 5, 1)
 
+	# Redox ladder (compact, left side above HUD bar)
+	_draw_redox_ladder(hud_y)
+
 	# Minimap
 	_draw_minimap(hud_y)
+
+func _draw_redox_ladder(hud_y: float) -> void:
+	# Show available substrates for current level with energy values
+	var def = GameData.get_level_def()
+	var subs: Array = def.get("subs", [])
+	if subs.size() == 0:
+		return
+
+	var rx = 188.0
+	var ry = hud_y + 2
+	var spacing = 52.0 / maxf(1, subs.size())
+	spacing = minf(spacing, 13.0)
+
+	# Small vertical energy ladder
+	for i in range(subs.size()):
+		var sd = GameData.SUBSTRATES[subs[i]]
+		var col = Color.html(sd["color"])
+		var y = ry + i * spacing
+		# Colored dot
+		draw_rect(Rect2(rx, y + 1, 4, 4), col)
+		# Formula + energy
+		_text("%s +%d" % [sd["formula"], sd["energy"]], rx + 6, y, col * Color(1,1,1,0.85), 5)
 
 func _draw_minimap(hud_y: float) -> void:
 	if !game_ref or !game_ref.world_node:
@@ -268,6 +368,64 @@ func _draw_minimap(hud_y: float) -> void:
 			var cx = mm_x + (c.position.x / GameData.TILE) * sx
 			var cy = mm_y + (c.position.y / GameData.TILE) * sy
 			draw_rect(Rect2(cx, cy, 1, 1), Color(0.37, 0.81, 0.37, 0.8))
+
+func _draw_tutorial() -> void:
+	if !game_ref or !game_ref.player_node:
+		return
+	if GameData.current_level > 1:
+		return  # Only show tutorial on first 2 levels
+	var p = game_ref.player_node
+	var t = GameData.game_time
+	var hint_text := ""
+	var hint_color := Color(1, 0.84, 0, 0.8)
+
+	if p.substrates_eaten == 0 and t > 2.0:
+		hint_text = "Move with ARROWS/WASD - touch substrates to eat them!"
+	elif p.substrates_eaten > 0 and p.substrates_eaten < 3 and p.health < 80:
+		hint_text = "Eating restores HP and Energy - keep moving to find food!"
+	elif p.health < 40 and p.substrates_eaten > 0:
+		hint_text = "Health is low! Find substrates quickly or you'll starve!"
+		hint_color = Color(1, 0.3, 0.3, 0.8)
+	elif p.can_divide() and p.colonies_placed == 0:
+		hint_text = "Growth bar full! Press SPACE to place a colony!"
+		hint_color = Color(0.37, 0.81, 0.37, 0.9)
+	elif p.colonies_placed > 0 and p.colonies_placed < game_ref.colonies.size() + 1:
+		var def = GameData.get_level_def()
+		var goal = def.get("goal", 5)
+		if game_ref.colonies.size() < goal:
+			hint_text = "Colony placed! Keep eating to grow and place %d total." % goal
+	elif p.can_ride_flow() and !p.riding_flow and p.substrates_eaten > 5:
+		hint_text = "Hold SHIFT to ride the flow current (planktonic mode)!"
+		hint_color = Color(0.31, 0.64, 0.94, 0.8)
+
+	if hint_text != "":
+		# Pulsing visibility
+		var alpha = sin(t * 2.0) * 0.2 + 0.7
+		hint_color.a *= alpha
+		_box(40, 2, 400, 14, Color(0, 0, 0, 0.5 * alpha), Color(0.3, 0.3, 0.5, 0.3 * alpha))
+		_text(hint_text, 240, 3, hint_color, 7, 1)
+
+func _draw_screen_effects() -> void:
+	if !game_ref or !game_ref.player_node:
+		return
+	# Eat flash
+	if game_ref.eat_flash_timer > 0:
+		var a = game_ref.eat_flash_timer / 0.15 * 0.15
+		draw_rect(Rect2(0, 0, 480, 270), Color(game_ref.eat_flash_color, a))
+
+	# Starvation warning - red vignette pulsing
+	if game_ref.starvation_pulse > 0:
+		var pulse = sin(game_ref.starvation_pulse) * 0.5 + 0.5
+		var intensity = (1.0 - game_ref.player_node.health / 30.0) * 0.25
+		var a = pulse * intensity
+		# Red borders
+		draw_rect(Rect2(0, 0, 480, 8), Color(0.8, 0, 0, a))
+		draw_rect(Rect2(0, 262, 480, 8), Color(0.8, 0, 0, a))
+		draw_rect(Rect2(0, 0, 8, 270), Color(0.8, 0, 0, a))
+		draw_rect(Rect2(472, 0, 8, 270), Color(0.8, 0, 0, a))
+		# Warning text
+		if pulse > 0.7:
+			_text("STARVING!", 240, 10, Color(1, 0.2, 0.2, a * 3), 8, 1)
 
 func _draw_pause() -> void:
 	draw_rect(Rect2(0, 0, 480, 270), Color(0, 0, 0, 0.6))

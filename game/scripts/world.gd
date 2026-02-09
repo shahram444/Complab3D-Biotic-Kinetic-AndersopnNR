@@ -335,13 +335,15 @@ func _compute_flow(base_speed: float) -> void:
 		pressure[y] = []
 		pressure[y].resize(map_w)
 		for x in range(map_w):
-			pressure[y][x] = 0.0
+			# Initialize with linear gradient so flow has a baseline
+			pressure[y][x] = 1.0 - float(x) / float(map_w - 1)
+	# Fixed boundary conditions
 	for y in range(map_h):
 		pressure[y][0] = 1.0
 		pressure[y][map_w - 1] = 0.0
 
-	# Jacobi iteration
-	for _iter in range(40):
+	# Jacobi iteration - include boundary cells in neighbor averaging
+	for _iter in range(60):
 		for y in range(1, map_h - 1):
 			for x in range(1, map_w - 1):
 				if map[y][x] == Tile.SOLID:
@@ -351,9 +353,11 @@ func _compute_flow(base_speed: float) -> void:
 				for d in [Vector2i(0,-1),Vector2i(1,0),Vector2i(0,1),Vector2i(-1,0)]:
 					var nx = x + d.x
 					var ny = y + d.y
-					if nx >= 0 and nx < map_w and ny >= 0 and ny < map_h and map[ny][nx] != Tile.SOLID:
-						s += pressure[ny][nx]
-						c += 1
+					if nx >= 0 and nx < map_w and ny >= 0 and ny < map_h:
+						# Include border SOLID cells (they carry boundary pressure)
+						if map[ny][nx] != Tile.SOLID or nx == 0 or nx == map_w - 1:
+							s += pressure[ny][nx]
+							c += 1
 				if c > 0:
 					pressure[y][x] = s / c
 
