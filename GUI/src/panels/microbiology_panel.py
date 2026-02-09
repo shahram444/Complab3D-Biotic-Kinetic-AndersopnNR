@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QFormLayout, QLabel, QWidget,
     QPushButton, QListWidget, QTabWidget, QComboBox,
 )
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 from .base_panel import BasePanel
 from ..core.project import Microbe
 from ..widgets.collapsible_section import CollapsibleSection
@@ -76,7 +76,7 @@ class MicrobiologyPanel(BasePanel):
         # Tab 1: General
         t1 = QWidget()
         f1 = QFormLayout(t1)
-        f1.setLabelAlignment(0x0002)  # AlignRight
+        f1.setLabelAlignment(Qt.AlignmentFlag.AlignRight)  # AlignRight
         f1.setHorizontalSpacing(12)
         f1.setVerticalSpacing(6)
 
@@ -113,7 +113,7 @@ class MicrobiologyPanel(BasePanel):
         # Tab 2: Kinetics
         t2 = QWidget()
         f2 = QFormLayout(t2)
-        f2.setLabelAlignment(0x0002)
+        f2.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         f2.setHorizontalSpacing(12)
         f2.setVerticalSpacing(6)
 
@@ -136,7 +136,7 @@ class MicrobiologyPanel(BasePanel):
         # Tab 3: Biofilm / Physical
         t3 = QWidget()
         f3 = QFormLayout(t3)
-        f3.setLabelAlignment(0x0002)
+        f3.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         f3.setHorizontalSpacing(12)
         f3.setVerticalSpacing(6)
 
@@ -166,7 +166,7 @@ class MicrobiologyPanel(BasePanel):
         # Tab 4: Boundary Conditions
         t4 = QWidget()
         f4 = QFormLayout(t4)
-        f4.setLabelAlignment(0x0002)
+        f4.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         f4.setHorizontalSpacing(12)
         f4.setVerticalSpacing(6)
 
