@@ -82,15 +82,43 @@ func on_eat() -> void:
 
 func _draw() -> void:
 	var bob = sin(anim_timer * 3.0) * 2.0
+	var time = anim_timer
+
+	# Bright red pulsing glow so rival is always visible
+	var pulse = sin(time * 2.5) * 0.15 + 0.4
+	# Outer glow
+	draw_rect(Rect2(Vector2(-2, -2 + bob), Vector2(36, 36)),
+		Color(1.0, 0.2, 0.15, pulse * 0.35))
+	# Inner dark background
+	draw_rect(Rect2(Vector2(2, 2 + bob), Vector2(28, 28)),
+		Color(0.3, 0.05, 0.05, 0.5))
+
 	# Shadow
-	draw_rect(Rect2(Vector2(4, 18 + bob), Vector2(12, 2)), Color(0, 0, 0, 0.25))
+	draw_rect(Rect2(Vector2(4, 22 + bob), Vector2(24, 3)), Color(0, 0, 0, 0.35))
 
 	# Draw rival sprite
 	var tex = SpriteFactory.get_tex("rival")
 	if tex:
 		draw_texture(tex, Vector2(6, bob))
 
+	# Red border markers
+	var c = Color(1, 0.3, 0.3, 0.7)
+	draw_rect(Rect2(Vector2(2, 2 + bob), Vector2(5, 2)), c)
+	draw_rect(Rect2(Vector2(2, 2 + bob), Vector2(2, 5)), c)
+	draw_rect(Rect2(Vector2(25, 2 + bob), Vector2(5, 2)), c)
+	draw_rect(Rect2(Vector2(28, 2 + bob), Vector2(2, 5)), c)
+	draw_rect(Rect2(Vector2(2, 22 + bob), Vector2(5, 2)), c)
+	draw_rect(Rect2(Vector2(2, 19 + bob), Vector2(2, 5)), c)
+	draw_rect(Rect2(Vector2(25, 22 + bob), Vector2(5, 2)), c)
+	draw_rect(Rect2(Vector2(28, 19 + bob), Vector2(2, 5)), c)
+
 	# Eat flash
 	if eat_flash > 0:
-		draw_rect(Rect2(Vector2(4, bob - 2), Vector2(24, 24)),
+		draw_rect(Rect2(Vector2(2, bob - 2), Vector2(28, 28)),
 			Color(1, 0.3, 0.3, eat_flash))
+
+	# "!" danger indicator above rival
+	var font = ThemeDB.fallback_font
+	if font:
+		var ex_alpha = sin(time * 4.0) * 0.3 + 0.5
+		draw_string(font, Vector2(10, -6 + bob), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 0.3, 0.3, ex_alpha))

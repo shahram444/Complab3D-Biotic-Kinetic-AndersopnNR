@@ -61,6 +61,8 @@ func init_at(tx: int, ty: int, world: Node2D) -> void:
 	invincible_timer = 0.0
 	riding_flow = false
 	visible = true
+	modulate = Color.WHITE
+	z_index = 10
 
 func _process(delta: float) -> void:
 	if !alive:
@@ -242,9 +244,19 @@ func _draw() -> void:
 	var time = GameData.game_time
 	var bob = sin(time * 4.0) * 2.0 if alive else 0.0
 
+	# Bright pulsing highlight circle so player is always visible
+	if alive:
+		var pulse = sin(time * 3.0) * 0.15 + 0.45
+		# Outer glow ring
+		draw_rect(Rect2(Vector2(-6, -6 + bob), Vector2(44, 44)),
+			Color(0.1, 1.0, 0.85, pulse * 0.35))
+		# Inner bright background
+		draw_rect(Rect2(Vector2(-2, -2 + bob), Vector2(36, 36)),
+			Color(0.0, 0.3, 0.25, 0.6))
+
 	# Shadow
 	if alive:
-		draw_rect(Rect2(Vector2(6, 28 + bob), Vector2(20, 4)), Color(0, 0, 0, 0.3))
+		draw_rect(Rect2(Vector2(6, 28 + bob), Vector2(20, 4)), Color(0, 0, 0, 0.5))
 
 	# Select sprite
 	var tex_key: String
@@ -263,19 +275,38 @@ func _draw() -> void:
 	if tex:
 		draw_texture(tex, Vector2(0, bob))
 
+	# Bright white border highlight so character stands out
+	if alive and tex:
+		# Draw corner markers for visibility
+		var c = Color(1, 1, 1, 0.7)
+		draw_rect(Rect2(Vector2(-1, -1 + bob), Vector2(6, 2)), c)
+		draw_rect(Rect2(Vector2(-1, -1 + bob), Vector2(2, 6)), c)
+		draw_rect(Rect2(Vector2(27, -1 + bob), Vector2(6, 2)), c)
+		draw_rect(Rect2(Vector2(31, -1 + bob), Vector2(2, 6)), c)
+		draw_rect(Rect2(Vector2(-1, 31 + bob), Vector2(6, 2)), c)
+		draw_rect(Rect2(Vector2(-1, 27 + bob), Vector2(2, 6)), c)
+		draw_rect(Rect2(Vector2(27, 31 + bob), Vector2(6, 2)), c)
+		draw_rect(Rect2(Vector2(31, 27 + bob), Vector2(2, 6)), c)
+
 	# Division ready glow
 	if can_divide() and alive:
 		var glow = sin(flash_timer * 6.0) * 0.25 + 0.25
-		draw_rect(Rect2(Vector2(-2, -2 + bob), Vector2(36, 36)),
+		draw_rect(Rect2(Vector2(-4, -4 + bob), Vector2(40, 40)),
 			Color(1, 1, 0.37, glow))
 
 	# Flow riding indicator
 	if riding_flow and alive:
 		var alpha = sin(time * 6.0) * 0.2 + 0.3
-		draw_rect(Rect2(Vector2(-4, -4 + bob), Vector2(40, 40)),
+		draw_rect(Rect2(Vector2(-6, -6 + bob), Vector2(44, 44)),
 			Color(0.3, 0.6, 1.0, alpha))
 
 	# Health warning
 	if alive and health < 25:
 		var flash = 0.3 if sin(time * 8.0) > 0 else 0.0
 		draw_rect(Rect2(Vector2(0, bob), Vector2(32, 32)), Color(1, 0, 0, flash))
+
+	# Down arrow indicator above character
+	if alive:
+		var arrow_bob = sin(time * 5.0) * 3.0
+		draw_rect(Rect2(Vector2(13, -16 + arrow_bob), Vector2(6, 8)),
+			Color(1, 1, 1, 0.6))
