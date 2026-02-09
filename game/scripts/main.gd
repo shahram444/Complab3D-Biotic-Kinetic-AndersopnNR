@@ -9,6 +9,9 @@ var boot_timer: float = 0.0
 var dialogue_idx: int = 0
 var dialogue_char: int = 0
 var dialogue_timer: float = 0.0
+var mission_idx: int = 0
+var mission_char: int = 0
+var mission_timer: float = 0.0
 var intro_timer: float = 0.0
 var complete_timer: float = 0.0
 var death_timer: float = 0.0
@@ -89,6 +92,7 @@ func _process(delta: float) -> void:
 		S.BOOT: _update_boot(delta)
 		S.TITLE: _update_title(delta)
 		S.NARRATIVE: _update_narrative(delta)
+		S.MISSION_BRIEF: _update_mission_brief(delta)
 		S.LEVEL_INTRO: _update_level_intro(delta)
 		S.PLAYING: _update_playing(delta)
 		S.PAUSED: _update_paused(delta)
@@ -142,6 +146,35 @@ func _update_narrative(delta: float) -> void:
 			AudioMgr.sfx_menu_select()
 			if dialogue_idx >= GameData.CUTSCENE.size():
 				_start_game()
+
+func _update_mission_brief(delta: float) -> void:
+	mission_timer += delta
+	var briefs = GameData.MISSION_BRIEFS
+	var level_briefs: Array = []
+	if GameData.current_level < briefs.size():
+		level_briefs = briefs[GameData.current_level]
+	if level_briefs.size() == 0:
+		state = S.LEVEL_INTRO
+		intro_timer = 0
+		return
+
+	var line = level_briefs[mission_idx]
+	var full_len = line["text"].length()
+	var chars_per_sec = 35.0
+	mission_char = mini(int(mission_timer * chars_per_sec), full_len)
+
+	if Input.is_action_just_pressed("ui_confirm"):
+		if mission_char < full_len:
+			mission_char = full_len
+			mission_timer = full_len / chars_per_sec + 1.0
+		else:
+			mission_idx += 1
+			mission_char = 0
+			mission_timer = 0.0
+			AudioMgr.sfx_menu_select()
+			if mission_idx >= level_briefs.size():
+				state = S.LEVEL_INTRO
+				intro_timer = 0
 
 func _update_level_intro(delta: float) -> void:
 	intro_timer += delta
@@ -308,8 +341,11 @@ func _load_level(idx: int) -> void:
 	if def["env"] != prev_env:
 		AudioMgr.play_env_music(def["env"])
 
-	state = S.LEVEL_INTRO
-	intro_timer = 0
+	# Start with mission briefing, then level intro
+	mission_idx = 0
+	mission_char = 0
+	mission_timer = 0.0
+	state = S.MISSION_BRIEF
 
 func _load_next_level() -> void:
 	GameData.total_score += player_node.score

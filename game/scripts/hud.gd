@@ -17,6 +17,7 @@ func _draw() -> void:
 		GameData.State.BOOT: _draw_boot()
 		GameData.State.TITLE: _draw_title()
 		GameData.State.NARRATIVE: _draw_narrative()
+		GameData.State.MISSION_BRIEF: _draw_mission_brief()
 		GameData.State.LEVEL_INTRO: _draw_level_intro()
 		GameData.State.PLAYING:
 			_draw_hud()
@@ -249,6 +250,149 @@ func _draw_cutscene_scene(speaker: String, t: float) -> void:
 			var gc = Color(1, 0.3, 0.3, 0.3) if i % 2 == 0 else Color(0.3, 1, 0.3, 0.2)
 			draw_rect(Rect2(gx, gy, 6, 12), gc)
 			draw_rect(Rect2(gx - 2, gy + 12, 10, 4), gc * Color(1,1,1,0.5))
+
+func _draw_mission_brief() -> void:
+	if !game_ref:
+		return
+	var briefs = GameData.MISSION_BRIEFS
+	var level_briefs: Array = []
+	if GameData.current_level < briefs.size():
+		level_briefs = briefs[GameData.current_level]
+	if level_briefs.size() == 0 or game_ref.mission_idx >= level_briefs.size():
+		return
+
+	var t = GameData.game_time
+	var line = level_briefs[game_ref.mission_idx]
+	var speaker: String = line["speaker"]
+	var full_text: String = line["text"]
+	var shown_text: String = full_text.substr(0, game_ref.mission_char)
+
+	# Dark background
+	draw_rect(Rect2(0, 0, 960, 540), Color(0.02, 0.02, 0.06))
+
+	# Level title at top
+	var def = GameData.get_level_def()
+	var fade = clampf(game_ref.mission_timer * 3, 0, 1)
+	_text("MISSION BRIEFING", 480, 16, Color(0.31, 0.64, 0.94, fade), 20, 1)
+	_text("Level %d: %s" % [GameData.current_level + 1, def["title"]], 480, 50, Color(1, 0.84, 0, fade), 16, 1)
+
+	# Scene illustration area (top center)
+	_draw_mission_scene(speaker, t)
+
+	# === DIALOGUE BOX (bottom 180px, visual novel style) ===
+	var box_y = 360.0
+	var box_h = 180.0
+	# Box background
+	draw_rect(Rect2(0, box_y, 960, box_h), Color(0.02, 0.02, 0.08, 0.95))
+	# Top border with glow
+	draw_rect(Rect2(0, box_y, 960, 4), Color(0.2, 0.3, 0.5, 0.8))
+	draw_rect(Rect2(0, box_y + 4, 960, 2), Color(0.1, 0.15, 0.3, 0.4))
+
+	# Portrait frame (left side)
+	var portrait_x = 20.0
+	var portrait_y = box_y + 16.0
+	var portrait_size = 128.0
+
+	# Portrait border
+	var border_col = Color(0.15, 0.2, 0.35) if speaker == "ELDER" else Color(0.1, 0.3, 0.25)
+	draw_rect(Rect2(portrait_x - 4, portrait_y - 4, portrait_size + 8, portrait_size + 8), border_col)
+	draw_rect(Rect2(portrait_x - 2, portrait_y - 2, portrait_size + 4, portrait_size + 4),
+		Color(0.05, 0.05, 0.12))
+
+	# Draw portrait
+	var tex_key = "elder" if speaker == "ELDER" else "methi_down"
+	var tex = SpriteFactory.get_tex(tex_key)
+	if tex:
+		draw_texture_rect(tex, Rect2(portrait_x, portrait_y, portrait_size, portrait_size), false)
+
+	# Speaker name
+	var name_x = portrait_x + portrait_size + 24
+	var name_y = box_y + 12
+	var name_color: Color
+	var name_str: String
+	if speaker == "ELDER":
+		name_str = "ARCHAEON PRIME"
+		name_color = Color(0.28, 0.28, 0.82)
+	else:
+		name_str = "METHI"
+		name_color = Color(0.16, 0.81, 0.69)
+
+	# Name background
+	var name_w = 200.0
+	draw_rect(Rect2(name_x - 4, name_y - 2, name_w, 24), Color(name_color, 0.15))
+	draw_rect(Rect2(name_x - 4, name_y - 2, name_w, 24), name_color * Color(1,1,1,0.4), false, 2.0)
+	_text(name_str, name_x + 4, name_y, name_color, 16)
+
+	# Dialogue text (typewriter)
+	var text_x = name_x
+	var text_y = name_y + 32
+	var text_lines = shown_text.split("\n")
+	for i in range(text_lines.size()):
+		var tc = Color(0.85, 0.85, 0.95)
+		_text(text_lines[i], text_x, text_y + i * 24, tc, 14)
+
+	# Blinking cursor / advance prompt
+	if game_ref.mission_char >= full_text.length():
+		if sin(t * 4) > 0:
+			_text(">>", 920, box_y + box_h - 28, Color(1, 0.84, 0), 14, 2)
+	else:
+		# Typing cursor
+		var cursor_x = text_x + 8 * (shown_text.length() - shown_text.rfind("\n") - 1)
+		var cursor_y_pos = text_y + (text_lines.size() - 1) * 24
+		if sin(t * 8) > 0:
+			draw_rect(Rect2(cursor_x, cursor_y_pos + 2, 8, 14), Color(1, 1, 1, 0.6))
+
+	# Progress indicator
+	_text("%d/%d" % [game_ref.mission_idx + 1, level_briefs.size()],
+		920, box_y + 12, Color(0.3, 0.3, 0.4), 12, 2)
+
+func _draw_mission_scene(speaker: String, t: float) -> void:
+	# Draw characters in the scene area above the dialogue box
+	var scene_h = 280.0
+
+	# Subtle pore-space background
+	for i in range(15):
+		var gx = fmod(sin(i * 47.3) * 0.5 + 0.5, 1.0) * 960
+		var gy = 80 + fmod(cos(i * 31.7) * 0.5 + 0.5, 1.0) * scene_h
+		var gr = 12 + sin(i * 17) * 6
+		draw_rect(Rect2(gx - gr, gy - gr, gr * 2, gr * 2),
+			Color(0.1, 0.08, 0.04, 0.3))
+
+	# Water streaks
+	for i in range(8):
+		var wx = fmod(sin(i * 89.1 + t * 0.3) * 0.5 + 0.5, 1.0) * 960
+		var wy = 80 + fmod(cos(i * 67.3 + t * 0.2) * 0.5 + 0.5, 1.0) * scene_h
+		draw_rect(Rect2(wx, wy, 30, 3), Color(0.1, 0.2, 0.4, 0.15))
+
+	if speaker == "ELDER":
+		# Elder speaking, larger and centered-left with glow
+		var elder_tex = SpriteFactory.get_tex("elder")
+		if elder_tex:
+			var bob = sin(t * 1.5) * 6
+			draw_texture_rect(elder_tex, Rect2(180, 140 + bob, 140, 140), false,
+				Color(1, 1, 1, 0.9))
+			# Bioluminescent glow
+			draw_rect(Rect2(170, 130 + bob, 160, 160),
+				Color(0.2, 0.2, 0.7, 0.08 + sin(t * 2) * 0.04))
+		# METHI listening on the right
+		var methi_tex = SpriteFactory.get_tex("methi_down")
+		if methi_tex:
+			var bob2 = sin(t * 2 + 1) * 4
+			draw_texture_rect(methi_tex, Rect2(640, 180 + bob2, 96, 96), false,
+				Color(1, 1, 1, 0.75))
+	else:
+		# METHI speaking
+		var methi_tex = SpriteFactory.get_tex("methi_right")
+		if methi_tex:
+			var bob = sin(t * 2) * 6
+			draw_texture_rect(methi_tex, Rect2(620, 140 + bob, 140, 140), false,
+				Color(1, 1, 1, 0.9))
+		# Elder listening on the left
+		var elder_tex = SpriteFactory.get_tex("elder")
+		if elder_tex:
+			var bob2 = sin(t * 1.5 + 1) * 4
+			draw_texture_rect(elder_tex, Rect2(200, 180 + bob2, 96, 96), false,
+				Color(1, 1, 1, 0.7))
 
 func _draw_level_intro() -> void:
 	var def = GameData.get_level_def()

@@ -10,7 +10,7 @@ const COLS := 30
 const ROWS := 17
 
 # ── GAME STATES ──────────────────────────────────────────────────────────────
-enum State { BOOT, TITLE, NARRATIVE, LEVEL_INTRO, PLAYING, PAUSED,
+enum State { BOOT, TITLE, NARRATIVE, MISSION_BRIEF, LEVEL_INTRO, PLAYING, PAUSED,
 	LEVEL_COMPLETE, SCIENCE_POPUP, GAME_OVER, VICTORY }
 
 # ── TILE TYPES ───────────────────────────────────────────────────────────────
@@ -197,6 +197,72 @@ const SCIENCE_FACTS := [
 	  "text": "Deep-sea vents release fluids at 300-400C\nrich in H2S, Fe2+, Mn2+, and CH4.\n\nChemosynthetic microbes harvest energy\nfrom these chemicals, forming the base\nof entire ecosystems without sunlight.\n\nThe full redox ladder operates here\nin centimeters of sediment." },
 	{ "title": "You Are Earth's Climate Shield",
 	  "text": "Subsurface microbes process ~600 Tg CH4/yr,\npreventing most geological methane from\nreaching the atmosphere.\n\nWithout microbial methane consumption,\nEarth's temperature would be\nsignificantly higher.\n\nEvery colony you built represents\na real climate defense mechanism.\n\nCongratulations, Guardian of Earth." },
+]
+
+# ── MISSION BRIEFINGS (Elder speaks before each level) ───────────────────────
+# Each entry is an array of dialogue lines from the Elder for that level index
+const MISSION_BRIEFS := [
+	# Level 0: First Breath
+	[
+		{"speaker": "ELDER", "text": "Your first mission, young one.\nThis is the Soil Frontier -\nshallow soil beneath a meadow."},
+		{"speaker": "ELDER", "text": "Oxygen flows from above.\nEat substrates to survive.\nPlace 3 colonies to secure this zone."},
+		{"speaker": "METHI", "text": "I'm ready, Archaeon Prime!"},
+	],
+	# Level 1: Roots of Life
+	[
+		{"speaker": "ELDER", "text": "You've grown stronger.\nBut now a rival microbe lurks\nin these pores. Be vigilant."},
+		{"speaker": "ELDER", "text": "It will steal your food.\nMove fast, eat faster.\nPlace 5 colonies this time."},
+	],
+	# Level 2: Into the Depths
+	[
+		{"speaker": "ELDER", "text": "We descend into the Deep Sediment.\nOxygen cannot reach here.\nOnly iron and nitrate remain."},
+		{"speaker": "ELDER", "text": "The passages are narrow and dark.\nTwo rivals hunt these corridors.\nConserve your energy carefully."},
+		{"speaker": "METHI", "text": "No oxygen? How do I survive?"},
+		{"speaker": "ELDER", "text": "Use the redox ladder, child.\nNitrate and iron will sustain you.\nAnd never stop eating methane!"},
+	],
+	# Level 3: The Hungry Dark
+	[
+		{"speaker": "ELDER", "text": "Deeper still. The sediment\ntightens around us.\nThree rivals compete for scraps."},
+		{"speaker": "ELDER", "text": "Manganese joins your options now.\nBut food is scarce - every\nmolecule matters here."},
+	],
+	# Level 4: The Methane Vents
+	[
+		{"speaker": "ELDER", "text": "Now we enter the Methane Seeps!\nCH4 erupts from volcanic vents below.\nThis is where our kind truly shines."},
+		{"speaker": "ELDER", "text": "Beware the toxic zones - they\nburn through your cell membrane.\nAvoid the purple areas!"},
+		{"speaker": "METHI", "text": "The methane... I can feel it rising."},
+		{"speaker": "ELDER", "text": "Consume it! Every molecule of CH4\nyou eat prevents global warming.\nYou are Earth's climate shield!"},
+	],
+	# Level 5: Vent Guardians
+	[
+		{"speaker": "ELDER", "text": "The vents grow stronger.\nMore methane, more toxins,\nmore rivals. Stay focused."},
+		{"speaker": "ELDER", "text": "Place 8 colonies to build\na biofilm wall against\nthe rising greenhouse gases."},
+	],
+	# Level 6: Thawing Grounds
+	[
+		{"speaker": "ELDER", "text": "The Permafrost Edge... the ice\nis melting. Ancient carbon\nunlocks after millennia."},
+		{"speaker": "ELDER", "text": "The flow here is fast and chaotic.\nUse SHIFT to ride the currents.\nIt will save your energy."},
+		{"speaker": "METHI", "text": "The water moves so fast here!"},
+		{"speaker": "ELDER", "text": "The melting permafrost releases\n1,500 gigatons of trapped carbon.\nWe are the last line of defense."},
+	],
+	# Level 7: The Great Thaw
+	[
+		{"speaker": "ELDER", "text": "This is critical. The thaw\naccelerates. Four rivals compete.\nMethane pulses are massive."},
+		{"speaker": "ELDER", "text": "Build 8 colonies. Create a\nbiofilm barrier. The planet's\nfuture depends on us."},
+	],
+	# Level 8: The Abyss
+	[
+		{"speaker": "ELDER", "text": "The Hydrothermal Realm.\nDeep ocean vents blast superheated\nfluid through mineral chimneys."},
+		{"speaker": "ELDER", "text": "The full redox ladder is here -\nsulfate, iron, manganese, methane.\nUse everything available to you."},
+		{"speaker": "METHI", "text": "It's so hot... and hostile."},
+		{"speaker": "ELDER", "text": "Only the strongest archaea\nsurvive here. But you have\ngrown beyond my expectations."},
+	],
+	# Level 9: Earth's Last Stand
+	[
+		{"speaker": "ELDER", "text": "This is it. The final stand.\nEvery greenhouse gas that escapes\nthese vents warms the planet."},
+		{"speaker": "ELDER", "text": "Five rivals. Toxic zones everywhere.\n12 colonies needed to seal\nthe vent network permanently."},
+		{"speaker": "METHI", "text": "I won't let you down, Elder."},
+		{"speaker": "ELDER", "text": "You have become a true Guardian\nof Earth. Now show the world\nwhat one archaea can do!"},
+	],
 ]
 
 # ── RUNTIME STATE ────────────────────────────────────────────────────────────
