@@ -1,150 +1,140 @@
-"""Base panel class with common factory methods."""
+"""Base panel class with factory methods for consistent widget creation."""
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel,
     QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QCheckBox,
-    QGroupBox, QScrollArea, QFrame, QPushButton,
+    QPushButton, QScrollArea, QFrame, QGroupBox, QSizePolicy,
 )
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import Qt, Signal
 
 
 class BasePanel(QWidget):
+    """Base for all right-side settings panels.
+
+    Provides factory methods for uniform widget styling
+    and a scroll area for content that may exceed panel height.
+    """
+
     data_changed = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, title: str = "", parent=None):
         super().__init__(parent)
-        self._project = None
-        self._updating = False
+        self._title = title
+        self._main_layout = QVBoxLayout(self)
+        self._main_layout.setContentsMargins(0, 0, 0, 0)
+        self._main_layout.setSpacing(0)
 
-    def set_project(self, project):
-        self._project = project
-        self._updating = True
-        try:
-            self._populate_fields()
-        finally:
-            self._updating = False
+        # Scroll area wrapping content
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        scroll.setFrameStyle(QFrame.Shape.NoFrame)
 
-    def collect_data(self, project):
-        """Override to write widget values back to project."""
-        pass
+        self._content = QWidget()
+        self._content_layout = QVBoxLayout(self._content)
+        self._content_layout.setContentsMargins(12, 8, 12, 8)
+        self._content_layout.setSpacing(8)
 
-    def _populate_fields(self):
-        """Override to read project and fill widgets."""
-        pass
+        if title:
+            heading = QLabel(title)
+            heading.setProperty("heading", True)
+            self._content_layout.addWidget(heading)
 
-    def _emit_changed(self):
-        if not self._updating:
-            self.data_changed.emit()
+        scroll.setWidget(self._content)
+        self._main_layout.addWidget(scroll)
 
-    # --- Factory methods ---
+    def add_section(self, title: str) -> QLabel:
+        lbl = QLabel(title)
+        lbl.setProperty("section", True)
+        self._content_layout.addWidget(lbl)
+        return lbl
 
-    @staticmethod
-    def _create_heading(text):
-        label = QLabel(text)
-        label.setProperty("heading", True)
-        return label
-
-    @staticmethod
-    def _create_subheading(text):
-        label = QLabel(text)
-        label.setProperty("subheading", True)
-        return label
-
-    @staticmethod
-    def _create_section_label(text):
-        label = QLabel(text)
-        label.setProperty("section", True)
-        return label
-
-    @staticmethod
-    def _create_info_label(text):
-        label = QLabel(text)
-        label.setProperty("info", True)
-        label.setWordWrap(True)
-        return label
-
-    @staticmethod
-    def _create_separator():
-        line = QFrame()
-        line.setFrameShape(QFrame.Shape.HLine)
-        line.setFrameShadow(QFrame.Shadow.Sunken)
-        return line
-
-    def _create_spin(self, min_val=0, max_val=999999, value=0, suffix=""):
-        spin = QSpinBox()
-        spin.setRange(min_val, max_val)
-        spin.setValue(value)
-        if suffix:
-            spin.setSuffix(f" {suffix}")
-        spin.setMinimumWidth(120)
-        spin.valueChanged.connect(self._emit_changed)
-        return spin
-
-    def _create_double_spin(self, min_val=0.0, max_val=1e30, value=0.0,
-                             decimals=6, step=0.1, suffix=""):
-        spin = QDoubleSpinBox()
-        spin.setRange(min_val, max_val)
-        spin.setDecimals(decimals)
-        spin.setSingleStep(step)
-        spin.setValue(value)
-        if suffix:
-            spin.setSuffix(f" {suffix}")
-        spin.setMinimumWidth(150)
-        spin.valueChanged.connect(self._emit_changed)
-        return spin
-
-    def _create_sci_spin(self, min_val=-1e30, max_val=1e30, value=0.0, decimals=10):
-        """Double spin box for scientific notation values."""
-        spin = QDoubleSpinBox()
-        spin.setRange(min_val, max_val)
-        spin.setDecimals(decimals)
-        spin.setValue(value)
-        spin.setMinimumWidth(160)
-        spin.valueChanged.connect(self._emit_changed)
-        return spin
-
-    def _create_line_edit(self, text="", placeholder=""):
-        edit = QLineEdit(text)
-        if placeholder:
-            edit.setPlaceholderText(placeholder)
-        edit.setMinimumWidth(150)
-        edit.textChanged.connect(self._emit_changed)
-        return edit
-
-    def _create_combo(self, items, current=0):
-        combo = QComboBox()
-        combo.addItems(items)
-        if isinstance(current, int):
-            combo.setCurrentIndex(current)
-        elif isinstance(current, str):
-            idx = combo.findText(current)
-            if idx >= 0:
-                combo.setCurrentIndex(idx)
-        combo.currentIndexChanged.connect(self._emit_changed)
-        return combo
-
-    def _create_checkbox(self, text, checked=False):
-        cb = QCheckBox(text)
-        cb.setChecked(checked)
-        cb.stateChanged.connect(self._emit_changed)
-        return cb
-
-    def _create_group(self, title):
-        group = QGroupBox(title)
-        return group
-
-    @staticmethod
-    def _create_form():
+    def add_form(self) -> QFormLayout:
         form = QFormLayout()
         form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         form.setHorizontalSpacing(12)
-        form.setVerticalSpacing(8)
+        form.setVerticalSpacing(6)
+        self._content_layout.addLayout(form)
         return form
 
+    def add_group(self, title: str) -> QGroupBox:
+        group = QGroupBox(title)
+        self._content_layout.addWidget(group)
+        return group
+
+    def add_stretch(self):
+        self._content_layout.addStretch()
+
+    def add_separator(self):
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.HLine)
+        line.setFrameShadow(QFrame.Shadow.Sunken)
+        self._content_layout.addWidget(line)
+
+    def add_widget(self, widget):
+        self._content_layout.addWidget(widget)
+
+    def add_layout(self, layout):
+        self._content_layout.addLayout(layout)
+
+    # ── Factory methods ─────────────────────────────────────────────
+
     @staticmethod
-    def _create_scroll_area(widget):
-        scroll = QScrollArea()
-        scroll.setWidget(widget)
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.Shape.NoFrame)
-        return scroll
+    def make_line_edit(text: str = "", placeholder: str = "",
+                       readonly: bool = False) -> QLineEdit:
+        w = QLineEdit(text)
+        w.setPlaceholderText(placeholder)
+        w.setReadOnly(readonly)
+        return w
+
+    @staticmethod
+    def make_spin(value: int = 0, min_val: int = 0,
+                  max_val: int = 999999999, suffix: str = "") -> QSpinBox:
+        w = QSpinBox()
+        w.setRange(min_val, max_val)
+        w.setValue(value)
+        if suffix:
+            w.setSuffix(f" {suffix}")
+        return w
+
+    @staticmethod
+    def make_double_spin(value: float = 0.0, min_val: float = -1e30,
+                         max_val: float = 1e30, decimals: int = 6,
+                         suffix: str = "", step: float = 0.0) -> QDoubleSpinBox:
+        w = QDoubleSpinBox()
+        w.setDecimals(decimals)
+        w.setRange(min_val, max_val)
+        w.setValue(value)
+        if suffix:
+            w.setSuffix(f" {suffix}")
+        if step > 0:
+            w.setSingleStep(step)
+        return w
+
+    @staticmethod
+    def make_combo(items: list, current: int = 0) -> QComboBox:
+        w = QComboBox()
+        w.addItems(items)
+        if 0 <= current < len(items):
+            w.setCurrentIndex(current)
+        return w
+
+    @staticmethod
+    def make_checkbox(text: str = "", checked: bool = False) -> QCheckBox:
+        w = QCheckBox(text)
+        w.setChecked(checked)
+        return w
+
+    @staticmethod
+    def make_button(text: str, primary: bool = False) -> QPushButton:
+        w = QPushButton(text)
+        if primary:
+            w.setProperty("primary", True)
+        return w
+
+    @staticmethod
+    def make_info_label(text: str) -> QLabel:
+        lbl = QLabel(text)
+        lbl.setProperty("info", True)
+        lbl.setWordWrap(True)
+        return lbl
