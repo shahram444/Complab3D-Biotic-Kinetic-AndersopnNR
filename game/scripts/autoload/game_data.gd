@@ -22,17 +22,17 @@ enum Sub { O2, NO3, MN4, FE3, SO4, CH4 }
 
 const SUBSTRATES := {
 	Sub.O2:  { "name": "Oxygen",   "formula": "O2",     "color": "#4fa4ff", "glow": "#8fc8ff",
-	           "energy": 20, "growth": 6,  "dG": -818.0, "desc": "Aerobic respiration" },
+	           "energy": 20, "growth": 15, "dG": -818.0, "desc": "Aerobic respiration" },
 	Sub.NO3: { "name": "Nitrate",  "formula": "NO3-",   "color": "#4fdf6f", "glow": "#8fff9f",
-	           "energy": 15, "growth": 8,  "dG": -649.0, "desc": "Denitrification - prevents N2O" },
+	           "energy": 15, "growth": 18, "dG": -649.0, "desc": "Denitrification - prevents N2O" },
 	Sub.MN4: { "name": "Manganese","formula": "Mn(IV)", "color": "#cf6fff", "glow": "#df9fff",
-	           "energy": 12, "growth": 5,  "dG": -558.0, "desc": "Manganese reduction" },
+	           "energy": 12, "growth": 12, "dG": -558.0, "desc": "Manganese reduction" },
 	Sub.FE3: { "name": "Iron",     "formula": "Fe(III)","color": "#ef8f3f", "glow": "#ffbf7f",
-	           "energy": 10, "growth": 4,  "dG": -334.0, "desc": "Iron reduction" },
+	           "energy": 10, "growth": 10, "dG": -334.0, "desc": "Iron reduction" },
 	Sub.SO4: { "name": "Sulfate",  "formula": "SO42-",  "color": "#dfdf3f", "glow": "#ffffaf",
-	           "energy": 6,  "growth": 3,  "dG": -152.0, "desc": "Sulfate reduction" },
+	           "energy": 6,  "growth": 8,  "dG": -152.0, "desc": "Sulfate reduction" },
 	Sub.CH4: { "name": "Methane",  "formula": "CH4",    "color": "#ff4f4f", "glow": "#ff9f7f",
-	           "energy": 3,  "growth": 10, "dG": -31.0,  "desc": "Methanotrophy - prevents warming!" },
+	           "energy": 3,  "growth": 25, "dG": -31.0,  "desc": "Methanotrophy - prevents warming!" },
 }
 
 # ── SCIENCE PARAMETERS (from CompLaB3D) ─────────────────────────────────────
@@ -69,45 +69,45 @@ const BAL := {
 
 # ── LEVEL DEFINITIONS ────────────────────────────────────────────────────────
 const LEVELS := [
-	# Level 1: The Soil Frontier (tutorial)
-	{ "env": 0, "w": 30, "h": 20, "goal": 3, "porosity": 0.65, "grain": [2,3],
-	  "subs": [Sub.O2, Sub.NO3, Sub.CH4], "flow": 0.6, "density": 3,
-	  "toxic": 0.0, "title": "First Breath" },
-	{ "env": 0, "w": 35, "h": 22, "goal": 5, "porosity": 0.60, "grain": [2,4],
-	  "subs": [Sub.O2, Sub.NO3, Sub.CH4], "flow": 0.7, "density": 3,
-	  "toxic": 0.0, "title": "Roots of Life" },
+	# Level 1: The Soil Frontier (tutorial - no rivals)
+	{ "env": 0, "w": 30, "h": 20, "goal": 3, "porosity": 0.70, "grain": [2,3],
+	  "subs": [Sub.O2, Sub.NO3, Sub.CH4], "flow": 0.6, "density": 4,
+	  "toxic": 0.0, "rivals": 0, "title": "First Breath" },
+	{ "env": 0, "w": 35, "h": 22, "goal": 5, "porosity": 0.65, "grain": [2,4],
+	  "subs": [Sub.O2, Sub.NO3, Sub.CH4], "flow": 0.7, "density": 4,
+	  "toxic": 0.0, "rivals": 1, "title": "Roots of Life" },
 
 	# Level 2: Deep Sediment
-	{ "env": 1, "w": 35, "h": 25, "goal": 4, "porosity": 0.40, "grain": [1,2],
-	  "subs": [Sub.NO3, Sub.FE3, Sub.CH4], "flow": 0.3, "density": 2,
-	  "toxic": 0.0, "title": "Into the Depths" },
-	{ "env": 1, "w": 40, "h": 28, "goal": 6, "porosity": 0.35, "grain": [1,3],
-	  "subs": [Sub.NO3, Sub.MN4, Sub.FE3, Sub.CH4], "flow": 0.25, "density": 1,
-	  "toxic": 0.0, "title": "The Hungry Dark" },
+	{ "env": 1, "w": 35, "h": 25, "goal": 4, "porosity": 0.50, "grain": [1,2],
+	  "subs": [Sub.NO3, Sub.FE3, Sub.CH4], "flow": 0.3, "density": 3,
+	  "toxic": 0.0, "rivals": 2, "title": "Into the Depths" },
+	{ "env": 1, "w": 40, "h": 28, "goal": 6, "porosity": 0.45, "grain": [1,3],
+	  "subs": [Sub.NO3, Sub.MN4, Sub.FE3, Sub.CH4], "flow": 0.25, "density": 2,
+	  "toxic": 0.0, "rivals": 3, "title": "The Hungry Dark" },
 
 	# Level 3: Methane Seeps
-	{ "env": 2, "w": 35, "h": 22, "goal": 5, "porosity": 0.55, "grain": [2,4],
-	  "subs": [Sub.SO4, Sub.CH4], "flow": 0.5, "density": 4,
-	  "toxic": 0.15, "title": "The Methane Vents" },
-	{ "env": 2, "w": 40, "h": 25, "goal": 8, "porosity": 0.50, "grain": [2,3],
-	  "subs": [Sub.SO4, Sub.CH4, Sub.FE3], "flow": 0.6, "density": 4,
-	  "toxic": 0.20, "title": "Vent Guardians" },
+	{ "env": 2, "w": 35, "h": 22, "goal": 5, "porosity": 0.60, "grain": [2,4],
+	  "subs": [Sub.SO4, Sub.CH4], "flow": 0.5, "density": 5,
+	  "toxic": 0.15, "rivals": 2, "title": "The Methane Vents" },
+	{ "env": 2, "w": 40, "h": 25, "goal": 8, "porosity": 0.55, "grain": [2,3],
+	  "subs": [Sub.SO4, Sub.CH4, Sub.FE3], "flow": 0.6, "density": 5,
+	  "toxic": 0.20, "rivals": 3, "title": "Vent Guardians" },
 
 	# Level 4: Permafrost Edge
-	{ "env": 3, "w": 40, "h": 25, "goal": 6, "porosity": 0.50, "grain": [2,5],
-	  "subs": [Sub.O2, Sub.NO3, Sub.CH4], "flow": 0.8, "density": 5,
-	  "toxic": 0.10, "title": "Thawing Grounds" },
-	{ "env": 3, "w": 45, "h": 28, "goal": 8, "porosity": 0.45, "grain": [3,5],
-	  "subs": [Sub.NO3, Sub.SO4, Sub.CH4], "flow": 1.0, "density": 5,
-	  "toxic": 0.15, "title": "The Great Thaw" },
+	{ "env": 3, "w": 40, "h": 25, "goal": 6, "porosity": 0.55, "grain": [2,5],
+	  "subs": [Sub.O2, Sub.NO3, Sub.CH4], "flow": 0.8, "density": 6,
+	  "toxic": 0.10, "rivals": 3, "title": "Thawing Grounds" },
+	{ "env": 3, "w": 45, "h": 28, "goal": 8, "porosity": 0.50, "grain": [3,5],
+	  "subs": [Sub.NO3, Sub.SO4, Sub.CH4], "flow": 1.0, "density": 6,
+	  "toxic": 0.15, "rivals": 4, "title": "The Great Thaw" },
 
 	# Level 5: Hydrothermal Realm (final)
-	{ "env": 4, "w": 45, "h": 25, "goal": 8, "porosity": 0.50, "grain": [2,4],
-	  "subs": [Sub.SO4, Sub.FE3, Sub.MN4, Sub.CH4], "flow": 1.2, "density": 3,
-	  "toxic": 0.20, "title": "The Abyss" },
-	{ "env": 4, "w": 50, "h": 30, "goal": 12, "porosity": 0.45, "grain": [2,5],
-	  "subs": [Sub.SO4, Sub.FE3, Sub.MN4, Sub.CH4, Sub.NO3], "flow": 1.5, "density": 4,
-	  "toxic": 0.25, "title": "Earth's Last Stand" },
+	{ "env": 4, "w": 45, "h": 25, "goal": 8, "porosity": 0.55, "grain": [2,4],
+	  "subs": [Sub.SO4, Sub.FE3, Sub.MN4, Sub.CH4], "flow": 1.2, "density": 4,
+	  "toxic": 0.20, "rivals": 4, "title": "The Abyss" },
+	{ "env": 4, "w": 50, "h": 30, "goal": 12, "porosity": 0.50, "grain": [2,5],
+	  "subs": [Sub.SO4, Sub.FE3, Sub.MN4, Sub.CH4, Sub.NO3], "flow": 1.5, "density": 5,
+	  "toxic": 0.25, "rivals": 5, "title": "Earth's Last Stand" },
 ]
 
 # ── ENVIRONMENT PALETTES ─────────────────────────────────────────────────────
@@ -139,44 +139,26 @@ const ENV_PAL := [
 	  "bg": "#060304", "toxic": "#8a4a1a", "toxic_g": "#c07030" },
 ]
 
-# ── NARRATIVE (opening story) ────────────────────────────────────────────────
-const NARRATIVE_LINES := [
-	"",
-	"Beneath your feet...",
-	"beneath the ocean floor...",
-	"in the spaces between grains of sand",
-	"and fragments of ancient rock...",
-	"",
-	"...an invisible war is being fought.",
-	"",
-	"Methane rises from the deep.",
-	"Nitrous oxide seeps from thawing soil.",
-	"Greenhouse gases that could",
-	"devastate our climate.",
-	"",
-	"But standing guard...",
-	"are Earth's tiniest heroes.",
-	"",
-	"The MICROBES.",
-	"",
-	"For billions of years, they have consumed",
-	"these dangerous gases before they",
-	"reach the atmosphere.",
-	"",
-	"You are METHI.",
-	"A methanotrophic archaea.",
-	"Born in the dark pores of deep sediment.",
-	"",
-	"Your mission:",
-	"  Eat. Grow. Colonize.",
-	"  Prevent greenhouse gases",
-	"  from reaching the surface.",
-	"",
-	"The fate of the climate...",
-	"is in your pseudopods.",
-	"",
-	"",
-	"     [ PRESS ENTER ]",
+# ── CUTSCENE DIALOGUE (visual novel style) ──────────────────────────────────
+# speaker: "ELDER" = Archaeon Prime (mentor), "METHI" = player, "" = narration
+const CUTSCENE := [
+	{"speaker": "", "text": "Deep within the pore space...\nbetween grains of ancient rock..."},
+	{"speaker": "ELDER", "text": "Young one... wake up."},
+	{"speaker": "METHI", "text": "W-where am I? What is this place?"},
+	{"speaker": "ELDER", "text": "You are in the subsurface. Between\ngrains of soil, far from light.\nThis is our world."},
+	{"speaker": "ELDER", "text": "I am ARCHAEON PRIME.\nElder of the methanotrophic archaea.\nI have guarded these pores for eons."},
+	{"speaker": "METHI", "text": "Why is everything so dark?\nWhat's happening?"},
+	{"speaker": "ELDER", "text": "Methane. CH4. A greenhouse gas\n80 times more powerful than CO2.\nIt rises from the deep below."},
+	{"speaker": "ELDER", "text": "And N2O... nitrous oxide.\n300 times more dangerous than CO2.\nThey seep from thawing soil."},
+	{"speaker": "ELDER", "text": "For billions of years, we microbes\nhave consumed these gases.\nWe are Earth's invisible shield."},
+	{"speaker": "METHI", "text": "What must I do?"},
+	{"speaker": "ELDER", "text": "Eat substrates. Grow your biomass.\nWhen your growth bar fills -\npress SPACE to DIVIDE!"},
+	{"speaker": "ELDER", "text": "Place colonies across the pore network.\nBuild a biofilm to filter the gas.\nThat is the Cellular Automata way."},
+	{"speaker": "ELDER", "text": "But beware... rival microbes roam\nthese pores. They will steal\nyour nutrients."},
+	{"speaker": "ELDER", "text": "And the pore geometry itself is\nyour enemy. Dead-end pores\nmean starvation and death."},
+	{"speaker": "METHI", "text": "I won't let Earth down."},
+	{"speaker": "ELDER", "text": "Remember the redox ladder:\nO2 gives most energy, CH4 the least.\nBut eating CH4 saves the planet!"},
+	{"speaker": "ELDER", "text": "Now go, young one.\nThe Soil Frontier awaits.\nEarth's fate is in your pseudopods."},
 ]
 
 # ── WORLD INTRO TEXTS ────────────────────────────────────────────────────────

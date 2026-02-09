@@ -52,6 +52,14 @@ const PAL := {
 	"f": "#3a7a5a",       # biofilm
 	"F": "#5aaa7a",       # biofilm light
 	"v": "#2a5a4a",       # biofilm dark
+	# Elder archaea (mentor)
+	"j": "#1a1aa0",       # elder body dark blue
+	"J": "#4848d0",       # elder body blue highlight
+	"q": "#5030a0",       # elder lower purple
+	"Q": "#7050c0",       # elder purple highlight
+	# Rival microbes
+	"z": "#b03030",       # rival body dark
+	"Z": "#e06060",       # rival body light
 }
 
 # ── SPRITE DATA ──────────────────────────────────────────────────────────────
@@ -290,6 +298,40 @@ const SUB_CH4 := [
 	"...kkkk...",
 ]
 
+# ELDER ARCHAEA (mentor) 16x16 - wise old microbe with bioluminescent spots
+const ELDER := [
+	"....kkkkkk......",
+	"...kjjjjjjk.....",
+	"..kjJjjjjJjk....",
+	".kjJwwjjwwJjk...",
+	".kjjwejjewjjk...",
+	".kjjjjjjjjjjk...",
+	".kjjjjmjjjjjk...",
+	"..kjjjjjjjjk....",
+	"..kkjjjjjjkk....",
+	".kqqkjjjjkqqk...",
+	".kqqqjjjjqqqk...",
+	"..kqqqqqqqqk....",
+	"...kqqqqqqk.....",
+	"....kkkkkk......",
+	"......k.k.......",
+	"................",
+]
+
+# RIVAL MICROBE 10x10 - aggressive bacteria that steals food
+const RIVAL_BASE := [
+	"...kkkk...",
+	"..kzZZzk..",
+	".kzwZwZzk.",
+	".kzeZeZzk.",
+	".kzZZZZzk.",
+	".kzZmZZzk.",
+	"..kzZZzk..",
+	"...kzzk...",
+	"....kk....",
+	"..........",
+]
+
 # Colony cell 12x12
 const COLONY := [
 	"...kkkkkk...",
@@ -353,6 +395,12 @@ func _generate_all() -> void:
 	textures["sub_fe3"] = _make_tex(SUB_FE3)
 	textures["sub_so4"] = _make_tex(SUB_SO4)
 	textures["sub_ch4"] = _make_tex(SUB_CH4)
+
+	# Elder portrait
+	textures["elder"] = _make_tex(ELDER)
+
+	# Rival microbe
+	textures["rival"] = _make_tex(RIVAL_BASE)
 
 	# Colony
 	textures["colony"] = _make_tex(COLONY)

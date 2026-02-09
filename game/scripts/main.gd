@@ -6,7 +6,9 @@ const T := GameData.TILE
 
 var state: int = S.BOOT
 var boot_timer: float = 0.0
-var story_scroll: float = 0.0
+var dialogue_idx: int = 0
+var dialogue_char: int = 0
+var dialogue_timer: float = 0.0
 var intro_timer: float = 0.0
 var complete_timer: float = 0.0
 var death_timer: float = 0.0
@@ -27,7 +29,9 @@ var hud_node: Node2D = null
 # Substrate & colony tracking
 var substrates: Array = []
 var colonies: Array = []
+var rivals: Array = []
 var spawn_timer: float = 0.0
+var rival_move_timer: float = 0.0
 
 # Camera shake
 var shake_intensity: float = 0.0
@@ -113,15 +117,31 @@ func _update_title(_delta: float) -> void:
 		AudioMgr.sfx_menu_confirm()
 		AudioMgr.stop_music()
 		state = S.NARRATIVE
-		story_scroll = 0
+		dialogue_idx = 0
+		dialogue_char = 0
+		dialogue_timer = 0.0
 
 func _update_narrative(delta: float) -> void:
-	story_scroll += delta * 10
+	dialogue_timer += delta
+	# Typewriter effect - advance chars
+	var line = GameData.CUTSCENE[dialogue_idx]
+	var full_len = line["text"].length()
+	var chars_per_sec = 30.0
+	dialogue_char = mini(int(dialogue_timer * chars_per_sec), full_len)
+
 	if Input.is_action_just_pressed("ui_confirm"):
-		if story_scroll > GameData.NARRATIVE_LINES.size() * 14 + 80:
-			_start_game()
+		if dialogue_char < full_len:
+			# Skip to full text
+			dialogue_char = full_len
+			dialogue_timer = full_len / chars_per_sec + 1.0
 		else:
-			story_scroll = GameData.NARRATIVE_LINES.size() * 14 + 100
+			# Advance to next dialogue line
+			dialogue_idx += 1
+			dialogue_char = 0
+			dialogue_timer = 0.0
+			AudioMgr.sfx_menu_select()
+			if dialogue_idx >= GameData.CUTSCENE.size():
+				_start_game()
 
 func _update_level_intro(delta: float) -> void:
 	intro_timer += delta
@@ -150,6 +170,7 @@ func _update_playing(delta: float) -> void:
 	# Update substrates
 	_update_substrates(delta)
 	_update_colonies(delta)
+	_update_rivals(delta)
 	_update_popups(delta)
 
 	# Eat flash
@@ -260,11 +281,21 @@ func _load_level(idx: int) -> void:
 		if is_instance_valid(c):
 			c.queue_free()
 	colonies.clear()
+	for r in rivals:
+		if is_instance_valid(r):
+			r.queue_free()
+	rivals.clear()
 	spawn_timer = 0.0
+	rival_move_timer = 0.0
 	science_mode = false
 	eat_flash_timer = 0.0
 	popup_texts.clear()
 	starvation_pulse = 0.0
+
+	# Spawn rival microbes
+	var num_rivals = def.get("rivals", 0)
+	for _r in range(num_rivals):
+		_spawn_rival()
 
 	# Camera snap
 	if cam:
@@ -417,6 +448,45 @@ func _update_colonies(_delta: float) -> void:
 				if is_instance_valid(s):
 					s.queue_free()
 				substrates.remove_at(i)
+
+func _spawn_rival() -> void:
+	# Find a random walkable pore away from player start
+	for _attempt in range(40):
+		var rx = randi_range(int(world_node.map_w * 0.3), world_node.map_w - 2)
+		var ry = randi_range(1, world_node.map_h - 2)
+		if world_node.is_walkable_tile(world_node.get_tile(rx, ry)):
+			var rival_node = Node2D.new()
+			rival_node.set_script(preload("res://scripts/rival.gd"))
+			rival_node.init_at(rx, ry, world_node)
+			entity_layer.add_child(rival_node)
+			rivals.append(rival_node)
+			return
+
+func _update_rivals(delta: float) -> void:
+	rival_move_timer -= delta
+	if rival_move_timer > 0:
+		return
+	rival_move_timer = 0.4  # Rivals move every 0.4 seconds
+
+	for rival in rivals:
+		if !is_instance_valid(rival):
+			continue
+		rival.do_move()
+
+		# Check if rival eats any substrates
+		for i in range(substrates.size() - 1, -1, -1):
+			var s = substrates[i]
+			if !is_instance_valid(s):
+				substrates.remove_at(i)
+				continue
+			var dx = s.position.x - rival.position.x
+			var dy = s.position.y - rival.position.y
+			if absf(dx) < T and absf(dy) < T:
+				if is_instance_valid(s):
+					s.queue_free()
+				substrates.remove_at(i)
+				rival.on_eat()
+				break
 
 func _on_player_died() -> void:
 	AudioMgr.sfx_die()

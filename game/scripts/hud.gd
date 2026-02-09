@@ -97,97 +97,158 @@ func _draw_title() -> void:
 	_text("University of Georgia", 240, 225, Color(0.27, 0.27, 0.27), 6, 1)
 
 func _draw_narrative() -> void:
-	draw_rect(Rect2(0, 0, 480, 270), Color.BLACK)
+	if !game_ref or game_ref.dialogue_idx >= GameData.CUTSCENE.size():
+		return
 
-	# Starfield background
 	var t = GameData.game_time
-	for i in range(40):
-		var sx = fmod(sin(i * 73.1) * 0.5 + 0.5, 1.0) * 480
-		var sy = fmod(cos(i * 97.3) * 0.5 + 0.5, 1.0) * 270
-		var blink = 0.5 + sin(t * 1.5 + i * 0.7) * 0.3
-		draw_rect(Rect2(sx, sy, 1, 1), Color(1, 1, 1, blink * 0.4))
+	var line = GameData.CUTSCENE[game_ref.dialogue_idx]
+	var speaker: String = line["speaker"]
+	var full_text: String = line["text"]
+	var shown_text: String = full_text.substr(0, game_ref.dialogue_char)
 
-	var lines = GameData.NARRATIVE_LINES
-	var line_h = 14.0
-	var start_y = 280.0 - game_ref.story_scroll
+	# Dark background with pore-like scene illustration
+	draw_rect(Rect2(0, 0, 480, 270), Color(0.02, 0.02, 0.06))
 
-	for i in range(lines.size()):
-		var y = start_y + i * line_h
-		if y < -20 or y > 290:
-			continue
-		var alpha = 1.0
-		if y < 30:
-			alpha = clampf(y / 30.0, 0, 1)
-		if y > 240:
-			alpha = clampf((270.0 - y) / 30.0, 0, 1)
+	# Scene illustration area (top portion)
+	_draw_cutscene_scene(speaker, t)
 
-		var line = lines[i]
-		var color = Color(0.78, 0.78, 0.91, alpha)
-		var fsize = 8
+	# === DIALOGUE BOX (bottom 90px, visual novel style) ===
+	var box_y = 180.0
+	var box_h = 90.0
+	# Box background
+	draw_rect(Rect2(0, box_y, 480, box_h), Color(0.02, 0.02, 0.08, 0.95))
+	# Top border with glow
+	draw_rect(Rect2(0, box_y, 480, 2), Color(0.2, 0.3, 0.5, 0.8))
+	draw_rect(Rect2(0, box_y + 2, 480, 1), Color(0.1, 0.15, 0.3, 0.4))
 
-		if "METHI" in line:
-			color = Color(0.16, 0.81, 0.69, alpha)
-			fsize = 11
-		elif "MICROBES" in line:
-			color = Color(0.37, 0.81, 0.37, alpha)
-			fsize = 12
-		elif "ENTER" in line:
-			color = Color(1, 0.84, 0, alpha)
-		elif "..." in line:
-			color = Color(0.37, 0.77, 0.92, alpha)
-		elif "mission" in line.to_lower():
-			color = Color(1, 0.84, 0, alpha)
-			fsize = 9
-		elif "eat" in line.to_lower() or "grow" in line.to_lower():
-			color = Color(0.37, 0.81, 0.37, alpha)
-			fsize = 9
+	# Portrait frame (left side)
+	var portrait_x = 10.0
+	var portrait_y = box_y + 8.0
+	var portrait_size = 64.0
 
-		_text(line, 240, y, color, fsize, 1)
+	# Portrait border
+	draw_rect(Rect2(portrait_x - 2, portrait_y - 2, portrait_size + 4, portrait_size + 4),
+		Color(0.15, 0.2, 0.35))
+	draw_rect(Rect2(portrait_x - 1, portrait_y - 1, portrait_size + 2, portrait_size + 2),
+		Color(0.05, 0.05, 0.12))
 
-		# Draw inline illustrations at key story moments
-		if "invisible war" in line.to_lower() and alpha > 0.3:
-			_draw_narrative_scene_earth(240, y + 14, alpha)
-		elif "microbes" in line.to_upper() and line.strip_edges() == "The MICROBES." and alpha > 0.3:
-			_draw_narrative_scene_microbes(240, y + 14, alpha)
-		elif "pseudopods" in line.to_lower() and alpha > 0.3:
-			_draw_narrative_scene_methi(240, y + 14, alpha)
-
-	_text("ENTER to skip", 456, 258, Color(0.27, 0.27, 0.27, 0.5), 6, 2)
-
-func _draw_narrative_scene_earth(cx: float, y: float, alpha: float) -> void:
-	# Small pixel Earth with gas arrows rising
-	var w = 50.0
-	var x = cx - w * 0.5
-	# Ground layer
-	draw_rect(Rect2(x, y + 6, w, 12), Color(0.3, 0.2, 0.1, alpha * 0.6))
-	draw_rect(Rect2(x, y + 3, w, 4), Color(0.2, 0.5, 0.2, alpha * 0.5))
-	# Rising gas arrows (red for CH4)
-	for i in range(5):
-		var ax = x + 8 + i * 10
-		var ay = y + 2 - sin(GameData.game_time * 2 + i) * 3
-		draw_rect(Rect2(ax, ay, 2, 4), Color(1, 0.3, 0.3, alpha * 0.7))
-		draw_rect(Rect2(ax - 1, ay + 4, 4, 1), Color(1, 0.3, 0.3, alpha * 0.4))
-
-func _draw_narrative_scene_microbes(cx: float, y: float, alpha: float) -> void:
-	# Row of little microbe silhouettes
-	for i in range(7):
-		var mx = cx - 42 + i * 14
-		var my = y + 4 + sin(GameData.game_time * 3 + i * 1.2) * 2
-		var col = Color(0.16, 0.81, 0.69, alpha * 0.8) if i % 2 == 0 else Color(0.37, 0.81, 0.37, alpha * 0.7)
-		draw_rect(Rect2(mx, my, 6, 5), col)
-		draw_rect(Rect2(mx + 1, my - 1, 4, 1), col * Color(1,1,1,0.7))
-		draw_rect(Rect2(mx + 2, my + 1, 1, 1), Color(1, 1, 1, alpha * 0.9))
-
-func _draw_narrative_scene_methi(cx: float, y: float, alpha: float) -> void:
-	# Large METHI character preview
-	var tex = SpriteFactory.get_tex("methi_down")
+	# Draw portrait
+	var tex_key = "elder" if speaker == "ELDER" else "methi_down"
+	var tex = SpriteFactory.get_tex(tex_key)
 	if tex:
-		var bob = sin(GameData.game_time * 2) * 3
-		draw_texture_rect(tex, Rect2(cx - 16, y + 2 + bob, 32, 32), false,
-			Color(1, 1, 1, alpha * 0.9))
-		# Glow around character
-		draw_rect(Rect2(cx - 20, y - 2 + bob, 40, 40),
-			Color(0.16, 0.81, 0.69, alpha * 0.15))
+		draw_texture_rect(tex, Rect2(portrait_x, portrait_y, portrait_size, portrait_size), false)
+	elif speaker == "":
+		# Narration - draw starfield in portrait
+		draw_rect(Rect2(portrait_x, portrait_y, portrait_size, portrait_size), Color(0.02, 0.02, 0.06))
+		for i in range(8):
+			var sx = portrait_x + fmod(sin(i * 37) * 0.5 + 0.5, 1.0) * portrait_size
+			var sy = portrait_y + fmod(cos(i * 53) * 0.5 + 0.5, 1.0) * portrait_size
+			draw_rect(Rect2(sx, sy, 1, 1), Color(1, 1, 1, 0.5 + sin(t * 2 + i) * 0.3))
+
+	# Speaker name
+	var name_x = portrait_x + portrait_size + 12
+	var name_y = box_y + 6
+	var name_color: Color
+	var name_str: String
+	if speaker == "ELDER":
+		name_str = "ARCHAEON PRIME"
+		name_color = Color(0.28, 0.28, 0.82)
+	elif speaker == "METHI":
+		name_str = "METHI"
+		name_color = Color(0.16, 0.81, 0.69)
+	else:
+		name_str = ""
+		name_color = Color(0.5, 0.5, 0.7)
+
+	if name_str != "":
+		# Name background
+		var name_w = 100.0
+		draw_rect(Rect2(name_x - 2, name_y - 1, name_w, 12), Color(name_color, 0.15))
+		draw_rect(Rect2(name_x - 2, name_y - 1, name_w, 12), name_color * Color(1,1,1,0.4), false, 1.0)
+		_text(name_str, name_x + 2, name_y, name_color, 8)
+
+	# Dialogue text (typewriter)
+	var text_x = name_x
+	var text_y = name_y + 16
+	var text_lines = shown_text.split("\n")
+	for i in range(text_lines.size()):
+		var tc = Color(0.85, 0.85, 0.95) if speaker != "" else Color(0.6, 0.7, 0.85)
+		_text(text_lines[i], text_x, text_y + i * 12, tc, 7)
+
+	# Blinking cursor / advance prompt
+	if game_ref.dialogue_char >= full_text.length():
+		if sin(t * 4) > 0:
+			_text(">>", 460, box_y + box_h - 14, Color(1, 0.84, 0), 7, 2)
+	else:
+		# Typing cursor
+		var cursor_x = text_x + 4 * (shown_text.length() - shown_text.rfind("\n") - 1)
+		var cursor_y_pos = text_y + (text_lines.size() - 1) * 12
+		if sin(t * 8) > 0:
+			draw_rect(Rect2(cursor_x, cursor_y_pos + 1, 4, 7), Color(1, 1, 1, 0.6))
+
+	# Progress indicator
+	_text("%d/%d" % [game_ref.dialogue_idx + 1, GameData.CUTSCENE.size()],
+		460, box_y + 6, Color(0.3, 0.3, 0.4), 6, 2)
+
+func _draw_cutscene_scene(speaker: String, t: float) -> void:
+	# Draw a pore-space illustration in the top area
+	var scene_h = 175.0
+
+	# Pore-like background with grain particles
+	for i in range(25):
+		var gx = fmod(sin(i * 47.3) * 0.5 + 0.5, 1.0) * 480
+		var gy = fmod(cos(i * 31.7) * 0.5 + 0.5, 1.0) * scene_h
+		var gr = 8 + sin(i * 17) * 4
+		draw_rect(Rect2(gx - gr, gy - gr, gr * 2, gr * 2),
+			Color(0.15, 0.1, 0.05, 0.4))
+		draw_rect(Rect2(gx - gr + 1, gy - gr + 1, gr * 2 - 2, gr * 2 - 2),
+			Color(0.2, 0.15, 0.08, 0.3))
+
+	# Water/pore space between grains (subtle blue)
+	for i in range(15):
+		var wx = fmod(sin(i * 89.1 + t * 0.3) * 0.5 + 0.5, 1.0) * 480
+		var wy = fmod(cos(i * 67.3 + t * 0.2) * 0.5 + 0.5, 1.0) * scene_h
+		draw_rect(Rect2(wx, wy, 20, 2), Color(0.1, 0.2, 0.4, 0.2))
+
+	# Character illustrations based on speaker
+	if speaker == "ELDER":
+		# Elder on the left, larger, with glow
+		var elder_tex = SpriteFactory.get_tex("elder")
+		if elder_tex:
+			var bob = sin(t * 1.5) * 3
+			draw_texture_rect(elder_tex, Rect2(60, 60 + bob, 80, 80), false,
+				Color(1, 1, 1, 0.9))
+			# Bioluminescent glow
+			draw_rect(Rect2(55, 55 + bob, 90, 90),
+				Color(0.2, 0.2, 0.7, 0.08 + sin(t * 2) * 0.04))
+		# METHI listening on the right
+		var methi_tex = SpriteFactory.get_tex("methi_down")
+		if methi_tex:
+			var bob2 = sin(t * 2 + 1) * 2
+			draw_texture_rect(methi_tex, Rect2(350, 85 + bob2, 48, 48), false,
+				Color(1, 1, 1, 0.85))
+	elif speaker == "METHI":
+		# METHI on the right, speaking
+		var methi_tex = SpriteFactory.get_tex("methi_right")
+		if methi_tex:
+			var bob = sin(t * 2) * 3
+			draw_texture_rect(methi_tex, Rect2(340, 55 + bob, 80, 80), false,
+				Color(1, 1, 1, 0.9))
+		# Elder listening on the left
+		var elder_tex = SpriteFactory.get_tex("elder")
+		if elder_tex:
+			var bob2 = sin(t * 1.5 + 1) * 2
+			draw_texture_rect(elder_tex, Rect2(70, 80 + bob2, 48, 48), false,
+				Color(1, 1, 1, 0.7))
+	else:
+		# Narration - atmospheric scene
+		# Rising gas particles
+		for i in range(10):
+			var gx = 100 + i * 35
+			var gy = scene_h - fmod(t * 20 + i * 40, scene_h + 20)
+			var gc = Color(1, 0.3, 0.3, 0.3) if i % 2 == 0 else Color(0.3, 1, 0.3, 0.2)
+			draw_rect(Rect2(gx, gy, 3, 6), gc)
+			draw_rect(Rect2(gx - 1, gy + 6, 5, 2), gc * Color(1,1,1,0.5))
 
 func _draw_level_intro() -> void:
 	var def = GameData.get_level_def()

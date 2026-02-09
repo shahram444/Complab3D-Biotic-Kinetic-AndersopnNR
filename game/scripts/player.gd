@@ -147,10 +147,7 @@ func _update_survival(delta: float) -> void:
 			health -= BAL["toxic_damage"] * delta
 			hurt_timer = 0.12
 
-	# Growth decay (slow)
-	if growth > 0:
-		growth -= 0.15 * delta
-		growth = maxf(0, growth)
+	# Growth is stable - no decay (biomass doesn't vanish)
 
 	# Clamp
 	health = clampf(health, 0, BAL["max_health"])
@@ -204,6 +201,17 @@ func try_divide() -> bool:
 	if !can_divide() or !world_ref:
 		return false
 	var pores = world_ref.get_adjacent_pores(tile_x, tile_y)
+
+	# If no direct neighbors, search 2 tiles away
+	if pores.size() == 0:
+		for d1 in [Vector2i(0,-1),Vector2i(1,0),Vector2i(0,1),Vector2i(-1,0)]:
+			var mx = tile_x + d1.x
+			var my = tile_y + d1.y
+			if mx >= 0 and mx < world_ref.map_w and my >= 0 and my < world_ref.map_h:
+				var farther = world_ref.get_adjacent_pores(mx, my)
+				for fp in farther:
+					if fp != Vector2i(tile_x, tile_y):
+						pores.append(fp)
 	if pores.size() == 0:
 		return false
 
