@@ -4,53 +4,50 @@ import json
 import os
 from pathlib import Path
 
-DEFAULT_CONFIG = {
-    "complab_executable": "",
-    "default_project_dir": str(Path.home() / "CompLaB_Projects"),
-    "recent_projects": [],
-    "max_recent": 10,
-    "theme": "dark",
-    "font_size": 10,
-    "auto_save": False,
-    "auto_save_interval": 300,
-    "max_console_lines": 10000,
-}
 
-CONFIG_DIR = Path.home() / ".complab_studio"
-CONFIG_FILE = CONFIG_DIR / "config.json"
+class AppConfig:
+    """Persistent app settings at ~/.complab_studio/config.json."""
 
+    _DEFAULTS = {
+        "complab_executable": "",
+        "default_project_dir": "",
+        "auto_save": False,
+        "auto_save_interval": 300,
+        "font_size": 10,
+        "max_console_lines": 10000,
+        "recent_projects": [],
+    }
 
-class Config:
     def __init__(self):
-        self._data = dict(DEFAULT_CONFIG)
-        self.load()
+        self._dir = Path.home() / ".complab_studio"
+        self._path = self._dir / "config.json"
+        self._data = dict(self._DEFAULTS)
+        self._load()
 
-    def load(self):
-        if CONFIG_FILE.exists():
+    def _load(self):
+        if self._path.exists():
             try:
-                with open(CONFIG_FILE, "r") as f:
+                with open(self._path, "r") as f:
                     stored = json.load(f)
                 self._data.update(stored)
             except (json.JSONDecodeError, OSError):
                 pass
 
     def save(self):
-        CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        with open(CONFIG_FILE, "w") as f:
+        self._dir.mkdir(parents=True, exist_ok=True)
+        with open(self._path, "w") as f:
             json.dump(self._data, f, indent=2)
 
-    def get(self, key, default=None):
-        return self._data.get(key, default)
+    def get(self, key: str, default=None):
+        return self._data.get(key, default if default is not None else self._DEFAULTS.get(key))
 
-    def set(self, key, value):
+    def set(self, key: str, value):
         self._data[key] = value
 
-    def add_recent_project(self, path):
+    def add_recent(self, filepath: str):
         recents = self._data.get("recent_projects", [])
-        path = str(path)
-        if path in recents:
-            recents.remove(path)
-        recents.insert(0, path)
-        max_r = self._data.get("max_recent", 10)
-        self._data["recent_projects"] = recents[:max_r]
+        if filepath in recents:
+            recents.remove(filepath)
+        recents.insert(0, filepath)
+        self._data["recent_projects"] = recents[:10]
         self.save()

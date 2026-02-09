@@ -1,12 +1,15 @@
-"""3D visualization widget with VTK or fallback."""
+"""3D visualization widget using VTK or a placeholder fallback.
+
+Provides geometry preview and result viewing capabilities.
+Falls back gracefully if VTK is not installed.
+"""
 
 import os
-import struct
 from pathlib import Path
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel,
-    QComboBox, QFileDialog, QMessageBox,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QComboBox, QFrame, QFileDialog, QSizePolicy,
 )
 from PySide6.QtCore import Qt
 
@@ -17,219 +20,228 @@ try:
 except ImportError:
     HAS_VTK = False
 
-try:
-    import numpy as np
-    HAS_NUMPY = True
-except ImportError:
-    HAS_NUMPY = False
 
-
-class VTKViewerWidget(QWidget):
+class VTKViewer(QWidget):
+    """Center panel: 3D visualization area."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._current_file = None
+        self._renderer = None
+        self._vtk_widget = None
         self._setup_ui()
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         # Toolbar
         toolbar = QHBoxLayout()
-        toolbar.setContentsMargins(4, 4, 4, 4)
+        toolbar.setContentsMargins(8, 4, 8, 4)
 
-        self._open_btn = QPushButton("Open File")
-        self._open_btn.clicked.connect(self._open_file)
+        lbl = QLabel("3D Viewer")
+        lbl.setProperty("subheading", True)
+        toolbar.addWidget(lbl)
+        toolbar.addStretch()
 
-        self._reset_btn = QPushButton("Reset View")
-        self._reset_btn.clicked.connect(self._reset_view)
+        self._file_combo = QComboBox()
+        self._file_combo.setFixedWidth(200)
+        self._file_combo.setPlaceholderText("Select VTK file...")
+        self._file_combo.currentIndexChanged.connect(self._on_file_changed)
+        toolbar.addWidget(self._file_combo)
+
+        open_btn = QPushButton("Open VTK")
+        open_btn.setFixedWidth(80)
+        open_btn.clicked.connect(self._open_vtk_file)
+        toolbar.addWidget(open_btn)
 
         self._view_combo = QComboBox()
-        self._view_combo.addItems(["+X", "-X", "+Y", "-Y", "+Z", "-Z", "Isometric"])
-        self._view_combo.setCurrentText("Isometric")
-        self._view_combo.currentTextChanged.connect(self._set_view_preset)
-
-        self._display_combo = QComboBox()
-        self._display_combo.addItems(["Surface", "Wireframe", "Points"])
-        self._display_combo.currentTextChanged.connect(self._set_display_mode)
-
-        self._info_label = QLabel("")
-        self._info_label.setProperty("info", True)
-
-        toolbar.addWidget(self._open_btn)
-        toolbar.addWidget(self._reset_btn)
-        toolbar.addWidget(QLabel("View:"))
+        self._view_combo.addItems(["+X", "-X", "+Y", "-Y", "+Z", "-Z", "Iso"])
+        self._view_combo.setCurrentIndex(6)
+        self._view_combo.setFixedWidth(60)
+        self._view_combo.currentTextChanged.connect(self._set_view)
         toolbar.addWidget(self._view_combo)
-        toolbar.addWidget(QLabel("Display:"))
-        toolbar.addWidget(self._display_combo)
-        toolbar.addStretch()
-        toolbar.addWidget(self._info_label)
+
+        reset_btn = QPushButton("Reset")
+        reset_btn.setFixedWidth(60)
+        reset_btn.clicked.connect(self.reset_view)
+        toolbar.addWidget(reset_btn)
 
         layout.addLayout(toolbar)
 
+        # Viewer area
         if HAS_VTK:
             self._vtk_widget = QVTKRenderWindowInteractor(self)
             self._renderer = vtk.vtkRenderer()
-            self._renderer.SetBackground(0.12, 0.12, 0.12)
+            self._renderer.SetBackground(0.12, 0.12, 0.14)
+            self._renderer.SetBackground2(0.18, 0.19, 0.21)
+            self._renderer.GradientBackgroundOn()
             self._vtk_widget.GetRenderWindow().AddRenderer(self._renderer)
-
-            style = vtk.vtkInteractorStyleTrackballCamera()
-            self._vtk_widget.GetRenderWindow().GetInteractor().SetInteractorStyle(style)
-
-            layout.addWidget(self._vtk_widget)
-            self._actor = None
+            layout.addWidget(self._vtk_widget, 1)
+            self._vtk_widget.Initialize()
+            self._add_axes()
         else:
-            fallback = QLabel(
-                "VTK is not installed.\n\n"
-                "Install with: pip install vtk\n\n"
-                "Alternatively, use ParaView to view .vti output files."
-            )
-            fallback.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            fallback.setProperty("info", True)
-            layout.addWidget(fallback)
+            placeholder = QFrame()
+            placeholder.setFrameStyle(QFrame.Shape.StyledPanel)
+            placeholder.setSizePolicy(
+                QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            ph_layout = QVBoxLayout(placeholder)
+            msg = QLabel("VTK not installed.\n\nInstall with: pip install vtk\n\n"
+                         "Geometry and results will display here.")
+            msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            msg.setProperty("info", True)
+            ph_layout.addWidget(msg)
+            layout.addWidget(placeholder, 1)
 
-    def _open_file(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Open Visualization File", "",
-            "VTK ImageData (*.vti);;VTK Legacy (*.vtk);;Geometry (*.dat);;All Files (*)")
-        if path:
-            self.load_file(path)
-
-    def load_file(self, filepath):
-        if not HAS_VTK:
+    def _add_axes(self):
+        """Add orientation axes widget."""
+        if not HAS_VTK or not self._renderer:
             return
-        filepath = str(filepath)
-        ext = Path(filepath).suffix.lower()
+        axes = vtk.vtkAxesActor()
+        widget = vtk.vtkOrientationMarkerWidget()
+        widget.SetOrientationMarker(axes)
+        widget.SetInteractor(self._vtk_widget.GetRenderWindow().GetInteractor())
+        widget.SetViewport(0.0, 0.0, 0.15, 0.15)
+        widget.EnabledOn()
+        widget.InteractiveOff()
+        self._axes_widget = widget
 
-        try:
-            if ext == ".vti":
-                self._load_vti(filepath)
-            elif ext == ".vtk":
-                self._load_vtk(filepath)
-            elif ext == ".dat":
-                self._load_dat(filepath)
-            else:
-                QMessageBox.warning(self, "Unsupported", f"Unsupported file format: {ext}")
-                return
-            self._current_file = filepath
-            self._info_label.setText(Path(filepath).name)
-        except Exception as e:
-            QMessageBox.critical(self, "Load Error", str(e))
+    def load_vti(self, filepath: str):
+        """Load a VTK ImageData (.vti) file."""
+        if not HAS_VTK or not self._renderer:
+            return
+        self._renderer.RemoveAllViewProps()
+        self._add_axes()
 
-    def _load_vti(self, filepath):
         reader = vtk.vtkXMLImageDataReader()
         reader.SetFileName(filepath)
         reader.Update()
-        self._display_structured(reader.GetOutput())
 
-    def _load_vtk(self, filepath):
-        reader = vtk.vtkStructuredPointsReader()
-        reader.SetFileName(filepath)
-        reader.Update()
-        self._display_structured(reader.GetOutput())
-
-    def _load_dat(self, filepath):
-        """Load headerless .dat geometry file. Requires dimensions set externally."""
-        if not HAS_NUMPY:
-            QMessageBox.warning(self, "NumPy Required", "NumPy is required to load .dat files.")
+        data = reader.GetOutput()
+        if data is None:
             return
 
-        with open(filepath, "r") as f:
-            values = []
-            for line in f:
-                line = line.strip()
-                if line:
-                    try:
-                        values.append(int(line))
-                    except ValueError:
-                        try:
-                            values.append(int(float(line)))
-                        except ValueError:
-                            continue
-
-        if not values:
-            QMessageBox.warning(self, "Empty File", "No valid data found in .dat file.")
-            return
-
-        n = len(values)
-        # Try to infer cubic dimensions
-        side = round(n ** (1 / 3))
-        if side ** 3 != n:
-            QMessageBox.warning(
-                self, "Dimension Mismatch",
-                f"File has {n} values. Cannot auto-detect 3D dimensions.\n"
-                "Set domain dimensions in the Domain panel first."
-            )
-            return
-
-        arr = np.array(values, dtype=np.int32).reshape((side, side, side))
-        self._display_voxels(arr)
-
-    def _display_structured(self, data):
-        threshold = vtk.vtkThreshold()
-        threshold.SetInputData(data)
-        threshold.SetUpperThreshold(0.5)
-        threshold.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_UPPER)
-        threshold.Update()
+        # Choose first array for display
+        pd = data.GetPointData()
+        if pd.GetNumberOfArrays() > 0:
+            pd.SetActiveScalars(pd.GetArrayName(0))
 
         mapper = vtk.vtkDataSetMapper()
-        mapper.SetInputConnection(threshold.GetOutputPort())
+        mapper.SetInputData(data)
         mapper.ScalarVisibilityOn()
 
-        if self._actor:
-            self._renderer.RemoveActor(self._actor)
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
 
-        self._actor = vtk.vtkActor()
-        self._actor.SetMapper(mapper)
-        self._renderer.AddActor(self._actor)
+        self._renderer.AddActor(actor)
+
+        # Add scalar bar
+        sbar = vtk.vtkScalarBarActor()
+        sbar.SetLookupTable(mapper.GetLookupTable())
+        sbar.SetTitle(pd.GetArrayName(0) if pd.GetNumberOfArrays() > 0 else "")
+        sbar.SetNumberOfLabels(5)
+        self._renderer.AddActor2D(sbar)
+
         self._renderer.ResetCamera()
-        self._vtk_widget.GetRenderWindow().Render()
+        self._render()
 
-    def _display_voxels(self, arr):
-        nx, ny, nz = arr.shape
-        image_data = vtk.vtkImageData()
-        image_data.SetDimensions(nx, ny, nz)
-        image_data.SetSpacing(1.0, 1.0, 1.0)
-        image_data.AllocateScalars(vtk.VTK_INT, 1)
+    def load_geometry_dat(self, filepath: str, nx: int, ny: int, nz: int):
+        """Load a .dat geometry file as structured grid."""
+        if not HAS_VTK or not self._renderer:
+            return
+        if not os.path.isfile(filepath):
+            return
 
-        for i in range(nx):
-            for j in range(ny):
-                for k in range(nz):
-                    image_data.SetScalarComponentFromFloat(i, j, k, 0, float(arr[i, j, k]))
+        try:
+            with open(filepath, "r") as f:
+                values = [int(x) for line in f for x in line.split()]
+        except (ValueError, OSError):
+            return
 
-        self._display_structured(image_data)
+        expected = nx * ny * nz
+        if len(values) < expected:
+            return
 
-    def _reset_view(self):
-        if HAS_VTK:
+        self._renderer.RemoveAllViewProps()
+        self._add_axes()
+
+        image = vtk.vtkImageData()
+        image.SetDimensions(nx, ny, nz)
+
+        arr = vtk.vtkIntArray()
+        arr.SetName("Material")
+        arr.SetNumberOfTuples(nx * ny * nz)
+        for idx, val in enumerate(values[:expected]):
+            arr.SetValue(idx, val)
+        image.GetPointData().SetScalars(arr)
+
+        mapper = vtk.vtkDataSetMapper()
+        mapper.SetInputData(image)
+        mapper.ScalarVisibilityOn()
+
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        self._renderer.AddActor(actor)
+        self._renderer.ResetCamera()
+        self._render()
+
+    def reset_view(self):
+        if self._renderer:
             self._renderer.ResetCamera()
+            self._render()
+
+    def clear_scene(self):
+        if self._renderer:
+            self._renderer.RemoveAllViewProps()
+            self._add_axes()
+            self._render()
+
+    def _set_view(self, direction: str):
+        if not self._renderer:
+            return
+        cam = self._renderer.GetActiveCamera()
+        cam.SetFocalPoint(0, 0, 0)
+        d = 100
+        views = {
+            "+X": (d, 0, 0, 0, 0, 1),
+            "-X": (-d, 0, 0, 0, 0, 1),
+            "+Y": (0, d, 0, 0, 0, 1),
+            "-Y": (0, -d, 0, 0, 0, 1),
+            "+Z": (0, 0, d, 0, 1, 0),
+            "-Z": (0, 0, -d, 0, 1, 0),
+            "Iso": (d, d, d, 0, 0, 1),
+        }
+        if direction in views:
+            px, py, pz, ux, uy, uz = views[direction]
+            cam.SetPosition(px, py, pz)
+            cam.SetViewUp(ux, uy, uz)
+        self._renderer.ResetCamera()
+        self._render()
+
+    def _render(self):
+        if self._vtk_widget:
             self._vtk_widget.GetRenderWindow().Render()
 
-    def _set_view_preset(self, name):
-        if not HAS_VTK:
-            return
-        camera = self._renderer.GetActiveCamera()
-        camera.SetFocalPoint(0, 0, 0)
-        presets = {
-            "+X": (1, 0, 0, 0, 0, 1),
-            "-X": (-1, 0, 0, 0, 0, 1),
-            "+Y": (0, 1, 0, 0, 0, 1),
-            "-Y": (0, -1, 0, 0, 0, 1),
-            "+Z": (0, 0, 1, 0, 1, 0),
-            "-Z": (0, 0, -1, 0, 1, 0),
-            "Isometric": (1, 1, 1, 0, 0, 1),
-        }
-        if name in presets:
-            px, py, pz, ux, uy, uz = presets[name]
-            camera.SetPosition(px * 100, py * 100, pz * 100)
-            camera.SetViewUp(ux, uy, uz)
-        self._renderer.ResetCamera()
-        self._vtk_widget.GetRenderWindow().Render()
+    def _open_vtk_file(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Open VTK File", "",
+            "VTK ImageData (*.vti);;All Files (*)")
+        if path:
+            self._file_combo.addItem(Path(path).name, path)
+            self._file_combo.setCurrentIndex(self._file_combo.count() - 1)
 
-    def _set_display_mode(self, mode):
-        if not HAS_VTK or not self._actor:
+    def _on_file_changed(self, index):
+        if index < 0:
             return
-        modes = {"Surface": 1, "Wireframe": 0, "Points": 2}
-        rep = modes.get(mode, 1)
-        self._actor.GetProperty().SetRepresentation(rep)
-        self._vtk_widget.GetRenderWindow().Render()
+        path = self._file_combo.itemData(index)
+        if path and os.path.isfile(path):
+            self.load_vti(path)
+
+    def add_output_files(self, directory: str):
+        """Scan a directory for VTI files and add to combo."""
+        self._file_combo.clear()
+        if not os.path.isdir(directory):
+            return
+        vti_files = sorted(Path(directory).glob("*.vti"))
+        for f in vti_files:
+            self._file_combo.addItem(f.name, str(f))
