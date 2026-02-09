@@ -4,166 +4,92 @@ import os
 from pathlib import Path
 
 from PySide6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QLabel, QWidget, QPushButton,
-    QGroupBox, QListWidget, QListWidgetItem, QTabWidget,
-    QTableWidget, QTableWidgetItem, QHeaderView,
+    QHBoxLayout, QFormLayout, QPushButton, QListWidget,
+    QFileDialog,
 )
-from PySide6.QtCore import Qt
-
+from PySide6.QtCore import Signal
 from .base_panel import BasePanel
 
 
 class PostProcessPanel(BasePanel):
+    """Browse and visualize output files from completed simulations."""
+
+    file_selected = Signal(str)  # VTI file path
 
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self._setup_ui()
+        super().__init__("Post-Processing", parent)
+        self._output_dir = ""
+        self._build_ui()
 
-    def _setup_ui(self):
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
+    def _build_ui(self):
+        self.add_section("Output Directory")
+        form = self.add_form()
 
-        w = QWidget()
-        layout = QVBoxLayout(w)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(12)
+        row = QHBoxLayout()
+        self._dir_edit = self.make_line_edit("", "Select output directory")
+        self._dir_edit.setReadOnly(True)
+        browse_btn = QPushButton("Browse")
+        browse_btn.setFixedWidth(80)
+        browse_btn.clicked.connect(self._browse_dir)
+        row.addWidget(self._dir_edit, 1)
+        row.addWidget(browse_btn)
+        form.addRow("Directory:", row)
 
-        layout.addWidget(self._create_heading("Post-Processing"))
-        layout.addWidget(self._create_subheading(
-            "Browse output files and view simulation results."))
-
-        tabs = QTabWidget()
-
-        # --- Output Files Tab ---
-        files_w = QWidget()
-        fl = QVBoxLayout(files_w)
-
-        btn_row = QHBoxLayout()
-        self._refresh_btn = QPushButton("Refresh")
-        self._refresh_btn.clicked.connect(self._refresh_files)
-        self._open_dir_btn = QPushButton("Open Output Directory")
-        self._open_dir_btn.clicked.connect(self._open_output_dir)
-        btn_row.addWidget(self._refresh_btn)
-        btn_row.addWidget(self._open_dir_btn)
-        btn_row.addStretch()
-        fl.addLayout(btn_row)
-
+        self.add_section("VTK Output Files")
         self._file_list = QListWidget()
-        fl.addWidget(self._file_list)
+        self._file_list.setMinimumHeight(200)
+        self._file_list.currentTextChanged.connect(self._on_file_selected)
+        self.add_widget(self._file_list)
 
-        self._file_info = QLabel("")
-        self._file_info.setProperty("info", True)
-        self._file_info.setWordWrap(True)
-        fl.addWidget(self._file_info)
+        row2 = QHBoxLayout()
+        refresh_btn = self.make_button("Refresh")
+        refresh_btn.clicked.connect(self._refresh_files)
+        row2.addWidget(refresh_btn)
+        row2.addStretch()
+        self.add_layout(row2)
 
-        tabs.addTab(files_w, "Output Files")
+        self.add_section("File Info")
+        self._info_lbl = self.make_info_label("Select an output file to view details.")
+        self.add_widget(self._info_lbl)
 
-        # --- Summary Tab ---
-        summary_w = QWidget()
-        sl = QVBoxLayout(summary_w)
+        self.add_stretch()
 
-        self._summary_table = QTableWidget()
-        self._summary_table.setColumnCount(2)
-        self._summary_table.setHorizontalHeaderLabels(["Property", "Value"])
-        self._summary_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self._summary_table.setAlternatingRowColors(True)
-        self._summary_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        sl.addWidget(self._summary_table)
-
-        tabs.addTab(summary_w, "Summary")
-
-        # --- Export Tab ---
-        export_w = QWidget()
-        el = QVBoxLayout(export_w)
-
-        self._export_csv_btn = QPushButton("Export Data to CSV")
-        self._export_csv_btn.clicked.connect(self._export_csv)
-        el.addWidget(self._export_csv_btn)
-
-        el.addWidget(self._create_info_label(
-            "For advanced visualization, open .vti files directly in ParaView.\n"
-            "VTK ImageData files contain all field variables at each saved timestep."))
-        el.addStretch()
-
-        tabs.addTab(export_w, "Export")
-
-        layout.addWidget(tabs, 1)
-        outer.addWidget(self._create_scroll_area(w))
+    def _browse_dir(self):
+        d = QFileDialog.getExistingDirectory(
+            self, "Select Output Directory", self._output_dir)
+        if d:
+            self._output_dir = d
+            self._dir_edit.setText(d)
+            self._refresh_files()
 
     def _refresh_files(self):
         self._file_list.clear()
-        if not self._project or not self._project.project_dir:
+        if not self._output_dir or not os.path.isdir(self._output_dir):
             return
+        vti_files = sorted(Path(self._output_dir).glob("*.vti"))
+        for f in vti_files:
+            self._file_list.addItem(f.name)
 
-        output_dir = Path(self._project.project_dir) / self._project.paths.output_path
-        if not output_dir.is_dir():
-            self._file_info.setText("Output directory does not exist yet.")
+        vtk_files = sorted(Path(self._output_dir).glob("*.vtk"))
+        for f in vtk_files:
+            self._file_list.addItem(f.name)
+
+        if self._file_list.count() == 0:
+            self._info_lbl.setText("No VTK files found in directory.")
+        else:
+            self._info_lbl.setText(f"Found {self._file_list.count()} output files.")
+
+    def _on_file_selected(self, name):
+        if not name:
             return
+        path = os.path.join(self._output_dir, name)
+        if os.path.isfile(path):
+            size = os.path.getsize(path)
+            size_str = f"{size / 1024:.1f} KB" if size < 1048576 else f"{size / 1048576:.1f} MB"
+            self._info_lbl.setText(f"File: {name}\nSize: {size_str}")
+            self.file_selected.emit(path)
 
-        files = sorted(output_dir.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True)
-        vti_count = 0
-        chk_count = 0
-        for f in files:
-            if f.is_file():
-                suffix = f.suffix.lower()
-                size_kb = f.stat().st_size / 1024
-                label = f"{f.name}  ({size_kb:.0f} KB)"
-                self._file_list.addItem(label)
-                if suffix == ".vti":
-                    vti_count += 1
-                elif suffix in (".dat", ".chk"):
-                    chk_count += 1
-
-        self._file_info.setText(
-            f"Total files: {len(files)}  |  VTI: {vti_count}  |  Checkpoints: {chk_count}")
-
-        # Update summary
-        self._update_summary(output_dir, len(files), vti_count)
-
-    def _update_summary(self, output_dir, total, vti_count):
-        rows = [
-            ("Output directory", str(output_dir)),
-            ("Total files", str(total)),
-            ("VTK files", str(vti_count)),
-        ]
-        self._summary_table.setRowCount(len(rows))
-        for i, (prop, val) in enumerate(rows):
-            self._summary_table.setItem(i, 0, QTableWidgetItem(prop))
-            self._summary_table.setItem(i, 1, QTableWidgetItem(val))
-
-    def _open_output_dir(self):
-        if not self._project or not self._project.project_dir:
-            return
-        output_dir = Path(self._project.project_dir) / self._project.paths.output_path
-        if output_dir.is_dir():
-            import subprocess
-            import sys
-            if sys.platform == "win32":
-                os.startfile(str(output_dir))
-            elif sys.platform == "darwin":
-                subprocess.Popen(["open", str(output_dir)])
-            else:
-                subprocess.Popen(["xdg-open", str(output_dir)])
-
-    def _export_csv(self):
-        from PySide6.QtWidgets import QFileDialog
-        if not self._project:
-            return
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Export CSV", "results.csv",
-            "CSV Files (*.csv);;All Files (*)")
-        if not path:
-            return
-        # Export summary table
-        with open(path, "w") as f:
-            for i in range(self._summary_table.rowCount()):
-                prop = self._summary_table.item(i, 0)
-                val = self._summary_table.item(i, 1)
-                if prop and val:
-                    f.write(f"{prop.text()},{val.text()}\n")
-
-    def _populate_fields(self):
+    def set_output_directory(self, directory: str):
+        self._output_dir = directory
+        self._dir_edit.setText(directory)
         self._refresh_files()
-
-    def collect_data(self, project):
-        pass

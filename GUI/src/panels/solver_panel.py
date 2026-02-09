@@ -1,187 +1,99 @@
-"""Solver configuration panel - numerics, iteration, and I/O settings."""
-
-from PySide6.QtWidgets import (
-    QVBoxLayout, QFormLayout, QLabel, QWidget, QTabWidget, QGroupBox,
-)
-from PySide6.QtCore import Qt
+"""Solver / iteration settings panel."""
 
 from .base_panel import BasePanel
+from ..widgets.collapsible_section import CollapsibleSection
+from PySide6.QtWidgets import QFormLayout
 
 
 class SolverPanel(BasePanel):
+    """Iteration control parameters for NS and ADE solvers."""
 
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self._setup_ui()
+        super().__init__("Solver Settings", parent)
+        self._build_ui()
 
-    def _setup_ui(self):
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
+    def _build_ui(self):
+        # Navier-Stokes
+        self.add_section("Navier-Stokes (Flow) Solver")
+        form = self.add_form()
 
-        w = QWidget()
-        layout = QVBoxLayout(w)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(12)
+        self.ns_max_iT1 = self.make_spin(100000, 0)
+        self.ns_max_iT1.setToolTip("Max NS iterations for initial flow solve (phase 1).")
+        form.addRow("Phase 1 max iterations:", self.ns_max_iT1)
 
-        layout.addWidget(self._create_heading("Solver Settings"))
-        layout.addWidget(self._create_subheading(
-            "LBM numerics, iteration control, and output configuration."))
+        self.ns_converge_iT1 = self.make_double_spin(1e-8, 0, 1, 12)
+        self.ns_converge_iT1.setToolTip("Convergence criterion for initial NS solve.")
+        form.addRow("Phase 1 convergence:", self.ns_converge_iT1)
 
-        tabs = QTabWidget()
+        self.ns_max_iT2 = self.make_spin(100000, 0)
+        self.ns_max_iT2.setToolTip("Max NS iterations per coupled step (phase 2).")
+        form.addRow("Phase 2 max iterations:", self.ns_max_iT2)
 
-        # --- Numerics Tab ---
-        num_w = QWidget()
-        nf = QVBoxLayout(num_w)
+        self.ns_converge_iT2 = self.make_double_spin(1e-6, 0, 1, 12)
+        self.ns_converge_iT2.setToolTip("Convergence criterion for coupled NS updates.")
+        form.addRow("Phase 2 convergence:", self.ns_converge_iT2)
 
-        flow_group = self._create_group("Flow Parameters")
-        ff = self._create_form()
-        self._tau = self._create_double_spin(0.501, 1.999, 0.8, 4, 0.01)
-        self._delta_p = self._create_sci_spin(0, 1e10, 2.0e-3)
-        self._peclet = self._create_double_spin(0.001, 1000.0, 1.0, 3, 0.1)
-        self._track_perf = self._create_checkbox("Track performance metrics")
-        ff.addRow("Relaxation time (tau):", self._tau)
-        ff.addRow("Pressure drop (delta_P) [Pa]:", self._delta_p)
-        ff.addRow("Peclet number:", self._peclet)
-        ff.addRow("", self._track_perf)
-        flow_group.setLayout(ff)
-        nf.addWidget(flow_group)
+        self.ns_update = self.make_spin(1, 1)
+        self.ns_update.setToolTip("Recompute NS flow every N ADE iterations.")
+        form.addRow("NS update interval:", self.ns_update)
 
-        stability_info = QLabel(
-            "Stability constraints:\n"
-            "  tau: Must be in range (0.5, 2.0). Closer to 1.0 is more stable.\n"
-            "  Peclet: Pe = u*L/D. Higher values mean advection-dominated transport.\n"
-            "  Grid Peclet: Pe_grid < 2.0 for numerical stability.")
-        stability_info.setProperty("info", True)
-        stability_info.setWordWrap(True)
-        nf.addWidget(stability_info)
-        nf.addStretch()
+        # ADE
+        self.add_section("Advection-Diffusion (Transport) Solver")
+        form2 = self.add_form()
 
-        tabs.addTab(num_w, "Numerics")
+        self.ade_max_iT = self.make_spin(50000, 0)
+        self.ade_max_iT.setToolTip("Maximum ADE iterations for transport.")
+        form2.addRow("Max ADE iterations:", self.ade_max_iT)
 
-        # --- Iteration Tab ---
-        iter_w = QWidget()
-        il = QVBoxLayout(iter_w)
+        self.ade_converge = self.make_double_spin(1e-8, 0, 1, 12)
+        self.ade_converge.setToolTip("ADE convergence criterion (parsed but currently unused in solver).")
+        form2.addRow("ADE convergence:", self.ade_converge)
 
-        ns_group = self._create_group("Navier-Stokes Solver")
-        nsf = self._create_form()
-        self._ns_max1 = self._create_spin(100, 10000000, 100000)
-        self._ns_max2 = self._create_spin(100, 10000000, 100000)
-        self._ns_conv1 = self._create_sci_spin(0, 1.0, 1e-8)
-        self._ns_conv2 = self._create_sci_spin(0, 1.0, 1e-6)
-        self._ns_interval = self._create_spin(1, 100000, 1)
-        nsf.addRow("Phase 1 max iterations:", self._ns_max1)
-        nsf.addRow("Phase 1 convergence:", self._ns_conv1)
-        nsf.addRow("Phase 2 max iterations:", self._ns_max2)
-        nsf.addRow("Phase 2 convergence:", self._ns_conv2)
-        nsf.addRow("Update interval:", self._ns_interval)
-        ns_group.setLayout(nsf)
-        il.addWidget(ns_group)
+        self.ade_update = self.make_spin(1, 1)
+        self.ade_update.setToolTip("ADE update interval.")
+        form2.addRow("ADE update interval:", self.ade_update)
 
-        ade_group = self._create_group("Advection-Diffusion Solver")
-        af = self._create_form()
-        self._ade_max = self._create_spin(100, 10000000, 50000)
-        self._ade_conv = self._create_sci_spin(0, 1.0, 1e-8)
-        self._ade_interval = self._create_spin(1, 100000, 1)
-        af.addRow("Max iterations:", self._ade_max)
-        af.addRow("Convergence criterion:", self._ade_conv)
-        af.addRow("Update interval:", self._ade_interval)
-        ade_group.setLayout(af)
-        il.addWidget(ade_group)
+        # Restart
+        adv = CollapsibleSection("Restart Settings")
+        adv_form = QFormLayout()
+        self.ns_rerun_iT0 = self.make_spin(0, 0)
+        self.ns_rerun_iT0.setToolTip(
+            "Starting iteration for NS restart (when read_NS_file=true).\n"
+            "0 = start from beginning.")
+        adv_form.addRow("NS restart iteration:", self.ns_rerun_iT0)
 
-        il.addWidget(self._create_info_label(
-            "Phase 1: Initial flow field calculation (strict convergence).\n"
-            "Phase 2: Flow field updates during reactive transport (relaxed convergence)."))
-        il.addStretch()
+        self.ade_rerun_iT0 = self.make_spin(0, 0)
+        self.ade_rerun_iT0.setToolTip(
+            "Starting iteration for ADE restart (when read_ADE_file=true).\n"
+            "0 = start from beginning.")
+        adv_form.addRow("ADE restart iteration:", self.ade_rerun_iT0)
+        adv.set_content_layout(adv_form)
+        self.add_widget(adv)
 
-        tabs.addTab(iter_w, "Iteration Control")
+        self.add_stretch()
 
-        # --- I/O Tab ---
-        io_w = QWidget()
-        iol = QVBoxLayout(io_w)
-
-        restart_group = self._create_group("Restart Files")
-        rf = self._create_form()
-        self._read_ns = self._create_checkbox("Read NS restart file")
-        self._read_ade = self._create_checkbox("Read ADE restart file")
-        self._ns_file = self._create_line_edit("nsLattice")
-        self._mask_file = self._create_line_edit("maskLattice")
-        self._subs_file = self._create_line_edit("subsLattice")
-        self._bio_file = self._create_line_edit("bioLattice")
-        rf.addRow("", self._read_ns)
-        rf.addRow("", self._read_ade)
-        rf.addRow("NS filename:", self._ns_file)
-        rf.addRow("Mask filename:", self._mask_file)
-        rf.addRow("Substrate filename:", self._subs_file)
-        rf.addRow("Biomass filename:", self._bio_file)
-        restart_group.setLayout(rf)
-        iol.addWidget(restart_group)
-
-        output_group = self._create_group("Output Intervals")
-        of = self._create_form()
-        self._vtk_interval = self._create_spin(1, 10000000, 500)
-        self._chk_interval = self._create_spin(1, 10000000, 5000)
-        of.addRow("Save VTK every N iterations:", self._vtk_interval)
-        of.addRow("Save checkpoint every N iterations:", self._chk_interval)
-        output_group.setLayout(of)
-        iol.addWidget(output_group)
-        iol.addStretch()
-
-        tabs.addTab(io_w, "I/O Settings")
-
-        layout.addWidget(tabs, 1)
-        outer.addWidget(self._create_scroll_area(w))
-
-    def _populate_fields(self):
-        if not self._project:
-            return
-        p = self._project
-        self._tau.setValue(p.fluid.tau)
-        self._delta_p.setValue(p.fluid.delta_p)
-        self._peclet.setValue(p.fluid.peclet)
-        self._track_perf.setChecked(p.track_performance)
-
-        it = p.iteration
-        self._ns_max1.setValue(it.ns_max_iT1)
-        self._ns_max2.setValue(it.ns_max_iT2)
-        self._ns_conv1.setValue(it.ns_converge_iT1)
-        self._ns_conv2.setValue(it.ns_converge_iT2)
-        self._ns_interval.setValue(it.ns_update_interval)
-        self._ade_max.setValue(it.ade_max_iT)
-        self._ade_conv.setValue(it.ade_converge_iT)
-        self._ade_interval.setValue(it.ade_update_interval)
-
-        io = p.io_settings
-        self._read_ns.setChecked(io.read_ns_file)
-        self._read_ade.setChecked(io.read_ade_file)
-        self._ns_file.setText(io.ns_filename)
-        self._mask_file.setText(io.mask_filename)
-        self._subs_file.setText(io.subs_filename)
-        self._bio_file.setText(io.bio_filename)
-        self._vtk_interval.setValue(io.save_vtk_interval)
-        self._chk_interval.setValue(io.save_chk_interval)
-
-    def collect_data(self, project):
-        project.fluid.tau = self._tau.value()
-        project.fluid.delta_p = self._delta_p.value()
-        project.fluid.peclet = self._peclet.value()
-        project.track_performance = self._track_perf.isChecked()
-
+    def load_from_project(self, project):
         it = project.iteration
-        it.ns_max_iT1 = self._ns_max1.value()
-        it.ns_max_iT2 = self._ns_max2.value()
-        it.ns_converge_iT1 = self._ns_conv1.value()
-        it.ns_converge_iT2 = self._ns_conv2.value()
-        it.ns_update_interval = self._ns_interval.value()
-        it.ade_max_iT = self._ade_max.value()
-        it.ade_converge_iT = self._ade_conv.value()
-        it.ade_update_interval = self._ade_interval.value()
+        self.ns_max_iT1.setValue(it.ns_max_iT1)
+        self.ns_max_iT2.setValue(it.ns_max_iT2)
+        self.ns_converge_iT1.setValue(it.ns_converge_iT1)
+        self.ns_converge_iT2.setValue(it.ns_converge_iT2)
+        self.ns_update.setValue(it.ns_update_interval)
+        self.ade_max_iT.setValue(it.ade_max_iT)
+        self.ade_converge.setValue(it.ade_converge_iT)
+        self.ade_update.setValue(it.ade_update_interval)
+        self.ns_rerun_iT0.setValue(it.ns_rerun_iT0)
+        self.ade_rerun_iT0.setValue(it.ade_rerun_iT0)
 
-        io = project.io_settings
-        io.read_ns_file = self._read_ns.isChecked()
-        io.read_ade_file = self._read_ade.isChecked()
-        io.ns_filename = self._ns_file.text().strip()
-        io.mask_filename = self._mask_file.text().strip()
-        io.subs_filename = self._subs_file.text().strip()
-        io.bio_filename = self._bio_file.text().strip()
-        io.save_vtk_interval = self._vtk_interval.value()
-        io.save_chk_interval = self._chk_interval.value()
+    def save_to_project(self, project):
+        it = project.iteration
+        it.ns_max_iT1 = self.ns_max_iT1.value()
+        it.ns_max_iT2 = self.ns_max_iT2.value()
+        it.ns_converge_iT1 = self.ns_converge_iT1.value()
+        it.ns_converge_iT2 = self.ns_converge_iT2.value()
+        it.ns_update_interval = self.ns_update.value()
+        it.ade_max_iT = self.ade_max_iT.value()
+        it.ade_converge_iT = self.ade_converge.value()
+        it.ade_update_interval = self.ade_update.value()
+        it.ns_rerun_iT0 = self.ns_rerun_iT0.value()
+        it.ade_rerun_iT0 = self.ade_rerun_iT0.value()

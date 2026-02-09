@@ -1,21 +1,20 @@
-"""Console output widget with color-coded messages."""
+"""Console output widget with color-coded messages and run controls."""
 
 import datetime
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton,
-    QFileDialog,
+    QLabel, QProgressBar, QFileDialog,
 )
-from PySide6.QtGui import QTextCursor, QColor
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QTextCursor, QColor
 
 
 class ConsoleWidget(QWidget):
-
-    MAX_LINES = 10000
+    """Bottom panel: console log + progress bar + run controls."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._line_count = 0
+        self._max_lines = 10000
         self._setup_ui()
 
     def _setup_ui(self):
@@ -23,87 +22,116 @@ class ConsoleWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        toolbar = QHBoxLayout()
-        toolbar.setContentsMargins(4, 2, 4, 2)
+        # Header bar
+        header = QHBoxLayout()
+        header.setContentsMargins(8, 4, 8, 4)
+        lbl = QLabel("Console Output")
+        lbl.setProperty("subheading", True)
+        header.addWidget(lbl)
+        header.addStretch()
+
+        self._progress = QProgressBar()
+        self._progress.setFixedWidth(200)
+        self._progress.setTextVisible(True)
+        self._progress.setValue(0)
+        self._progress.setVisible(False)
+        header.addWidget(self._progress)
+
+        self._status_lbl = QLabel("Ready")
+        self._status_lbl.setProperty("info", True)
+        self._status_lbl.setFixedWidth(200)
+        self._status_lbl.setAlignment(Qt.AlignmentFlag.AlignRight)
+        header.addWidget(self._status_lbl)
 
         self._clear_btn = QPushButton("Clear")
         self._clear_btn.setFixedWidth(60)
         self._clear_btn.clicked.connect(self.clear)
+        header.addWidget(self._clear_btn)
 
         self._save_btn = QPushButton("Save Log")
         self._save_btn.setFixedWidth(70)
         self._save_btn.clicked.connect(self._save_log)
+        header.addWidget(self._save_btn)
 
-        toolbar.addStretch()
-        toolbar.addWidget(self._clear_btn)
-        toolbar.addWidget(self._save_btn)
+        layout.addLayout(header)
 
-        self._output = QTextEdit()
-        self._output.setReadOnly(True)
-        self._output.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
-        self._output.setAcceptRichText(True)
+        # Text area
+        self._text = QTextEdit()
+        self._text.setReadOnly(True)
+        self._text.setLineWrapMode(QTextEdit.LineWrapMode.NoWrap)
+        layout.addWidget(self._text)
 
-        layout.addLayout(toolbar)
-        layout.addWidget(self._output)
-
-    def append(self, text, level="info"):
-        color_map = {
-            "info": "#888888",
-            "output": "#cccccc",
-            "success": "#4ec9b0",
-            "warning": "#cca700",
-            "error": "#f44747",
-        }
-        color = color_map.get(level, "#cccccc")
-        # Auto-detect level from content
-        if level == "info":
+    def append(self, text: str, color: str = None):
+        """Append a line to the console."""
+        if color:
+            html = f'<span style="color:{color}">{_escape(text)}</span>'
+        else:
+            # Auto-color based on content
             lower = text.lower()
-            if "[error]" in lower or "error" in lower:
-                color = color_map["error"]
-            elif "[warning]" in lower or "warning" in lower:
-                color = color_map["warning"]
-            elif "converge" in lower or "completed" in lower:
-                color = color_map["success"]
+            if "error" in lower or "fail" in lower or "terminat" in lower:
+                html = f'<span style="color:#e06c75">{_escape(text)}</span>'
+            elif "warning" in lower or "warn" in lower:
+                html = f'<span style="color:#e5c07b">{_escape(text)}</span>'
+            elif text.startswith("--") or text.startswith("=="):
+                html = f'<span style="color:#8cb4d8">{_escape(text)}</span>'
+            else:
+                html = _escape(text)
 
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-        html = f'<span style="color:#555555">{timestamp}</span> <span style="color:{color}">{_escape(text)}</span>'
-        self._output.append(html)
-        self._line_count += 1
+        cursor = self._text.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+        self._text.setTextCursor(cursor)
+        self._text.append(html)
 
-        if self._line_count > self.MAX_LINES:
-            self._trim()
+        # Trim old lines
+        doc = self._text.document()
+        if doc.blockCount() > self._max_lines:
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            cursor.movePosition(
+                QTextCursor.MoveOperation.Down,
+                QTextCursor.MoveMode.KeepAnchor,
+                doc.blockCount() - self._max_lines
+            )
+            cursor.removeSelectedText()
 
-        self._output.moveCursor(QTextCursor.MoveOperation.End)
+    def log_info(self, text: str):
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        self.append(f"[{ts}] {text}")
 
-    def append_output(self, text):
-        """Append simulation output, auto-detecting log level."""
-        self.append(text, "info")
+    def log_error(self, text: str):
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        self.append(f"[{ts}] ERROR: {text}", "#e06c75")
+
+    def log_success(self, text: str):
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        self.append(f"[{ts}] {text}", "#98c379")
+
+    def set_progress(self, current: int, maximum: int):
+        if maximum > 0:
+            self._progress.setVisible(True)
+            self._progress.setMaximum(maximum)
+            self._progress.setValue(current)
+        else:
+            self._progress.setVisible(False)
+
+    def set_status(self, text: str):
+        self._status_lbl.setText(text)
 
     def clear(self):
-        self._output.clear()
-        self._line_count = 0
+        self._text.clear()
 
-    def _trim(self):
-        cursor = self._output.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.Start)
-        cursor.movePosition(
-            QTextCursor.MoveOperation.Down,
-            QTextCursor.MoveMode.KeepAnchor,
-            self._line_count - self.MAX_LINES,
-        )
-        cursor.removeSelectedText()
-        self._line_count = self.MAX_LINES
+    def set_max_lines(self, n: int):
+        self._max_lines = n
 
     def _save_log(self):
         path, _ = QFileDialog.getSaveFileName(
-            self, "Save Console Log", "console.log",
-            "Log Files (*.log);;Text Files (*.txt);;All Files (*)")
+            self, "Save Console Log", "console_log.txt",
+            "Text Files (*.txt);;All Files (*)")
         if path:
             with open(path, "w") as f:
-                f.write(self._output.toPlainText())
+                f.write(self._text.toPlainText())
 
 
-def _escape(text):
+def _escape(text: str) -> str:
     return (text
             .replace("&", "&amp;")
             .replace("<", "&lt;")

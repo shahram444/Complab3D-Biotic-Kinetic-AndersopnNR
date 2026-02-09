@@ -3,23 +3,25 @@
 from pathlib import Path
 
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QFormLayout, QLabel,
-    QLineEdit, QPushButton, QListWidget, QListWidgetItem,
-    QFileDialog, QGroupBox, QTextEdit,
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QListWidget, QListWidgetItem, QLineEdit, QFileDialog,
+    QFormLayout,
 )
 from PySide6.QtCore import Qt
 
-from ..core.templates import ProjectTemplates, TEMPLATES
+from ..core.templates import get_template_list, create_from_template
 
 
 class NewProjectDialog(QDialog):
+    """Template selection wizard for new project creation."""
 
-    def __init__(self, default_dir="", parent=None):
+    def __init__(self, default_dir: str = "", parent=None):
         super().__init__(parent)
         self.setWindowTitle("New Project")
-        self.setMinimumSize(700, 500)
+        self.setMinimumSize(550, 450)
         self._default_dir = default_dir
-        self._selected_template = None
+        self._selected_key = ""
+        self._project = None
         self._setup_ui()
 
     def _setup_ui(self):
@@ -30,126 +32,77 @@ class NewProjectDialog(QDialog):
         heading.setProperty("heading", True)
         layout.addWidget(heading)
 
-        body = QHBoxLayout()
-        body.setSpacing(16)
+        layout.addWidget(QLabel("Select a simulation template:"))
 
-        # Left: template list
-        left = QVBoxLayout()
-        left.addWidget(QLabel("Select Template:"))
-
-        self._template_list = QListWidget()
-        self._template_list.setMinimumWidth(260)
-        current_group = ""
-        for key, label, group, desc in ProjectTemplates.list_templates():
-            if group != current_group:
-                separator = QListWidgetItem(f"--- {group} ---")
-                separator.setFlags(Qt.ItemFlag.NoItemFlags)
-                self._template_list.addItem(separator)
-                current_group = group
-            item = QListWidgetItem(f"  {label}")
+        # Template list
+        self._list = QListWidget()
+        templates = get_template_list()
+        for key, name, desc in templates:
+            item = QListWidgetItem(f"{name}\n  {desc}")
             item.setData(Qt.ItemDataRole.UserRole, key)
-            self._template_list.addItem(item)
+            self._list.addItem(item)
+        self._list.currentItemChanged.connect(self._on_select)
+        layout.addWidget(self._list, 1)
 
-        self._template_list.currentItemChanged.connect(self._on_template_selected)
-        left.addWidget(self._template_list)
+        # Description
+        self._desc = QLabel("")
+        self._desc.setProperty("info", True)
+        self._desc.setWordWrap(True)
+        layout.addWidget(self._desc)
 
-        # Right: details + project info
-        right = QVBoxLayout()
-
-        self._desc_label = QLabel("Select a template to see its description.")
-        self._desc_label.setProperty("info", True)
-        self._desc_label.setWordWrap(True)
-        self._desc_label.setMinimumHeight(60)
-        right.addWidget(self._desc_label)
-
-        right.addWidget(self._separator())
-
+        # Project name and directory
         form = QFormLayout()
-        form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
         form.setHorizontalSpacing(12)
-        form.setVerticalSpacing(8)
 
-        self._name_edit = QLineEdit("MyProject")
-        self._name_edit.textChanged.connect(self._update_path)
+        self._name_edit = QLineEdit("Untitled")
+        form.addRow("Project name:", self._name_edit)
 
         dir_row = QHBoxLayout()
-        self._dir_edit = QLineEdit(self._default_dir or str(Path.home() / "CompLaB_Projects"))
-        self._browse_btn = QPushButton("Browse")
-        self._browse_btn.setFixedWidth(80)
-        self._browse_btn.clicked.connect(self._browse_dir)
+        self._dir_edit = QLineEdit(self._default_dir)
+        browse_btn = QPushButton("Browse")
+        browse_btn.setFixedWidth(80)
+        browse_btn.clicked.connect(self._browse_dir)
         dir_row.addWidget(self._dir_edit)
-        dir_row.addWidget(self._browse_btn)
-
-        self._path_label = QLabel("")
-        self._path_label.setProperty("info", True)
-
-        self._description = QLineEdit()
-        self._description.setPlaceholderText("Optional project description")
-
-        form.addRow("Project name:", self._name_edit)
-        form.addRow("Location:", dir_row)
-        form.addRow("Full path:", self._path_label)
-        form.addRow("Description:", self._description)
-
-        right.addLayout(form)
-        right.addStretch()
-
-        body.addLayout(left)
-        body.addLayout(right, 1)
-        layout.addLayout(body, 1)
+        dir_row.addWidget(browse_btn)
+        form.addRow("Save directory:", dir_row)
+        layout.addLayout(form)
 
         # Buttons
         btn_row = QHBoxLayout()
         btn_row.addStretch()
-        self._cancel_btn = QPushButton("Cancel")
-        self._cancel_btn.clicked.connect(self.reject)
-        self._create_btn = QPushButton("Create Project")
-        self._create_btn.setProperty("primary", True)
-        self._create_btn.clicked.connect(self.accept)
-        self._create_btn.setEnabled(False)
-        btn_row.addWidget(self._cancel_btn)
-        btn_row.addWidget(self._create_btn)
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.reject)
+        create_btn = QPushButton("Create")
+        create_btn.setProperty("primary", True)
+        create_btn.clicked.connect(self._create)
+        btn_row.addWidget(cancel_btn)
+        btn_row.addWidget(create_btn)
         layout.addLayout(btn_row)
 
-        self._update_path()
+        if self._list.count() > 0:
+            self._list.setCurrentRow(0)
 
-    def _separator(self):
-        from PySide6.QtWidgets import QFrame
-        line = QFrame()
-        line.setFrameShape(QFrame.Shape.HLine)
-        return line
-
-    def _on_template_selected(self, current, previous):
-        if current is None:
-            return
-        key = current.data(Qt.ItemDataRole.UserRole)
-        if key and key in TEMPLATES:
-            self._selected_template = key
-            self._desc_label.setText(TEMPLATES[key]["description"])
-            self._create_btn.setEnabled(True)
-        else:
-            self._selected_template = None
-            self._create_btn.setEnabled(False)
+    def _on_select(self, current, _prev=None):
+        if current:
+            self._selected_key = current.data(Qt.ItemDataRole.UserRole)
 
     def _browse_dir(self):
-        d = QFileDialog.getExistingDirectory(self, "Select Project Location",
-                                              self._dir_edit.text())
+        d = QFileDialog.getExistingDirectory(
+            self, "Select Project Directory", self._dir_edit.text())
         if d:
             self._dir_edit.setText(d)
-            self._update_path()
 
-    def _update_path(self):
+    def _create(self):
+        if not self._selected_key:
+            return
+        self._project = create_from_template(self._selected_key)
         name = self._name_edit.text().strip()
-        directory = self._dir_edit.text().strip()
-        if name and directory:
-            self._path_label.setText(str(Path(directory) / name))
-        else:
-            self._path_label.setText("")
+        if name:
+            self._project.name = name
+        self.accept()
 
-    def get_result(self):
-        return {
-            "name": self._name_edit.text().strip(),
-            "directory": self._dir_edit.text().strip(),
-            "template": self._selected_template,
-            "description": self._description.text().strip(),
-        }
+    def get_project(self):
+        return self._project
+
+    def get_directory(self) -> str:
+        return self._dir_edit.text()
