@@ -130,12 +130,12 @@ func _gen_deep_sediment(def: Dictionary) -> void:
 		for x in range(2, map_w - 2):
 			if map_copy[y][x] == Tile.PORE and _rng.randf() < 0.6:
 				# Open up adjacent cells in 1-2 directions
-				var dirs = [Vector2i(0,-1),Vector2i(1,0),Vector2i(0,1),Vector2i(-1,0)]
+				var widen_dirs = [Vector2i(0,-1),Vector2i(1,0),Vector2i(0,1),Vector2i(-1,0)]
 				var num_opens = 1 if _rng.randf() < 0.5 else 2
 				for _o in range(num_opens):
 					var d = _rng.randi_range(0, 3)
-					var nx = x + dirs[d].x
-					var ny = y + dirs[d].y
+					var nx = x + widen_dirs[d].x
+					var ny = y + widen_dirs[d].y
 					if ny > 0 and ny < map_h-1 and nx > 0 and nx < map_w-1:
 						map[ny][nx] = Tile.PORE
 	_add_borders()
