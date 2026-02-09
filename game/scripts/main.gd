@@ -116,12 +116,12 @@ func _update_title(_delta: float) -> void:
 		story_scroll = 0
 
 func _update_narrative(delta: float) -> void:
-	story_scroll += delta * 22
+	story_scroll += delta * 10
 	if Input.is_action_just_pressed("ui_confirm"):
-		if story_scroll > GameData.NARRATIVE_LINES.size() * 12 + 40:
+		if story_scroll > GameData.NARRATIVE_LINES.size() * 14 + 80:
 			_start_game()
 		else:
-			story_scroll = GameData.NARRATIVE_LINES.size() * 12 + 60
+			story_scroll = GameData.NARRATIVE_LINES.size() * 14 + 100
 
 func _update_level_intro(delta: float) -> void:
 	intro_timer += delta
@@ -150,6 +150,17 @@ func _update_playing(delta: float) -> void:
 	# Update substrates
 	_update_substrates(delta)
 	_update_colonies(delta)
+	_update_popups(delta)
+
+	# Eat flash
+	if eat_flash_timer > 0:
+		eat_flash_timer -= delta
+
+	# Starvation urgency pulse
+	if player_node.alive and player_node.health < 30:
+		starvation_pulse += delta * 4.0
+	else:
+		starvation_pulse = 0.0
 
 	# Camera follow
 	if player_node and cam:
@@ -251,6 +262,9 @@ func _load_level(idx: int) -> void:
 	colonies.clear()
 	spawn_timer = 0.0
 	science_mode = false
+	eat_flash_timer = 0.0
+	popup_texts.clear()
+	starvation_pulse = 0.0
 
 	# Camera snap
 	if cam:
@@ -349,18 +363,30 @@ func _spawn_substrates(def: Dictionary) -> void:
 	var available_subs: Array = def.get("subs", [GameData.Sub.CH4])
 
 	for _n in range(density):
-		# Find spawn location (left side)
 		var spawn_x = -1
 		var spawn_y = -1
-		for _attempt in range(20):
-			var ty = randi_range(1, world_node.map_h - 2)
-			for tx in range(0, mini(5, world_node.map_w)):
+
+		# 40% chance spawn at inlet (flow-carried), 60% random pore location
+		var use_inlet = randf() < 0.4
+		if use_inlet:
+			for _attempt in range(20):
+				var ty = randi_range(1, world_node.map_h - 2)
+				for tx in range(0, mini(5, world_node.map_w)):
+					if world_node.is_walkable_tile(world_node.get_tile(tx, ty)):
+						spawn_x = tx
+						spawn_y = ty
+						break
+				if spawn_x >= 0:
+					break
+		else:
+			# Spawn at random walkable pore anywhere in the map
+			for _attempt in range(30):
+				var tx = randi_range(1, world_node.map_w - 2)
+				var ty = randi_range(1, world_node.map_h - 2)
 				if world_node.is_walkable_tile(world_node.get_tile(tx, ty)):
 					spawn_x = tx
 					spawn_y = ty
 					break
-			if spawn_x >= 0:
-				break
 		if spawn_x < 0:
 			continue
 
@@ -412,8 +438,31 @@ func _on_player_divided(tile_pos: Vector2i) -> void:
 	if colonies.size() >= def.get("goal", 5):
 		_complete_level()
 
+var eat_flash_timer: float = 0.0
+var eat_flash_color: Color = Color.WHITE
+var popup_texts: Array = []  # [{text, pos, timer, color}]
+var starvation_pulse: float = 0.0
+
 func _on_ate_substrate(sub_type: int) -> void:
-	pass  # Could add screen effects here
+	var sub_data = GameData.SUBSTRATES[sub_type]
+	eat_flash_timer = 0.15
+	eat_flash_color = Color.html(sub_data["glow"])
+	_do_shake(1.5, 0.1)
+	# Floating +energy popup
+	var popup = {
+		"text": "+%d %s" % [sub_data["energy"], sub_data["formula"]],
+		"pos": player_node.position + Vector2(8, -8),
+		"timer": 1.2,
+		"color": Color.html(sub_data["color"]),
+	}
+	popup_texts.append(popup)
+
+func _update_popups(delta: float) -> void:
+	for i in range(popup_texts.size() - 1, -1, -1):
+		popup_texts[i]["timer"] -= delta
+		popup_texts[i]["pos"].y -= delta * 20  # float upward
+		if popup_texts[i]["timer"] <= 0:
+			popup_texts.remove_at(i)
 
 # ── CAMERA SHAKE ─────────────────────────────────────────────────────────────
 
@@ -438,8 +487,11 @@ func _update_shake(delta: float) -> void:
 
 func _draw() -> void:
 	# These draw in world space - UI overlays are handled by HUD on CanvasLayer
-	if science_mode and state == S.PLAYING:
-		_draw_science_overlay()
+	if state == S.PLAYING:
+		if science_mode:
+			_draw_science_overlay()
+		# Floating popup texts in world space
+		_draw_popups()
 
 func _draw_science_overlay() -> void:
 	if !world_node or !cam:
@@ -464,3 +516,17 @@ func _draw_science_overlay() -> void:
 			var tex = SpriteFactory.get_tex(arrow_key)
 			if tex:
 				draw_texture(tex, pos, Color(1, 1, 1, alpha))
+
+func _draw_popups() -> void:
+	var font = ThemeDB.fallback_font
+	if !font:
+		return
+	for p in popup_texts:
+		var alpha = clampf(p["timer"] / 0.6, 0, 1)
+		var col: Color = p["color"]
+		col.a = alpha
+		# Shadow
+		draw_string(font, p["pos"] + Vector2(1, 1), p["text"],
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0, 0, 0, alpha * 0.8))
+		draw_string(font, p["pos"], p["text"],
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 7, col)
