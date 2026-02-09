@@ -1,0 +1,357 @@
+================================================================================
+                         CompLaB Studio User Guide
+                              Version 1.0
+          
+                 Pore-Scale Reactive Transport Modeling
+================================================================================
+
+                        CompLaB Studio 3D GUI
+                  Developed by: Shahram Asgari
+                  shahram.asgari@uga.edu
+                  
+                  Advisor: Dr. Christof Meile
+                  cmeile@uga.edu
+
+                     CompLaB Core Engine (2D)
+                  Original Developer: Dr. Heewon Jung
+                  hjung@cnu.ac.kr
+
+        University of Georgia 
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+1. Introduction
+2. Installation
+3. Quick Start Guide
+4. Creating Projects with Templates
+5. Preparing Geometry Files
+6. Configuring Simulations
+7. Running Simulations
+8. Troubleshooting
+9. Reference
+
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+CompLaB Studio is a graphical user interface for configuring and running 
+CompLaB (Computational Laboratory) simulations. CompLaB is a pore-scale 
+reactive transport modeling framework that uses the Lattice Boltzmann Method 
+(LBM) for fluid flow and Cellular Automata (CA) for biofilm growth dynamics.
+
+The software enables researchers to:
+  * Simulate fluid flow through complex porous media geometries
+  * Model advection-diffusion of chemical substrates
+  * Simulate microbial growth and biofilm formation
+  * Couple biological and chemical reactions at the pore scale
+
+1.1 System Requirements
+-----------------------
+  * Windows 10 or later (64-bit)
+  * 8 GB RAM minimum (16 GB recommended for large domains)
+  * MATLAB R2020a or later (for geometry creation)
+  * ParaView (recommended for visualization)
+
+
+================================================================================
+2. INSTALLATION
+================================================================================
+
+2.1 Installing CompLaB Studio
+-----------------------------
+1. Download the CompLaB Studio installer
+2. Run the installer and follow the prompts
+3. The software will be installed to:
+   C:\Users\<username>\AppData\Local\CompLaB_Studio\
+
+2.2 Directory Structure
+-----------------------
+After installation, the following directories are created:
+
+CompLaB_Studio/
+  bin/           # CompLaB executable
+  gui/           # GUI application files
+  matlab/        # MATLAB scripts for geometry
+
+
+================================================================================
+3. QUICK START GUIDE
+================================================================================
+
+This section provides a step-by-step guide to run your first simulation.
+
+3.1 Workflow Overview
+---------------------
+1. Create geometry in MATLAB using createDAT_with_microbes.m
+2. Launch CompLaB Studio and create a new project
+3. Select a project template based on your simulation type
+4. Copy your geometry .dat file to the project's input folder
+5. Configure domain dimensions and simulation parameters
+6. Save the project and run the simulation
+7. View results in ParaView
+
+3.2 Launching the GUI
+---------------------
+To start CompLaB Studio, run:
+   python -m complab_gui
+
+Or double-click the CompLaB Studio shortcut if available.
+
+
+================================================================================
+4. CREATING PROJECTS WITH TEMPLATES
+================================================================================
+
+CompLaB Studio provides project templates to help you quickly set up different 
+types of simulations. Templates pre-configure the necessary parameters for 
+common simulation scenarios.
+
+4.1 Available Templates
+-----------------------
+
+TEMPLATE                        USE CASE
+--------                        --------
+Flow Only                       Permeability calculation, flow field
+                                visualization
+
+Flow + Transport                Tracer transport, solute dispersion
+
+Flow + Transport + Reactions    Abiotic reactions, mineral dissolution
+                                (Custom kinetics via defineKinetics.hh)
+
+Flow + Transport + Microbes     Suspended microbial growth with Monod
+                                kinetics
+
+Flow + Transport + Biofilm      Biofilm growth, clogging, bioremediation
+                                (Complete biofilm simulation with CA)
+
+4.2 Creating a New Project
+--------------------------
+1. Click File -> New Project (or press Ctrl+N)
+2. Select a template from the list on the left
+3. Enter a project name (e.g., "biofilm_simulation")
+4. Choose a location for your project
+5. Click "Create Project"
+
+The project will be created with the following structure:
+
+MyProject/
+  MyProject.complab    # Project file
+  CompLaB.xml          # Configuration for solver
+  input/               # Geometry and input files
+  output/              # Simulation results
+
+
+================================================================================
+5. PREPARING GEOMETRY FILES
+================================================================================
+
+Geometry files define the porous medium structure for your simulation. These 
+files are created in MATLAB and imported into CompLaB Studio.
+
+5.1 Geometry File Format
+------------------------
+CompLaB uses .dat files with the following format:
+  * Plain text file with one integer per line
+  * NO header line (dimensions are specified in the GUI)
+  * Total lines = nx x ny x nz
+  * Each integer represents a material number
+
+5.2 Material Numbers
+--------------------
+
+NUMBER    MATERIAL              DESCRIPTION
+------    --------              -----------
+0         Solid grains          No flow, no diffusion
+1         Bounce-back walls     Boundary conditions (inlet/outlet)
+2         Pore space            Open pore where flow and diffusion occur
+3+        Microbe populations   Each microbe species uses a unique number
+
+5.3 Creating Geometry in MATLAB
+-------------------------------
+Use the createDAT_with_microbes.m script to create geometry files:
+
+1. Open MATLAB and navigate to the matlab folder in your CompLaB installation
+2. Open createDAT_with_microbes.m
+3. Set the domain dimensions (nx, ny, nz)
+4. Configure the porous medium structure
+5. Choose a microbe distribution pattern
+6. Run the script to generate the .dat file
+
+5.3.1 Microbe Distribution Patterns
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The MATLAB script supports several distribution patterns:
+  * Surface layer: Microbes attached to grain surfaces
+  * Random sparse: Low density random distribution
+  * Random dense: High density random distribution
+  * Gradient: Decreasing density along flow direction
+  * Hotspots: Clustered colonies at random locations
+
+5.4 Importing Geometry into CompLaB Studio
+------------------------------------------
+1. Copy your .dat file to the project's input folder
+2. In CompLaB Studio, go to the Domain tab
+3. Enter the exact dimensions (nx, ny, nz) used in MATLAB
+4. Enter the geometry filename (e.g., FibHbase3D.dat)
+5. Click "Load and Validate" to verify the file
+
+IMPORTANT: The dimensions in the GUI must exactly match the dimensions used 
+when creating the geometry in MATLAB. Mismatched dimensions will cause 
+simulation errors.
+
+
+================================================================================
+6. CONFIGURING SIMULATIONS
+================================================================================
+
+6.1 Domain Settings
+-------------------
+Configure the computational domain in the Domain tab:
+  * nx, ny, nz: Domain dimensions in lattice units
+  * dx: Grid spacing (physical units, e.g., micrometers)
+  * Geometry file: Name of the .dat file in the input folder
+
+6.2 Fluid Settings
+------------------
+  * Peclet number: Ratio of advective to diffusive transport
+  * Delta P: Pressure gradient driving flow
+  * Tau: Relaxation time (affects viscosity)
+
+6.3 Substrate Configuration
+---------------------------
+For each substrate (chemical species):
+  * Diffusion coefficients: In pore and biofilm
+  * Initial concentration: Starting value throughout domain
+  * Boundary conditions: Dirichlet (fixed value) or Neumann (fixed flux)
+
+6.4 Microbiology Configuration
+------------------------------
+For each microbial population:
+  * Material number: Must match the number used in geometry file
+  * Initial density: Starting biomass concentration
+  * Half-saturation constants: Monod kinetics parameter (Ks)
+  * Maximum uptake flux: Vmax for substrate consumption
+  * Decay coefficient: Cell death rate
+
+6.5 Iteration Settings
+----------------------
+  * NS max iterations: Maximum Navier-Stokes iterations
+  * ADE max iterations: Maximum advection-diffusion iterations
+  * Convergence threshold: Stopping criteria for steady state
+  * Update interval: How often to recompute flow field
+
+
+================================================================================
+7. RUNNING SIMULATIONS
+================================================================================
+
+7.1 Pre-Flight Checks
+---------------------
+Before running, CompLaB Studio performs automatic validation:
+  * Verifies CompLaB executable exists
+  * Checks project directory structure
+  * Validates geometry file exists and has correct number of values
+  * Verifies XML configuration is valid
+
+7.2 Starting a Simulation
+-------------------------
+1. Save your project (Ctrl+S)
+2. Click the "Run" button or press F5
+3. Monitor progress in the console output window
+4. Wait for completion or click "Stop" to terminate
+
+7.3 Output Files
+----------------
+Simulation results are saved to the output folder:
+  * *.vti files: VTK format for ParaView visualization
+  * *.chk files: Checkpoint files for restart
+  * *.log files: Simulation log with timestamps
+
+
+================================================================================
+8. TROUBLESHOOTING
+================================================================================
+
+CompLaB Studio provides detailed error messages to help diagnose problems.
+
+8.1 Common Errors and Solutions
+-------------------------------
+
+GEOMETRY FILE VALIDATION FAILED
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Error: "Value count mismatch"
+Cause: The number of values in the .dat file doesn't match nx x ny x nz
+Solution: Verify dimensions in GUI match those used in MATLAB script
+
+ELEMENT NOT FOUND IN XML
+~~~~~~~~~~~~~~~~~~~~~~~~
+Error: "Element microbiology not found in XML file"
+Cause: XML file is missing required sections
+Solution: Save the project to regenerate the XML file
+
+HEAP CORRUPTION (EXIT CODE -1073740940)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Error: Memory corruption / heap corruption
+Cause: Geometry dimensions don't match file content
+Solution: Check that nx, ny, nz exactly match the MATLAB script
+
+SIMULATION EXITS IMMEDIATELY
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Error: Process exits with code -1 and minimal output
+Causes:
+  * Invalid geometry file format
+  * Missing input files
+  * Invalid parameter values in XML
+Solution: Run from command line to see detailed error:
+   cd C:\path\to\project
+   complab.exe CompLaB.xml
+
+8.2 Getting Help
+----------------
+If you encounter issues not covered here:
+  * Check the simulation log file in the output folder
+  * Run the simulation from command line for detailed error messages
+  * Contact the developer with the log file and error description
+
+
+================================================================================
+9. REFERENCE
+================================================================================
+
+9.1 Keyboard Shortcuts
+----------------------
+SHORTCUT      ACTION
+--------      ------
+Ctrl+N        New project
+Ctrl+O        Open project
+Ctrl+S        Save project
+F5            Run simulation
+
+9.2 File Locations
+------------------
+CompLaB Installation:
+   C:\Users\<username>\AppData\Local\CompLaB_Studio\
+
+Default Projects Location:
+   C:\Users\<username>\CompLaB_Projects\
+
+9.3 Credits
+-----------
+CompLaB Studio 3D GUI
+  Developer:    Shahram Asgari
+                shahram.asgari@uga.edu
+  Advisor:      Dr. Christof Meile
+                cmeile@uga.edu
+  Institution:  University of Georgia
+
+CompLaB Core Engine (2D)
+  Original Developer:  Dr. Heewon Jung
+                       hjung@cnu.ac.kr
+  Institution:         Chungnam National University
+
+
+================================================================================
+                     End of CompLaB Studio User Guide
+================================================================================
