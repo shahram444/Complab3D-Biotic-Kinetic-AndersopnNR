@@ -535,8 +535,8 @@ func _draw() -> void:
 					# Animated flow lines
 					var off = int(time * 10) % T
 					for i in range(3):
-						var lx = (off + i * 6) % T
-						draw_rect(Rect2(pos + Vector2(lx, 3 + i * 4), Vector2(3, 1)),
+						var lx = (off + i * 12) % T
+						draw_rect(Rect2(pos + Vector2(lx, 6 + i * 8), Vector2(6, 2)),
 							Color.html(ep["water_l"]).lightened(0.2))
 				Tile.TOXIC:
 					var key = "toxic_%d_%d" % [env_idx, variation % 2]
@@ -557,7 +557,7 @@ func _draw() -> void:
 					if tex:
 						draw_texture(tex, pos)
 					var p = sin(time * 4.0) * 0.3 + 0.5
-					draw_rect(Rect2(pos, Vector2(4, T)),
+					draw_rect(Rect2(pos, Vector2(8, T)),
 						Color(0.24, 0.48, 0.71, p), true)
 				Tile.OUTLET:
 					var key = "pore_%d_0" % env_idx
@@ -565,5 +565,5 @@ func _draw() -> void:
 					if tex:
 						draw_texture(tex, pos)
 					var p = sin(time * 2.0) * 0.2 + 0.5
-					draw_rect(Rect2(pos + Vector2(12, 0), Vector2(4, T)),
+					draw_rect(Rect2(pos + Vector2(24, 0), Vector2(8, T)),
 						Color(0.37, 0.81, 0.37, p), true)

@@ -432,6 +432,7 @@ func _make_tex(data: Array, override_pal: Dictionary = {}) -> ImageTexture:
 			else:
 				img.set_pixel(x, y, Color(0, 0, 0, 0))
 
+	img.resize(w * 2, h * 2, Image.INTERPOLATE_NEAREST)
 	var tex = ImageTexture.create_from_image(img)
 	return tex
 
@@ -456,6 +457,7 @@ func _generate_env_tiles(env_idx: int) -> void:
 				else:
 					col = ep["grain_a"]
 				img.set_pixel(x, y, Color.html(col))
+		img.resize(32, 32, Image.INTERPOLATE_NEAREST)
 		textures["grain_%d_%d" % [env_idx, v]] = ImageTexture.create_from_image(img)
 
 	# Pore tile (16x16)
@@ -474,6 +476,7 @@ func _generate_env_tiles(env_idx: int) -> void:
 				else:
 					col = ep["water"]
 				img.set_pixel(x, y, Color.html(col))
+		img.resize(32, 32, Image.INTERPOLATE_NEAREST)
 		textures["pore_%d_%d" % [env_idx, v]] = ImageTexture.create_from_image(img)
 
 	# Fast flow tile
@@ -494,6 +497,7 @@ func _generate_env_tiles(env_idx: int) -> void:
 				else:
 					col = ep["pore"]
 				img.set_pixel(x, y, Color.html(col))
+		img.resize(32, 32, Image.INTERPOLATE_NEAREST)
 		textures["flow_%d_%d" % [env_idx, v]] = ImageTexture.create_from_image(img)
 
 	# Toxic tile
@@ -514,6 +518,7 @@ func _generate_env_tiles(env_idx: int) -> void:
 				else:
 					col = "#1a0a1a"
 				img.set_pixel(x, y, Color.html(col))
+		img.resize(32, 32, Image.INTERPOLATE_NEAREST)
 		textures["toxic_%d_%d" % [env_idx, v]] = ImageTexture.create_from_image(img)
 
 	# Biofilm tile
@@ -531,6 +536,7 @@ func _generate_env_tiles(env_idx: int) -> void:
 			else:
 				col = "#1a4a3a"
 			img.set_pixel(x, y, Color.html(col))
+	img.resize(32, 32, Image.INTERPOLATE_NEAREST)
 	textures["biofilm_%d" % env_idx] = ImageTexture.create_from_image(img)
 
 func get_tex(key: String) -> ImageTexture:

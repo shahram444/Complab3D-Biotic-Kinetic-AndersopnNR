@@ -185,7 +185,7 @@ func _update_playing(delta: float) -> void:
 
 	# Camera follow
 	if player_node and cam:
-		cam.position = player_node.position + Vector2(8, 8)
+		cam.position = player_node.position + Vector2(T / 2, T / 2)
 		# Clamp camera to map
 		var map_size = world_node.map_w * T
 		var map_h = world_node.map_h * T
@@ -299,7 +299,7 @@ func _load_level(idx: int) -> void:
 
 	# Camera snap
 	if cam:
-		cam.position = player_node.position + Vector2(8, 8)
+		cam.position = player_node.position + Vector2(T / 2, T / 2)
 
 	# Music for new world
 	var prev_env = -1
@@ -521,7 +521,7 @@ func _on_ate_substrate(sub_type: int) -> void:
 	# Floating +energy popup
 	var popup = {
 		"text": "+%d %s" % [sub_data["energy"], sub_data["formula"]],
-		"pos": player_node.position + Vector2(8, -8),
+		"pos": player_node.position + Vector2(T / 2, -T / 2),
 		"timer": 1.2,
 		"color": Color.html(sub_data["color"]),
 	}
@@ -530,7 +530,7 @@ func _on_ate_substrate(sub_type: int) -> void:
 func _update_popups(delta: float) -> void:
 	for i in range(popup_texts.size() - 1, -1, -1):
 		popup_texts[i]["timer"] -= delta
-		popup_texts[i]["pos"].y -= delta * 20  # float upward
+		popup_texts[i]["pos"].y -= delta * 40  # float upward
 		if popup_texts[i]["timer"] <= 0:
 			popup_texts.remove_at(i)
 
@@ -580,7 +580,7 @@ func _draw_science_overlay() -> void:
 				continue
 			if (col + row) % 3 != 0:
 				continue
-			var pos = Vector2(col * T + 4, row * T + 4)
+			var pos = Vector2(col * T + 8, row * T + 8)
 			var alpha = clampf(flow["speed"] * 1.2, 0.1, 0.7)
 			var arrow_key = "arrow_r" if flow["dir"] == 1 or flow["dir"] == 3 else "arrow_d"
 			var tex = SpriteFactory.get_tex(arrow_key)
@@ -596,7 +596,7 @@ func _draw_popups() -> void:
 		var col: Color = p["color"]
 		col.a = alpha
 		# Shadow
-		draw_string(font, p["pos"] + Vector2(1, 1), p["text"],
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 7, Color(0, 0, 0, alpha * 0.8))
+		draw_string(font, p["pos"] + Vector2(2, 2), p["text"],
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0, 0, 0, alpha * 0.8))
 		draw_string(font, p["pos"], p["text"],
-			HORIZONTAL_ALIGNMENT_LEFT, -1, 7, col)
+			HORIZONTAL_ALIGNMENT_LEFT, -1, 14, col)

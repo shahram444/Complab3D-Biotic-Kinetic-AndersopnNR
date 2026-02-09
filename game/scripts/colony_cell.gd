@@ -15,13 +15,13 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var tex = SpriteFactory.get_tex("colony")
 	if tex:
-		draw_texture(tex, Vector2(2, 2))
+		draw_texture(tex, Vector2(4, 4))
 
 	# Pulse glow
 	var pulse = sin(pulse_timer * 2.0) * 0.12 + 0.12
-	draw_rect(Rect2(Vector2(2, 2), Vector2(12, 12)), Color(0.37, 0.81, 0.37, pulse))
+	draw_rect(Rect2(Vector2(4, 4), Vector2(24, 24)), Color(0.37, 0.81, 0.37, pulse))
 
 	# Birth glow
 	if age < 1.0:
 		var glow = (1.0 - age) * 0.4
-		draw_rect(Rect2(Vector2(-1, -1), Vector2(18, 18)), Color(0.37, 0.81, 0.37, glow))
+		draw_rect(Rect2(Vector2(-2, -2), Vector2(36, 36)), Color(0.37, 0.81, 0.37, glow))

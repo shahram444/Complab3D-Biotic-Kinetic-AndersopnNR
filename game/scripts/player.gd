@@ -240,11 +240,11 @@ func can_ride_flow() -> bool:
 
 func _draw() -> void:
 	var time = GameData.game_time
-	var bob = sin(time * 4.0) * 1.0 if alive else 0.0
+	var bob = sin(time * 4.0) * 2.0 if alive else 0.0
 
 	# Shadow
 	if alive:
-		draw_rect(Rect2(Vector2(3, 14 + bob), Vector2(10, 2)), Color(0, 0, 0, 0.3))
+		draw_rect(Rect2(Vector2(6, 28 + bob), Vector2(20, 4)), Color(0, 0, 0, 0.3))
 
 	# Select sprite
 	var tex_key: String
@@ -266,16 +266,16 @@ func _draw() -> void:
 	# Division ready glow
 	if can_divide() and alive:
 		var glow = sin(flash_timer * 6.0) * 0.25 + 0.25
-		draw_rect(Rect2(Vector2(-1, -1 + bob), Vector2(18, 18)),
+		draw_rect(Rect2(Vector2(-2, -2 + bob), Vector2(36, 36)),
 			Color(1, 1, 0.37, glow))
 
 	# Flow riding indicator
 	if riding_flow and alive:
 		var alpha = sin(time * 6.0) * 0.2 + 0.3
-		draw_rect(Rect2(Vector2(-2, -2 + bob), Vector2(20, 20)),
+		draw_rect(Rect2(Vector2(-4, -4 + bob), Vector2(40, 40)),
 			Color(0.3, 0.6, 1.0, alpha))
 
 	# Health warning
 	if alive and health < 25:
 		var flash = 0.3 if sin(time * 8.0) > 0 else 0.0
-		draw_rect(Rect2(Vector2(0, bob), Vector2(16, 16)), Color(1, 0, 0, flash))
+		draw_rect(Rect2(Vector2(0, bob), Vector2(32, 32)), Color(1, 0, 0, flash))

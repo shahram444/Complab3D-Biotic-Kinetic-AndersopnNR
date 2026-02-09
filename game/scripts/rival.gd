@@ -81,16 +81,16 @@ func on_eat() -> void:
 	eat_flash = 0.3
 
 func _draw() -> void:
-	var bob = sin(anim_timer * 3.0) * 1.0
+	var bob = sin(anim_timer * 3.0) * 2.0
 	# Shadow
-	draw_rect(Rect2(Vector2(2, 9 + bob), Vector2(6, 1)), Color(0, 0, 0, 0.25))
+	draw_rect(Rect2(Vector2(4, 18 + bob), Vector2(12, 2)), Color(0, 0, 0, 0.25))
 
 	# Draw rival sprite
 	var tex = SpriteFactory.get_tex("rival")
 	if tex:
-		draw_texture(tex, Vector2(3, bob))
+		draw_texture(tex, Vector2(6, bob))
 
 	# Eat flash
 	if eat_flash > 0:
-		draw_rect(Rect2(Vector2(2, bob - 1), Vector2(12, 12)),
+		draw_rect(Rect2(Vector2(4, bob - 2), Vector2(24, 24)),
 			Color(1, 0.3, 0.3, eat_flash))
