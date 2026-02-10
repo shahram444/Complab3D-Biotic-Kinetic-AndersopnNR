@@ -1,430 +1,203 @@
 #!/usr/bin/env python3
-"""Generate a nostalgic 8-bit pixel art cover image for ARKE: Guardians of Earth.
-Style: Classic NES/Famicom game box art with pixel characters and atmospheric scene.
-Output: 960x540 PNG (native game resolution), pixel-perfect at 2x scale.
+"""Generate a bright, readable 8-bit pixel art cover for itch.io.
+Size: 630x500 (itch.io recommended). Bold, high contrast, large characters.
 """
 from PIL import Image, ImageDraw
+import math, random
 
-# Work at 480x270 native, then scale up 2x for crisp pixels
-W, H = 480, 270
-img = Image.new("RGBA", (W, H), (5, 5, 15, 255))
+W, H = 630, 500
+img = Image.new("RGBA", (W, H), (10, 20, 50, 255))
 draw = ImageDraw.Draw(img)
-
-# === PALETTE (from sprite_factory.gd) ===
-PAL = {
-    "bg_deep":    (5, 5, 15),
-    "bg_mid":     (10, 15, 35),
-    "bg_top":     (15, 25, 50),
-    # Grains
-    "grain":      (122, 90, 42),
-    "grain_l":    (164, 138, 90),
-    "grain_d":    (74, 58, 26),
-    "grain_a":    (196, 160, 96),
-    # Pore/water
-    "pore":       (20, 30, 55),
-    "pore_l":     (30, 45, 70),
-    "water":      (26, 58, 96),
-    "water_l":    (48, 96, 160),
-    # Teal (ARKE)
-    "teal":       (26, 138, 122),
-    "teal_h":     (42, 207, 175),
-    "teal_glow":  (95, 255, 223),
-    "teal_d":     (10, 90, 74),
-    # Visor
-    "visor":      (64, 200, 216),
-    "visor_s":    (144, 232, 240),
-    "helmet":     (120, 136, 160),
-    # Elder
-    "elder":      (26, 26, 160),
-    "elder_h":    (72, 72, 208),
-    # Rival
-    "rival":      (176, 48, 48),
-    "rival_h":    (224, 96, 96),
-    # Substrates
-    "ch4_r":      (255, 79, 79),
-    "ch4_l":      (255, 159, 127),
-    "o2_b":       (79, 164, 255),
-    "o2_l":       (143, 200, 255),
-    "no3_g":      (79, 223, 111),
-    "no3_l":      (143, 255, 159),
-    "fe_o":       (239, 143, 63),
-    "fe_l":       (255, 191, 127),
-    "so4_y":      (223, 223, 63),
-    "mn_p":       (207, 111, 255),
-    # Toxic
-    "toxic":      (180, 40, 180),
-    "toxic_g":    (220, 80, 220),
-    # UI
-    "gold":       (255, 215, 0),
-    "white":      (255, 255, 255),
-    "gray":       (136, 136, 136),
-    "dark_gray":  (68, 68, 68),
-    # Biofilm
-    "bio":        (58, 122, 90),
-    "bio_l":      (90, 170, 122),
-}
-
-import random
-import math
-
 rng = random.Random(42)
 
-# === BACKGROUND: Underground pore-space scene ===
+# === PALETTE ===
+TEAL = (42, 207, 175)
+TEAL_BRIGHT = (95, 255, 223)
+TEAL_DARK = (15, 80, 70)
+GOLD = (255, 215, 0)
+GOLD_DARK = (160, 120, 0)
+WHITE = (255, 255, 255)
+VISOR = (64, 200, 216)
+VISOR_SHINE = (180, 245, 250)
+HELMET = (140, 155, 180)
+RED = (224, 80, 80)
+RED_DARK = (160, 40, 40)
+BLUE_ELDER = (60, 60, 200)
+BLUE_ELDER_H = (100, 100, 240)
+PURPLE = (100, 60, 180)
+GRAIN = (160, 120, 60)
+GRAIN_L = (200, 165, 100)
+GRAIN_D = (100, 75, 35)
+BIO_GREEN = (80, 180, 110)
+BIO_LIGHT = (120, 220, 150)
+WATER = (40, 80, 140)
+WATER_L = (70, 130, 200)
+CH4_RED = (255, 90, 90)
+O2_BLUE = (90, 175, 255)
+NO3_GREEN = (90, 230, 120)
+FE_ORANGE = (250, 160, 70)
+SO4_YELLOW = (230, 230, 80)
+MN_PURPLE = (210, 120, 255)
 
-# Gradient sky (underground glow from above)
+# === BACKGROUND: Rich gradient (NOT black!) ===
 for y in range(H):
     t = y / H
-    r = int(5 + 12 * (1 - t))
-    g = int(5 + 20 * (1 - t))
-    b = int(15 + 40 * (1 - t))
+    # Top: deep blue, Middle: dark teal, Bottom: dark brown (underground feel)
+    if t < 0.3:
+        r = int(8 + 15 * t)
+        g = int(15 + 30 * t)
+        b = int(45 + 20 * t)
+    elif t < 0.7:
+        tt = (t - 0.3) / 0.4
+        r = int(12 + 20 * tt)
+        g = int(24 + 15 * tt)
+        b = int(51 - 10 * tt)
+    else:
+        tt = (t - 0.7) / 0.3
+        r = int(32 + 25 * tt)
+        g = int(28 + 15 * tt)
+        b = int(40 - 15 * tt)
     for x in range(W):
         img.putpixel((x, y), (r, g, b, 255))
 
-# Subtle water flow streaks in background
-for i in range(40):
-    sx = rng.randint(0, W)
-    sy = rng.randint(60, H - 40)
-    length = rng.randint(20, 60)
-    alpha = rng.randint(15, 40)
-    for dx in range(length):
-        px = sx + dx
-        py = sy + int(math.sin(dx * 0.15 + i) * 2)
-        if 0 <= px < W and 0 <= py < H:
-            old = img.getpixel((px, py))
-            nr = min(255, old[0] + alpha // 4)
-            ng = min(255, old[1] + alpha // 3)
-            nb = min(255, old[2] + alpha // 2)
-            img.putpixel((px, py), (nr, ng, nb, 255))
+# === LARGE PORE-SPACE SCENE (bottom half) ===
 
-# === GRAIN CLUSTERS (pore geometry) ===
-
-def draw_grain(cx, cy, radius, col_main, col_light, col_dark):
-    """Draw a circular grain particle with shading."""
-    for dy in range(-radius, radius + 1):
-        for dx in range(-radius, radius + 1):
-            if dx*dx + dy*dy <= radius*radius:
+def draw_circle(cx, cy, radius, col_main, col_light, col_dark, outline=(0,0,0)):
+    for dy in range(-radius - 1, radius + 2):
+        for dx in range(-radius - 1, radius + 2):
+            dist = math.sqrt(dx*dx + dy*dy)
+            if dist <= radius + 0.5:
                 px, py = cx + dx, cy + dy
                 if 0 <= px < W and 0 <= py < H:
-                    # Simple shading
-                    shade = dx - dy  # light from top-left
-                    if shade > radius * 0.4:
+                    if dist > radius - 1.5:
+                        c = outline
+                    elif (dx - dy) > radius * 0.3:
                         c = col_light
-                    elif shade < -radius * 0.4:
+                    elif (dx - dy) < -radius * 0.3:
                         c = col_dark
                     else:
                         c = col_main
-                    # Edge outline
-                    dist = math.sqrt(dx*dx + dy*dy)
-                    if dist > radius - 1.2:
-                        c = (max(0, c[0] - 40), max(0, c[1] - 40), max(0, c[2] - 40))
                     img.putpixel((px, py), (*c, 255))
 
-# Bottom terrain - large grains
-grain_positions = [
-    # Bottom row
-    (40, 240, 18), (90, 250, 14), (140, 235, 20), (200, 248, 16),
-    (260, 238, 22), (320, 252, 12), (370, 242, 17), (420, 248, 15),
-    (460, 235, 19),
-    # Second row
-    (65, 215, 12), (165, 210, 14), (310, 215, 11), (400, 218, 13),
-    # Scattered upper
-    (20, 180, 9), (110, 170, 11), (350, 175, 10), (450, 185, 8),
-    # Left column grains
-    (15, 120, 14), (8, 155, 10), (25, 90, 8),
-    # Right column grains
-    (465, 130, 12), (470, 165, 9), (455, 100, 7),
+# Grain clusters - big, visible
+grains = [
+    (60, 430, 35), (170, 460, 30), (300, 450, 40), (440, 465, 28),
+    (560, 435, 38), (115, 395, 22), (380, 405, 25), (520, 400, 20),
+    (40, 370, 18), (230, 390, 20), (490, 380, 16), (600, 405, 22),
+    # Upper scattered
+    (20, 320, 14), (160, 330, 12), (350, 340, 15), (530, 325, 13),
+    (610, 350, 11), (80, 345, 10), (450, 345, 11),
 ]
+for gx, gy, gr in grains:
+    draw_circle(gx, gy, gr, GRAIN, GRAIN_L, GRAIN_D)
 
-for gx, gy, gr in grain_positions:
-    draw_grain(gx, gy, gr, PAL["grain"], PAL["grain_l"], PAL["grain_d"])
-
-# === PORE CHANNELS between grains (brighter water areas) ===
-for i in range(60):
+# Pore water between grains (bright blue patches)
+for i in range(120):
     px = rng.randint(0, W - 1)
-    py = rng.randint(140, H - 20)
-    # Check not on a grain
-    on_grain = False
-    for gx, gy, gr in grain_positions:
-        if (px - gx)**2 + (py - gy)**2 < (gr + 2)**2:
-            on_grain = True
-            break
+    py = rng.randint(300, H - 10)
+    on_grain = any((px - gx)**2 + (py - gy)**2 < (gr + 4)**2 for gx, gy, gr in grains)
     if not on_grain:
-        sz = rng.randint(2, 5)
-        wc = PAL["water_l"] if rng.random() < 0.3 else PAL["water"]
+        sz = rng.randint(3, 8)
+        wc = WATER_L if rng.random() < 0.3 else WATER
         for dy in range(sz):
             for dx in range(sz):
                 npx, npy = px + dx, py + dy
                 if 0 <= npx < W and 0 <= npy < H:
                     old = img.getpixel((npx, npy))
-                    # Only draw on dark areas (pore space)
-                    if old[0] < 60 and old[1] < 60:
+                    if old[0] < 80:
                         img.putpixel((npx, npy), (*wc, 255))
 
-# === BIOFILM COLONIES on some grains ===
-bio_positions = [(140, 215, 8), (260, 218, 7), (370, 225, 6), (420, 232, 5)]
-for bx, by, br in bio_positions:
+# Biofilm colonies (bright green)
+for bx, by, br in [(170, 430, 12), (380, 410, 10), (530, 408, 9), (270, 418, 8)]:
     for dy in range(-br, br + 1):
         for dx in range(-br, br + 1):
             if dx*dx + dy*dy <= br*br:
                 px, py = bx + dx, by + dy
                 if 0 <= px < W and 0 <= py < H:
-                    c = PAL["bio_l"] if rng.random() < 0.4 else PAL["bio"]
+                    c = BIO_LIGHT if rng.random() < 0.4 else BIO_GREEN
                     img.putpixel((px, py), (*c, 255))
 
-# === FLOW ARROWS (subtle, showing left-to-right flow) ===
-for i in range(12):
-    ax = 50 + i * 35
-    ay = 155 + int(math.sin(i * 0.8) * 15)
-    a_col = (48, 96, 160, 100)
-    # Arrow body
-    for dx in range(8):
-        for dy in range(-1, 2):
-            px, py = ax + dx, ay + dy
-            if 0 <= px < W and 0 <= py < H:
-                old = img.getpixel((px, py))
-                if old[0] < 80:
-                    img.putpixel((px, py), (old[0] + 20, old[1] + 40, old[2] + 60, 255))
-    # Arrow head
-    for dy in range(-3, 4):
-        px = ax + 8
-        py2 = ay + dy
-        if 0 <= px < W and 0 <= py2 < H:
-            old = img.getpixel((px, py2))
-            if old[0] < 80:
-                img.putpixel((px, py2), (old[0] + 15, old[1] + 30, old[2] + 50, 255))
+# === FLOATING SUBSTRATES (bright, visible orbs) ===
 
-# === TOXIC ZONE (right side, purple glow) ===
-for i in range(30):
-    tx = rng.randint(380, 440)
-    ty = rng.randint(150, 200)
-    for dy in range(-2, 3):
-        for dx in range(-2, 3):
-            px, py = tx + dx, ty + dy
-            if 0 <= px < W and 0 <= py < H:
-                old = img.getpixel((px, py))
-                if old[0] < 100:
-                    a = rng.randint(20, 50)
-                    img.putpixel((px, py), (min(255, old[0] + a), old[1], min(255, old[2] + a), 255))
-
-# === SUBSTRATE MOLECULES floating ===
-
-def draw_substrate(cx, cy, size, col, col_light):
-    """Draw a small glowing substrate orb."""
+def draw_orb(cx, cy, size, col, col_light, glow_size=4):
+    # Glow
+    for dy in range(-size - glow_size, size + glow_size + 1):
+        for dx in range(-size - glow_size, size + glow_size + 1):
+            dist = math.sqrt(dx*dx + dy*dy)
+            if size < dist <= size + glow_size:
+                px, py = cx + dx, cy + dy
+                if 0 <= px < W and 0 <= py < H:
+                    a = 1 - (dist - size) / glow_size
+                    old = img.getpixel((px, py))
+                    nr = min(255, old[0] + int(col[0] * a * 0.4))
+                    ng = min(255, old[1] + int(col[1] * a * 0.4))
+                    nb = min(255, old[2] + int(col[2] * a * 0.4))
+                    img.putpixel((px, py), (nr, ng, nb, 255))
+    # Core
     for dy in range(-size, size + 1):
         for dx in range(-size, size + 1):
             dist = math.sqrt(dx*dx + dy*dy)
             if dist <= size:
                 px, py = cx + dx, cy + dy
                 if 0 <= px < W and 0 <= py < H:
-                    if dist < size * 0.5:
+                    if dist < size * 0.4:
                         c = col_light
-                    elif dist < size * 0.8:
+                    elif dist < size * 0.75:
                         c = col
                     else:
-                        c = (max(0, col[0] - 30), max(0, col[1] - 30), max(0, col[2] - 30))
-                    img.putpixel((px, py), (*c, 255))
-    # Glow
-    for dy in range(-size - 2, size + 3):
-        for dx in range(-size - 2, size + 3):
-            dist = math.sqrt(dx*dx + dy*dy)
-            if size < dist <= size + 2:
-                px, py = cx + dx, cy + dy
-                if 0 <= px < W and 0 <= py < H:
-                    old = img.getpixel((px, py))
-                    a = int(30 * (1 - (dist - size) / 2))
-                    nr = min(255, old[0] + (col[0] * a) // 255)
-                    ng = min(255, old[1] + (col[1] * a) // 255)
-                    nb = min(255, old[2] + (col[2] * a) // 255)
-                    img.putpixel((px, py), (nr, ng, nb, 255))
-
-# Substrates scattered in pore space
-substrates = [
-    (75, 150, 4, PAL["ch4_r"], PAL["ch4_l"]),     # CH4
-    (180, 135, 3, PAL["o2_b"], PAL["o2_l"]),        # O2
-    (130, 165, 3, PAL["no3_g"], PAL["no3_l"]),      # NO3
-    (290, 155, 4, PAL["fe_o"], PAL["fe_l"]),         # Fe
-    (330, 140, 3, PAL["so4_y"], (255, 255, 200)),    # SO4
-    (60, 120, 3, PAL["mn_p"], (220, 160, 255)),      # Mn
-    (220, 160, 3, PAL["ch4_r"], PAL["ch4_l"]),       # CH4
-    (400, 145, 3, PAL["ch4_r"], PAL["ch4_l"]),       # CH4 in toxic
-    (155, 145, 2, PAL["o2_b"], PAL["o2_l"]),         # O2
-    (350, 160, 2, PAL["no3_g"], PAL["no3_l"]),       # NO3
-]
-
-for sx, sy, sz, sc, sl in substrates:
-    draw_substrate(sx, sy, sz, sc, sl)
-
-# === ARKE - Main character (center, large, heroic) ===
-
-# Draw ARKE at ~3x game scale (48x48 pixels), centered
-arke_x, arke_y = 210, 85
-scale = 3
-
-METHI_DOWN = [
-    "....kHHHHHk.....",
-    "...kHHHHHHHk....",
-    "..kHVVVVVVVHk...",
-    "..kVXXVVVXXVk...",
-    "..kVXwwVwwXVk...",
-    "..kVVwekweVVk...",
-    "..kHVVVVVVVHk...",
-    "..kkHHkkkHHkk...",
-    "..kTTTTTTTTTk...",
-    "..kTTTTTTTTTk...",
-    "..kTtTTTTTtTk...",
-    "...ktTTTTTtk....",
-    "....ktttttkk....",
-    ".....kkkkk......",
-    "......k.k.......",
-    "................",
-]
-
-sprite_pal = {
-    ".": None, "k": (0, 0, 0),
-    "H": (120, 136, 160), "V": (64, 200, 216), "X": (144, 232, 240),
-    "w": (255, 255, 255), "e": (26, 26, 46),
-    "T": (42, 207, 175), "t": (26, 138, 122),
-    "L": (95, 255, 223), "d": (10, 90, 74),
-    "s": (255, 255, 95), "m": (10, 106, 90),
-}
-
-# Glow aura behind ARKE
-for dy in range(-22, 54):
-    for dx in range(-22, 54):
-        cx = arke_x + dx
-        cy = arke_y + dy
-        dist = math.sqrt((dx - 16)**2 + (dy - 16)**2)
-        if dist < 38 and 0 <= cx < W and 0 <= cy < H:
-            a = max(0, int(35 * (1 - dist / 38)))
-            old = img.getpixel((cx, cy))
-            nr = min(255, old[0] + a // 3)
-            ng = min(255, old[1] + a)
-            nb = min(255, old[2] + int(a * 0.85))
-            img.putpixel((cx, cy), (nr, ng, nb, 255))
-
-# Draw ARKE sprite
-for row_idx, row in enumerate(METHI_DOWN):
-    for col_idx, ch in enumerate(row):
-        c = sprite_pal.get(ch)
-        if c is None:
-            continue
-        for sy2 in range(scale):
-            for sx2 in range(scale):
-                px = arke_x + col_idx * scale + sx2
-                py = arke_y + row_idx * scale + sy2
-                if 0 <= px < W and 0 <= py < H:
+                        c = (max(0, col[0] - 40), max(0, col[1] - 40), max(0, col[2] - 40))
+                    # Outline
+                    if dist > size - 1.2:
+                        c = (max(0, c[0] - 60), max(0, c[1] - 60), max(0, c[2] - 60))
                     img.putpixel((px, py), (*c, 255))
 
-# === ELDER ARCHAEA (left side, smaller, mentor pose) ===
-elder_x, elder_y = 60, 60
-elder_scale = 2
+# Big substrates scattered around
+draw_orb(90, 270, 8, CH4_RED, (255, 180, 180), 6)    # CH4
+draw_orb(180, 310, 7, O2_BLUE, (180, 220, 255), 5)    # O2
+draw_orb(530, 290, 8, NO3_GREEN, (180, 255, 200), 6)  # NO3
+draw_orb(440, 310, 7, FE_ORANGE, (255, 210, 160), 5)  # Fe
+draw_orb(50, 340, 6, SO4_YELLOW, (255, 255, 200), 5)  # SO4
+draw_orb(560, 340, 6, MN_PURPLE, (230, 180, 255), 5)  # Mn
+draw_orb(300, 350, 7, CH4_RED, (255, 180, 180), 5)    # CH4
+draw_orb(370, 290, 5, O2_BLUE, (180, 220, 255), 4)    # O2
 
-ELDER = [
-    "....kkkkkk......",
-    "...kjjjjjjk.....",
-    "..kjJjjjjJjk....",
-    ".kjJwwjjwwJjk...",
-    ".kjjwejjewjjk...",
-    ".kjjjjjjjjjjk...",
-    ".kjjjjmjjjjjk...",
-    "..kjjjjjjjjk....",
-    "..kkjjjjjjkk....",
-    ".kqqkjjjjkqqk...",
-    ".kqqqjjjjqqqk...",
-    "..kqqqqqqqqk....",
-    "...kqqqqqqk.....",
-    "....kkkkkk......",
-    "......k.k.......",
-    "................",
-]
+# Labels next to substrates
+def put_label(x, y, text, color):
+    """Simple 1px text approximation - draw colored rectangle with text idea."""
+    # We'll use draw.text with default font
+    try:
+        draw.text((x, y), text, fill=(*color, 255))
+    except:
+        pass
 
-elder_pal = {
-    ".": None, "k": (0, 0, 0),
-    "j": (26, 26, 160), "J": (72, 72, 208),
-    "w": (255, 255, 255), "e": (26, 26, 46),
-    "m": (10, 106, 90),
-    "q": (80, 48, 160), "Q": (112, 80, 192),
-}
+put_label(102, 265, "CH4", CH4_RED)
+put_label(192, 305, "O2", O2_BLUE)
+put_label(542, 285, "NO3", NO3_GREEN)
+put_label(452, 305, "Fe3+", FE_ORANGE)
 
-# Elder glow
-for dy in range(-10, 42):
-    for dx in range(-10, 42):
-        cx = elder_x + dx
-        cy = elder_y + dy
-        dist = math.sqrt((dx - 12)**2 + (dy - 12)**2)
-        if dist < 26 and 0 <= cx < W and 0 <= cy < H:
-            a = max(0, int(20 * (1 - dist / 26)))
-            old = img.getpixel((cx, cy))
-            nr = min(255, old[0] + a // 3)
-            ng = min(255, old[1] + a // 3)
-            nb = min(255, old[2] + a)
-            img.putpixel((cx, cy), (nr, ng, nb, 255))
+# === FLOW ARROWS (bright, visible) ===
+for i in range(8):
+    ax = 80 + i * 65
+    ay = 360
+    # Bright blue arrow
+    for dx in range(18):
+        for dy in range(-2, 3):
+            px, py = ax + dx, ay + dy
+            if 0 <= px < W and 0 <= py < H:
+                old = img.getpixel((px, py))
+                if old[0] < 120:
+                    img.putpixel((px, py), (*WATER_L, 255))
+    # Arrow head
+    for dy in range(-5, 6):
+        px = ax + 18
+        py2 = ay + dy
+        if 0 <= px < W and 0 <= py2 < H and abs(dy) < 6:
+            old = img.getpixel((px, py2))
+            if old[0] < 120:
+                img.putpixel((px, py2), (*WATER_L, 255))
 
-for row_idx, row in enumerate(ELDER):
-    for col_idx, ch in enumerate(row):
-        c = elder_pal.get(ch)
-        if c is None:
-            continue
-        for sy2 in range(elder_scale):
-            for sx2 in range(elder_scale):
-                px = elder_x + col_idx * elder_scale + sx2
-                py = elder_y + row_idx * elder_scale + sy2
-                if 0 <= px < W and 0 <= py < H:
-                    img.putpixel((px, py), (*c, 255))
-
-# === RIVAL MICROBES (right side, menacing) ===
-RIVAL = [
-    "...kkkk...",
-    "..kzZZzk..",
-    ".kzwZwZzk.",
-    ".kzeZeZzk.",
-    ".kzZZZZzk.",
-    ".kzZmZZzk.",
-    "..kzZZzk..",
-    "...kzzk...",
-    "....kk....",
-    "..........",
-]
-
-rival_pal = {
-    ".": None, "k": (0, 0, 0),
-    "z": (176, 48, 48), "Z": (224, 96, 96),
-    "w": (255, 255, 255), "e": (26, 26, 46),
-    "m": (140, 30, 30),
-}
-
-# Two rivals at different positions
-for ri, (rx, ry, rs) in enumerate([(380, 70, 2), (420, 95, 2), (360, 105, 1)]):
-    # Red glow
-    for dy in range(-6, 26):
-        for dx in range(-6, 26):
-            cx = rx + dx
-            cy = ry + dy
-            dist = math.sqrt((dx - 8)**2 + (dy - 8)**2)
-            if dist < 18 and 0 <= cx < W and 0 <= cy < H:
-                a = max(0, int(15 * (1 - dist / 18)))
-                old = img.getpixel((cx, cy))
-                nr = min(255, old[0] + a)
-                ng = old[1]
-                nb = old[2]
-                img.putpixel((cx, cy), (nr, ng, nb, 255))
-
-    for row_idx, row in enumerate(RIVAL):
-        for col_idx, ch in enumerate(row):
-            c = rival_pal.get(ch)
-            if c is None:
-                continue
-            for sy2 in range(rs):
-                for sx2 in range(rs):
-                    px = rx + col_idx * rs + sx2
-                    py = ry + row_idx * rs + sy2
-                    if 0 <= px < W and 0 <= py < H:
-                        img.putpixel((px, py), (*c, 255))
-
-# === TITLE TEXT (pixel art letters) ===
-
-# Each letter is defined on a 5x7 grid
-FONT_5x7 = {
+# === PIXEL FONT (5x7, drawn at given scale) ===
+FONT = {
     'A': ["01110","10001","10001","11111","10001","10001","10001"],
     'R': ["11110","10001","10001","11110","10100","10010","10001"],
     'K': ["10001","10010","10100","11000","10100","10010","10001"],
@@ -446,177 +219,294 @@ FONT_5x7 = {
     'M': ["10001","11011","10101","10101","10001","10001","10001"],
     'W': ["10001","10001","10001","10101","10101","11011","10001"],
     'Y': ["10001","10001","01010","00100","00100","00100","00100"],
+    'X': ["10001","10001","01010","00100","01010","10001","10001"],
     '3': ["11110","00001","00001","01110","00001","00001","11110"],
     ':': ["00000","00100","00100","00000","00100","00100","00000"],
     ' ': ["00000","00000","00000","00000","00000","00000","00000"],
-    'X': ["10001","10001","01010","00100","01010","10001","10001"],
 }
 
-def draw_text(text, start_x, start_y, pixel_size, color, shadow_color=None):
-    """Draw pixel text using 5x7 font."""
+def draw_text(text, start_x, start_y, px_size, color, shadow=None):
     cx = start_x
     for ch in text.upper():
-        glyph = FONT_5x7.get(ch, FONT_5x7.get(' '))
-        if glyph is None:
-            cx += 6 * pixel_size
-            continue
-        for row_idx, row in enumerate(glyph):
-            for col_idx, bit in enumerate(row):
+        glyph = FONT.get(ch, FONT[' '])
+        for ry, row in enumerate(glyph):
+            for rx, bit in enumerate(row):
                 if bit == '1':
-                    px = cx + col_idx * pixel_size
-                    py = start_y + row_idx * pixel_size
-                    # Shadow
-                    if shadow_color:
-                        for sy2 in range(pixel_size):
-                            for sx2 in range(pixel_size):
-                                spx = px + pixel_size + sx2
-                                spy = py + pixel_size + sy2
-                                if 0 <= spx < W and 0 <= spy < H:
-                                    img.putpixel((spx, spy), (*shadow_color, 255))
-                    # Main pixel
-                    for sy2 in range(pixel_size):
-                        for sx2 in range(pixel_size):
-                            npx = px + sx2
-                            npy = py + sy2
-                            if 0 <= npx < W and 0 <= npy < H:
-                                img.putpixel((npx, npy), (*color, 255))
-        cx += 6 * pixel_size
+                    bx = cx + rx * px_size
+                    by = start_y + ry * px_size
+                    if shadow:
+                        draw.rectangle([bx + px_size, by + px_size,
+                                        bx + px_size * 2 - 1, by + px_size * 2 - 1],
+                                       fill=(*shadow, 255))
+                    draw.rectangle([bx, by, bx + px_size - 1, by + px_size - 1],
+                                   fill=(*color, 255))
+        cx += 6 * px_size
 
-# "ARKE" - Main title, large
+def text_width(text, px_size):
+    return len(text) * 6 * px_size - px_size
+
+# === TITLE: "ARKE" huge and bright ===
 title = "ARKE"
-title_w = len(title) * 6 * 4 - 4  # pixel_size=4
-title_x = (W - title_w) // 2
-draw_text(title, title_x, 10, 4, (42, 207, 175), (0, 50, 45))
+tw = text_width(title, 8)
+tx = (W - tw) // 2
+draw_text(title, tx, 25, 8, TEAL_BRIGHT, (0, 40, 35))
 
-# Underline glow
-for x in range(title_x - 10, title_x + title_w + 10):
-    if 0 <= x < W:
-        for dy in range(3):
-            y = 42 + dy
-            if y < H:
-                a = 80 - dy * 25
-                old = img.getpixel((x, y))
-                img.putpixel((x, y), (min(255, old[0] + a // 4), min(255, old[1] + a), min(255, old[2] + int(a * 0.8)), 255))
+# Glow line under title
+for x in range(tx - 20, tx + tw + 20):
+    for dy in range(4):
+        y = 88 + dy
+        if 0 <= x < W and 0 <= y < H:
+            a = max(0, 120 - dy * 35)
+            old = img.getpixel((x, y))
+            nr = min(255, old[0] + a // 5)
+            ng = min(255, old[1] + a)
+            nb = min(255, old[2] + int(a * 0.85))
+            img.putpixel((x, y), (nr, ng, nb, 255))
 
-# "GUARDIANS OF EARTH" - Subtitle
+# Subtitle: "GUARDIANS OF EARTH"
 sub = "GUARDIANS OF EARTH"
-sub_w = len(sub) * 6 * 2 - 2
-sub_x = (W - sub_w) // 2
-draw_text(sub, sub_x, 50, 2, (255, 215, 0), (80, 60, 0))
+sw = text_width(sub, 4)
+sx = (W - sw) // 2
+draw_text(sub, sx, 100, 4, GOLD, (60, 45, 0))
 
-# === BOTTOM BAR with game info ===
-# Dark bar at bottom
-for y in range(H - 22, H):
+# === ARKE CHARACTER - HUGE (center, 6x scale = 96px) ===
+METHI = [
+    "....kHHHHHk.....",
+    "...kHHHHHHHk....",
+    "..kHVVVVVVVHk...",
+    "..kVXXVVVXXVk...",
+    "..kVXwwVwwXVk...",
+    "..kVVwekweVVk...",
+    "..kHVVVVVVVHk...",
+    "..kkHHkkkHHkk...",
+    "..kTTTTTTTTTk...",
+    "..kTTTTTTTTTk...",
+    "..kTtTTTTTtTk...",
+    "...ktTTTTTtk....",
+    "....ktttttkk....",
+    ".....kkkkk......",
+    "......k.k.......",
+    "................",
+]
+
+pal = {
+    ".": None, "k": (0, 0, 0),
+    "H": HELMET, "V": VISOR, "X": VISOR_SHINE,
+    "w": WHITE, "e": (26, 26, 46),
+    "T": TEAL, "t": (26, 138, 122),
+    "L": TEAL_BRIGHT, "d": TEAL_DARK,
+    "s": (255, 255, 95), "m": (10, 106, 90),
+}
+
+scale = 6
+arke_w = 16 * scale
+arke_h = 16 * scale
+arke_x = (W - arke_w) // 2
+arke_y = 140
+
+# Big teal glow behind ARKE
+for dy in range(-30, arke_h + 30):
+    for dx in range(-30, arke_w + 30):
+        cx = arke_x + dx
+        cy = arke_y + dy
+        dist = math.sqrt((dx - arke_w // 2)**2 + (dy - arke_h // 2)**2)
+        max_dist = arke_h * 0.7
+        if dist < max_dist and 0 <= cx < W and 0 <= cy < H:
+            a = max(0, int(50 * (1 - dist / max_dist)))
+            old = img.getpixel((cx, cy))
+            nr = min(255, old[0] + a // 4)
+            ng = min(255, old[1] + a)
+            nb = min(255, old[2] + int(a * 0.8))
+            img.putpixel((cx, cy), (nr, ng, nb, 255))
+
+# Draw ARKE
+for ry, row in enumerate(METHI):
+    for rx, ch in enumerate(row):
+        c = pal.get(ch)
+        if c is None:
+            continue
+        for sy in range(scale):
+            for sx2 in range(scale):
+                px = arke_x + rx * scale + sx2
+                py = arke_y + ry * scale + sy
+                if 0 <= px < W and 0 <= py < H:
+                    img.putpixel((px, py), (*c, 255))
+
+# === ELDER (left, 4x scale) ===
+ELDER = [
+    "....kkkkkk......",
+    "...kjjjjjjk.....",
+    "..kjJjjjjJjk....",
+    ".kjJwwjjwwJjk...",
+    ".kjjwejjewjjk...",
+    ".kjjjjjjjjjjk...",
+    ".kjjjjmjjjjjk...",
+    "..kjjjjjjjjk....",
+    "..kkjjjjjjkk....",
+    ".kqqkjjjjkqqk...",
+    ".kqqqjjjjqqqk...",
+    "..kqqqqqqqqk....",
+    "...kqqqqqqk.....",
+    "....kkkkkk......",
+    "......k.k.......",
+    "................",
+]
+
+elder_pal = {
+    ".": None, "k": (0, 0, 0),
+    "j": BLUE_ELDER, "J": BLUE_ELDER_H,
+    "w": WHITE, "e": (26, 26, 46), "m": (10, 106, 90),
+    "q": PURPLE, "Q": (130, 90, 210),
+}
+
+es = 4
+elder_x = 50
+elder_y = 170
+
+# Blue glow
+for dy in range(-15, 16 * es + 15):
+    for dx in range(-15, 16 * es + 15):
+        cx = elder_x + dx
+        cy = elder_y + dy
+        dist = math.sqrt((dx - 32)**2 + (dy - 32)**2)
+        if dist < 55 and 0 <= cx < W and 0 <= cy < H:
+            a = max(0, int(35 * (1 - dist / 55)))
+            old = img.getpixel((cx, cy))
+            nr = min(255, old[0] + a // 4)
+            ng = min(255, old[1] + a // 4)
+            nb = min(255, old[2] + a)
+            img.putpixel((cx, cy), (nr, ng, nb, 255))
+
+for ry, row in enumerate(ELDER):
+    for rx, ch in enumerate(row):
+        c = elder_pal.get(ch)
+        if c is None:
+            continue
+        for sy in range(es):
+            for sx2 in range(es):
+                px = elder_x + rx * es + sx2
+                py = elder_y + ry * es + sy
+                if 0 <= px < W and 0 <= py < H:
+                    img.putpixel((px, py), (*c, 255))
+
+# === RIVALS (right side, 3x scale, two of them) ===
+RIVAL = [
+    "...kkkk...",
+    "..kzZZzk..",
+    ".kzwZwZzk.",
+    ".kzeZeZzk.",
+    ".kzZZZZzk.",
+    ".kzZmZZzk.",
+    "..kzZZzk..",
+    "...kzzk...",
+    "....kk....",
+    "..........",
+]
+
+rival_pal = {
+    ".": None, "k": (0, 0, 0),
+    "z": RED_DARK, "Z": RED,
+    "w": WHITE, "e": (26, 26, 46), "m": (140, 30, 30),
+}
+
+for ri, (rx, ry, rs) in enumerate([(490, 180, 4), (540, 220, 3), (580, 170, 2)]):
+    # Red glow
+    glow_r = rs * 12
+    for dy in range(-glow_r, glow_r):
+        for dx in range(-glow_r, glow_r):
+            cx = rx + 5 * rs + dx
+            cy = ry + 5 * rs + dy
+            dist = math.sqrt(dx*dx + dy*dy)
+            if dist < glow_r and 0 <= cx < W and 0 <= cy < H:
+                a = max(0, int(30 * (1 - dist / glow_r)))
+                old = img.getpixel((cx, cy))
+                nr = min(255, old[0] + a)
+                ng = old[1]
+                nb = old[2]
+                img.putpixel((cx, cy), (nr, ng, nb, 255))
+
+    for ry2, row in enumerate(RIVAL):
+        for rx2, ch in enumerate(row):
+            c = rival_pal.get(ch)
+            if c is None:
+                continue
+            for sy in range(rs):
+                for sx2 in range(rs):
+                    px = rx + rx2 * rs + sx2
+                    py = ry + ry2 * rs + sy
+                    if 0 <= px < W and 0 <= py < H:
+                        img.putpixel((px, py), (*c, 255))
+
+# "!" above biggest rival
+draw_text("!", 505, 160, 4, (255, 100, 100), (80, 0, 0))
+
+# === BOTTOM INFO BAR ===
+for y in range(H - 35, H):
     for x in range(W):
-        img.putpixel((x, y), (8, 8, 20, 255))
-# Border line
+        img.putpixel((x, y), (12, 12, 25, 255))
 for x in range(W):
-    img.putpixel((x, H - 23), (50, 50, 90, 255))
+    img.putpixel((x, H - 36), (60, 60, 110, 255))
 
-# "CompLaB3D" text
-draw_text("COMPLAB3D", 10, H - 18, 1, (80, 160, 200))
+draw_text("COMPLAB3D", 15, H - 28, 2, (80, 160, 200), (0, 30, 50))
 
-# "BASED ON REAL SCIENCE" text
-draw_text("BASED ON REAL SCIENCE", W - 220, H - 18, 1, (100, 100, 120))
+brs = "BASED ON REAL SCIENCE"
+bw = text_width(brs, 2)
+draw_text(brs, W - bw - 15, H - 28, 2, (130, 130, 160), (30, 30, 50))
 
-# === "INLET" and "OUTLET" labels ===
-draw_text("IN", 8, 155, 1, (79, 164, 255))
-# Small arrows from left
-for i in range(4):
-    ax = 22 + i * 10
-    for dy in range(-1, 2):
-        if 0 <= 157 + dy < H:
-            img.putpixel((ax, 157 + dy), (48, 96, 160, 255))
-            img.putpixel((ax + 1, 157 + dy), (48, 96, 160, 255))
+# === "IN" and "OUT" labels ===
+draw_text("IN", 15, 360, 3, O2_BLUE, (0, 30, 60))
+draw_text("OUT", W - 60, 360, 3, NO3_GREEN, (0, 40, 20))
 
-draw_text("OUT", W - 28, 155, 1, (94, 207, 94))
-
-# === SCANLINES effect (subtle, nostalgic) ===
-for y in range(0, H, 2):
-    for x in range(W):
-        old = img.getpixel((x, y))
-        # Very subtle darkening of every other line
-        nr = max(0, old[0] - 6)
-        ng = max(0, old[1] - 6)
-        nb = max(0, old[2] - 6)
-        img.putpixel((x, y), (nr, ng, nb, 255))
-
-# === CORNER DECORATIONS (NES-style frame) ===
-frame_col = (50, 50, 90)
-# Top border
-for x in range(W):
-    img.putpixel((x, 0), (*frame_col, 255))
-    img.putpixel((x, 1), (*frame_col, 255))
-# Bottom border (above info bar)
-for x in range(W):
-    img.putpixel((x, H - 24), (*frame_col, 255))
-# Left/right borders
-for y in range(H):
-    img.putpixel((0, y), (*frame_col, 255))
-    img.putpixel((1, y), (*frame_col, 255))
-    img.putpixel((W - 1, y), (*frame_col, 255))
-    img.putpixel((W - 2, y), (*frame_col, 255))
-
-# Corner flourishes
-corner_pixels = [(2, 2), (3, 2), (2, 3), (4, 2), (2, 4), (3, 3)]
-bright_frame = (80, 80, 140)
-for dx, dy in corner_pixels:
-    # Top-left
-    img.putpixel((dx, dy), (*bright_frame, 255))
-    # Top-right
-    img.putpixel((W - 1 - dx, dy), (*bright_frame, 255))
-    # Bottom-left
-    img.putpixel((dx, H - 25 - dy), (*bright_frame, 255))
-    # Bottom-right
-    img.putpixel((W - 1 - dx, H - 25 - dy), (*bright_frame, 255))
-
-# === STARS in upper dark area ===
-for i in range(25):
+# === STARS in upper area ===
+for i in range(40):
     sx = rng.randint(5, W - 5)
-    sy = rng.randint(3, 55)
-    brightness = rng.randint(150, 255)
-    # Avoid drawing over text area
+    sy = rng.randint(3, 90)
     old = img.getpixel((sx, sy))
-    if old[0] < 40 and old[1] < 60:
-        img.putpixel((sx, sy), (brightness, brightness, brightness, 255))
+    if old[0] < 50 and old[1] < 70:
+        b = rng.randint(160, 255)
+        img.putpixel((sx, sy), (b, b, b, 255))
         if rng.random() < 0.3:
-            # Cross sparkle
             for d in [(1,0),(-1,0),(0,1),(0,-1)]:
                 nx, ny = sx + d[0], sy + d[1]
                 if 0 <= nx < W and 0 <= ny < H:
-                    img.putpixel((nx, ny), (brightness // 2, brightness // 2, brightness // 2, 255))
+                    img.putpixel((nx, ny), (b//2, b//2, b//2, 255))
 
-# === Rising CH4 gas particles (from bottom, dramatic) ===
-for i in range(15):
-    gx = rng.randint(100, 380)
-    gy = rng.randint(140, 230)
-    # Small red-orange rising particle
-    c = PAL["ch4_r"] if rng.random() < 0.5 else PAL["fe_o"]
-    for dy in range(-2, 3):
-        for dx in range(-1, 2):
-            px, py = gx + dx, gy + dy
+# === BORDER FRAME ===
+frame = (70, 70, 120)
+for x in range(W):
+    for t in range(3):
+        img.putpixel((x, t), (*frame, 255))
+        img.putpixel((x, H - 1 - t), (*frame, 255))
+for y in range(H):
+    for t in range(3):
+        img.putpixel((t, y), (*frame, 255))
+        img.putpixel((W - 1 - t, y), (*frame, 255))
+
+# Corner accents
+bright = (110, 110, 170)
+for i in range(6):
+    for j in range(6 - i):
+        for cx, cy in [(3, 3), (W - 4 - j, 3), (3, H - 4 - j), (W - 4 - j, H - 4 - j)]:
+            px, py = cx + (i if cx < W // 2 else 0), cy + (i if cy < H // 2 else 0)
             if 0 <= px < W and 0 <= py < H:
-                old = img.getpixel((px, py))
-                # Only on dark areas
-                if old[0] < 100 and old[1] < 100:
-                    a = max(0, 60 - abs(dy) * 20 - abs(dx) * 15)
-                    nr = min(255, old[0] + (c[0] * a) // 255)
-                    ng = min(255, old[1] + (c[1] * a) // 255)
-                    nb = min(255, old[2] + (c[2] * a) // 255)
-                    img.putpixel((px, py), (nr, ng, nb, 255))
+                img.putpixel((px, py), (*bright, 255))
 
-# === SCALE UP 2x for final output ===
-final = img.resize((960, 540), Image.NEAREST)
+# === SCANLINES (very subtle) ===
+for y in range(0, H, 3):
+    for x in range(W):
+        old = img.getpixel((x, y))
+        nr = max(0, old[0] - 4)
+        ng = max(0, old[1] - 4)
+        nb = max(0, old[2] - 4)
+        img.putpixel((x, y), (nr, ng, nb, 255))
 
-# Save
-output_path = "/home/user/Complab3D-Biotic-Kinetic-AndersopnNR/game/builds"
+# === SAVE ===
 import os
-os.makedirs(output_path, exist_ok=True)
+os.makedirs("/home/user/Complab3D-Biotic-Kinetic-AndersopnNR/game/builds", exist_ok=True)
 
-final.save(f"{output_path}/cover_art.png")
-# Also save to docs for easy access
-final.save("/home/user/Complab3D-Biotic-Kinetic-AndersopnNR/docs/ARKE_cover_art.png")
+img.save("/home/user/Complab3D-Biotic-Kinetic-AndersopnNR/game/builds/cover_art.png")
+img.save("/home/user/Complab3D-Biotic-Kinetic-AndersopnNR/docs/ARKE_cover_art.png")
 
-print(f"Cover art saved!")
-print(f"  {output_path}/cover_art.png (960x540)")
+print(f"Cover art saved! Size: {W}x{H}")
+print(f"  game/builds/cover_art.png")
 print(f"  docs/ARKE_cover_art.png")
