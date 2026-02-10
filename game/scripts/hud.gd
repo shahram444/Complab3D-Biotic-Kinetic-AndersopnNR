@@ -490,9 +490,10 @@ func _draw_hud() -> void:
 	# Level
 	_text("Lv%d" % (GameData.current_level + 1), 952, hud_y + 44, Color(0.53, 0.53, 0.53), 12, 2)
 
-	# Science mode indicator
+	# Science mode indicator + data panel
 	if game_ref.science_mode:
-		_text("[SCIENCE: Q]", 480, hud_y + 22, Color(0.31, 0.64, 0.94), 12, 1)
+		_text("[SCIENCE MODE: Q]", 480, hud_y + 22, Color(0.31, 0.64, 0.94), 14, 1)
+		_draw_science_panel(hud_y)
 
 	# Flow ride indicator
 	if p.riding_flow:
@@ -557,6 +558,108 @@ func _draw_redox_ladder(hud_y: float) -> void:
 		draw_rect(Rect2(rx, y + 2, 8, 8), col)
 		# Formula + energy
 		_text("%s +%d" % [sd["formula"], sd["energy"]], rx + 12, y, col * Color(1,1,1,0.85), 10)
+
+func _draw_science_panel(hud_y: float) -> void:
+	if !game_ref or !game_ref.player_node or !game_ref.world_node:
+		return
+	var p = game_ref.player_node
+	var w = game_ref.world_node
+	var t = GameData.game_time
+	var def = GameData.get_level_def()
+
+	# Panel background (top-left, semi-transparent)
+	var px = 8.0
+	var py = 36.0
+	var pw = 220.0
+	var ph = 200.0
+	var border_pulse = sin(t * 2.0) * 0.1 + 0.5
+	_box(px, py, pw, ph, Color(0.02, 0.02, 0.1, 0.85),
+		Color(0.31, 0.64, 0.94, border_pulse))
+
+	# Title
+	_text("SCIENCE ANALYSIS", px + pw * 0.5, py + 2, Color(0.31, 0.64, 0.94), 12, 1)
+	draw_rect(Rect2(px + 4, py + 20, pw - 8, 1), Color(0.31, 0.64, 0.94, 0.4))
+
+	# Current tile data
+	var tx = p.tile_x
+	var ty = p.tile_y
+	var tile = w.get_tile(tx, ty)
+	var flow = w.get_flow(tx, ty)
+	var dist = w.get_distance(tx, ty)
+
+	var tile_name = "?"
+	var tile_col = Color(0.7, 0.7, 0.8)
+	match tile:
+		GameData.Tile.PORE:
+			tile_name = "PORE SPACE"
+			tile_col = Color(0.5, 0.7, 1.0)
+		GameData.Tile.FLOW_FAST:
+			tile_name = "FAST CHANNEL"
+			tile_col = Color(1.0, 0.8, 0.3)
+		GameData.Tile.TOXIC:
+			tile_name = "TOXIC (H2S)"
+			tile_col = Color(1.0, 0.3, 0.9)
+		GameData.Tile.INLET:
+			tile_name = "INLET (P=1.0)"
+			tile_col = Color(0.4, 0.7, 1.0)
+		GameData.Tile.OUTLET:
+			tile_name = "OUTLET (P=0.0)"
+			tile_col = Color(0.37, 0.81, 0.37)
+		GameData.Tile.BIOFILM:
+			tile_name = "BIOFILM COLONY"
+			tile_col = Color(0.37, 0.81, 0.37)
+		GameData.Tile.SOLID:
+			tile_name = "SOLID GRAIN"
+			tile_col = Color(0.5, 0.4, 0.3)
+
+	var ly = py + 24.0
+	_text("Position: (%d, %d)" % [tx, ty], px + 6, ly, Color(0.6, 0.6, 0.7), 10)
+	ly += 16
+	_text("Tile: %s" % tile_name, px + 6, ly, tile_col, 10)
+	ly += 16
+
+	# Flow data
+	var dir_names = ["none", "RIGHT", "DOWN", "LEFT", "UP"]
+	var dir_name = dir_names[flow["dir"]] if flow["dir"] < 5 else "?"
+	_text("Flow: %s  v=%.2f" % [dir_name, flow["speed"]], px + 6, ly,
+		Color(0.4, 0.7, 1.0) if flow["speed"] > 0.1 else Color(0.4, 0.4, 0.5), 10)
+	ly += 16
+
+	_text("Dist to wall: %d tiles" % dist, px + 6, ly, Color(0.6, 0.6, 0.7), 10)
+	ly += 20
+
+	# Separator
+	draw_rect(Rect2(px + 4, ly - 4, pw - 8, 1), Color(0.3, 0.3, 0.5, 0.4))
+
+	# Level parameters
+	_text("LEVEL PARAMETERS", px + pw * 0.5, ly, Color(1, 0.84, 0, 0.8), 10, 1)
+	ly += 16
+	_text("Flow speed: %.1f" % def.get("flow", 0.5), px + 6, ly, Color(0.6, 0.6, 0.7), 10)
+	ly += 14
+	_text("Porosity: %.0f%%" % (def.get("porosity", 0.5) * 100), px + 6, ly, Color(0.6, 0.6, 0.7), 10)
+	ly += 14
+	if def.get("toxic", 0.0) > 0:
+		_text("Toxic: %.0f%% coverage" % (def.get("toxic", 0) * 100), px + 6, ly, Color(1.0, 0.3, 0.9), 10)
+		ly += 14
+	_text("Rivals: %d" % def.get("rivals", 0), px + 6, ly, Color(1.0, 0.4, 0.4), 10)
+	ly += 14
+	_text("Map: %dx%d tiles" % [w.map_w, w.map_h], px + 6, ly, Color(0.6, 0.6, 0.7), 10)
+
+	# Flow speed legend (bottom of panel)
+	ly += 20
+	draw_rect(Rect2(px + 4, ly - 4, pw - 8, 1), Color(0.3, 0.3, 0.5, 0.4))
+	_text("FLOW SPEED MAP", px + pw * 0.5, ly, Color(0.7, 0.7, 0.8, 0.7), 10, 1)
+	ly += 14
+	# Color legend bar
+	var bar_x = px + 6
+	var bar_w = pw - 12
+	var seg = bar_w / 4.0
+	draw_rect(Rect2(bar_x, ly, seg, 8), Color(0.1, 0.2, 0.8, 0.6))
+	draw_rect(Rect2(bar_x + seg, ly, seg, 8), Color(0.1, 0.7, 0.7, 0.6))
+	draw_rect(Rect2(bar_x + seg * 2, ly, seg, 8), Color(0.2, 0.8, 0.2, 0.6))
+	draw_rect(Rect2(bar_x + seg * 3, ly, seg, 8), Color(0.9, 0.6, 0.1, 0.6))
+	_text("slow", bar_x, ly + 10, Color(0.5, 0.5, 0.6), 8)
+	_text("fast", bar_x + bar_w - 16, ly + 10, Color(0.5, 0.5, 0.6), 8)
 
 func _draw_minimap(hud_y: float) -> void:
 	if !game_ref or !game_ref.world_node:

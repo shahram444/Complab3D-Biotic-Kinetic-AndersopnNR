@@ -621,19 +621,106 @@ func _draw_science_overlay() -> void:
 	var start_y = int((cam_pos.y - half.y) / T)
 	var end_y = start_y + GameData.ROWS + 2
 
+	var font = ThemeDB.fallback_font
+	var t = GameData.game_time
+
+	# Semi-transparent dark overlay for contrast
+	var overlay_rect = Rect2(
+		maxi(0, start_x) * T, maxi(0, start_y) * T,
+		(end_x - start_x) * T, (end_y - start_y) * T)
+	draw_rect(overlay_rect, Color(0, 0, 0.05, 0.35))
+
 	for row in range(maxi(0, start_y), mini(world_node.map_h, end_y)):
 		for col in range(maxi(0, start_x), mini(world_node.map_w, end_x)):
+			var tile = world_node.get_tile(col, row)
+			var pos = Vector2(col * T, row * T)
+
+			if tile == GameData.Tile.SOLID:
+				# Grid lines on solid (geology visualization)
+				draw_rect(Rect2(pos, Vector2(T, T)), Color(0.3, 0.2, 0.1, 0.15), false, 1.0)
+				continue
+
 			var flow = world_node.get_flow(col, row)
-			if flow["dir"] == 0 or flow["speed"] < 0.05:
-				continue
-			if (col + row) % 3 != 0:
-				continue
-			var pos = Vector2(col * T + 8, row * T + 8)
-			var alpha = clampf(flow["speed"] * 1.2, 0.1, 0.7)
-			var arrow_key = "arrow_r" if flow["dir"] == 1 or flow["dir"] == 3 else "arrow_d"
-			var tex = SpriteFactory.get_tex(arrow_key)
-			if tex:
-				draw_texture(tex, pos, Color(1, 1, 1, alpha))
+
+			# Color-coded flow speed heat map on every walkable tile
+			if flow["speed"] > 0.01:
+				var spd_norm = clampf(flow["speed"] / 1.5, 0, 1)
+				# Blue (slow) -> Cyan -> Green -> Yellow -> Red (fast)
+				var heat_col: Color
+				if spd_norm < 0.25:
+					heat_col = Color(0.1, 0.2, 0.8, 0.25)  # blue
+				elif spd_norm < 0.5:
+					heat_col = Color(0.1, 0.7, 0.7, 0.3)   # cyan
+				elif spd_norm < 0.75:
+					heat_col = Color(0.2, 0.8, 0.2, 0.3)   # green
+				else:
+					heat_col = Color(0.9, 0.6, 0.1, 0.35)   # orange
+				draw_rect(Rect2(pos + Vector2(1,1), Vector2(T-2, T-2)), heat_col)
+
+			# Flow direction arrows (every 2nd tile, animated)
+			if flow["dir"] > 0 and flow["speed"] > 0.05:
+				if (col + row) % 2 == 0:
+					var cx = pos.x + T * 0.5
+					var cy = pos.y + T * 0.5
+					var aoff = fmod(t * 2.0, 1.0) * 6.0
+					var aa = clampf(flow["speed"] * 0.8, 0.15, 0.6)
+					var ac = Color(1, 1, 1, aa)
+					match flow["dir"]:
+						1: # right
+							draw_rect(Rect2(cx - 6 + aoff, cy - 1, 14, 2), ac)
+							draw_rect(Rect2(cx + 5 + aoff, cy - 3, 2, 6), ac)
+						2: # down
+							draw_rect(Rect2(cx - 1, cy - 6 + aoff, 2, 14), ac)
+							draw_rect(Rect2(cx - 3, cy + 5 + aoff, 6, 2), ac)
+						3: # left
+							draw_rect(Rect2(cx - 8 - aoff, cy - 1, 14, 2), ac)
+							draw_rect(Rect2(cx - 8 - aoff, cy - 3, 2, 6), ac)
+						4: # up
+							draw_rect(Rect2(cx - 1, cy - 8 - aoff, 2, 14), ac)
+							draw_rect(Rect2(cx - 3, cy - 8 - aoff, 6, 2), ac)
+
+			# Speed label on every 4th tile
+			if font and (col + row) % 4 == 0 and flow["speed"] > 0.05:
+				var spd_str = "%.1f" % flow["speed"]
+				draw_string(font, pos + Vector2(2, T - 4),
+					spd_str, HORIZONTAL_ALIGNMENT_LEFT, -1, 8,
+					Color(1, 1, 1, 0.5))
+
+			# Tile type labels on every 3rd tile
+			if font and (col * 3 + row) % 5 == 0:
+				var label = ""
+				var lc = Color.WHITE
+				match tile:
+					GameData.Tile.PORE:
+						label = "PORE"
+						lc = Color(0.5, 0.7, 1.0, 0.4)
+					GameData.Tile.FLOW_FAST:
+						label = "FAST"
+						lc = Color(1.0, 0.8, 0.3, 0.5)
+					GameData.Tile.TOXIC:
+						label = "H2S"
+						lc = Color(1.0, 0.3, 0.9, 0.6)
+					GameData.Tile.INLET:
+						label = "INLET"
+						lc = Color(0.4, 0.7, 1.0, 0.7)
+					GameData.Tile.OUTLET:
+						label = "OUT"
+						lc = Color(0.37, 0.81, 0.37, 0.7)
+					GameData.Tile.BIOFILM:
+						label = "BIO"
+						lc = Color(0.37, 0.81, 0.37, 0.5)
+				if label != "":
+					draw_string(font, pos + Vector2(2, 10),
+						label, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, lc)
+
+	# Highlight player tile with crosshair
+	if player_node and player_node.alive:
+		var ptx = player_node.tile_x
+		var pty = player_node.tile_y
+		var pp = Vector2(ptx * T, pty * T)
+		var pulse = sin(t * 4.0) * 0.15 + 0.6
+		draw_rect(Rect2(pp - Vector2(2, 2), Vector2(T + 4, T + 4)),
+			Color(0.16, 0.81, 0.69, pulse), false, 2.0)
 
 func _draw_popups() -> void:
 	var font = ThemeDB.fallback_font
