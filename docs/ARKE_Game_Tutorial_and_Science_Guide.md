@@ -1,4 +1,4 @@
-# METHI: Guardians of Earth
+# ARKE: Guardians of Earth
 ## Complete Game Tutorial & Science Guide
 
 *An educational game based on CompLaB3D pore-scale biogeochemical reactive transport research*
@@ -10,9 +10,22 @@
 
 ## 1.1 What Is This Game?
 
-You play as **METHI**, a tiny methanotrophic archaea (a single-celled microorganism) living inside the pore spaces between soil and rock grains deep underground. Your mission: **eat substrates, grow biomass, place colonies, and prevent greenhouse gases (methane CH4 and nitrous oxide N2O) from reaching the atmosphere.**
+You play as **ARKE** (from Greek "arkhē" = beginning/origin, the root of "Archaea"), a tiny methanotrophic archaea (a single-celled microorganism) living inside the pore spaces between soil and rock grains deep underground. Your mission: **eat substrates, grow biomass, place colonies, and prevent greenhouse gases (methane CH4 and nitrous oxide N2O) from reaching the atmosphere.**
 
 The game is based on real science from the CompLaB3D research framework, which simulates how microbes grow, consume chemicals, and form biofilms inside porous media at the pore scale.
+
+### How the Pore World Works
+
+The game world represents a cross-section of subsurface porous media:
+- **Brown tiles** = Solid grains (rock/soil particles) - you CANNOT pass through these
+- **Dark blue/black tiles** = Pore space (water-filled gaps between grains) - this is where you live and move
+- **Flow direction** = Water flows **from LEFT (inlet, high pressure) to RIGHT (outlet, low pressure)**, just like in real groundwater systems driven by hydraulic pressure gradients
+- **"IN" label** = Inlet on the left edge - where water and nutrients ENTER the pore network (marked with blue pulsing bar and animated arrows)
+- **"OUT" label** = Outlet on the right edge - where water EXITS (marked with green pulsing bar)
+- **Blue arrows on tiles** = Subtle flow direction indicators showing which way water moves (visible by default; press Q for detailed science overlay)
+- **Purple/magenta tiles** = **TOXIC ZONES** - areas with accumulated hydrogen sulfide (H2S) and reactive chemical species (see section 1.8 below)
+
+Substrates (food) primarily **spawn at the inlet** and are **carried by water flow** through the pore network. They cannot pass through solid grains - they follow the open pore channels. This means **following the flow direction leads you to food!**
 
 ---
 
@@ -20,7 +33,7 @@ The game is based on real science from the CompLaB3D research framework, which s
 
 | Key | Action | Description |
 |-----|--------|-------------|
-| **Arrow Keys** or **WASD** | Move | Navigate METHI through pore spaces between grains |
+| **Arrow Keys** or **WASD** | Move | Navigate ARKE through pore spaces between grains |
 | **SPACE** | Divide | Place a colony when your Growth bar is full |
 | **SHIFT** (hold) | Ride Flow | Enter planktonic mode - travel along water flow currents at 2x speed |
 | **Q** | Science Mode | Toggle science overlay showing flow arrows and directions |
@@ -30,7 +43,7 @@ The game is based on real science from the CompLaB3D research framework, which s
 
 ### Movement Details
 
-- METHI moves **tile by tile** through walkable pore spaces (the dark blue areas between brown grains)
+- ARKE moves **tile by tile** through walkable pore spaces (the dark blue areas between brown grains)
 - You **cannot** walk through solid grains (brown/dark tiles) or void areas
 - Movement speed is **2.5 tiles per second** in normal mode
 - In **planktonic mode** (SHIFT held), you ride water currents at **5 tiles per second** (2x multiplier), but it costs a small amount of energy (0.5 per move)
@@ -79,7 +92,7 @@ The HUD bar sits at the bottom of the screen and shows all your vital informatio
 - **Drain:** You lose **1.5 HP per second** from starvation (your metabolism constantly burns energy)
 - **Recovery:** Eating substrates restores HP (amount depends on substrate type)
 - **Toxic damage:** Standing in toxic zones (purple/magenta areas) drains **20 HP per second**
-- **Death:** When HP reaches 0, METHI dies. The screen will show "MICROBE LOST"
+- **Death:** When HP reaches 0, ARKE dies. The screen will show "MICROBE LOST"
 - **Warning:** When HP drops below 30, the screen edges pulse red and "STARVING!" appears
 
 #### EN Bar (Energy) - Middle Left
@@ -115,7 +128,7 @@ The HUD bar sits at the bottom of the screen and shows all your vital informatio
 - **Purple dots:** Toxic zones
 - **Green dots:** Biofilm/colonies you've placed
 - **Bright green dot:** Outlet
-- **White/teal blinking dot:** Your position (METHI)
+- **White/teal blinking dot:** Your position (ARKE)
 
 ---
 
@@ -134,7 +147,7 @@ Division is the core mechanic - it's how you win levels!
    - Fe(III) (Iron, orange): +10 Growth
    - SO4 (Sulfate, yellow): +8 Growth
 3. **GR bar reaches 100** - The bar flashes yellow, "SPACE!" text appears
-4. **Press SPACE** - METHI divides! A new colony cell is placed on an adjacent pore tile
+4. **Press SPACE** - ARKE divides! A new colony cell is placed on an adjacent pore tile
 5. **Colony placement logic:**
    - The game finds adjacent walkable pore tiles
    - If no direct neighbors are free, it searches 2 tiles away
@@ -166,13 +179,22 @@ Substrates are the colored floating particles you eat. They follow the real-worl
 | Manganese | Mn(IV) | Purple | +12 | +12 | -558 | Manganese reduction |
 | Iron | Fe(III) | Orange | +10 | +10 | -334 | Iron reduction |
 | Sulfate | SO42- | Yellow | +6 | +8 | -152 | Sulfate reduction |
-| Methane | CH4 | Red | +3 | +25 | -31 | Methanotrophy (saves the planet!) |
+| Methane | CH4 | Red | +5 | +25 | -31 | Methanotrophy (saves the planet!) |
+
+### Why Does Energy vs Growth Differ? (The Real Science)
+
+This is scientifically accurate! Here's why:
+- **Energy** represents the thermodynamic free energy (dG) of the metabolic reaction. O2 yields -818 kJ/mol (most energy), while anaerobic methane oxidation yields only -31 kJ/mol (least energy). This determines how much "fuel" you get.
+- **Growth** represents biomass yield - how much of the substrate is incorporated into new cell material. CH4 is a **carbon source** (C1 compound) that methanotrophic archaea directly assimilate into biomass through formaldehyde pathways. So CH4 gives the MOST biomass growth (+25) even though its energy yield is lowest.
+- **O2** is an electron acceptor, not a carbon source. It gives lots of energy but doesn't directly provide carbon for building new cells, so growth is moderate (+15).
+- **NO3** is balanced because denitrification both provides decent energy AND prevents toxic N2O accumulation, supporting healthy growth.
 
 ### Key Strategy:
-- **O2 gives the most energy** (keeps you alive) but less growth
-- **CH4 gives the most growth** (fills your division bar fastest) but least energy
-- **NO3 is balanced** - good energy AND good growth, plus it prevents N2O emissions
+- **O2 gives the most energy** (keeps you alive longest) but moderate growth
+- **CH4 gives the most growth** (fills your division bar fastest) but low energy - eat it when your HP is safe
+- **NO3 is the best all-rounder** - good energy AND good growth, plus it prevents N2O emissions
 - In deeper levels, high-energy substrates (O2) disappear - you must survive on lower-energy options
+- **Balance is key:** eat CH4 for growth when HP is above 50, switch to high-energy substrates when HP drops
 
 ### Scoring Bonuses:
 - Eating any substrate: **+10 points**
@@ -183,17 +205,19 @@ Substrates are the colored floating particles you eat. They follow the real-worl
 
 ## 1.6 Rival Microbes
 
-Rivals are **red enemy bacteria** marked with a flashing **"!"** above them. They:
-- Wander through pore spaces randomly
-- **Steal your food** - they eat any substrate they touch
-- Move every 0.4 seconds in a preferred direction (with 20% chance to turn)
+Rivals are **red enemy bacteria** marked with a flashing **"!"** above them. They are smart competitors:
+- **Sense nearby substrates** (within 6 tiles) and actively move toward food
+- **Track your position** - when you're close (within 8 tiles), they may move toward your area to compete for the same food zone
+- **Follow water flow** - they ride currents to reach food, just like real planktonic bacteria
+- **Get hungrier over time** - the longer they go without eating, the more aggressively they seek food (up to 75% seek rate)
+- **Steal your food** - they eat any substrate they touch, and flash red when eating
 - Cannot be killed or interacted with - you must **outcompete** them
-- Flash red when they eat a substrate
 
 ### Strategies Against Rivals:
-- Move fast - reach substrates before they do
-- Use planktonic mode (SHIFT) to cover ground quickly
+- Move fast - reach substrates before rivals sense them
+- Use planktonic mode (SHIFT) to cover ground quickly and outpace rivals
 - Don't chase a rival into a dead-end pore
+- Rivals tend to follow flow - try exploring side channels they miss
 - Focus on areas the rival isn't visiting
 - Rivals don't target you specifically - they wander randomly
 
@@ -201,11 +225,21 @@ Rivals are **red enemy bacteria** marked with a flashing **"!"** above them. The
 
 ## 1.7 Hazards
 
-### Toxic Zones (Purple/Magenta Tiles)
+### Toxic Zones (Purple/Magenta Tiles) - YES, They Are Real!
+
+Toxic zones represent areas where **reactive chemical species accumulate** in the subsurface. This is real geochemistry:
+
+- **Hydrogen Sulfide (H2S):** Produced by sulfate-reducing bacteria. H2S is toxic to most cells - it inhibits cytochrome c oxidase and damages cell membranes. In methane seep environments, H2S concentrations can reach lethal levels.
+- **Reactive Oxygen Species (ROS):** At interfaces between oxic and anoxic zones, chemical reactions produce superoxide and hydroxyl radicals that damage DNA and proteins.
+- **Heavy Metals:** Near hydrothermal vents, dissolved metals (Cu, Zn, Pb) in superheated fluid are toxic to microbes at high concentrations.
+
+**In the game:**
 - Deal **20 damage per second** while standing on them
 - Appear in Chapters 3-5 (Methane Seeps, Permafrost Edge, Hydrothermal Realm)
-- Shown as purple dots on the minimap
-- **Avoid them!** Or cross quickly if you must
+- Shown as **purple/magenta tiles with pulsing borders and rising toxic particles**
+- Marked as purple dots on the minimap
+- The HUD shows a **toxic zone legend** (purple square + "TOXIC (H2S)") when the level has toxic zones
+- **Avoid them!** Or cross very quickly if you must - 20 HP/sec is devastating
 
 ### Starvation
 - HP drains at 1.5/sec even when standing still
@@ -222,7 +256,7 @@ Rivals are **red enemy bacteria** marked with a flashing **"!"** above them. The
 
 ## 1.8 Visual Indicators on Characters
 
-### METHI (Your Character)
+### ARKE (Your Character)
 - **Teal/cyan glow:** Pulsing teal highlight rectangle around you - always visible
 - **White corner brackets:** Four white L-shaped markers at each corner
 - **Floating white arrow:** Bouncing arrow above your head
@@ -687,7 +721,7 @@ In the game, this translates to:
 ## 3.6 Biofilm Formation & Cellular Automata
 
 ### In the Game
-When METHI divides (SPACE), a colony is placed on an adjacent pore tile. The tile becomes permanent biofilm (green). Colonies passively consume nearby substrates. The goal is to build a network of colonies across the pore space.
+When ARKE divides (SPACE), a colony is placed on an adjacent pore tile. The tile becomes permanent biofilm (green). Colonies passively consume nearby substrates. The goal is to build a network of colonies across the pore space.
 
 ### The Real Science
 **Biofilms** are structured communities of microorganisms attached to surfaces and enclosed in a self-produced matrix of extracellular polymeric substances (EPS). In subsurface environments, biofilms:
@@ -905,6 +939,6 @@ Key parameters used in the game (from CompLaB3D):
 
 ---
 
-*METHI: Guardians of Earth is an educational game demonstrating that the invisible world of subsurface microorganisms plays a critical role in regulating Earth's climate. Every colony you build represents a real biological defense mechanism against greenhouse gas emissions.*
+*ARKE: Guardians of Earth is an educational game demonstrating that the invisible world of subsurface microorganisms plays a critical role in regulating Earth's climate. Every colony you build represents a real biological defense mechanism against greenhouse gas emissions.*
 
 *Developed based on CompLaB3D research at the University of Georgia.*

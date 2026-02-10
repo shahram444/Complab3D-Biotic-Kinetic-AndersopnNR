@@ -377,19 +377,31 @@ func _update_substrates(delta: float) -> void:
 			substrates.remove_at(i)
 			continue
 
-		# Flow movement
+		# Flow movement - substrates only move through open pore space
 		var tx = int(s.position.x / T)
 		var ty = int(s.position.y / T)
 		var flow = world_node.get_flow(tx, ty)
 		if flow["speed"] > 0:
 			var flow_dirs = [Vector2.ZERO, Vector2(1,0), Vector2(0,1), Vector2(-1,0), Vector2(0,-1)]
 			var fd: Vector2 = flow_dirs[flow["dir"]]
-			s.position += fd * flow["speed"] * T * delta
-			# Diffusion drift
-			s.position.x += randf_range(-3, 3) * delta
-			s.position.y += randf_range(-3, 3) * delta
+			var new_pos = s.position + fd * flow["speed"] * T * delta
+			# Check if new position is still in open pore (not solid)
+			var check_tx = int(new_pos.x / T)
+			var check_ty = int(new_pos.y / T)
+			var check_tile = world_node.get_tile(check_tx, check_ty)
+			if world_node.is_walkable_tile(check_tile):
+				s.position = new_pos
+				# Small diffusion drift (stays within pore)
+				var drift_x = s.position.x + randf_range(-2, 2) * delta
+				var drift_y = s.position.y + randf_range(-2, 2) * delta
+				var dtx = int(drift_x / T)
+				var dty = int(drift_y / T)
+				if world_node.is_walkable_tile(world_node.get_tile(dtx, dty)):
+					s.position.x = drift_x
+					s.position.y = drift_y
+			# If blocked by solid, substrate stays put (no teleporting through grains)
 
-		# Check bounds / solid
+		# Check bounds / solid - remove if somehow ended up in solid
 		var ntx = int(s.position.x / T)
 		var nty = int(s.position.y / T)
 		var tile = world_node.get_tile(ntx, nty)
@@ -433,8 +445,8 @@ func _spawn_substrates(def: Dictionary) -> void:
 		var spawn_x = -1
 		var spawn_y = -1
 
-		# 40% chance spawn at inlet (flow-carried), 60% random pore location
-		var use_inlet = randf() < 0.4
+		# 75% chance spawn at inlet (flow-carried), 25% random pore location
+		var use_inlet = randf() < 0.75
 		if use_inlet:
 			for _attempt in range(20):
 				var ty = randi_range(1, world_node.map_h - 2)
@@ -507,7 +519,7 @@ func _update_rivals(delta: float) -> void:
 	for rival in rivals:
 		if !is_instance_valid(rival):
 			continue
-		rival.do_move()
+		rival.do_move(substrates, player_node.position if player_node else Vector2.ZERO)
 
 		# Check if rival eats any substrates
 		for i in range(substrates.size() - 1, -1, -1):

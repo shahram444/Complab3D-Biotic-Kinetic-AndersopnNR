@@ -1,5 +1,5 @@
 extends Node2D
-## METHI - The methanotrophic archaea player character.
+## ARKE - The methanotrophic archaea player character.
 ## Handles movement, flow riding, eating, growth, and division.
 
 const T := GameData.TILE

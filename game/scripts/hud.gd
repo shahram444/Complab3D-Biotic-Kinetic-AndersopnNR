@@ -81,7 +81,7 @@ func _draw_title() -> void:
 
 	# Title
 	var ty = 70 + sin(t * 1.5) * 6
-	_text("METHI", 480, ty, Color(0.16, 0.81, 0.69), 40, 1)
+	_text("ARKE", 480, ty, Color(0.16, 0.81, 0.69), 40, 1)
 	_text("Guardians of Earth", 480, ty + 56, Color(0.77, 0.63, 0.35), 20, 1)
 
 	# Methi sprite
@@ -154,8 +154,8 @@ func _draw_narrative() -> void:
 	if speaker == "ELDER":
 		name_str = "ARCHAEON PRIME"
 		name_color = Color(0.28, 0.28, 0.82)
-	elif speaker == "METHI":
-		name_str = "METHI"
+	elif speaker == "ARKE":
+		name_str = "ARKE"
 		name_color = Color(0.16, 0.81, 0.69)
 	else:
 		name_str = ""
@@ -222,14 +222,14 @@ func _draw_cutscene_scene(speaker: String, t: float) -> void:
 			# Bioluminescent glow
 			draw_rect(Rect2(110, 110 + bob, 180, 180),
 				Color(0.2, 0.2, 0.7, 0.08 + sin(t * 2) * 0.04))
-		# METHI listening on the right
+		# ARKE listening on the right
 		var methi_tex = SpriteFactory.get_tex("methi_down")
 		if methi_tex:
 			var bob2 = sin(t * 2 + 1) * 4
 			draw_texture_rect(methi_tex, Rect2(700, 170 + bob2, 96, 96), false,
 				Color(1, 1, 1, 0.85))
-	elif speaker == "METHI":
-		# METHI on the right, speaking
+	elif speaker == "ARKE":
+		# ARKE on the right, speaking
 		var methi_tex = SpriteFactory.get_tex("methi_right")
 		if methi_tex:
 			var bob = sin(t * 2) * 6
@@ -314,7 +314,7 @@ func _draw_mission_brief() -> void:
 		name_str = "ARCHAEON PRIME"
 		name_color = Color(0.28, 0.28, 0.82)
 	else:
-		name_str = "METHI"
+		name_str = "ARKE"
 		name_color = Color(0.16, 0.81, 0.69)
 
 	# Name background
@@ -374,14 +374,14 @@ func _draw_mission_scene(speaker: String, t: float) -> void:
 			# Bioluminescent glow
 			draw_rect(Rect2(170, 130 + bob, 160, 160),
 				Color(0.2, 0.2, 0.7, 0.08 + sin(t * 2) * 0.04))
-		# METHI listening on the right
+		# ARKE listening on the right
 		var methi_tex = SpriteFactory.get_tex("methi_down")
 		if methi_tex:
 			var bob2 = sin(t * 2 + 1) * 4
 			draw_texture_rect(methi_tex, Rect2(640, 180 + bob2, 96, 96), false,
 				Color(1, 1, 1, 0.75))
 	else:
-		# METHI speaking
+		# ARKE speaking
 		var methi_tex = SpriteFactory.get_tex("methi_right")
 		if methi_tex:
 			var bob = sin(t * 2) * 6
@@ -500,11 +500,41 @@ func _draw_hud() -> void:
 	elif p.can_ride_flow() and !p.can_divide():
 		_text("SHIFT: ride flow", 480, hud_y + 44, Color(0.4, 0.4, 0.6), 10, 1)
 
+	# Flow direction compass (above minimap)
+	_draw_flow_compass(hud_y)
+
 	# Redox ladder (compact, left side above HUD bar)
 	_draw_redox_ladder(hud_y)
 
 	# Minimap
 	_draw_minimap(hud_y)
+
+func _draw_flow_compass(hud_y: float) -> void:
+	# Show flow direction: left = inlet (high pressure), right = outlet (low pressure)
+	var cx = 200.0
+	var cy = hud_y - 18.0
+	var t = GameData.game_time
+
+	# Background
+	draw_rect(Rect2(cx - 4, cy - 4, 110, 16), Color(0, 0, 0, 0.4))
+
+	# Animated arrow showing flow left->right
+	var anim = fmod(t * 2.0, 1.0) * 8.0
+	_text("IN", cx, cy - 4, Color(0.4, 0.7, 1.0, 0.7), 10)
+	# Flow arrows
+	for i in range(3):
+		var ax = cx + 22 + i * 18 + anim
+		draw_rect(Rect2(ax, cy + 2, 8, 2), Color(0.4, 0.7, 1.0, 0.5))
+		draw_rect(Rect2(ax + 6, cy, 2, 6), Color(0.4, 0.7, 1.0, 0.5))
+	_text("OUT", cx + 78, cy - 4, Color(0.37, 0.81, 0.37, 0.7), 10)
+
+	# Toxic zone warning (if level has toxic zones)
+	var def = GameData.get_level_def()
+	if def.get("toxic", 0.0) > 0:
+		var warn_x = cx + 120.0
+		var warn_a = sin(t * 3.0) * 0.2 + 0.7
+		draw_rect(Rect2(warn_x, cy - 2, 8, 8), Color(1.0, 0.3, 0.9, warn_a))
+		_text("= TOXIC (H2S)", warn_x + 12, cy - 4, Color(1.0, 0.4, 0.9, 0.6), 10)
 
 func _draw_redox_ladder(hud_y: float) -> void:
 	# Show available substrates for current level with energy values
@@ -718,7 +748,7 @@ func _draw_victory() -> void:
 		draw_texture_rect(tex, Rect2(464, 100 + sin(GameData.game_time * 3) * 10, 32, 32), false)
 
 	if t > 1:
-		_text("Methi has colonized the underground!", 480, 160, Color(0.37, 0.81, 0.37), 16, 1)
+		_text("Arke has colonized the underground!", 480, 160, Color(0.37, 0.81, 0.37), 16, 1)
 	if t > 2:
 		_text("From a single archaea to a thriving biofilm,", 480, 200, Color(0.78, 0.78, 0.91), 14, 1)
 		_text("you prevented greenhouse gases from escaping.", 480, 224, Color(0.78, 0.78, 0.91), 14, 1)
