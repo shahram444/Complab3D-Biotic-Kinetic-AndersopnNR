@@ -32,7 +32,7 @@ const SUBSTRATES := {
 	Sub.SO4: { "name": "Sulfate",  "formula": "SO42-",  "color": "#dfdf3f", "glow": "#ffffaf",
 	           "energy": 6,  "growth": 8,  "dG": -152.0, "desc": "Sulfate reduction" },
 	Sub.CH4: { "name": "Methane",  "formula": "CH4",    "color": "#ff4f4f", "glow": "#ff9f7f",
-	           "energy": 3,  "growth": 25, "dG": -31.0,  "desc": "Methanotrophy - prevents warming!" },
+	           "energy": 5,  "growth": 25, "dG": -31.0,  "desc": "Methanotrophy - prevents warming!" },
 }
 
 # ── SCIENCE PARAMETERS (from CompLaB3D) ─────────────────────────────────────
@@ -140,23 +140,23 @@ const ENV_PAL := [
 ]
 
 # ── CUTSCENE DIALOGUE (visual novel style) ──────────────────────────────────
-# speaker: "ELDER" = Archaeon Prime (mentor), "METHI" = player, "" = narration
+# speaker: "ELDER" = Archaeon Prime (mentor), "ARKE" = player, "" = narration
 const CUTSCENE := [
 	{"speaker": "", "text": "Deep within the pore space...\nbetween grains of ancient rock..."},
 	{"speaker": "ELDER", "text": "Young one... wake up."},
-	{"speaker": "METHI", "text": "W-where am I? What is this place?"},
+	{"speaker": "ARKE", "text": "W-where am I? What is this place?"},
 	{"speaker": "ELDER", "text": "You are in the subsurface. Between\ngrains of soil, far from light.\nThis is our world."},
 	{"speaker": "ELDER", "text": "I am ARCHAEON PRIME.\nElder of the methanotrophic archaea.\nI have guarded these pores for eons."},
-	{"speaker": "METHI", "text": "Why is everything so dark?\nWhat's happening?"},
+	{"speaker": "ARKE", "text": "Why is everything so dark?\nWhat's happening?"},
 	{"speaker": "ELDER", "text": "Methane. CH4. A greenhouse gas\n80 times more powerful than CO2.\nIt rises from the deep below."},
 	{"speaker": "ELDER", "text": "And N2O... nitrous oxide.\n300 times more dangerous than CO2.\nThey seep from thawing soil."},
 	{"speaker": "ELDER", "text": "For billions of years, we microbes\nhave consumed these gases.\nWe are Earth's invisible shield."},
-	{"speaker": "METHI", "text": "What must I do?"},
+	{"speaker": "ARKE", "text": "What must I do?"},
 	{"speaker": "ELDER", "text": "Eat substrates. Grow your biomass.\nWhen your growth bar fills -\npress SPACE to DIVIDE!"},
 	{"speaker": "ELDER", "text": "Place colonies across the pore network.\nBuild a biofilm to filter the gas.\nThat is the Cellular Automata way."},
 	{"speaker": "ELDER", "text": "But beware... rival microbes roam\nthese pores. They will steal\nyour nutrients."},
 	{"speaker": "ELDER", "text": "And the pore geometry itself is\nyour enemy. Dead-end pores\nmean starvation and death."},
-	{"speaker": "METHI", "text": "I won't let Earth down."},
+	{"speaker": "ARKE", "text": "I won't let Earth down."},
 	{"speaker": "ELDER", "text": "Remember the redox ladder:\nO2 gives most energy, CH4 the least.\nBut eating CH4 saves the planet!"},
 	{"speaker": "ELDER", "text": "Now go, young one.\nThe Soil Frontier awaits.\nEarth's fate is in your pseudopods."},
 ]
@@ -206,7 +206,7 @@ const MISSION_BRIEFS := [
 	[
 		{"speaker": "ELDER", "text": "Your first mission, young one.\nThis is the Soil Frontier -\nshallow soil beneath a meadow."},
 		{"speaker": "ELDER", "text": "Oxygen flows from above.\nEat substrates to survive.\nPlace 3 colonies to secure this zone."},
-		{"speaker": "METHI", "text": "I'm ready, Archaeon Prime!"},
+		{"speaker": "ARKE", "text": "I'm ready, Archaeon Prime!"},
 	],
 	# Level 1: Roots of Life
 	[
@@ -217,7 +217,7 @@ const MISSION_BRIEFS := [
 	[
 		{"speaker": "ELDER", "text": "We descend into the Deep Sediment.\nOxygen cannot reach here.\nOnly iron and nitrate remain."},
 		{"speaker": "ELDER", "text": "The passages are narrow and dark.\nTwo rivals hunt these corridors.\nConserve your energy carefully."},
-		{"speaker": "METHI", "text": "No oxygen? How do I survive?"},
+		{"speaker": "ARKE", "text": "No oxygen? How do I survive?"},
 		{"speaker": "ELDER", "text": "Use the redox ladder, child.\nNitrate and iron will sustain you.\nAnd never stop eating methane!"},
 	],
 	# Level 3: The Hungry Dark
@@ -229,7 +229,7 @@ const MISSION_BRIEFS := [
 	[
 		{"speaker": "ELDER", "text": "Now we enter the Methane Seeps!\nCH4 erupts from volcanic vents below.\nThis is where our kind truly shines."},
 		{"speaker": "ELDER", "text": "Beware the toxic zones - they\nburn through your cell membrane.\nAvoid the purple areas!"},
-		{"speaker": "METHI", "text": "The methane... I can feel it rising."},
+		{"speaker": "ARKE", "text": "The methane... I can feel it rising."},
 		{"speaker": "ELDER", "text": "Consume it! Every molecule of CH4\nyou eat prevents global warming.\nYou are Earth's climate shield!"},
 	],
 	# Level 5: Vent Guardians
@@ -241,7 +241,7 @@ const MISSION_BRIEFS := [
 	[
 		{"speaker": "ELDER", "text": "The Permafrost Edge... the ice\nis melting. Ancient carbon\nunlocks after millennia."},
 		{"speaker": "ELDER", "text": "The flow here is fast and chaotic.\nUse SHIFT to ride the currents.\nIt will save your energy."},
-		{"speaker": "METHI", "text": "The water moves so fast here!"},
+		{"speaker": "ARKE", "text": "The water moves so fast here!"},
 		{"speaker": "ELDER", "text": "The melting permafrost releases\n1,500 gigatons of trapped carbon.\nWe are the last line of defense."},
 	],
 	# Level 7: The Great Thaw
@@ -253,14 +253,14 @@ const MISSION_BRIEFS := [
 	[
 		{"speaker": "ELDER", "text": "The Hydrothermal Realm.\nDeep ocean vents blast superheated\nfluid through mineral chimneys."},
 		{"speaker": "ELDER", "text": "The full redox ladder is here -\nsulfate, iron, manganese, methane.\nUse everything available to you."},
-		{"speaker": "METHI", "text": "It's so hot... and hostile."},
+		{"speaker": "ARKE", "text": "It's so hot... and hostile."},
 		{"speaker": "ELDER", "text": "Only the strongest archaea\nsurvive here. But you have\ngrown beyond my expectations."},
 	],
 	# Level 9: Earth's Last Stand
 	[
 		{"speaker": "ELDER", "text": "This is it. The final stand.\nEvery greenhouse gas that escapes\nthese vents warms the planet."},
 		{"speaker": "ELDER", "text": "Five rivals. Toxic zones everywhere.\n12 colonies needed to seal\nthe vent network permanently."},
-		{"speaker": "METHI", "text": "I won't let you down, Elder."},
+		{"speaker": "ARKE", "text": "I won't let you down, Elder."},
 		{"speaker": "ELDER", "text": "You have become a true Guardian\nof Earth. Now show the world\nwhat one archaea can do!"},
 	],
 ]

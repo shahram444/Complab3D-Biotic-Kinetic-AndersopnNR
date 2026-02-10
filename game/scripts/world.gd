@@ -522,11 +522,30 @@ func _draw() -> void:
 					var tex = SpriteFactory.get_tex(key)
 					if tex:
 						draw_texture(tex, pos)
-					# Subtle flow visualization
+					# Subtle flow visualization with direction arrows
 					if flow_dir[row][col] > 0 and flow_spd[row][col] > 0.08:
 						var alpha = clampf(flow_spd[row][col] * 0.25, 0, 0.35)
 						alpha += sin(time * 2.0 + col * 0.5) * 0.1
 						draw_rect(Rect2(pos, Vector2(T, T)), Color.html(ep["water_l"]).darkened(0.3), true)
+						# Flow direction arrow (every 3rd tile)
+						if (col + row) % 3 == 0 and flow_spd[row][col] > 0.15:
+							var aa = clampf(flow_spd[row][col] * 0.4, 0.08, 0.25)
+							var ac = Color(0.4, 0.7, 1.0, aa)
+							var cx = pos.x + T * 0.5
+							var cy = pos.y + T * 0.5
+							var ao = fmod(time * 1.5, 1.0) * 4.0
+							if flow_dir[row][col] == 1: # right
+								draw_rect(Rect2(cx - 4 + ao, cy - 1, 10, 2), ac)
+								draw_rect(Rect2(cx + 4 + ao, cy - 3, 2, 6), ac)
+							elif flow_dir[row][col] == 2: # down
+								draw_rect(Rect2(cx - 1, cy - 4 + ao, 2, 10), ac)
+								draw_rect(Rect2(cx - 3, cy + 4 + ao, 6, 2), ac)
+							elif flow_dir[row][col] == 3: # left
+								draw_rect(Rect2(cx - 6 - ao, cy - 1, 10, 2), ac)
+								draw_rect(Rect2(cx - 6 - ao, cy - 3, 2, 6), ac)
+							elif flow_dir[row][col] == 4: # up
+								draw_rect(Rect2(cx - 1, cy - 6 - ao, 2, 10), ac)
+								draw_rect(Rect2(cx - 3, cy - 6 - ao, 6, 2), ac)
 				Tile.FLOW_FAST:
 					var key = "flow_%d_%d" % [env_idx, variation % 2]
 					var tex = SpriteFactory.get_tex(key)
@@ -543,9 +562,18 @@ func _draw() -> void:
 					var tex = SpriteFactory.get_tex(key)
 					if tex:
 						draw_texture(tex, pos)
-					var glow = sin(time * 3.0 + col * 0.7 + row * 0.5) * 0.15 + 0.2
+					var glow = sin(time * 3.0 + col * 0.7 + row * 0.5) * 0.15 + 0.25
 					draw_rect(Rect2(pos, Vector2(T, T)),
 						Color(Color.html(ep["toxic_g"]), glow), true)
+					# Hazard warning - pulsing border and "X" marker
+					var warn_a = sin(time * 4.0 + col + row) * 0.2 + 0.35
+					draw_rect(Rect2(pos, Vector2(T, T)),
+						Color(1.0, 0.2, 0.8, warn_a * 0.3), false, 2.0)
+					# Animated toxic particles rising
+					if (col + row) % 2 == 0:
+						var py = fmod(time * 12 + col * 7, T + 8.0) - 8.0
+						draw_rect(Rect2(pos.x + 8 + sin(time + col) * 4, pos.y + T - py, 3, 3),
+							Color(1.0, 0.3, 0.9, warn_a * 0.5))
 				Tile.BIOFILM:
 					var key = "biofilm_%d" % env_idx
 					var tex = SpriteFactory.get_tex(key)
@@ -559,6 +587,17 @@ func _draw() -> void:
 					var p = sin(time * 4.0) * 0.3 + 0.5
 					draw_rect(Rect2(pos, Vector2(8, T)),
 						Color(0.24, 0.48, 0.71, p), true)
+					# Animated flow arrows entering from left
+					for ai in range(3):
+						var ax = fmod(time * 20 + ai * 12, T + 8) - 8
+						draw_rect(Rect2(pos.x + ax, pos.y + 8 + ai * 6, 6, 2),
+							Color(0.4, 0.7, 1.0, p * 0.6))
+					# "INLET" label
+					var font = ThemeDB.fallback_font
+					if font:
+						draw_string(font, pos + Vector2(2, -4), "IN",
+							HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+							Color(0.4, 0.7, 1.0, 0.7))
 				Tile.OUTLET:
 					var key = "pore_%d_0" % env_idx
 					var tex = SpriteFactory.get_tex(key)
@@ -567,3 +606,14 @@ func _draw() -> void:
 					var p = sin(time * 2.0) * 0.2 + 0.5
 					draw_rect(Rect2(pos + Vector2(24, 0), Vector2(8, T)),
 						Color(0.37, 0.81, 0.37, p), true)
+					# Animated flow arrows exiting to right
+					for ai in range(3):
+						var ax = fmod(time * 20 + ai * 12, T + 8) - 8
+						draw_rect(Rect2(pos.x + ax, pos.y + 8 + ai * 6, 6, 2),
+							Color(0.37, 0.81, 0.37, p * 0.6))
+					# "OUT" label
+					var font2 = ThemeDB.fallback_font
+					if font2:
+						draw_string(font2, pos + Vector2(2, -4), "OUT",
+							HORIZONTAL_ALIGNMENT_LEFT, -1, 10,
+							Color(0.37, 0.81, 0.37, 0.7))
