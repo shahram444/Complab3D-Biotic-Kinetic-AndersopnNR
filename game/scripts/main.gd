@@ -498,9 +498,9 @@ func _update_colonies(_delta: float) -> void:
 				substrates.remove_at(i)
 
 func _spawn_rival() -> void:
-	# Find a random walkable pore away from player start
+	# Spawn rivals on the LEFT side near inlet where nutrients enter
 	for _attempt in range(40):
-		var rx = randi_range(int(world_node.map_w * 0.3), world_node.map_w - 2)
+		var rx = randi_range(2, int(world_node.map_w * 0.4))
 		var ry = randi_range(1, world_node.map_h - 2)
 		if world_node.is_walkable_tile(world_node.get_tile(rx, ry)):
 			var rival_node = Node2D.new()
