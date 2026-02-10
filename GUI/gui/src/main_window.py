@@ -1,6 +1,7 @@
 """
 CompLaB Studio Main Window
 Professional interface for reactive transport simulations
+Copyright (c) 2024 MeileLab, University of Georgia
 """
 
 import os
@@ -31,7 +32,7 @@ from .dialogs.new_project_dialog import NewProjectDialog
 from .dialogs.preferences_dialog import PreferencesDialog
 from .dialogs.about_dialog import AboutDialog
 from .widgets.console_widget import ConsoleWidget
-from .widgets.vtk_viewer import VTKViewerWidget
+from .widgets.vtk_viewer import VTKViewer
 from .core.project_manager import ProjectManager
 from .core.simulation_runner import SimulationRunner
 from .config import Config
@@ -134,7 +135,7 @@ class CompLaBMainWindow(QMainWindow):
         layout.setSpacing(0)
         
         # Panel header
-        header = QLabel("  📁 Project Navigator")
+        header = QLabel("  Project Navigator")
         header.setObjectName("panelHeader")
         header.setFixedHeight(40)
         layout.addWidget(header)
@@ -169,13 +170,13 @@ class CompLaBMainWindow(QMainWindow):
         
         # Monitoring panel
         self.monitoring_panel = MonitoringPanel()
-        self.properties_tabs.addTab(self.monitoring_panel, "📊 Monitor")
-        
+        self.properties_tabs.addTab(self.monitoring_panel, "Monitor")
+
         # Quick properties
         self.quick_props = QTextEdit()
         self.quick_props.setReadOnly(True)
         self.quick_props.setPlaceholderText("Select an item to view properties...")
-        self.properties_tabs.addTab(self.quick_props, "📋 Properties")
+        self.properties_tabs.addTab(self.quick_props, "Properties")
         
         layout.addWidget(self.properties_tabs)
         
@@ -185,39 +186,39 @@ class CompLaBMainWindow(QMainWindow):
         """Create all configuration panels"""
         # Project overview panel
         self.project_panel = ProjectPanel()
-        self.content_tabs.addTab(self.project_panel, "🏠 Project")
-        
+        self.content_tabs.addTab(self.project_panel, "Project")
+
         # Domain/Geometry panel
         self.domain_panel = DomainPanel()
-        self.content_tabs.addTab(self.domain_panel, "📐 Domain")
-        
+        self.content_tabs.addTab(self.domain_panel, "Domain")
+
         # Mesh/Geometry panel
         self.mesh_panel = MeshPanel()
-        self.content_tabs.addTab(self.mesh_panel, "🔲 Geometry")
-        
+        self.content_tabs.addTab(self.mesh_panel, "Geometry")
+
         # Chemistry panel
         self.chemistry_panel = ChemistryPanel()
-        self.content_tabs.addTab(self.chemistry_panel, "⚗️ Chemistry")
-        
+        self.content_tabs.addTab(self.chemistry_panel, "Chemistry")
+
         # Microbiology panel
         self.microbiology_panel = MicrobiologyPanel()
-        self.content_tabs.addTab(self.microbiology_panel, "🦠 Microbiology")
-        
+        self.content_tabs.addTab(self.microbiology_panel, "Microbiology")
+
         # Boundary conditions panel
         self.boundary_panel = BoundaryConditionsPanel()
-        self.content_tabs.addTab(self.boundary_panel, "🔲 Boundaries")
+        self.content_tabs.addTab(self.boundary_panel, "Boundaries")
         
         # Solver settings panel
         self.solver_panel = SolverPanel()
-        self.content_tabs.addTab(self.solver_panel, "⚙️ Solver")
+        self.content_tabs.addTab(self.solver_panel, "Solver")
         
         # 3D Viewer panel
-        self.vtk_viewer = VTKViewerWidget()
-        self.content_tabs.addTab(self.vtk_viewer, "🎨 3D View")
+        self.vtk_viewer = VTKViewer()
+        self.content_tabs.addTab(self.vtk_viewer, "3D Viewer")
         
         # Post-processing panel
         self.postprocess_panel = PostProcessPanel()
-        self.content_tabs.addTab(self.postprocess_panel, "📈 Results")
+        self.content_tabs.addTab(self.postprocess_panel, "Results")
         
     def _create_menus(self):
         """Create the menu bar"""
@@ -381,56 +382,62 @@ class CompLaBMainWindow(QMainWindow):
         
         # New project button
         new_btn = QToolButton()
-        new_btn.setText("📁 New")
+        new_btn.setText("  New  ")
         new_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        new_btn.setToolTip("New Project (Ctrl+N)")
         new_btn.clicked.connect(self._new_project)
         main_toolbar.addWidget(new_btn)
-        
+
         # Open button
         open_btn = QToolButton()
-        open_btn.setText("📂 Open")
+        open_btn.setText("  Open  ")
         open_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        open_btn.setToolTip("Open Project (Ctrl+O)")
         open_btn.clicked.connect(self._open_project)
         main_toolbar.addWidget(open_btn)
-        
+
         # Save button
         save_btn = QToolButton()
-        save_btn.setText("💾 Save")
+        save_btn.setText("  Save  ")
         save_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        save_btn.setToolTip("Save Project (Ctrl+S)")
         save_btn.clicked.connect(self._save_project)
         main_toolbar.addWidget(save_btn)
-        
+
         main_toolbar.addSeparator()
-        
+
         # Run button
         self.run_btn = QToolButton()
-        self.run_btn.setText("▶ Run")
+        self.run_btn.setText("  Run  ")
         self.run_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.run_btn.setObjectName("runButton")
+        self.run_btn.setToolTip("Run Simulation (F5)")
         self.run_btn.clicked.connect(self._run_simulation)
         main_toolbar.addWidget(self.run_btn)
-        
+
         # Stop button
         self.stop_btn = QToolButton()
-        self.stop_btn.setText("⏹ Stop")
+        self.stop_btn.setText("  Stop  ")
         self.stop_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.stop_btn.setObjectName("stopButton")
         self.stop_btn.setEnabled(False)
+        self.stop_btn.setToolTip("Stop Simulation (Shift+F5)")
         self.stop_btn.clicked.connect(self._stop_simulation)
         main_toolbar.addWidget(self.stop_btn)
-        
+
         main_toolbar.addSeparator()
-        
+
         # Validate button
         validate_btn = QToolButton()
-        validate_btn.setText("✓ Validate")
+        validate_btn.setText("  Validate  ")
         validate_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        validate_btn.setToolTip("Validate Setup (F6)")
         validate_btn.clicked.connect(self._validate_setup)
         main_toolbar.addWidget(validate_btn)
-        
+
         # 3D View button
         view3d_btn = QToolButton()
-        view3d_btn.setText("🎨 3D View")
+        view3d_btn.setText("  3D View  ")
         view3d_btn.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         view3d_btn.clicked.connect(lambda: self.content_tabs.setCurrentWidget(self.vtk_viewer))
         main_toolbar.addWidget(view3d_btn)
@@ -503,67 +510,79 @@ class CompLaBMainWindow(QMainWindow):
     def _update_project_tree(self):
         """Update the project tree with current project structure"""
         self.project_tree.clear()
-        
+
         if not self.current_project:
             return
-            
+
         # Root item
         root = QTreeWidgetItem(self.project_tree)
-        root.setText(0, f"📁 {self.current_project.name}")
+        root.setText(0, self.current_project.name)
         root.setExpanded(True)
         root.setData(0, Qt.UserRole, "project")
-        
+
         # Domain section
         domain_item = QTreeWidgetItem(root)
-        domain_item.setText(0, "📐 Domain")
+        domain_item.setText(0, "Domain")
         domain_item.setData(0, Qt.UserRole, "domain")
-        
+
         geom_item = QTreeWidgetItem(domain_item)
-        geom_item.setText(0, "🔲 Geometry")
+        geom_item.setText(0, "Geometry")
         geom_item.setData(0, Qt.UserRole, "geometry")
-        
+
+        # Fluid / Flow
+        flow_item = QTreeWidgetItem(root)
+        flow_item.setText(0, "Fluid / Flow")
+        flow_item.setData(0, Qt.UserRole, "fluid_flow")
+
         # Chemistry section
         chem_item = QTreeWidgetItem(root)
-        chem_item.setText(0, "⚗️ Chemistry")
+        chem_item.setText(0, "Chemistry")
         chem_item.setData(0, Qt.UserRole, "chemistry")
-        
+
         for i, substrate in enumerate(self.current_project.substrates):
             sub_item = QTreeWidgetItem(chem_item)
-            sub_item.setText(0, f"  {substrate.name}")
+            sub_item.setText(0, substrate.name)
             sub_item.setData(0, Qt.UserRole, f"substrate_{i}")
-            
+
         # Microbiology section
         bio_item = QTreeWidgetItem(root)
-        bio_item.setText(0, "🦠 Microbiology")
+        bio_item.setText(0, "Microbiology")
         bio_item.setData(0, Qt.UserRole, "microbiology")
-        
+
         for i, microbe in enumerate(self.current_project.microbes):
             mic_item = QTreeWidgetItem(bio_item)
-            mic_item.setText(0, f"  {microbe.name}")
+            mic_item.setText(0, microbe.name)
             mic_item.setData(0, Qt.UserRole, f"microbe_{i}")
-            
+
         # Boundary Conditions
         bc_item = QTreeWidgetItem(root)
-        bc_item.setText(0, "🔲 Boundary Conditions")
+        bc_item.setText(0, "Boundary Conditions")
         bc_item.setData(0, Qt.UserRole, "boundaries")
-        
+
         # Solver settings
         solver_item = QTreeWidgetItem(root)
-        solver_item.setText(0, "⚙️ Solver Settings")
+        solver_item.setText(0, "Solver Settings")
         solver_item.setData(0, Qt.UserRole, "solver")
-        
+
+        # Equilibrium
+        eq_item = QTreeWidgetItem(root)
+        eq_item.setText(0, "Equilibrium")
+        eq_item.setData(0, Qt.UserRole, "equilibrium")
+
         # Results (if any)
         if self.current_project.has_results():
             results_item = QTreeWidgetItem(root)
-            results_item.setText(0, "📈 Results")
+            results_item.setText(0, "Results")
             results_item.setData(0, Qt.UserRole, "results")
-            
+
         self.project_tree.expandAll()
         
     def _on_tree_item_clicked(self, item, column):
         """Handle tree item click"""
         item_type = item.data(0, Qt.UserRole)
-        
+        if not item_type:
+            return
+
         panel_map = {
             "project": self.project_panel,
             "domain": self.domain_panel,
@@ -574,9 +593,19 @@ class CompLaBMainWindow(QMainWindow):
             "solver": self.solver_panel,
             "results": self.postprocess_panel,
         }
-        
+
         if item_type in panel_map:
             self.content_tabs.setCurrentWidget(panel_map[item_type])
+        elif item_type.startswith("substrate_"):
+            # Navigate to chemistry panel when clicking a substrate
+            self.content_tabs.setCurrentWidget(self.chemistry_panel)
+        elif item_type.startswith("microbe_"):
+            # Navigate to microbiology panel when clicking a microbe
+            self.content_tabs.setCurrentWidget(self.microbiology_panel)
+        elif item_type == "fluid_flow":
+            self.content_tabs.setCurrentWidget(self.solver_panel)
+        elif item_type == "equilibrium":
+            self.content_tabs.setCurrentWidget(self.chemistry_panel)
             
     def _on_tree_item_double_clicked(self, item, column):
         """Handle tree item double click"""
@@ -846,6 +875,32 @@ class CompLaBMainWindow(QMainWindow):
         dialog = PreferencesDialog(self.config, self)
         if dialog.exec():
             self.config.save()
+            self._apply_preferences()
+
+    def _apply_preferences(self):
+        """Apply preference changes to the application"""
+        # Apply font size
+        font_size = self.config.get("font_size", 10)
+        app = QApplication.instance()
+        if app:
+            font = app.font()
+            font.setPointSize(font_size)
+            app.setFont(font)
+
+        # Apply console max lines
+        max_lines = self.config.get("console_max_lines", 10000)
+        self.console._max_lines = max_lines
+
+        # Apply theme
+        theme = self.config.get("theme", "dark")
+        style_dir = Path(__file__).parent.parent.parent / "styles"
+        if theme == "light":
+            style_file = style_dir / "light.qss"
+        else:
+            style_file = style_dir / "main.qss"
+        if style_file.exists():
+            with open(style_file, "r") as f:
+                QApplication.instance().setStyleSheet(f.read())
             
     def _show_tutorial(self):
         """Show quick start tutorial (local .txt file)"""

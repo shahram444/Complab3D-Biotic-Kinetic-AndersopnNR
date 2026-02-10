@@ -23,7 +23,7 @@ class BoundaryConditionsPanel(BasePanel):
         main_layout.setSpacing(15)
         
         # Header
-        header = self._create_header("Boundary Conditions", "🔲")
+        header = self._create_header("Boundary Conditions")
         main_layout.addWidget(header)
         
         # Description

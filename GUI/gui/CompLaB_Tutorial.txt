@@ -8,15 +8,11 @@
                         CompLaB Studio 3D GUI
                   Developed by: Shahram Asgari
                   shahram.asgari@uga.edu
-                  
-                  Advisor: Dr. Christof Meile
+
+                  PI: Dr. Christof Meile
                   cmeile@uga.edu
 
-                     CompLaB Core Engine (2D)
-                  Original Developer: Dr. Heewon Jung
-                  hjung@cnu.ac.kr
-
-        University of Georgia 
+                  MeileLab, University of Georgia
 ================================================================================
 
 TABLE OF CONTENTS
@@ -346,10 +342,10 @@ CompLaB Studio 3D GUI
                 cmeile@uga.edu
   Institution:  University of Georgia
 
-CompLaB Core Engine (2D)
-  Original Developer:  Dr. Heewon Jung
-                       hjung@cnu.ac.kr
-  Institution:         Chungnam National University
+CompLaB Studio
+  Developer:           Shahram Asgari (shahram.asgari@uga.edu)
+  PI:                  Dr. Christof Meile (cmeile@uga.edu)
+  Lab:                 MeileLab, University of Georgia
 
 
 ================================================================================

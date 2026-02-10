@@ -12,8 +12,8 @@ from PySide6.QtCore import Qt, Signal
 
 from .base_panel import BasePanel
 from ..core.project import (
-    Microbe, DiffusionCoefficients, BoundaryCondition, BoundaryType, 
-    SolverType, MicrobeDistribution, DistributionType
+    Microbe, DiffusionCoefficients, BoundaryCondition, BoundaryType,
+    SolverType, MicrobeDistribution, DistributionType, ReactionType
 )
 
 

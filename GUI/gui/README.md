@@ -164,8 +164,9 @@ This project is licensed under the GNU AGPL v3 License - see the LICENSE file fo
 
 ## Acknowledgments
 
-- **CompLaB Core Engine**: University of Georgia & Chungnam National University
-- **Contact**: Heewon Jung (hjung@cnu.ac.kr)
+- **CompLaB Core Engine**: MeileLab, University of Georgia
+- **Developer**: Shahram Asgari (shahram.asgari@uga.edu)
+- **PI**: Christof Meile (cmeile@uga.edu)
 - **Repository**: https://bitbucket.org/MeileLab/complab
 
 ## Support

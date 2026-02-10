@@ -110,7 +110,7 @@ class PostProcessPanel(BasePanel):
         main_layout.setSpacing(15)
         
         # Header
-        header = self._create_header("Results & Post-Processing", "📈")
+        header = self._create_header("Results & Post-Processing")
         main_layout.addWidget(header)
         
         tabs = QTabWidget()

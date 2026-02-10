@@ -16,12 +16,18 @@ class SolverType(Enum):
     CELLULAR_AUTOMATA = "CA"
     FINITE_DIFFERENCE = "FD"
     LATTICE_BOLTZMANN = "LBM"
-    
+
 
 class BoundaryType(Enum):
     """Boundary condition type"""
     DIRICHLET = "Dirichlet"
     NEUMANN = "Neumann"
+
+
+class ReactionType(Enum):
+    """Reaction type for microbes"""
+    KINETICS = "kinetics"
+    NONE = "none"
 
 
 class DistributionType(Enum):
@@ -32,6 +38,15 @@ class DistributionType(Enum):
     GRADIENT = "gradient"
     HOTSPOTS = "hotspots"
     UNIFORM = "uniform"
+
+
+@dataclass
+class SimulationMode:
+    """Simulation mode flags matching CompLaB XML <simulation_mode>"""
+    biotic_mode: bool = True
+    enable_kinetics: bool = True
+    enable_abiotic_kinetics: bool = False
+    enable_validation_diagnostics: bool = False
 
 
 @dataclass
@@ -46,20 +61,20 @@ class DomainSettings:
     unit: str = "um"
     characteristic_length: float = 10.0
     geometry_file: str = ""
-    
+
     # Material numbers
     pore_material: int = 2
     solid_material: int = 0
     bounce_back_material: int = 1
 
 
-@dataclass 
+@dataclass
 class FluidSettings:
     """Fluid/flow settings"""
     delta_p: float = 1e-3
     peclet: float = 1.0
     tau: float = 0.8
-    
+
 
 @dataclass
 class IterationSettings:
@@ -71,13 +86,13 @@ class IterationSettings:
     ns_converge_iT1: float = 1e-6
     ns_converge_iT2: float = 1e-5
     ns_update_interval: int = 10
-    
+
     # ADE solver
     ade_rerun_iT0: int = 0
     ade_max_iT: int = 100000
     ade_converge_iT: float = 1e-7
     ade_update_interval: int = 1
-    
+
 
 @dataclass
 class IOSettings:
@@ -98,7 +113,7 @@ class DiffusionCoefficients:
     """Diffusion coefficients in different zones"""
     in_pore: float = 1e-9
     in_biofilm: float = 1e-10
-    
+
 
 @dataclass
 class BoundaryCondition:
@@ -115,7 +130,7 @@ class Substrate:
     initial_concentration: float = 1.0
     left_boundary: BoundaryCondition = field(default_factory=lambda: BoundaryCondition(BoundaryType.DIRICHLET, 1.0))
     right_boundary: BoundaryCondition = field(default_factory=lambda: BoundaryCondition(BoundaryType.NEUMANN, 0.0))
-    
+
 
 @dataclass
 class MicrobeDistribution:
@@ -135,24 +150,25 @@ class Microbe:
     """Microbe/biomass configuration"""
     name: str = "microbe"
     solver_type: SolverType = SolverType.CELLULAR_AUTOMATA
+    reaction_type: ReactionType = ReactionType.KINETICS
     material_number: int = 3
-    
+
     # Initial conditions
     initial_densities: List[float] = field(default_factory=lambda: [10.0])
     distribution: MicrobeDistribution = field(default_factory=MicrobeDistribution)
-    
+
     # Diffusion
     diffusion_coefficients: DiffusionCoefficients = field(default_factory=lambda: DiffusionCoefficients(0, 0))
-    
+
     # Boundaries
     left_boundary: BoundaryCondition = field(default_factory=lambda: BoundaryCondition(BoundaryType.NEUMANN, 0.0))
     right_boundary: BoundaryCondition = field(default_factory=lambda: BoundaryCondition(BoundaryType.NEUMANN, 0.0))
-    
+
     # Kinetics parameters
     decay_coefficient: float = 1e-6  # 1/s
     half_saturation_constants: List[float] = field(default_factory=lambda: [0.1])
     maximum_uptake_flux: List[float] = field(default_factory=lambda: [0.2, 5.0])
-    
+
     # CA specific
     viscosity_ratio_in_biofilm: float = 0.0
 
@@ -161,9 +177,25 @@ class Microbe:
 class KineticsModel:
     """Custom kinetics model definition"""
     name: str = "default"
+    kinetics_type: str = "biotic"  # "biotic" or "abiotic"
     description: str = ""
     code: str = ""  # Custom C++ code for defineKinetics.hh
     parameters: Dict[str, float] = field(default_factory=dict)
+
+
+@dataclass
+class EquilibriumSpecies:
+    """Equilibrium species stoichiometry"""
+    stoichiometry: List[float] = field(default_factory=list)
+    logK: float = 0.0
+
+
+@dataclass
+class EquilibriumSettings:
+    """Equilibrium chemistry configuration matching XML <equilibrium>"""
+    enabled: bool = False
+    components: int = 0
+    species: List[EquilibriumSpecies] = field(default_factory=list)
 
 
 @dataclass
@@ -176,140 +208,127 @@ class MicrobiologySettings:
 
 class CompLaBProject:
     """Main project class containing all simulation settings"""
-    
+
     def __init__(self, name: str = "Untitled"):
         self.name = name
         self.path: Optional[str] = None
         self.created: str = ""
         self.modified: str = ""
         self.description: str = ""
-        
+
         # Settings
+        self.simulation_mode = SimulationMode()
         self.domain = DomainSettings()
         self.fluid = FluidSettings()
         self.iterations = IterationSettings()
         self.io = IOSettings()
         self.microbiology = MicrobiologySettings()
-        
+        self.equilibrium = EquilibriumSettings()
+
         # Species
         self.substrates: List[Substrate] = []
         self.microbes: List[Microbe] = []
-        
+
         # Custom kinetics
         self.kinetics_model: Optional[KineticsModel] = None
-        
+
         # Paths
+        self.src_path: str = "src"
         self.input_path: str = "input"
         self.output_path: str = "output"
-        
+
     @property
     def num_substrates(self) -> int:
         return len(self.substrates)
-        
+
     @property
     def num_microbes(self) -> int:
         return len(self.microbes)
-        
+
     def add_substrate(self, substrate: Substrate):
         """Add a substrate to the project"""
         self.substrates.append(substrate)
-        # Update half-saturation constants for all microbes
         for microbe in self.microbes:
             if len(microbe.half_saturation_constants) < len(self.substrates):
                 microbe.half_saturation_constants.append(0.1)
-                
+
     def remove_substrate(self, index: int):
         """Remove a substrate from the project"""
         if 0 <= index < len(self.substrates):
             self.substrates.pop(index)
-            # Update microbe parameters
             for microbe in self.microbes:
                 if len(microbe.half_saturation_constants) > index:
                     microbe.half_saturation_constants.pop(index)
-                    
+
     def add_microbe(self, microbe: Microbe):
         """Add a microbe to the project"""
         self.microbes.append(microbe)
-        
+
     def remove_microbe(self, index: int):
         """Remove a microbe from the project"""
         if 0 <= index < len(self.microbes):
             self.microbes.pop(index)
-            
+
     def get_project_dir(self) -> str:
-        """Get project directory"""
         if self.path:
             return os.path.dirname(self.path)
         return ""
-        
+
     def get_input_dir(self) -> str:
-        """Get input directory path"""
         return os.path.join(self.get_project_dir(), self.input_path)
-        
+
     def get_output_dir(self) -> str:
-        """Get output directory path"""
         return os.path.join(self.get_project_dir(), self.output_path)
-        
+
     def get_xml_path(self) -> str:
-        """Get XML configuration file path - CompLaB.xml in project root"""
         return os.path.join(self.get_project_dir(), "CompLaB.xml")
-        
+
     def has_results(self) -> bool:
-        """Check if project has simulation results"""
         output_dir = self.get_output_dir()
         if os.path.exists(output_dir):
-            # Check for VTK files
             for f in os.listdir(output_dir):
                 if f.endswith('.vti') or f.endswith('.vtk'):
                     return True
         return False
-        
+
     def validate(self) -> List[str]:
-        """Validate project settings, return list of errors"""
         errors = []
-        
-        # Domain validation
+
         if self.domain.nx <= 0 or self.domain.ny <= 0 or self.domain.nz <= 0:
             errors.append("Domain dimensions must be positive")
         if self.domain.dx <= 0:
             errors.append("Grid spacing must be positive")
-            
-        # Geometry file
+
         if not self.domain.geometry_file:
             errors.append("Geometry file not specified")
         elif self.path:
             geom_path = os.path.join(self.get_input_dir(), self.domain.geometry_file)
             if not os.path.exists(geom_path):
                 errors.append(f"Geometry file not found: {self.domain.geometry_file}")
-                
-        # Fluid settings
+
         if self.fluid.tau < 0.5:
             errors.append("Tau must be >= 0.5 for stability")
-            
-        # Substrates
+
         if len(self.substrates) == 0:
             errors.append("At least one substrate is required")
-            
+
         for i, sub in enumerate(self.substrates):
             if not sub.name:
                 errors.append(f"Substrate {i} has no name")
             if sub.diffusion_coefficients.in_pore <= 0:
                 errors.append(f"Substrate '{sub.name}' has invalid diffusion coefficient")
-                
-        # Microbes
-        for i, mic in enumerate(self.microbes):
-            if not mic.name:
-                errors.append(f"Microbe {i} has no name")
-            if len(mic.half_saturation_constants) != len(self.substrates):
-                errors.append(f"Microbe '{mic.name}' has wrong number of half-saturation constants")
-            if mic.solver_type == SolverType.CELLULAR_AUTOMATA:
-                if self.microbiology.maximum_biomass_density <= 0:
-                    errors.append("Maximum biomass density must be positive for CA solver")
-                    
+
+        if self.simulation_mode.biotic_mode:
+            for i, mic in enumerate(self.microbes):
+                if not mic.name:
+                    errors.append(f"Microbe {i} has no name")
+                if mic.solver_type == SolverType.CELLULAR_AUTOMATA:
+                    if self.microbiology.maximum_biomass_density <= 0:
+                        errors.append("Maximum biomass density must be positive for CA solver")
+
         return errors
-        
+
     def to_dict(self) -> Dict[str, Any]:
-        """Convert project to dictionary for serialization"""
         def convert_enum(obj):
             if isinstance(obj, Enum):
                 return obj.value
@@ -320,32 +339,35 @@ class CompLaBProject:
             elif hasattr(obj, '__dataclass_fields__'):
                 return {k: convert_enum(v) for k, v in asdict(obj).items()}
             return obj
-            
+
         return {
             "name": self.name,
             "description": self.description,
             "created": self.created,
             "modified": self.modified,
+            "simulation_mode": convert_enum(asdict(self.simulation_mode)),
             "domain": convert_enum(asdict(self.domain)),
             "fluid": convert_enum(asdict(self.fluid)),
             "iterations": convert_enum(asdict(self.iterations)),
             "io": convert_enum(asdict(self.io)),
             "microbiology": convert_enum(asdict(self.microbiology)),
+            "equilibrium": convert_enum(asdict(self.equilibrium)),
             "substrates": [convert_enum(asdict(s)) for s in self.substrates],
             "microbes": [convert_enum(asdict(m)) for m in self.microbes],
+            "src_path": self.src_path,
             "input_path": self.input_path,
             "output_path": self.output_path,
         }
-        
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'CompLaBProject':
-        """Create project from dictionary"""
         project = cls(data.get("name", "Untitled"))
         project.description = data.get("description", "")
         project.created = data.get("created", "")
         project.modified = data.get("modified", "")
-        
-        # Load settings
+
+        if "simulation_mode" in data:
+            project.simulation_mode = SimulationMode(**data["simulation_mode"])
         if "domain" in data:
             project.domain = DomainSettings(**data["domain"])
         if "fluid" in data:
@@ -356,10 +378,18 @@ class CompLaBProject:
             project.io = IOSettings(**data["io"])
         if "microbiology" in data:
             project.microbiology = MicrobiologySettings(**data["microbiology"])
-            
-        # Load substrates
+        if "equilibrium" in data:
+            eq_data = data["equilibrium"]
+            species_list = []
+            for sp in eq_data.get("species", []):
+                species_list.append(EquilibriumSpecies(**sp))
+            project.equilibrium = EquilibriumSettings(
+                enabled=eq_data.get("enabled", False),
+                components=eq_data.get("components", 0),
+                species=species_list
+            )
+
         for sub_data in data.get("substrates", []):
-            # Handle nested dataclasses
             if "diffusion_coefficients" in sub_data:
                 sub_data["diffusion_coefficients"] = DiffusionCoefficients(**sub_data["diffusion_coefficients"])
             if "left_boundary" in sub_data:
@@ -375,11 +405,12 @@ class CompLaBProject:
                     rb["value"]
                 )
             project.substrates.append(Substrate(**sub_data))
-            
-        # Load microbes
+
         for mic_data in data.get("microbes", []):
             if "solver_type" in mic_data:
                 mic_data["solver_type"] = SolverType(mic_data["solver_type"])
+            if "reaction_type" in mic_data:
+                mic_data["reaction_type"] = ReactionType(mic_data["reaction_type"])
             if "diffusion_coefficients" in mic_data:
                 mic_data["diffusion_coefficients"] = DiffusionCoefficients(**mic_data["diffusion_coefficients"])
             if "distribution" in mic_data:
@@ -400,8 +431,9 @@ class CompLaBProject:
                     rb["value"]
                 )
             project.microbes.append(Microbe(**mic_data))
-            
+
+        project.src_path = data.get("src_path", "src")
         project.input_path = data.get("input_path", "input")
         project.output_path = data.get("output_path", "output")
-        
+
         return project
