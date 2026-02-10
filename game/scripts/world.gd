@@ -489,6 +489,9 @@ func get_adjacent_pores(tx: int, ty: int) -> Array:
 
 # ── DRAWING ──────────────────────────────────────────────────────────────────
 
+func _process(_delta: float) -> void:
+	queue_redraw()
+
 func _draw() -> void:
 	if map.size() == 0:
 		return

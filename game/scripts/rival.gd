@@ -3,8 +3,8 @@ extends Node2D
 ## Navigates pores seeking food, creates meaningful competition.
 
 const T := GameData.TILE
-const SENSE_RANGE := 6  # Tiles radius to detect substrates
-const PLAYER_SENSE := 8 # Tiles radius to detect player (for competition)
+const SENSE_RANGE := 12  # Tiles radius to detect substrates
+const PLAYER_SENSE := 10 # Tiles radius to detect player (for competition)
 
 var tile_x: int = 0
 var tile_y: int = 0
