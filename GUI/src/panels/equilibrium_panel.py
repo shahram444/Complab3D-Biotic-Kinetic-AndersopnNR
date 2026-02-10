@@ -47,6 +47,7 @@ class EquilibriumPanel(BasePanel):
         self._table.setMinimumHeight(200)
         self._table.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.Stretch)
+        self._table.cellChanged.connect(self._on_cell_changed)
         self.add_widget(self._table)
 
         self.add_widget(self.make_info_label(
@@ -60,12 +61,19 @@ class EquilibriumPanel(BasePanel):
         self._components.setEnabled(checked)
         self._rebuild_btn.setEnabled(checked)
         self._table.setEnabled(checked)
+        self.data_changed.emit()
 
     def _on_components_changed(self):
         self.data_changed.emit()
 
+    def _on_cell_changed(self, row, col):
+        self.data_changed.emit()
+
     def _rebuild_matrix(self):
-        comp_names = self._components.text().strip().split()
+        comp_text = self._components.text().strip()
+        if not comp_text:
+            return
+        comp_names = comp_text.split()
         n_comp = len(comp_names)
         n_subs = len(self._substrate_names)
         if n_comp == 0 or n_subs == 0:
@@ -74,6 +82,7 @@ class EquilibriumPanel(BasePanel):
         # Preserve existing data where possible
         old_data = self._read_table()
 
+        self._table.blockSignals(True)
         self._table.setRowCount(n_subs)
         self._table.setColumnCount(n_comp + 1)
         headers = comp_names + ["logK"]
@@ -88,6 +97,8 @@ class EquilibriumPanel(BasePanel):
                 item = QTableWidgetItem(f"{val:.4g}")
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self._table.setItem(r, c, item)
+        self._table.blockSignals(False)
+        self.data_changed.emit()
 
     def _read_table(self):
         """Read current table data as 2D list."""
@@ -98,13 +109,39 @@ class EquilibriumPanel(BasePanel):
                 item = self._table.item(r, c)
                 try:
                     row.append(float(item.text()) if item else 0.0)
-                except ValueError:
+                except (ValueError, AttributeError):
                     row.append(0.0)
             data.append(row)
         return data
 
     def set_substrate_names(self, names: list):
-        self._substrate_names = names
+        """Called when substrates change in the Chemistry panel."""
+        old_names = self._substrate_names
+        self._substrate_names = list(names)
+
+        # Update the vertical header labels if table has rows
+        if self._table.rowCount() > 0:
+            old_data = self._read_table()
+            n_comp = self._table.columnCount() - 1 if self._table.columnCount() > 0 else 0
+            n_subs = len(names)
+
+            if n_subs != self._table.rowCount() and n_comp > 0:
+                # Row count changed - resize table preserving data
+                self._table.blockSignals(True)
+                self._table.setRowCount(n_subs)
+                self._table.setVerticalHeaderLabels(names)
+                for r in range(n_subs):
+                    for c in range(n_comp + 1):
+                        val = 0.0
+                        if r < len(old_data) and c < len(old_data[r]):
+                            val = old_data[r][c]
+                        item = QTableWidgetItem(f"{val:.4g}")
+                        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                        self._table.setItem(r, c, item)
+                self._table.blockSignals(False)
+            elif n_subs == self._table.rowCount():
+                # Just update labels
+                self._table.setVerticalHeaderLabels(names)
 
     def load_from_project(self, project):
         eq = project.equilibrium
@@ -116,6 +153,7 @@ class EquilibriumPanel(BasePanel):
         n_subs = len(project.substrates)
         self._substrate_names = [s.name for s in project.substrates]
 
+        self._table.blockSignals(True)
         if n_comp > 0 and n_subs > 0:
             self._table.setRowCount(n_subs)
             self._table.setColumnCount(n_comp + 1)
@@ -136,6 +174,10 @@ class EquilibriumPanel(BasePanel):
                 item = QTableWidgetItem(f"{logk:.4g}")
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self._table.setItem(r, n_comp, item)
+        else:
+            self._table.setRowCount(0)
+            self._table.setColumnCount(0)
+        self._table.blockSignals(False)
 
     def save_to_project(self, project):
         eq = project.equilibrium
@@ -153,12 +195,12 @@ class EquilibriumPanel(BasePanel):
                 item = self._table.item(r, c)
                 try:
                     row.append(float(item.text()) if item else 0.0)
-                except ValueError:
+                except (ValueError, AttributeError):
                     row.append(0.0)
             eq.stoichiometry.append(row)
             # logK
-            item = self._table.item(r, n_comp)
+            logk_item = self._table.item(r, n_comp) if n_comp < self._table.columnCount() else None
             try:
-                eq.log_k.append(float(item.text()) if item else 0.0)
-            except ValueError:
+                eq.log_k.append(float(logk_item.text()) if logk_item else 0.0)
+            except (ValueError, AttributeError):
                 eq.log_k.append(0.0)

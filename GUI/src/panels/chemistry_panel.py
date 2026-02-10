@@ -18,6 +18,7 @@ class ChemistryPanel(BasePanel):
         super().__init__("Chemistry - Substrates", parent)
         self._substrates = []
         self._current_idx = -1
+        self._loading = False  # guard against signal cascades
         self._build_ui()
 
     def _build_ui(self):
@@ -103,13 +104,15 @@ class ChemistryPanel(BasePanel):
         self._emit_names()
 
     def _on_select(self, idx):
+        if self._loading:
+            return
         self._save_current()
         self._current_idx = idx
         if 0 <= idx < len(self._substrates):
             s = self._substrates[idx]
-            self._name.blockSignals(True)
+            # Block all widget signals while populating to prevent cascades
+            self._loading = True
             self._name.setText(s.name)
-            self._name.blockSignals(False)
             self._c0.setValue(s.initial_concentration)
             self._d_pore.setValue(s.diffusion_in_pore)
             self._d_biofilm.setValue(s.diffusion_in_biofilm)
@@ -117,12 +120,17 @@ class ChemistryPanel(BasePanel):
             self._left_val.setValue(s.left_boundary_condition)
             self._right_type.setCurrentText(s.right_boundary_type)
             self._right_val.setValue(s.right_boundary_condition)
+            self._loading = False
 
     def _on_edited(self):
+        if self._loading:
+            return
         self._save_current()
         # Update list item name
         if 0 <= self._current_idx < self._list.count():
+            self._list.blockSignals(True)
             self._list.item(self._current_idx).setText(self._name.text())
+            self._list.blockSignals(False)
         self._emit_names()
 
     def _save_current(self):
@@ -145,6 +153,7 @@ class ChemistryPanel(BasePanel):
         self.data_changed.emit()
 
     def load_from_project(self, project):
+        self._loading = True
         self._current_idx = -1
         self._substrates = [Substrate(
             name=s.name,
@@ -159,6 +168,7 @@ class ChemistryPanel(BasePanel):
         self._list.clear()
         for s in self._substrates:
             self._list.addItem(s.name)
+        self._loading = False
         if self._substrates:
             self._list.setCurrentRow(0)
         self._emit_names()

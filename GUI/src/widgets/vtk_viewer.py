@@ -1,15 +1,21 @@
-"""3D visualization widget using VTK or a placeholder fallback.
+"""3D VTK visualization widget with ParaView-like capabilities.
 
-Provides geometry preview and result viewing capabilities.
-Falls back gracefully if VTK is not installed.
+Supports:
+  - .vti (vtkImageData) files: substrate concentrations, biomass, masks
+  - .vtk legacy files: flow velocity fields, pressure, geometry
+  - .dat binary geometry files
+  - Filters: threshold, contour, slice
+  - Controls: scalar range, colormap, opacity, scale factor
+  - View presets: axis-aligned and isometric
 """
 
-import os
+import struct
 from pathlib import Path
 
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QComboBox, QFrame, QFileDialog, QSizePolicy,
+    QComboBox, QSlider, QDoubleSpinBox, QCheckBox, QFileDialog,
+    QFormLayout, QSplitter, QFrame, QTabWidget, QSizePolicy,
 )
 from PySide6.QtCore import Qt
 
@@ -22,226 +28,706 @@ except ImportError:
 
 
 class VTKViewer(QWidget):
-    """Center panel: 3D visualization area."""
+    """3D viewer with ParaView-like filter and display controls."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._actor = None
+        self._filter_actor = None
+        self._scalar_bar = None
+        self._reader_output = None
+        self._data_arrays = []
+        self._current_file = ""
         self._renderer = None
         self._vtk_widget = None
         self._setup_ui()
 
     def _setup_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        # Toolbar
-        toolbar = QHBoxLayout()
-        toolbar.setContentsMargins(8, 4, 8, 4)
-
-        lbl = QLabel("3D Viewer")
-        lbl.setProperty("subheading", True)
-        toolbar.addWidget(lbl)
-        toolbar.addStretch()
-
-        self._file_combo = QComboBox()
-        self._file_combo.setFixedWidth(200)
-        self._file_combo.setPlaceholderText("Select VTK file...")
-        self._file_combo.currentIndexChanged.connect(self._on_file_changed)
-        toolbar.addWidget(self._file_combo)
-
-        open_btn = QPushButton("Open VTK")
-        open_btn.setFixedWidth(80)
-        open_btn.clicked.connect(self._open_vtk_file)
-        toolbar.addWidget(open_btn)
-
-        self._view_combo = QComboBox()
-        self._view_combo.addItems(["+X", "-X", "+Y", "-Y", "+Z", "-Z", "Iso"])
-        self._view_combo.setCurrentIndex(6)
-        self._view_combo.setFixedWidth(60)
-        self._view_combo.currentTextChanged.connect(self._set_view)
-        toolbar.addWidget(self._view_combo)
-
-        reset_btn = QPushButton("Reset")
-        reset_btn.setFixedWidth(60)
-        reset_btn.clicked.connect(self.reset_view)
-        toolbar.addWidget(reset_btn)
-
-        layout.addLayout(toolbar)
-
-        # Viewer area
-        if HAS_VTK:
-            self._vtk_widget = QVTKRenderWindowInteractor(self)
-            self._renderer = vtk.vtkRenderer()
-            self._renderer.SetBackground(0.12, 0.12, 0.14)
-            self._renderer.SetBackground2(0.18, 0.19, 0.21)
-            self._renderer.GradientBackgroundOn()
-            self._vtk_widget.GetRenderWindow().AddRenderer(self._renderer)
-            layout.addWidget(self._vtk_widget, 1)
-            self._vtk_widget.Initialize()
-            self._add_axes()
-        else:
+        if not HAS_VTK:
+            layout = QVBoxLayout(self)
             placeholder = QFrame()
             placeholder.setFrameStyle(QFrame.Shape.StyledPanel)
             placeholder.setSizePolicy(
                 QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             ph_layout = QVBoxLayout(placeholder)
-            msg = QLabel("VTK not installed.\n\nInstall with: pip install vtk\n\n"
-                         "Geometry and results will display here.")
+            msg = QLabel(
+                "VTK not installed.\n\n"
+                "Install with:\n  pip install vtk\n\n"
+                "Then restart CompLaB Studio.")
             msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
             msg.setProperty("info", True)
             ph_layout.addWidget(msg)
             layout.addWidget(placeholder, 1)
-
-    def _add_axes(self):
-        """Add orientation axes widget."""
-        if not HAS_VTK or not self._renderer:
             return
-        axes = vtk.vtkAxesActor()
-        widget = vtk.vtkOrientationMarkerWidget()
-        widget.SetOrientationMarker(axes)
-        widget.SetInteractor(self._vtk_widget.GetRenderWindow().GetInteractor())
-        widget.SetViewport(0.0, 0.0, 0.15, 0.15)
-        widget.EnabledOn()
-        widget.InteractiveOff()
-        self._axes_widget = widget
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        # ── Top toolbar ─────────────────────────────────────────────
+        toolbar = QHBoxLayout()
+        toolbar.setContentsMargins(4, 4, 4, 4)
+        toolbar.setSpacing(4)
+
+        open_btn = QPushButton("Open VTK")
+        open_btn.setFixedWidth(80)
+        open_btn.clicked.connect(self._open_file_dialog)
+        toolbar.addWidget(open_btn)
+
+        toolbar.addWidget(QLabel("Array:"))
+        self._array_combo = QComboBox()
+        self._array_combo.setMinimumWidth(120)
+        self._array_combo.currentTextChanged.connect(self._on_array_changed)
+        toolbar.addWidget(self._array_combo)
+
+        toolbar.addWidget(QLabel("View:"))
+        self._view_combo = QComboBox()
+        self._view_combo.addItems(["+X", "-X", "+Y", "-Y", "+Z", "-Z", "Iso"])
+        self._view_combo.setCurrentText("Iso")
+        self._view_combo.currentTextChanged.connect(self._set_view)
+        toolbar.addWidget(self._view_combo)
+
+        reset_btn = QPushButton("Reset")
+        reset_btn.setFixedWidth(60)
+        reset_btn.clicked.connect(self._reset_view)
+        toolbar.addWidget(reset_btn)
+
+        toolbar.addStretch()
+
+        self._file_label = QLabel("")
+        self._file_label.setProperty("info", True)
+        toolbar.addWidget(self._file_label)
+
+        layout.addLayout(toolbar)
+
+        # ── Main area: viewer + controls sidebar ────────────────────
+        body = QSplitter(Qt.Orientation.Horizontal)
+
+        # VTK render widget
+        self._vtk_widget = QVTKRenderWindowInteractor(self)
+        self._renderer = vtk.vtkRenderer()
+        self._renderer.SetBackground(0.12, 0.12, 0.14)
+        self._renderer.SetBackground2(0.18, 0.18, 0.20)
+        self._renderer.GradientBackgroundOn()
+        self._vtk_widget.GetRenderWindow().AddRenderer(self._renderer)
+        body.addWidget(self._vtk_widget)
+
+        # Orientation axes
+        self._axes_widget = vtk.vtkOrientationMarkerWidget()
+        axes_actor = vtk.vtkAxesActor()
+        self._axes_widget.SetOrientationMarker(axes_actor)
+        self._axes_widget.SetInteractor(self._vtk_widget)
+        self._axes_widget.SetViewport(0.0, 0.0, 0.15, 0.15)
+        self._axes_widget.EnabledOn()
+        self._axes_widget.InteractiveOff()
+
+        # ── Controls sidebar ────────────────────────────────────────
+        controls = QWidget()
+        controls.setMinimumWidth(200)
+        controls.setMaximumWidth(280)
+        ctrl_layout = QVBoxLayout(controls)
+        ctrl_layout.setContentsMargins(4, 4, 4, 4)
+        ctrl_layout.setSpacing(4)
+
+        ctrl_tabs = QTabWidget()
+
+        # -- Display tab --
+        display_w = QWidget()
+        dform = QFormLayout(display_w)
+        dform.setVerticalSpacing(6)
+
+        self._colormap_combo = QComboBox()
+        self._colormap_combo.addItems([
+            "Viridis", "Jet", "Coolwarm", "Grayscale",
+            "Rainbow", "Plasma", "Inferno",
+        ])
+        self._colormap_combo.currentTextChanged.connect(self._on_colormap_changed)
+        dform.addRow("Colormap:", self._colormap_combo)
+
+        self._opacity_slider = QSlider(Qt.Orientation.Horizontal)
+        self._opacity_slider.setRange(10, 100)
+        self._opacity_slider.setValue(100)
+        self._opacity_slider.valueChanged.connect(self._on_opacity_changed)
+        dform.addRow("Opacity:", self._opacity_slider)
+
+        self._range_min = QDoubleSpinBox()
+        self._range_min.setDecimals(6)
+        self._range_min.setRange(-1e20, 1e20)
+        self._range_min.valueChanged.connect(self._on_range_changed)
+        dform.addRow("Range min:", self._range_min)
+
+        self._range_max = QDoubleSpinBox()
+        self._range_max.setDecimals(6)
+        self._range_max.setRange(-1e20, 1e20)
+        self._range_max.setValue(1.0)
+        self._range_max.valueChanged.connect(self._on_range_changed)
+        dform.addRow("Range max:", self._range_max)
+
+        rescale_btn = QPushButton("Rescale to Data")
+        rescale_btn.clicked.connect(self._rescale_to_data)
+        dform.addRow("", rescale_btn)
+
+        self._show_edges = QCheckBox("Show edges")
+        self._show_edges.toggled.connect(self._on_edges_changed)
+        dform.addRow("", self._show_edges)
+
+        self._show_scalar_bar = QCheckBox("Scalar bar")
+        self._show_scalar_bar.setChecked(True)
+        self._show_scalar_bar.toggled.connect(self._on_scalar_bar_toggled)
+        dform.addRow("", self._show_scalar_bar)
+
+        ctrl_tabs.addTab(display_w, "Display")
+
+        # -- Filters tab --
+        filter_w = QWidget()
+        fform = QFormLayout(filter_w)
+        fform.setVerticalSpacing(6)
+
+        self._filter_combo = QComboBox()
+        self._filter_combo.addItems([
+            "None", "Threshold", "Contour", "Slice X", "Slice Y", "Slice Z",
+        ])
+        self._filter_combo.currentTextChanged.connect(self._on_filter_changed)
+        fform.addRow("Filter:", self._filter_combo)
+
+        self._filter_val1 = QDoubleSpinBox()
+        self._filter_val1.setDecimals(6)
+        self._filter_val1.setRange(-1e20, 1e20)
+        self._filter_val1.valueChanged.connect(self._apply_filter)
+        fform.addRow("Value / Min:", self._filter_val1)
+
+        self._filter_val2 = QDoubleSpinBox()
+        self._filter_val2.setDecimals(6)
+        self._filter_val2.setRange(-1e20, 1e20)
+        self._filter_val2.setValue(1.0)
+        self._filter_val2.valueChanged.connect(self._apply_filter)
+        fform.addRow("Max:", self._filter_val2)
+
+        self._slice_pos = QSlider(Qt.Orientation.Horizontal)
+        self._slice_pos.setRange(0, 100)
+        self._slice_pos.setValue(50)
+        self._slice_pos.valueChanged.connect(self._apply_filter)
+        fform.addRow("Slice pos:", self._slice_pos)
+
+        apply_btn = QPushButton("Apply Filter")
+        apply_btn.setProperty("primary", True)
+        apply_btn.clicked.connect(self._apply_filter)
+        fform.addRow("", apply_btn)
+
+        clear_btn = QPushButton("Clear Filter")
+        clear_btn.clicked.connect(self._clear_filter)
+        fform.addRow("", clear_btn)
+
+        ctrl_tabs.addTab(filter_w, "Filters")
+
+        # -- Transform tab --
+        xform_w = QWidget()
+        xform_form = QFormLayout(xform_w)
+        xform_form.setVerticalSpacing(6)
+
+        self._scale_x = QDoubleSpinBox()
+        self._scale_x.setRange(0.01, 100.0)
+        self._scale_x.setValue(1.0)
+        self._scale_x.setDecimals(2)
+        self._scale_x.valueChanged.connect(self._on_scale_changed)
+        xform_form.addRow("Scale X:", self._scale_x)
+
+        self._scale_y = QDoubleSpinBox()
+        self._scale_y.setRange(0.01, 100.0)
+        self._scale_y.setValue(1.0)
+        self._scale_y.setDecimals(2)
+        self._scale_y.valueChanged.connect(self._on_scale_changed)
+        xform_form.addRow("Scale Y:", self._scale_y)
+
+        self._scale_z = QDoubleSpinBox()
+        self._scale_z.setRange(0.01, 100.0)
+        self._scale_z.setValue(1.0)
+        self._scale_z.setDecimals(2)
+        self._scale_z.valueChanged.connect(self._on_scale_changed)
+        xform_form.addRow("Scale Z:", self._scale_z)
+
+        reset_scale_btn = QPushButton("Reset Scale")
+        reset_scale_btn.clicked.connect(self._reset_scale)
+        xform_form.addRow("", reset_scale_btn)
+
+        ctrl_tabs.addTab(xform_w, "Transform")
+
+        ctrl_layout.addWidget(ctrl_tabs, 1)
+        body.addWidget(controls)
+        body.setSizes([600, 220])
+
+        layout.addWidget(body, 1)
+        self._vtk_widget.Initialize()
+
+    # ── Public API ──────────────────────────────────────────────────
 
     def load_vti(self, filepath: str):
-        """Load a VTK ImageData (.vti) file."""
+        """Load a VTK file (.vti or .vtk) - main entry point."""
+        if not HAS_VTK:
+            return
+        filepath = str(filepath)
+        ext = Path(filepath).suffix.lower()
+        if ext == ".vtk":
+            self._load_vtk_legacy(filepath)
+        elif ext == ".vti":
+            self._load_vti_file(filepath)
+        else:
+            self._load_vti_file(filepath)
+
+    def load_file(self, filepath: str):
+        """Load any supported file type by extension."""
+        self.load_vti(filepath)
+
+    def load_geometry_dat(self, filepath: str, nx: int, ny: int, nz: int):
+        """Load binary .dat geometry file as vtkImageData."""
         if not HAS_VTK or not self._renderer:
             return
-        self._renderer.RemoveAllViewProps()
-        self._add_axes()
+        filepath = str(filepath)
+        try:
+            with open(filepath, "rb") as f:
+                raw = f.read()
+            n_cells = nx * ny * nz
+            expected = n_cells * 4  # int32
+            if len(raw) >= expected:
+                # Binary int32 format
+                img = vtk.vtkImageData()
+                img.SetDimensions(nx, ny, nz)
+                img.SetSpacing(1.0, 1.0, 1.0)
+                arr = vtk.vtkIntArray()
+                arr.SetName("MaterialNumber")
+                arr.SetNumberOfTuples(n_cells)
+                for i in range(n_cells):
+                    val = struct.unpack_from("<i", raw, i * 4)[0]
+                    arr.SetValue(i, val)
+                img.GetPointData().SetScalars(arr)
+                self._display_dataset(img, filepath)
+            else:
+                # Try text format
+                with open(filepath, "r") as f:
+                    values = [int(x) for line in f for x in line.split()]
+                if len(values) >= n_cells:
+                    img = vtk.vtkImageData()
+                    img.SetDimensions(nx, ny, nz)
+                    img.SetSpacing(1.0, 1.0, 1.0)
+                    arr = vtk.vtkIntArray()
+                    arr.SetName("MaterialNumber")
+                    arr.SetNumberOfTuples(n_cells)
+                    for i, val in enumerate(values[:n_cells]):
+                        arr.SetValue(i, val)
+                    img.GetPointData().SetScalars(arr)
+                    self._display_dataset(img, filepath)
+        except Exception:
+            pass
 
+    def add_output_files(self, directory: str):
+        """Scan a directory for VTK files and add to array combo."""
+        pass  # handled by post-process panel
+
+    # ── File loading internals ──────────────────────────────────────
+
+    def _load_vti_file(self, filepath: str):
         reader = vtk.vtkXMLImageDataReader()
         reader.SetFileName(filepath)
         reader.Update()
+        output = reader.GetOutput()
+        if output:
+            self._display_dataset(output, filepath)
 
-        data = reader.GetOutput()
-        if data is None:
-            return
+    def _load_vtk_legacy(self, filepath: str):
+        """Load legacy .vtk files (structured/rectilinear/unstructured/polydata)."""
+        reader = vtk.vtkGenericDataObjectReader()
+        reader.SetFileName(filepath)
+        reader.Update()
+        output = reader.GetOutput()
+        if output is not None:
+            self._display_dataset(output, filepath)
 
-        # Choose first array for display
-        pd = data.GetPointData()
-        if pd.GetNumberOfArrays() > 0:
-            pd.SetActiveScalars(pd.GetArrayName(0))
+    def _display_dataset(self, dataset, filepath: str):
+        """Display any VTK dataset with scalars."""
+        self.clear_scene()
+        self._current_file = filepath
+        self._reader_output = dataset
+        self._file_label.setText(Path(filepath).name)
 
+        # Enumerate available arrays
+        self._data_arrays = []
+        self._array_combo.blockSignals(True)
+        self._array_combo.clear()
+
+        pd = dataset.GetPointData()
+        for i in range(pd.GetNumberOfArrays()):
+            name = pd.GetArrayName(i)
+            if name:
+                self._data_arrays.append(("point", name))
+                self._array_combo.addItem(f"[P] {name}")
+
+        cd = dataset.GetCellData()
+        for i in range(cd.GetNumberOfArrays()):
+            name = cd.GetArrayName(i)
+            if name:
+                self._data_arrays.append(("cell", name))
+                self._array_combo.addItem(f"[C] {name}")
+
+        # Auto-select first array
+        if self._data_arrays:
+            loc, name = self._data_arrays[0]
+            if loc == "point":
+                dataset.GetPointData().SetActiveScalars(name)
+            else:
+                dataset.GetCellData().SetActiveScalars(name)
+
+        self._array_combo.blockSignals(False)
+
+        # Create mapper
         mapper = vtk.vtkDataSetMapper()
-        mapper.SetInputData(data)
-        mapper.ScalarVisibilityOn()
+        mapper.SetInputData(dataset)
 
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
+        if self._data_arrays:
+            mapper.ScalarVisibilityOn()
+            scalar_range = dataset.GetScalarRange()
+            mapper.SetScalarRange(scalar_range)
+            self._setup_colormap(mapper)
 
-        self._renderer.AddActor(actor)
+            # Update range spinboxes
+            self._range_min.blockSignals(True)
+            self._range_max.blockSignals(True)
+            self._range_min.setValue(scalar_range[0])
+            self._range_max.setValue(scalar_range[1])
+            self._range_min.blockSignals(False)
+            self._range_max.blockSignals(False)
 
-        # Add scalar bar
-        sbar = vtk.vtkScalarBarActor()
-        sbar.SetLookupTable(mapper.GetLookupTable())
-        sbar.SetTitle(pd.GetArrayName(0) if pd.GetNumberOfArrays() > 0 else "")
-        sbar.SetNumberOfLabels(5)
-        self._renderer.AddActor2D(sbar)
+            # Scalar bar
+            self._add_scalar_bar(mapper)
+        else:
+            mapper.ScalarVisibilityOff()
 
+        self._actor = vtk.vtkActor()
+        self._actor.SetMapper(mapper)
+        self._actor.GetProperty().SetOpacity(
+            self._opacity_slider.value() / 100.0)
+        if self._show_edges.isChecked():
+            self._actor.GetProperty().EdgeVisibilityOn()
+        self._renderer.AddActor(self._actor)
         self._renderer.ResetCamera()
-        self._render()
+        self._vtk_widget.GetRenderWindow().Render()
 
-    def load_geometry_dat(self, filepath: str, nx: int, ny: int, nz: int):
-        """Load a .dat geometry file as structured grid."""
-        if not HAS_VTK or not self._renderer:
+    # ── Array / Colormap / Display ──────────────────────────────────
+
+    def _on_array_changed(self, text: str):
+        if not self._reader_output or not text:
             return
-        if not os.path.isfile(filepath):
+        idx = self._array_combo.currentIndex()
+        if idx < 0 or idx >= len(self._data_arrays):
+            return
+        loc, name = self._data_arrays[idx]
+        ds = self._reader_output
+        if loc == "point":
+            ds.GetPointData().SetActiveScalars(name)
+        else:
+            ds.GetCellData().SetActiveScalars(name)
+
+        if self._actor:
+            mapper = self._actor.GetMapper()
+            mapper.SetInputData(ds)
+            mapper.ScalarVisibilityOn()
+            scalar_range = ds.GetScalarRange()
+            mapper.SetScalarRange(scalar_range)
+            self._range_min.blockSignals(True)
+            self._range_max.blockSignals(True)
+            self._range_min.setValue(scalar_range[0])
+            self._range_max.setValue(scalar_range[1])
+            self._range_min.blockSignals(False)
+            self._range_max.blockSignals(False)
+            if self._scalar_bar:
+                self._scalar_bar.SetTitle(name)
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _setup_colormap(self, mapper):
+        lut = vtk.vtkLookupTable()
+        cmap = self._colormap_combo.currentText()
+        self._apply_lut(lut, cmap)
+        mapper.SetLookupTable(lut)
+
+    def _apply_lut(self, lut, cmap_name):
+        """Configure a lookup table for the given colormap name."""
+        n = 256
+        lut.SetNumberOfTableValues(n)
+        if cmap_name == "Jet":
+            lut.SetHueRange(0.667, 0.0)
+            lut.Build()
+        elif cmap_name == "Coolwarm":
+            # Blue -> White -> Red diverging
+            ctf = vtk.vtkColorTransferFunction()
+            ctf.AddRGBPoint(0.0, 0.231, 0.298, 0.753)
+            ctf.AddRGBPoint(0.5, 0.865, 0.865, 0.865)
+            ctf.AddRGBPoint(1.0, 0.706, 0.016, 0.150)
+            for i in range(n):
+                r, g, b = ctf.GetColor(i / (n - 1))
+                lut.SetTableValue(i, r, g, b, 1.0)
+            lut.Build()
+        elif cmap_name == "Grayscale":
+            lut.SetHueRange(0.0, 0.0)
+            lut.SetSaturationRange(0.0, 0.0)
+            lut.SetValueRange(0.2, 1.0)
+            lut.Build()
+        elif cmap_name == "Rainbow":
+            lut.SetHueRange(0.0, 0.667)
+            lut.Build()
+        elif cmap_name in ("Viridis", "Plasma", "Inferno"):
+            ctf = vtk.vtkColorTransferFunction()
+            if cmap_name == "Viridis":
+                ctf.AddRGBPoint(0.0, 0.267, 0.004, 0.329)
+                ctf.AddRGBPoint(0.25, 0.282, 0.140, 0.458)
+                ctf.AddRGBPoint(0.5, 0.127, 0.566, 0.551)
+                ctf.AddRGBPoint(0.75, 0.544, 0.774, 0.247)
+                ctf.AddRGBPoint(1.0, 0.993, 0.906, 0.144)
+            elif cmap_name == "Plasma":
+                ctf.AddRGBPoint(0.0, 0.050, 0.030, 0.528)
+                ctf.AddRGBPoint(0.25, 0.494, 0.012, 0.658)
+                ctf.AddRGBPoint(0.5, 0.798, 0.280, 0.470)
+                ctf.AddRGBPoint(0.75, 0.973, 0.585, 0.253)
+                ctf.AddRGBPoint(1.0, 0.940, 0.975, 0.131)
+            elif cmap_name == "Inferno":
+                ctf.AddRGBPoint(0.0, 0.001, 0.0, 0.014)
+                ctf.AddRGBPoint(0.25, 0.341, 0.062, 0.429)
+                ctf.AddRGBPoint(0.5, 0.735, 0.215, 0.330)
+                ctf.AddRGBPoint(0.75, 0.973, 0.557, 0.055)
+                ctf.AddRGBPoint(1.0, 0.988, 1.0, 0.644)
+            for i in range(n):
+                r, g, b = ctf.GetColor(i / (n - 1))
+                lut.SetTableValue(i, r, g, b, 1.0)
+            lut.Build()
+        else:
+            lut.SetHueRange(0.667, 0.0)
+            lut.Build()
+
+    def _on_colormap_changed(self, _text):
+        if self._actor:
+            mapper = self._actor.GetMapper()
+            lut = mapper.GetLookupTable()
+            if lut is None:
+                lut = vtk.vtkLookupTable()
+            self._apply_lut(lut, self._colormap_combo.currentText())
+            mapper.SetLookupTable(lut)
+            if self._scalar_bar:
+                self._scalar_bar.SetLookupTable(lut)
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _on_opacity_changed(self, val):
+        if self._actor:
+            self._actor.GetProperty().SetOpacity(val / 100.0)
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _on_range_changed(self):
+        if self._actor:
+            mapper = self._actor.GetMapper()
+            mapper.SetScalarRange(
+                self._range_min.value(), self._range_max.value())
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _rescale_to_data(self):
+        if self._reader_output:
+            sr = self._reader_output.GetScalarRange()
+            self._range_min.setValue(sr[0])
+            self._range_max.setValue(sr[1])
+
+    def _on_edges_changed(self, checked):
+        if self._actor:
+            prop = self._actor.GetProperty()
+            if checked:
+                prop.EdgeVisibilityOn()
+                prop.SetEdgeColor(0.3, 0.3, 0.3)
+            else:
+                prop.EdgeVisibilityOff()
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _on_scalar_bar_toggled(self, checked):
+        if self._scalar_bar:
+            self._scalar_bar.SetVisibility(checked)
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _add_scalar_bar(self, mapper):
+        if self._scalar_bar:
+            self._renderer.RemoveActor2D(self._scalar_bar)
+        self._scalar_bar = vtk.vtkScalarBarActor()
+        self._scalar_bar.SetLookupTable(mapper.GetLookupTable())
+        self._scalar_bar.SetNumberOfLabels(5)
+        self._scalar_bar.SetMaximumWidthInPixels(80)
+        tp = self._scalar_bar.GetTitleTextProperty()
+        tp.SetColor(0.9, 0.9, 0.9)
+        tp.SetFontSize(10)
+        lp = self._scalar_bar.GetLabelTextProperty()
+        lp.SetColor(0.8, 0.8, 0.8)
+        lp.SetFontSize(9)
+        idx = self._array_combo.currentIndex()
+        if 0 <= idx < len(self._data_arrays):
+            self._scalar_bar.SetTitle(self._data_arrays[idx][1])
+        self._scalar_bar.SetVisibility(self._show_scalar_bar.isChecked())
+        self._renderer.AddActor2D(self._scalar_bar)
+
+    # ── Filters ─────────────────────────────────────────────────────
+
+    def _on_filter_changed(self, text):
+        self._filter_val2.setEnabled(text == "Threshold")
+        self._slice_pos.setEnabled(text.startswith("Slice"))
+
+    def _apply_filter(self):
+        if not self._reader_output:
+            return
+        self._clear_filter_actor()
+
+        filter_type = self._filter_combo.currentText()
+        if filter_type == "None":
             return
 
-        try:
-            with open(filepath, "r") as f:
-                values = [int(x) for line in f for x in line.split()]
-        except (ValueError, OSError):
-            return
+        ds = self._reader_output
+        filtered = None
 
-        expected = nx * ny * nz
-        if len(values) < expected:
-            return
+        if filter_type == "Threshold":
+            filt = vtk.vtkThreshold()
+            filt.SetInputData(ds)
+            low = self._filter_val1.value()
+            high = self._filter_val2.value()
+            filt.SetLowerThreshold(low)
+            filt.SetUpperThreshold(high)
+            filt.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_BETWEEN)
+            filt.Update()
+            filtered = filt.GetOutput()
 
-        self._renderer.RemoveAllViewProps()
-        self._add_axes()
+        elif filter_type == "Contour":
+            filt = vtk.vtkContourFilter()
+            filt.SetInputData(ds)
+            filt.SetValue(0, self._filter_val1.value())
+            filt.Update()
+            filtered = filt.GetOutput()
 
-        image = vtk.vtkImageData()
-        image.SetDimensions(nx, ny, nz)
+        elif filter_type.startswith("Slice"):
+            bounds = ds.GetBounds()
+            plane = vtk.vtkPlane()
+            pos_frac = self._slice_pos.value() / 100.0
 
-        arr = vtk.vtkIntArray()
-        arr.SetName("Material")
-        arr.SetNumberOfTuples(nx * ny * nz)
-        for idx, val in enumerate(values[:expected]):
-            arr.SetValue(idx, val)
-        image.GetPointData().SetScalars(arr)
+            if filter_type == "Slice X":
+                origin_val = bounds[0] + pos_frac * (bounds[1] - bounds[0])
+                plane.SetOrigin(origin_val, 0, 0)
+                plane.SetNormal(1, 0, 0)
+            elif filter_type == "Slice Y":
+                origin_val = bounds[2] + pos_frac * (bounds[3] - bounds[2])
+                plane.SetOrigin(0, origin_val, 0)
+                plane.SetNormal(0, 1, 0)
+            else:  # Slice Z
+                origin_val = bounds[4] + pos_frac * (bounds[5] - bounds[4])
+                plane.SetOrigin(0, 0, origin_val)
+                plane.SetNormal(0, 0, 1)
 
-        mapper = vtk.vtkDataSetMapper()
-        mapper.SetInputData(image)
-        mapper.ScalarVisibilityOn()
+            cutter = vtk.vtkCutter()
+            cutter.SetInputData(ds)
+            cutter.SetCutFunction(plane)
+            cutter.Update()
+            filtered = cutter.GetOutput()
 
-        actor = vtk.vtkActor()
-        actor.SetMapper(mapper)
-        self._renderer.AddActor(actor)
-        self._renderer.ResetCamera()
-        self._render()
+        if filtered and filtered.GetNumberOfCells() > 0:
+            mapper = vtk.vtkDataSetMapper()
+            mapper.SetInputData(filtered)
+            mapper.ScalarVisibilityOn()
+            mapper.SetScalarRange(
+                self._range_min.value(), self._range_max.value())
+            if self._actor:
+                mapper.SetLookupTable(
+                    self._actor.GetMapper().GetLookupTable())
+            self._filter_actor = vtk.vtkActor()
+            self._filter_actor.SetMapper(mapper)
+            self._renderer.AddActor(self._filter_actor)
 
-    def reset_view(self):
-        if self._renderer:
+            # Dim the main actor so filter result stands out
+            if self._actor:
+                self._actor.GetProperty().SetOpacity(0.15)
+
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _clear_filter(self):
+        self._clear_filter_actor()
+        self._filter_combo.setCurrentText("None")
+        if self._actor:
+            self._actor.GetProperty().SetOpacity(
+                self._opacity_slider.value() / 100.0)
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _clear_filter_actor(self):
+        if self._filter_actor:
+            self._renderer.RemoveActor(self._filter_actor)
+            self._filter_actor = None
+
+    # ── Transform / Scale ───────────────────────────────────────────
+
+    def _on_scale_changed(self):
+        if self._actor:
+            self._actor.SetScale(
+                self._scale_x.value(),
+                self._scale_y.value(),
+                self._scale_z.value())
             self._renderer.ResetCamera()
-            self._render()
+            self._vtk_widget.GetRenderWindow().Render()
 
-    def clear_scene(self):
-        if self._renderer:
-            self._renderer.RemoveAllViewProps()
-            self._add_axes()
-            self._render()
+    def _reset_scale(self):
+        self._scale_x.setValue(1.0)
+        self._scale_y.setValue(1.0)
+        self._scale_z.setValue(1.0)
+
+    # ── View presets ────────────────────────────────────────────────
 
     def _set_view(self, direction: str):
         if not self._renderer:
             return
         cam = self._renderer.GetActiveCamera()
-        cam.SetFocalPoint(0, 0, 0)
-        d = 100
-        views = {
-            "+X": (d, 0, 0, 0, 0, 1),
-            "-X": (-d, 0, 0, 0, 0, 1),
-            "+Y": (0, d, 0, 0, 0, 1),
-            "-Y": (0, -d, 0, 0, 0, 1),
-            "+Z": (0, 0, d, 0, 1, 0),
-            "-Z": (0, 0, -d, 0, 1, 0),
-            "Iso": (d, d, d, 0, 0, 1),
-        }
-        if direction in views:
-            px, py, pz, ux, uy, uz = views[direction]
-            cam.SetPosition(px, py, pz)
-            cam.SetViewUp(ux, uy, uz)
-        self._renderer.ResetCamera()
-        self._render()
+        dist = cam.GetDistance() if cam.GetDistance() > 0 else 100
+        fp = cam.GetFocalPoint()
 
-    def _render(self):
-        if self._vtk_widget:
+        view_map = {
+            "+X": ((fp[0] + dist, fp[1], fp[2]), (0, 0, 1)),
+            "-X": ((fp[0] - dist, fp[1], fp[2]), (0, 0, 1)),
+            "+Y": ((fp[0], fp[1] + dist, fp[2]), (0, 0, 1)),
+            "-Y": ((fp[0], fp[1] - dist, fp[2]), (0, 0, 1)),
+            "+Z": ((fp[0], fp[1], fp[2] + dist), (0, 1, 0)),
+            "-Z": ((fp[0], fp[1], fp[2] - dist), (0, 1, 0)),
+            "Iso": ((fp[0] + dist * 0.577, fp[1] + dist * 0.577,
+                     fp[2] + dist * 0.577), (0, 0, 1)),
+        }
+        if direction in view_map:
+            pos, up = view_map[direction]
+            cam.SetPosition(*pos)
+            cam.SetViewUp(*up)
+            self._renderer.ResetCamera()
             self._vtk_widget.GetRenderWindow().Render()
 
-    def _open_vtk_file(self):
+    def _reset_view(self):
+        if self._renderer:
+            self._renderer.ResetCamera()
+            self._vtk_widget.GetRenderWindow().Render()
+
+    def _open_file_dialog(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Open VTK File", "",
-            "VTK ImageData (*.vti);;All Files (*)")
+            "VTK Files (*.vti *.vtk);;All Files (*)")
         if path:
-            self._file_combo.addItem(Path(path).name, path)
-            self._file_combo.setCurrentIndex(self._file_combo.count() - 1)
+            self.load_file(path)
 
-    def _on_file_changed(self, index):
-        if index < 0:
-            return
-        path = self._file_combo.itemData(index)
-        if path and os.path.isfile(path):
-            self.load_vti(path)
+    def reset_view(self):
+        """Public reset view method."""
+        self._reset_view()
 
-    def add_output_files(self, directory: str):
-        """Scan a directory for VTI files and add to combo."""
-        self._file_combo.clear()
-        if not os.path.isdir(directory):
+    def clear_scene(self):
+        """Remove all actors except orientation axes."""
+        if not HAS_VTK or not self._renderer:
             return
-        vti_files = sorted(Path(directory).glob("*.vti"))
-        for f in vti_files:
-            self._file_combo.addItem(f.name, str(f))
+        self._clear_filter_actor()
+        if self._actor:
+            self._renderer.RemoveActor(self._actor)
+            self._actor = None
+        if self._scalar_bar:
+            self._renderer.RemoveActor2D(self._scalar_bar)
+            self._scalar_bar = None
+        self._reader_output = None
+        self._data_arrays = []
+        if hasattr(self, '_array_combo'):
+            self._array_combo.clear()
+        self._vtk_widget.GetRenderWindow().Render()

@@ -8,21 +8,30 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QFont
 
 from src.main_window import CompLaBMainWindow
+from src.config import AppConfig
 
 
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("CompLaB Studio")
     app.setApplicationVersion("2.0.0")
-    app.setOrganizationName("UGA-CNU")
+    app.setOrganizationName("MeileLab-UGA")
 
-    # Load stylesheet
-    style_path = Path(__file__).parent / "styles" / "theme.qss"
+    config = AppConfig()
+
+    # Load stylesheet based on theme preference
+    theme = config.get("theme", "Dark")
+    styles_dir = Path(__file__).parent / "styles"
+    if theme == "Light":
+        style_path = styles_dir / "light.qss"
+    else:
+        style_path = styles_dir / "theme.qss"
     if style_path.exists():
         app.setStyleSheet(style_path.read_text(encoding="utf-8"))
 
-    # Default font
-    font = QFont("Segoe UI", 10)
+    # Apply configured font size
+    font_size = config.get("font_size", 10)
+    font = QFont("Segoe UI", font_size)
     font.setStyleStrategy(QFont.StyleStrategy.PreferQuality)
     app.setFont(font)
 

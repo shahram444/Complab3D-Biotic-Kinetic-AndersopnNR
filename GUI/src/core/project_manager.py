@@ -58,8 +58,8 @@ class ProjectManager:
         sm_el = ET.SubElement(root, "simulation_mode")
         _add_text(sm_el, "biotic_mode", _bool_str(sm.biotic_mode))
         _add_text(sm_el, "enable_kinetics", _bool_str(sm.enable_kinetics))
-        if sm.enable_abiotic_kinetics:
-            _add_text(sm_el, "enable_abiotic_kinetics", "true")
+        _add_text(sm_el, "enable_abiotic_kinetics",
+                  _bool_str(sm.enable_abiotic_kinetics))
         _add_text(sm_el, "enable_validation_diagnostics",
                   _bool_str(sm.enable_validation_diagnostics))
 
