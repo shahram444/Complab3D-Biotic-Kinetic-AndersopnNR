@@ -24,6 +24,7 @@ class MicrobiologyPanel(BasePanel):
         super().__init__("Microbiology", parent)
         self._microbes = []
         self._current_idx = -1
+        self._loading = False  # guard against signal cascades
         self._build_ui()
 
     def _build_ui(self):
@@ -86,11 +87,10 @@ class MicrobiologyPanel(BasePanel):
 
         self._solver = self.make_combo(["CA", "LBM", "FD"])
         self._solver.currentTextChanged.connect(self._on_solver_changed)
-        self._solver.currentTextChanged.connect(lambda: self._on_edited())
         f1.addRow("Solver type:", self._solver)
 
         self._reaction = self.make_combo(["kinetics", "none"])
-        self._reaction.currentTextChanged.connect(lambda: self._on_edited())
+        self._reaction.currentTextChanged.connect(self._on_edited)
         f1.addRow("Reaction type:", self._reaction)
 
         self._mat_num = self.make_line_edit("3", "e.g. 3 or 3 6")
@@ -196,6 +196,8 @@ class MicrobiologyPanel(BasePanel):
         self._visc_ratio.setEnabled(is_ca)
         self._bd_pore.setEnabled(is_fd)
         self._bd_biofilm.setEnabled(is_fd)
+        if not self._loading:
+            self._on_edited()
 
     def _add_microbe(self):
         idx = len(self._microbes)
@@ -217,13 +219,14 @@ class MicrobiologyPanel(BasePanel):
         self._emit_names()
 
     def _on_select(self, idx):
+        if self._loading:
+            return
         self._save_current()
         self._current_idx = idx
         if 0 <= idx < len(self._microbes):
             m = self._microbes[idx]
-            self._name.blockSignals(True)
+            self._loading = True
             self._name.setText(m.name)
-            self._name.blockSignals(False)
             self._solver.setCurrentText(m.solver_type)
             self._reaction.setCurrentText(m.reaction_type)
             self._mat_num.setText(m.material_number)
@@ -238,11 +241,16 @@ class MicrobiologyPanel(BasePanel):
             self._left_val.setValue(m.left_boundary_condition)
             self._right_type.setCurrentText(m.right_boundary_type)
             self._right_val.setValue(m.right_boundary_condition)
+            self._loading = False
 
     def _on_edited(self):
+        if self._loading:
+            return
         self._save_current()
         if 0 <= self._current_idx < self._list.count():
+            self._list.blockSignals(True)
             self._list.item(self._current_idx).setText(self._name.text())
+            self._list.blockSignals(False)
         self._emit_names()
 
     def _save_current(self):
@@ -272,6 +280,7 @@ class MicrobiologyPanel(BasePanel):
         self.data_changed.emit()
 
     def load_from_project(self, project):
+        self._loading = True
         self._current_idx = -1
         mb = project.microbiology
         self.max_density.setValue(mb.maximum_biomass_density)
@@ -300,6 +309,7 @@ class MicrobiologyPanel(BasePanel):
         self._list.clear()
         for m in self._microbes:
             self._list.addItem(m.name)
+        self._loading = False
         if self._microbes:
             self._list.setCurrentRow(0)
         self._emit_names()

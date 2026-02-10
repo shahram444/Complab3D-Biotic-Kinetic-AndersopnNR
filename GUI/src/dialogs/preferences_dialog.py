@@ -1,9 +1,10 @@
 """Preferences dialog - application settings."""
 
+import sys
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLabel, QLineEdit,
     QPushButton, QHBoxLayout, QTabWidget, QWidget,
-    QSpinBox, QCheckBox, QFileDialog,
+    QSpinBox, QCheckBox, QFileDialog, QComboBox,
 )
 from PySide6.QtCore import Qt
 
@@ -13,7 +14,7 @@ class PreferencesDialog(QDialog):
     def __init__(self, config, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Preferences")
-        self.setMinimumSize(500, 350)
+        self.setMinimumSize(520, 400)
         self._config = config
         self._setup_ui()
 
@@ -45,6 +46,7 @@ class PreferencesDialog(QDialog):
 
         dir_row = QHBoxLayout()
         self._proj_dir = QLineEdit(self._config.get("default_project_dir", ""))
+        self._proj_dir.setPlaceholderText("Default directory for new projects")
         dir_browse = QPushButton("Browse")
         dir_browse.setFixedWidth(80)
         dir_browse.clicked.connect(self._browse_dir)
@@ -76,13 +78,32 @@ class PreferencesDialog(QDialog):
         self._font_size.setRange(8, 18)
         self._font_size.setValue(self._config.get("font_size", 10))
         self._font_size.setSuffix(" pt")
+        self._font_size.setToolTip(
+            "Application font size. Applied on next restart.")
 
         self._max_console = QSpinBox()
-        self._max_console.setRange(1000, 100000)
+        self._max_console.setRange(500, 100000)
+        self._max_console.setSingleStep(1000)
         self._max_console.setValue(self._config.get("max_console_lines", 10000))
+        self._max_console.setToolTip(
+            "Maximum number of lines kept in the console output. "
+            "Older lines are trimmed automatically.")
+
+        self._theme_combo = QComboBox()
+        self._theme_combo.addItems(["Dark", "Light"])
+        current_theme = self._config.get("theme", "Dark")
+        idx = self._theme_combo.findText(current_theme)
+        if idx >= 0:
+            self._theme_combo.setCurrentIndex(idx)
 
         df.addRow("Font size:", self._font_size)
         df.addRow("Max console lines:", self._max_console)
+        df.addRow("Theme:", self._theme_combo)
+
+        note = QLabel("Font size and theme changes take effect on restart.")
+        note.setProperty("info", True)
+        df.addRow("", note)
+
         tabs.addTab(disp_w, "Display")
 
         layout.addWidget(tabs, 1)
@@ -100,9 +121,12 @@ class PreferencesDialog(QDialog):
         layout.addLayout(btn_row)
 
     def _browse_exe(self):
+        if sys.platform == "win32":
+            filt = "Executables (*.exe);;All Files (*)"
+        else:
+            filt = "All Files (*)"
         path, _ = QFileDialog.getOpenFileName(
-            self, "Select CompLaB Executable", "",
-            "Executables (*.exe);;All Files (*)")
+            self, "Select CompLaB Executable", "", filt)
         if path:
             self._exe_path.setText(path)
 
@@ -119,5 +143,6 @@ class PreferencesDialog(QDialog):
         self._config.set("auto_save_interval", self._auto_interval.value())
         self._config.set("font_size", self._font_size.value())
         self._config.set("max_console_lines", self._max_console.value())
+        self._config.set("theme", self._theme_combo.currentText())
         self._config.save()
         self.accept()
