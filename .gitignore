@@ -1,0 +1,10 @@
+# Godot cache
+.godot/
+*.import
+
+# Export builds (large binaries, don't commit)
+game/builds/
+
+# OS files
+.DS_Store
+Thumbs.db
