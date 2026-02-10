@@ -99,7 +99,7 @@ class MeshPanel(BasePanel):
         main_layout.setSpacing(15)
         
         # Header
-        header = self._create_header("Geometry Import", "🔲")
+        header = self._create_header("Geometry Import")
         main_layout.addWidget(header)
         
         # Description

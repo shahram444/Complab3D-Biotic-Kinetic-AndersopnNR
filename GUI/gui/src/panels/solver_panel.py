@@ -20,7 +20,7 @@ class SolverPanel(BasePanel):
         main_layout.setSpacing(10)
         
         # Header
-        header = self._create_header("Solver Settings", "⚙️")
+        header = self._create_header("Solver Settings")
         main_layout.addWidget(header)
         
         desc = self._create_info_label(

@@ -20,7 +20,7 @@ class DomainPanel(BasePanel):
         main_layout.setSpacing(15)
         
         # Header
-        header = self._create_header("Domain Configuration", "📐")
+        header = self._create_header("Domain Configuration")
         main_layout.addWidget(header)
         
         # Description

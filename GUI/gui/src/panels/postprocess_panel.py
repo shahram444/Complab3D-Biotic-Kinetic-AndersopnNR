@@ -24,7 +24,7 @@ class PostProcessPanel(BasePanel):
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(10)
         
-        header = self._create_header("Results & Post-Processing", "📈")
+        header = self._create_header("Results & Post-Processing")
         main_layout.addWidget(header)
         
         # Main splitter
