@@ -1,4 +1,4 @@
-; METHI: Guardians of Earth
+; ARKE: Guardians of Earth
 ; Godot 4.2+ project - 8-bit educational game
 ; Based on CompLaB3D pore-scale reactive transport research
 
@@ -6,7 +6,10 @@ config_version=5
 
 [application]
 
-config/name="METHI: Guardians of Earth"
+config/name="ARKE: Guardians of Earth"
+config/description="Play as ARKE, a methanotrophic archaeon navigating real pore-scale environments. Eat substrates, grow biofilm colonies, and prevent greenhouse gas emissions - all based on real CompLaB3D reactive transport research."
+config/version="1.0.0"
+config/tags=PackedStringArray("educational", "science", "2D", "pixel-art")
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.2", "2D")
 
