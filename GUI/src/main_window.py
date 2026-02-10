@@ -1,0 +1,553 @@
+"""CompLaB Studio 2.0 - COMSOL-Style Main Window.
+
+4-panel layout:
+  Left:   Model Builder tree (navigation)
+  Center: VTK 3D viewer (always visible)
+  Right:  Context-sensitive settings panel
+  Bottom: Console output + progress
+"""
+
+import os
+from pathlib import Path
+
+from PySide6.QtWidgets import (
+    QMainWindow, QSplitter, QStackedWidget, QMenuBar, QMenu,
+    QToolBar, QStatusBar, QFileDialog, QMessageBox, QLabel,
+)
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QAction, QKeySequence
+
+from .config import AppConfig
+from .core.project import CompLaBProject
+from .core.project_manager import ProjectManager
+from .core.simulation_runner import SimulationRunner
+
+from .widgets.model_tree import (
+    ModelTree, NODE_GENERAL, NODE_DOMAIN, NODE_FLUID,
+    NODE_CHEMISTRY, NODE_SUBSTRATE, NODE_EQUILIBRIUM,
+    NODE_MICROBIOLOGY, NODE_MICROBE, NODE_SOLVER,
+    NODE_IO, NODE_RUN, NODE_POSTPROCESS,
+)
+from .widgets.console_widget import ConsoleWidget
+from .widgets.vtk_viewer import VTKViewer
+
+from .panels.general_panel import GeneralPanel
+from .panels.domain_panel import DomainPanel
+from .panels.fluid_panel import FluidPanel
+from .panels.chemistry_panel import ChemistryPanel
+from .panels.equilibrium_panel import EquilibriumPanel
+from .panels.microbiology_panel import MicrobiologyPanel
+from .panels.solver_panel import SolverPanel
+from .panels.io_panel import IOPanel
+from .panels.run_panel import RunPanel
+from .panels.postprocess_panel import PostProcessPanel
+
+from .dialogs.new_project_dialog import NewProjectDialog
+from .dialogs.kinetics_editor_dialog import KineticsEditorDialog
+from .dialogs.preferences_dialog import PreferencesDialog
+from .dialogs.about_dialog import AboutDialog
+
+
+class CompLaBMainWindow(QMainWindow):
+    """Main application window with COMSOL-style 4-panel layout."""
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("CompLaB Studio 2.0")
+        self.setMinimumSize(1200, 800)
+        self.resize(1400, 900)
+
+        self._config = AppConfig()
+        self._project = CompLaBProject()
+        self._project_file = ""
+        self._runner = None
+        self._modified = False
+
+        self._setup_panels()
+        self._setup_layout()
+        self._setup_menus()
+        self._setup_toolbar()
+        self._setup_statusbar()
+        self._connect_signals()
+
+        # Auto-save timer
+        self._auto_save_timer = QTimer()
+        self._auto_save_timer.timeout.connect(self._auto_save)
+        if self._config.get("auto_save"):
+            interval = self._config.get("auto_save_interval", 300) * 1000
+            self._auto_save_timer.start(interval)
+
+        self._load_project_to_panels()
+        self._console.log_info("CompLaB Studio 2.0 ready.")
+
+    # ── Panel setup ─────────────────────────────────────────────────
+
+    def _setup_panels(self):
+        """Create all settings panels."""
+        self._general_panel = GeneralPanel()
+        self._domain_panel = DomainPanel()
+        self._fluid_panel = FluidPanel()
+        self._chemistry_panel = ChemistryPanel()
+        self._equilibrium_panel = EquilibriumPanel()
+        self._micro_panel = MicrobiologyPanel()
+        self._solver_panel = SolverPanel()
+        self._io_panel = IOPanel()
+        self._run_panel = RunPanel()
+        self._post_panel = PostProcessPanel()
+
+        # Stacked widget for right panel
+        self._panel_stack = QStackedWidget()
+        self._panel_stack.addWidget(self._general_panel)    # 0
+        self._panel_stack.addWidget(self._domain_panel)     # 1
+        self._panel_stack.addWidget(self._fluid_panel)      # 2
+        self._panel_stack.addWidget(self._chemistry_panel)  # 3
+        self._panel_stack.addWidget(self._equilibrium_panel)  # 4
+        self._panel_stack.addWidget(self._micro_panel)      # 5
+        self._panel_stack.addWidget(self._solver_panel)     # 6
+        self._panel_stack.addWidget(self._io_panel)         # 7
+        self._panel_stack.addWidget(self._run_panel)        # 8
+        self._panel_stack.addWidget(self._post_panel)       # 9
+
+        self._panel_map = {
+            NODE_GENERAL: 0,
+            NODE_DOMAIN: 1,
+            NODE_FLUID: 2,
+            NODE_CHEMISTRY: 3,
+            NODE_SUBSTRATE: 3,
+            NODE_EQUILIBRIUM: 4,
+            NODE_MICROBIOLOGY: 5,
+            NODE_MICROBE: 5,
+            NODE_SOLVER: 6,
+            NODE_IO: 7,
+            NODE_RUN: 8,
+            NODE_POSTPROCESS: 9,
+        }
+
+    def _setup_layout(self):
+        """Create the 4-panel COMSOL-style layout using splitters."""
+        # Left: Model tree
+        self._tree = ModelTree()
+        self._tree.setMinimumWidth(200)
+        self._tree.setMaximumWidth(350)
+
+        # Center: VTK viewer
+        self._viewer = VTKViewer()
+
+        # Right: Settings panels
+        self._panel_stack.setMinimumWidth(350)
+
+        # Bottom: Console
+        self._console = ConsoleWidget()
+        self._console.setMinimumHeight(120)
+        self._console.set_max_lines(
+            self._config.get("max_console_lines", 10000))
+
+        # Horizontal splitter: tree | viewer | settings
+        h_splitter = QSplitter(Qt.Orientation.Horizontal)
+        h_splitter.addWidget(self._tree)
+        h_splitter.addWidget(self._viewer)
+        h_splitter.addWidget(self._panel_stack)
+        h_splitter.setStretchFactor(0, 0)   # Tree: fixed
+        h_splitter.setStretchFactor(1, 3)   # Viewer: takes most space
+        h_splitter.setStretchFactor(2, 1)   # Settings: moderate
+        h_splitter.setSizes([220, 600, 380])
+
+        # Vertical splitter: [h_splitter] / console
+        v_splitter = QSplitter(Qt.Orientation.Vertical)
+        v_splitter.addWidget(h_splitter)
+        v_splitter.addWidget(self._console)
+        v_splitter.setStretchFactor(0, 4)
+        v_splitter.setStretchFactor(1, 1)
+        v_splitter.setSizes([650, 200])
+
+        self.setCentralWidget(v_splitter)
+
+    # ── Menus ───────────────────────────────────────────────────────
+
+    def _setup_menus(self):
+        mb = self.menuBar()
+
+        # File
+        file_menu = mb.addMenu("&File")
+        self._act_new = file_menu.addAction("&New Project...")
+        self._act_new.setShortcut(QKeySequence.StandardKey.New)
+        self._act_new.triggered.connect(self._new_project)
+
+        self._act_open = file_menu.addAction("&Open Project...")
+        self._act_open.setShortcut(QKeySequence.StandardKey.Open)
+        self._act_open.triggered.connect(self._open_project)
+
+        self._act_save = file_menu.addAction("&Save Project")
+        self._act_save.setShortcut(QKeySequence.StandardKey.Save)
+        self._act_save.triggered.connect(self._save_project)
+
+        self._act_save_as = file_menu.addAction("Save Project &As...")
+        self._act_save_as.setShortcut(QKeySequence("Ctrl+Shift+S"))
+        self._act_save_as.triggered.connect(self._save_project_as)
+
+        file_menu.addSeparator()
+
+        self._act_import = file_menu.addAction("&Import CompLaB.xml...")
+        self._act_import.triggered.connect(self._import_xml)
+
+        self._act_export = file_menu.addAction("&Export CompLaB.xml...")
+        self._act_export.triggered.connect(self._export_xml)
+
+        file_menu.addSeparator()
+
+        # Recent projects submenu
+        self._recent_menu = file_menu.addMenu("Recent Projects")
+        self._update_recent_menu()
+
+        file_menu.addSeparator()
+
+        act_quit = file_menu.addAction("&Quit")
+        act_quit.setShortcut(QKeySequence.StandardKey.Quit)
+        act_quit.triggered.connect(self.close)
+
+        # Tools
+        tools_menu = mb.addMenu("&Tools")
+        act_kinetics = tools_menu.addAction("Kinetics &Editor...")
+        act_kinetics.triggered.connect(self._open_kinetics_editor)
+
+        act_validate = tools_menu.addAction("&Validate Configuration")
+        act_validate.triggered.connect(self._validate)
+
+        tools_menu.addSeparator()
+        act_prefs = tools_menu.addAction("&Preferences...")
+        act_prefs.triggered.connect(self._open_preferences)
+
+        # Help
+        help_menu = mb.addMenu("&Help")
+        act_about = help_menu.addAction("&About")
+        act_about.triggered.connect(self._show_about)
+
+    def _setup_toolbar(self):
+        tb = QToolBar("Main Toolbar")
+        tb.setMovable(False)
+        self.addToolBar(tb)
+
+        tb.addAction(self._act_new)
+        tb.addAction(self._act_open)
+        tb.addAction(self._act_save)
+        tb.addSeparator()
+        tb.addAction(self._act_import)
+        tb.addAction(self._act_export)
+
+    def _setup_statusbar(self):
+        sb = QStatusBar()
+        self.setStatusBar(sb)
+        self._status_label = QLabel("Ready")
+        sb.addPermanentWidget(self._status_label)
+
+    # ── Signal connections ──────────────────────────────────────────
+
+    def _connect_signals(self):
+        # Tree navigation
+        self._tree.node_selected.connect(self._on_node_selected)
+
+        # Chemistry <-> tree sync
+        self._chemistry_panel.substrates_changed.connect(
+            self._on_substrates_changed)
+        self._micro_panel.microbes_changed.connect(
+            self._on_microbes_changed)
+
+        # Domain geometry preview
+        self._domain_panel.geometry_loaded.connect(
+            self._viewer.load_geometry_dat)
+
+        # Run panel
+        self._run_panel.run_requested.connect(self._run_simulation)
+        self._run_panel.stop_requested.connect(self._stop_simulation)
+        self._run_panel.validate_requested.connect(self._validate)
+        self._run_panel.export_xml_requested.connect(self._export_xml)
+
+        # Post-process file selection -> viewer
+        self._post_panel.file_selected.connect(self._viewer.load_vti)
+
+        # Data changed -> mark modified
+        for panel in [
+            self._general_panel, self._domain_panel, self._fluid_panel,
+            self._chemistry_panel, self._equilibrium_panel,
+            self._micro_panel, self._solver_panel, self._io_panel,
+        ]:
+            panel.data_changed.connect(self._on_data_changed)
+
+    def _on_node_selected(self, node_type: str, index: int):
+        """Switch right panel based on tree selection."""
+        panel_idx = self._panel_map.get(node_type, 0)
+        self._panel_stack.setCurrentIndex(panel_idx)
+
+        # Select specific substrate or microbe
+        if node_type == NODE_SUBSTRATE and index >= 0:
+            self._chemistry_panel.select_substrate(index)
+        elif node_type == NODE_MICROBE and index >= 0:
+            self._micro_panel.select_microbe(index)
+
+    def _on_substrates_changed(self, names: list):
+        self._tree.update_substrates(names)
+        self._equilibrium_panel.set_substrate_names(names)
+
+    def _on_microbes_changed(self, names: list):
+        self._tree.update_microbes(names)
+
+    def _on_data_changed(self):
+        self._modified = True
+        self._update_title()
+
+    # ── Project load/save ───────────────────────────────────────────
+
+    def _load_project_to_panels(self):
+        """Push project data to all panels."""
+        p = self._project
+        self._general_panel.load_from_project(p)
+        self._domain_panel.load_from_project(p)
+        self._fluid_panel.load_from_project(p)
+        self._chemistry_panel.load_from_project(p)
+        self._equilibrium_panel.load_from_project(p)
+        self._micro_panel.load_from_project(p)
+        self._solver_panel.load_from_project(p)
+        self._io_panel.load_from_project(p)
+
+        self._tree.update_project_name(p.name)
+        self._tree.update_substrates([s.name for s in p.substrates])
+        self._tree.update_microbes([m.name for m in p.microbiology.microbes])
+        self._tree.select_node(NODE_GENERAL)
+        self._modified = False
+        self._update_title()
+
+    def _save_panels_to_project(self):
+        """Pull data from all panels into project."""
+        p = self._project
+        self._general_panel.save_to_project(p)
+        self._domain_panel.save_to_project(p)
+        self._fluid_panel.save_to_project(p)
+        self._chemistry_panel.save_to_project(p)
+        self._equilibrium_panel.save_to_project(p)
+        self._micro_panel.save_to_project(p)
+        self._solver_panel.save_to_project(p)
+        self._io_panel.save_to_project(p)
+
+    def _update_title(self):
+        name = self._project.name or "Untitled"
+        mod = " *" if self._modified else ""
+        self.setWindowTitle(f"CompLaB Studio 2.0 - {name}{mod}")
+
+    # ── File actions ────────────────────────────────────────────────
+
+    def _new_project(self):
+        if self._modified and not self._confirm_discard():
+            return
+        dlg = NewProjectDialog(
+            self._config.get("default_project_dir", ""), self)
+        if dlg.exec():
+            self._project = dlg.get_project()
+            self._project_file = ""
+            self._load_project_to_panels()
+            self._console.log_info(f"New project: {self._project.name}")
+
+    def _open_project(self):
+        if self._modified and not self._confirm_discard():
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Open Project", "",
+            "CompLaB Project (*.complab);;All Files (*)")
+        if not path:
+            return
+        try:
+            self._project = ProjectManager.load_project(path)
+            self._project_file = path
+            self._config.add_recent(path)
+            self._update_recent_menu()
+            self._load_project_to_panels()
+            self._console.log_success(f"Opened: {path}")
+        except Exception as e:
+            self._console.log_error(f"Failed to open project: {e}")
+            QMessageBox.critical(self, "Open Error", str(e))
+
+    def _save_project(self):
+        if not self._project_file:
+            self._save_project_as()
+            return
+        self._save_panels_to_project()
+        try:
+            ProjectManager.save_project(self._project, self._project_file)
+            self._modified = False
+            self._update_title()
+            self._console.log_success(f"Saved: {self._project_file}")
+        except Exception as e:
+            self._console.log_error(f"Save failed: {e}")
+
+    def _save_project_as(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Project As", self._project.name + ".complab",
+            "CompLaB Project (*.complab);;All Files (*)")
+        if not path:
+            return
+        self._project_file = path
+        self._config.add_recent(path)
+        self._update_recent_menu()
+        self._save_project()
+
+    def _import_xml(self):
+        if self._modified and not self._confirm_discard():
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Import CompLaB.xml", "",
+            "XML Files (*.xml);;All Files (*)")
+        if not path:
+            return
+        try:
+            self._project = ProjectManager.import_xml(path)
+            self._project_file = ""
+            self._load_project_to_panels()
+            self._console.log_success(f"Imported: {path}")
+        except Exception as e:
+            self._console.log_error(f"Import failed: {e}")
+            QMessageBox.critical(self, "Import Error", str(e))
+
+    def _export_xml(self):
+        self._save_panels_to_project()
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export CompLaB.xml", "CompLaB.xml",
+            "XML Files (*.xml);;All Files (*)")
+        if not path:
+            return
+        try:
+            ProjectManager.export_xml(self._project, path)
+            self._console.log_success(f"Exported: {path}")
+        except Exception as e:
+            self._console.log_error(f"Export failed: {e}")
+
+    def _update_recent_menu(self):
+        self._recent_menu.clear()
+        recents = self._config.get("recent_projects", [])
+        for path in recents:
+            act = self._recent_menu.addAction(path)
+            act.triggered.connect(lambda checked, p=path: self._open_recent(p))
+        if not recents:
+            act = self._recent_menu.addAction("(no recent projects)")
+            act.setEnabled(False)
+
+    def _open_recent(self, path):
+        if not os.path.exists(path):
+            self._console.log_error(f"File not found: {path}")
+            return
+        try:
+            self._project = ProjectManager.load_project(path)
+            self._project_file = path
+            self._load_project_to_panels()
+            self._console.log_success(f"Opened: {path}")
+        except Exception as e:
+            self._console.log_error(f"Failed to open: {e}")
+
+    # ── Simulation ──────────────────────────────────────────────────
+
+    def _run_simulation(self):
+        self._save_panels_to_project()
+        exe = self._config.get("complab_executable", "")
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not set. Go to Tools > Preferences.")
+            return
+
+        # Determine working directory
+        if self._project_file:
+            work_dir = str(Path(self._project_file).parent)
+        else:
+            work_dir = os.getcwd()
+
+        # Export XML first
+        xml_path = os.path.join(work_dir, "CompLaB.xml")
+        try:
+            ProjectManager.export_xml(self._project, xml_path)
+            self._console.log_info(f"Exported {xml_path}")
+        except Exception as e:
+            self._console.log_error(f"XML export failed: {e}")
+            return
+
+        self._runner = SimulationRunner(exe, work_dir, self)
+        self._runner.output_line.connect(self._console.append)
+        self._runner.progress.connect(self._run_panel.on_progress)
+        self._runner.progress.connect(
+            lambda c, m: self._console.set_progress(c, m))
+        self._runner.finished_signal.connect(self._on_sim_finished)
+        self._runner.start()
+        self._console.set_status("Running...")
+
+    def _stop_simulation(self):
+        if self._runner:
+            self._runner.cancel()
+
+    def _on_sim_finished(self, code, msg):
+        self._run_panel.on_finished(code, msg)
+        self._console.set_status("Ready")
+        self._console.set_progress(0, 0)
+        if code == 0:
+            self._console.log_success(msg)
+        else:
+            self._console.log_error(msg)
+
+    # ── Validation ──────────────────────────────────────────────────
+
+    def _validate(self):
+        self._save_panels_to_project()
+        errors = self._project.validate()
+        self._run_panel.show_validation(errors)
+        if errors:
+            self._console.log_error(
+                f"Validation: {len(errors)} error(s) found.")
+            for e in errors:
+                self._console.log_error(f"  {e}")
+        else:
+            self._console.log_success("Validation passed - no errors.")
+
+    # ── Dialogs ─────────────────────────────────────────────────────
+
+    def _open_kinetics_editor(self):
+        dlg = KineticsEditorDialog(self)
+        dlg.exec()
+
+    def _open_preferences(self):
+        dlg = PreferencesDialog(self._config, self)
+        if dlg.exec():
+            self._console.set_max_lines(
+                self._config.get("max_console_lines", 10000))
+
+    def _show_about(self):
+        dlg = AboutDialog(self)
+        dlg.exec()
+
+    # ── Helpers ─────────────────────────────────────────────────────
+
+    def _confirm_discard(self) -> bool:
+        reply = QMessageBox.question(
+            self, "Unsaved Changes",
+            "Current project has unsaved changes. Discard?",
+            QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+        )
+        return reply == QMessageBox.StandardButton.Discard
+
+    def _auto_save(self):
+        if self._modified and self._project_file:
+            self._save_project()
+            self._console.log_info("Auto-saved.")
+
+    def closeEvent(self, event):
+        if self._modified:
+            reply = QMessageBox.question(
+                self, "Quit",
+                "Save changes before quitting?",
+                QMessageBox.StandardButton.Save
+                | QMessageBox.StandardButton.Discard
+                | QMessageBox.StandardButton.Cancel,
+            )
+            if reply == QMessageBox.StandardButton.Save:
+                self._save_project()
+            elif reply == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+                return
+        if self._runner and self._runner.isRunning():
+            self._runner.cancel()
+            self._runner.wait(3000)
+        event.accept()
