@@ -1,14 +1,15 @@
-"""Kinetics C++ code editor dialog for biotic and abiotic kinetics files.
+"""Kinetics C++ code editor dialog with separate Biotic / Abiotic tabs.
 
-Opens the kinetics .hh files for editing with syntax highlighting.
-Supports templates for common kinetics patterns.
+Each tab manages its own kinetics .hh file with syntax highlighting
+and templates matching the C++ solver expectations.
 """
 
 from pathlib import Path
 
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTextEdit, QComboBox, QFileDialog, QMessageBox,
+    QTextEdit, QComboBox, QFileDialog, QMessageBox, QTabWidget,
+    QWidget,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QSyntaxHighlighter, QTextCharFormat, QColor
@@ -27,10 +28,10 @@ class CppHighlighter(QSyntaxHighlighter):
         kw_fmt.setForeground(QColor("#569cd6"))
         kw_fmt.setFontWeight(QFont.Weight.Bold)
         keywords = [
-            "namespace", "struct", "class", "const", "static", "double",
-            "int", "float", "void", "return", "if", "else", "for", "while",
-            "using", "typedef", "template", "typename", "true", "false",
-            "T", "plint", "pluint",
+            "namespace", "struct", "class", "const", "constexpr", "static",
+            "double", "int", "float", "void", "return", "if", "else", "for",
+            "while", "using", "typedef", "template", "typename", "true",
+            "false", "T", "plint", "pluint", "std", "vector",
         ]
         for kw in keywords:
             self._rules.append((re.compile(rf"\b{kw}\b"), kw_fmt))
@@ -57,146 +58,317 @@ class CppHighlighter(QSyntaxHighlighter):
                 self.setFormat(match.start(), match.end() - match.start(), fmt)
 
 
-# Kinetics templates
-BIOTIC_TEMPLATE = '''\
-// Biotic kinetics - Monod growth
-// This file is compiled by the C++ solver.
-// Modify parameters and rate expressions as needed.
+# ── Biotic kinetics templates ───────────────────────────────────────────
+
+BIOTIC_MONOD = '''\
+// defineKinetics.hh - Biotic kinetics (Monod growth)
+// Compiled by the C++ solver. Modify parameters as needed.
+//
+// Function signature expected by CompLaB3D:
+//   void defineRxnKinetics(vector<T>& C, vector<T>& subsR,
+//                          vector<T>& B, vector<T>& bioR,
+//                          plint mask)
 
 #ifndef DEFINE_KINETICS_HH
 #define DEFINE_KINETICS_HH
 
 namespace KineticParams {
-    // Monod kinetic parameters
-    const double mu_max  = 2.5;     // Maximum specific growth rate
-    const double Ks      = 1e-5;    // Half-saturation constant
-    const double Y       = 0.5;     // Yield coefficient
-    const double k_decay = 1e-9;    // Decay coefficient
+    constexpr double mu_max  = 2.5;      // [1/s] Maximum specific growth rate
+    constexpr double Ks      = 1.0e-5;   // [mol/L] Half-saturation constant
+    constexpr double Y       = 0.5;      // [-] Yield coefficient
+    constexpr double k_decay = 1.0e-9;   // [1/s] Decay coefficient
+    constexpr double MIN_CONC = 1.0e-20; // Minimum concentration floor
 }
 
 template<typename T>
-T bioticReactionRate(T substrate_conc, T biomass_density) {
+void defineRxnKinetics(std::vector<T>& C, std::vector<T>& subsR,
+                       std::vector<T>& B, std::vector<T>& bioR,
+                       plb::plint mask) {
     using namespace KineticParams;
+
     // Monod kinetics: mu = mu_max * S / (Ks + S)
-    T growth = mu_max * substrate_conc / (Ks + substrate_conc);
-    return growth * biomass_density;
+    T doc = (C[0] > MIN_CONC) ? C[0] : MIN_CONC;
+    T growth_rate = mu_max * doc / (Ks + doc);
+    T net_growth  = growth_rate - k_decay;
+
+    // Substrate consumption: dDOC/dt = -mu * B / Y
+    subsR[0] = -growth_rate * B[0] / Y;
+    // CO2 production (1:1 stoichiometry)
+    subsR[1] = -subsR[0];
+
+    // Biomass growth
+    bioR[0] = net_growth * B[0];
 }
 
 #endif
 '''
 
-ABIOTIC_TEMPLATE = '''\
-// Abiotic kinetics - Chemical reactions without microbes
-// This file is compiled by the C++ solver.
+BIOTIC_DUAL_MONOD = '''\
+// defineKinetics.hh - Dual-Monod kinetics (electron donor + acceptor)
+// Two-substrate limitation model
+
+#ifndef DEFINE_KINETICS_HH
+#define DEFINE_KINETICS_HH
+
+namespace KineticParams {
+    constexpr double mu_max   = 2.5;      // [1/s] Maximum growth rate
+    constexpr double Ks_donor = 1.0e-5;   // [mol/L] Half-sat for electron donor
+    constexpr double Ks_acc   = 2.0e-4;   // [mol/L] Half-sat for electron acceptor
+    constexpr double Y        = 0.5;      // [-] Yield coefficient
+    constexpr double k_decay  = 1.0e-9;   // [1/s] Decay coefficient
+}
+
+template<typename T>
+void defineRxnKinetics(std::vector<T>& C, std::vector<T>& subsR,
+                       std::vector<T>& B, std::vector<T>& bioR,
+                       plb::plint mask) {
+    using namespace KineticParams;
+
+    T donor    = (C[0] > 1e-20) ? C[0] : 1e-20;
+    T acceptor = (C[1] > 1e-20) ? C[1] : 1e-20;
+
+    // Dual-Monod: mu = mu_max * S_d/(Ks_d+S_d) * S_a/(Ks_a+S_a)
+    T growth = mu_max * donor / (Ks_donor + donor)
+                      * acceptor / (Ks_acc + acceptor);
+
+    subsR[0] = -growth * B[0] / Y;          // donor consumed
+    subsR[1] = -growth * B[0] / (2.0 * Y);  // acceptor consumed
+    bioR[0]  = (growth - k_decay) * B[0];
+}
+
+#endif
+'''
+
+BIOTIC_TEMPLATES = {
+    "Monod (single substrate)": BIOTIC_MONOD,
+    "Dual-Monod (donor + acceptor)": BIOTIC_DUAL_MONOD,
+}
+
+# ── Abiotic kinetics templates ──────────────────────────────────────────
+
+ABIOTIC_FIRST_ORDER = '''\
+// defineAbioticKinetics.hh - First-order decay
+// Compiled by the C++ solver. Modify parameters as needed.
+//
+// Function signature expected by CompLaB3D:
+//   void defineAbioticRxnKinetics(vector<T> C, vector<T>& subsR,
+//                                 plint mask)
 
 #ifndef DEFINE_ABIOTIC_KINETICS_HH
 #define DEFINE_ABIOTIC_KINETICS_HH
 
 namespace AbioticParams {
-    const double k_forward  = 1e-3;  // Forward rate constant
-    const double k_backward = 1e-4;  // Backward rate constant
+    constexpr double k_decay = 1.0e-3;  // [1/s] First-order decay rate
 }
 
 template<typename T>
-T abioticReactionRate(T reactant_conc, T product_conc) {
+void defineAbioticRxnKinetics(std::vector<T> C, std::vector<T>& subsR,
+                              plb::plint mask) {
     using namespace AbioticParams;
-    // Reversible reaction: A <-> B
-    return k_forward * reactant_conc - k_backward * product_conc;
+
+    // First-order decay: dC/dt = -k * C
+    subsR[0] = -k_decay * C[0];
 }
 
 #endif
 '''
 
-PLANKTONIC_TEMPLATE = '''\
-// Planktonic kinetics - Free-swimming bacteria
-// This file is compiled by the C++ solver.
+ABIOTIC_BIMOLECULAR = '''\
+// defineAbioticKinetics.hh - Bimolecular reaction A + B -> C
+// Second-order kinetics
 
-#ifndef DEFINE_KINETICS_PLANKTONIC_HH
-#define DEFINE_KINETICS_PLANKTONIC_HH
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
 
-namespace PlanktonicParams {
-    const double mu_max  = 2.5;     // Maximum specific growth rate
-    const double Ks      = 1e-5;    // Half-saturation constant
-    const double Y       = 0.5;     // Yield coefficient
-    const double k_decay = 1e-9;    // Decay coefficient
+namespace AbioticParams {
+    constexpr double k_forward = 1.0e-3;  // [L/(mol*s)] Rate constant
 }
 
 template<typename T>
-T planktonicReactionRate(T substrate_conc, T biomass_density) {
-    using namespace PlanktonicParams;
-    T growth = mu_max * substrate_conc / (Ks + substrate_conc);
-    return growth * biomass_density;
+void defineAbioticRxnKinetics(std::vector<T> C, std::vector<T>& subsR,
+                              plb::plint mask) {
+    using namespace AbioticParams;
+
+    // A + B -> C:  rate = k * [A] * [B]
+    T rate = k_forward * C[0] * C[1];
+    subsR[0] = -rate;   // A consumed
+    subsR[1] = -rate;   // B consumed
+    subsR[2] =  rate;   // C produced
 }
 
 #endif
 '''
 
-TEMPLATES = {
-    "Biotic (Monod) kinetics": BIOTIC_TEMPLATE,
-    "Abiotic kinetics": ABIOTIC_TEMPLATE,
-    "Planktonic kinetics": PLANKTONIC_TEMPLATE,
+ABIOTIC_REVERSIBLE = '''\
+// defineAbioticKinetics.hh - Reversible reaction A <-> B
+// Forward and backward rate constants
+
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
+
+namespace AbioticParams {
+    constexpr double k_forward  = 1.0e-3;  // [1/s] Forward rate
+    constexpr double k_backward = 1.0e-4;  // [1/s] Backward rate
 }
+
+template<typename T>
+void defineAbioticRxnKinetics(std::vector<T> C, std::vector<T>& subsR,
+                              plb::plint mask) {
+    using namespace AbioticParams;
+
+    // A <-> B:  net rate = k_f*[A] - k_b*[B]
+    T net_rate = k_forward * C[0] - k_backward * C[1];
+    subsR[0] = -net_rate;  // A
+    subsR[1] =  net_rate;  // B
+}
+
+#endif
+'''
+
+ABIOTIC_TEMPLATES = {
+    "First-order decay": ABIOTIC_FIRST_ORDER,
+    "Bimolecular (A + B -> C)": ABIOTIC_BIMOLECULAR,
+    "Reversible (A <-> B)": ABIOTIC_REVERSIBLE,
+}
+
+
+def _make_editor_tab(templates: dict, default_filename: str):
+    """Create a single kinetics editor tab widget.
+    Returns (widget, editor, filepath_label, template_combo, filepath_holder).
+    """
+    widget = QWidget()
+    layout = QVBoxLayout(widget)
+    layout.setSpacing(6)
+    layout.setContentsMargins(4, 8, 4, 4)
+
+    # Toolbar
+    toolbar = QHBoxLayout()
+    open_btn = QPushButton("Open")
+    save_btn = QPushButton("Save")
+    save_btn.setProperty("primary", True)
+    save_as_btn = QPushButton("Save As")
+    toolbar.addWidget(open_btn)
+    toolbar.addWidget(save_btn)
+    toolbar.addWidget(save_as_btn)
+    toolbar.addStretch()
+    toolbar.addWidget(QLabel("Template:"))
+    template_combo = QComboBox()
+    template_combo.addItems(list(templates.keys()))
+    template_combo.setMinimumWidth(180)
+    toolbar.addWidget(template_combo)
+    load_btn = QPushButton("Load Template")
+    toolbar.addWidget(load_btn)
+    layout.addLayout(toolbar)
+
+    # File path
+    path_label = QLabel("No file loaded")
+    path_label.setProperty("info", True)
+    layout.addWidget(path_label)
+
+    # Code editor
+    editor = QTextEdit()
+    font = QFont("Consolas", 10)
+    font.setStyleHint(QFont.StyleHint.Monospace)
+    editor.setFont(font)
+    CppHighlighter(editor.document())
+    layout.addWidget(editor, 1)
+
+    # Store file path on the widget
+    widget._filepath = ""
+    widget._editor = editor
+    widget._path_label = path_label
+    widget._default_filename = default_filename
+
+    def open_file_dlg():
+        path, _ = QFileDialog.getOpenFileName(
+            widget, "Open Kinetics File", "",
+            "C++ Headers (*.hh *.h *.hpp);;All Files (*)")
+        if path:
+            _load_file(widget, path)
+
+    def save_file():
+        if not widget._filepath:
+            save_as()
+            return
+        try:
+            with open(widget._filepath, "w") as f:
+                f.write(editor.toPlainText())
+            path_label.setText(f"Saved: {widget._filepath}")
+        except OSError as e:
+            QMessageBox.critical(widget, "Save Error", str(e))
+
+    def save_as():
+        path, _ = QFileDialog.getSaveFileName(
+            widget, "Save Kinetics File",
+            widget._filepath or default_filename,
+            "C++ Headers (*.hh *.h *.hpp);;All Files (*)")
+        if path:
+            widget._filepath = path
+            save_file()
+
+    def load_template():
+        key = template_combo.currentText()
+        if key in templates:
+            editor.setPlainText(templates[key])
+
+    open_btn.clicked.connect(open_file_dlg)
+    save_btn.clicked.connect(save_file)
+    save_as_btn.clicked.connect(save_as)
+    load_btn.clicked.connect(load_template)
+
+    return widget
+
+
+def _load_file(tab_widget, filepath: str):
+    """Load a file into a tab's editor."""
+    if not Path(filepath).exists():
+        tab_widget._editor.setPlainText(
+            f"// File not found: {filepath}\n"
+            "// Select a template to create a new file.\n")
+        tab_widget._filepath = filepath
+        tab_widget._path_label.setText(filepath)
+        return
+    tab_widget._filepath = filepath
+    tab_widget._path_label.setText(filepath)
+    with open(filepath, "r") as f:
+        tab_widget._editor.setPlainText(f.read())
 
 
 class KineticsEditorDialog(QDialog):
-    """C++ kinetics file editor with syntax highlighting."""
+    """C++ kinetics file editor with Biotic / Abiotic tabs."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Kinetics File Editor")
-        self.setMinimumSize(700, 500)
-        self._filepath = ""
+        self.setMinimumSize(780, 560)
         self._setup_ui()
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(8)
+        layout.setSpacing(6)
 
         heading = QLabel("C++ Kinetics Editor")
         heading.setProperty("heading", True)
         layout.addWidget(heading)
 
-        # Toolbar
-        toolbar = QHBoxLayout()
+        info = QLabel(
+            "Edit the C++ kinetics header files used by the CompLaB3D solver. "
+            "Biotic kinetics (defineKinetics.hh) define microbial growth reactions. "
+            "Abiotic kinetics (defineAbioticKinetics.hh) define chemical reactions "
+            "without microbes.")
+        info.setWordWrap(True)
+        info.setProperty("info", True)
+        layout.addWidget(info)
 
-        open_btn = QPushButton("Open")
-        open_btn.clicked.connect(self._open_file)
-        toolbar.addWidget(open_btn)
-
-        save_btn = QPushButton("Save")
-        save_btn.setProperty("primary", True)
-        save_btn.clicked.connect(self._save_file)
-        toolbar.addWidget(save_btn)
-
-        save_as_btn = QPushButton("Save As")
-        save_as_btn.clicked.connect(self._save_as)
-        toolbar.addWidget(save_as_btn)
-
-        toolbar.addStretch()
-
-        toolbar.addWidget(QLabel("Template:"))
-        self._template_combo = QComboBox()
-        self._template_combo.addItems(list(TEMPLATES.keys()))
-        toolbar.addWidget(self._template_combo)
-
-        insert_btn = QPushButton("Load Template")
-        insert_btn.clicked.connect(self._load_template)
-        toolbar.addWidget(insert_btn)
-
-        layout.addLayout(toolbar)
-
-        # File path display
-        self._path_label = QLabel("No file loaded")
-        self._path_label.setProperty("info", True)
-        layout.addWidget(self._path_label)
-
-        # Editor
-        self._editor = QTextEdit()
-        font = QFont("Consolas", 10)
-        font.setStyleHint(QFont.StyleHint.Monospace)
-        self._editor.setFont(font)
-        self._highlighter = CppHighlighter(self._editor.document())
-        layout.addWidget(self._editor, 1)
+        # Tabs: Biotic / Abiotic
+        self._tabs = QTabWidget()
+        self._biotic_tab = _make_editor_tab(
+            BIOTIC_TEMPLATES, "defineKinetics.hh")
+        self._abiotic_tab = _make_editor_tab(
+            ABIOTIC_TEMPLATES, "defineAbioticKinetics.hh")
+        self._tabs.addTab(self._biotic_tab, "Biotic Kinetics")
+        self._tabs.addTab(self._abiotic_tab, "Abiotic Kinetics")
+        layout.addWidget(self._tabs, 1)
 
         # Close button
         btn_row = QHBoxLayout()
@@ -206,46 +378,20 @@ class KineticsEditorDialog(QDialog):
         btn_row.addWidget(close_btn)
         layout.addLayout(btn_row)
 
+    def open_biotic_file(self, filepath: str):
+        """Open a specific biotic kinetics file for editing."""
+        _load_file(self._biotic_tab, filepath)
+        self._tabs.setCurrentWidget(self._biotic_tab)
+
+    def open_abiotic_file(self, filepath: str):
+        """Open a specific abiotic kinetics file for editing."""
+        _load_file(self._abiotic_tab, filepath)
+        self._tabs.setCurrentWidget(self._abiotic_tab)
+
     def open_file(self, filepath: str):
-        """Open a specific file for editing."""
-        if not Path(filepath).exists():
-            self._editor.setPlainText(f"// File not found: {filepath}\n"
-                                       "// Select a template to create a new file.\n")
-            self._filepath = filepath
-            self._path_label.setText(filepath)
-            return
-        self._filepath = filepath
-        self._path_label.setText(filepath)
-        with open(filepath, "r") as f:
-            self._editor.setPlainText(f.read())
-
-    def _open_file(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Open Kinetics File", "",
-            "C++ Headers (*.hh *.h *.hpp);;All Files (*)")
-        if path:
-            self.open_file(path)
-
-    def _save_file(self):
-        if not self._filepath:
-            self._save_as()
-            return
-        try:
-            with open(self._filepath, "w") as f:
-                f.write(self._editor.toPlainText())
-            self._path_label.setText(f"Saved: {self._filepath}")
-        except OSError as e:
-            QMessageBox.critical(self, "Save Error", str(e))
-
-    def _save_as(self):
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Save Kinetics File", self._filepath or "defineKinetics.hh",
-            "C++ Headers (*.hh *.h *.hpp);;All Files (*)")
-        if path:
-            self._filepath = path
-            self._save_file()
-
-    def _load_template(self):
-        key = self._template_combo.currentText()
-        if key in TEMPLATES:
-            self._editor.setPlainText(TEMPLATES[key])
+        """Open a file, auto-detecting type from filename."""
+        name = Path(filepath).name.lower()
+        if "abiotic" in name:
+            self.open_abiotic_file(filepath)
+        else:
+            self.open_biotic_file(filepath)
