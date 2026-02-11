@@ -66,7 +66,7 @@ private:
 void writeNsVTI(MultiBlockLattice3D<T,NSDES>& lattice, plint iter, std::string nameid)
 {
     const plint nx = lattice.getNx();
-    const plint ny = lattice.getNx();
+    const plint ny = lattice.getNy();
     const plint nz = lattice.getNz();
     VtkImageOutput3D<T> vtkOut(createFileName(nameid, iter, 7), 1.);
 
@@ -77,7 +77,7 @@ void writeNsVTI(MultiBlockLattice3D<T,NSDES>& lattice, plint iter, std::string n
 void writePorousMediumVTI(MultiScalarField3D<int>& geometry, plint iter, std::string nameid)
 {
     const plint nx = geometry.getNx();
-    const plint ny = geometry.getNx();
+    const plint ny = geometry.getNy();
     const plint nz = geometry.getNz();
     VtkImageOutput3D<T> vtkOut(createFileName(nameid, iter, 7), 1.);
     vtkOut.writeData<float>(*copyConvert<int,T>(geometry, Box3D(1,nx-2,0,ny-1,0,nz-1)), "tag", 1.0);
@@ -86,7 +86,7 @@ void writePorousMediumVTI(MultiScalarField3D<int>& geometry, plint iter, std::st
 void writeAdvVTI(MultiBlockLattice3D<T,RXNDES>& lattice, plint iter, std::string nameid)
 {
     const plint nx = lattice.getNx();
-    const plint ny = lattice.getNx();
+    const plint ny = lattice.getNy();
     const plint nz = lattice.getNz();
 
     VtkImageOutput3D<T> vtkOut(createFileName(nameid, iter, 7), 1.);
@@ -97,7 +97,7 @@ void writeAdvVTI(MultiBlockLattice3D<T,RXNDES>& lattice, plint iter, std::string
 void writeScalarVTI(MultiScalarField3D<int>& field)
 {
     const plint nx = field.getNx();
-    const plint ny = field.getNx();
+    const plint ny = field.getNy();
     const plint nz = field.getNz();
 
     VtkImageOutput3D<T> vtkOut("distanceDomain", 1.);
