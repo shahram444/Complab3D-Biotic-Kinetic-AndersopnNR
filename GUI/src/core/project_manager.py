@@ -163,7 +163,7 @@ class ProjectManager:
         _add_text(eq_el, "enabled", _bool_str(eq.enabled))
         if eq.enabled and eq.component_names:
             _add_text(eq_el, "components", " ".join(eq.component_names))
-            # Solver parameters (informational - C++ uses defaults from code)
+            # Solver parameters (read by C++ solver from XML)
             _add_text(eq_el, "max_iterations", str(eq.max_iterations))
             _add_text(eq_el, "tolerance", _fmt_float(eq.tolerance))
             _add_text(eq_el, "anderson_depth", str(eq.anderson_depth))
