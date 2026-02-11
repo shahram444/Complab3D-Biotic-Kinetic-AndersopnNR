@@ -62,6 +62,17 @@
 #include <iomanip>
 #include <cmath>
 
+#ifdef PLB_WINDOWS
+#include <direct.h>
+#define getcwd _getcwd
+#define mkdir(path, mode) _mkdir(path)
+#ifndef S_ISDIR
+#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
+#endif
+#else
+#include <unistd.h>
+#endif
+
 // ============================================================================
 // STABILITY CHECK STRUCTURE  
 // ============================================================================
@@ -257,6 +268,7 @@ int main(int argc, char **argv) {
         T eq_tolerance = 1e-10;
         plint eq_anderson_depth = 4;
         T eq_beta = 1.0;
+        XMLreader doc("CompLaB.xml");
         try { doc["parameters"]["equilibrium"]["max_iterations"].read(eq_max_iter); }
         catch (PlbIOException& exception) { eq_max_iter = 200; }
         try { doc["parameters"]["equilibrium"]["tolerance"].read(eq_tolerance); }
