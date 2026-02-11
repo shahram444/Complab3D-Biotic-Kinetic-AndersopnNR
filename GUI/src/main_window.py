@@ -641,6 +641,7 @@ class CompLaBMainWindow(QMainWindow):
         self._runner = SimulationRunner(
             exe, work_dir, self,
             mpi_command=mpi_cmd, num_cores=num_cores,
+            project=self._project,
         )
         self._runner.output_line.connect(self._console.append)
         self._runner.progress.connect(self._run_panel.on_progress)
@@ -650,6 +651,7 @@ class CompLaBMainWindow(QMainWindow):
         self._runner.convergence.connect(self._on_convergence)
         self._runner.phase_changed.connect(self._on_phase_changed)
         self._runner.finished_signal.connect(self._on_sim_finished)
+        self._runner.diagnostic_signal.connect(self._on_diagnostic)
 
         # Start elapsed / ETA tracking
         self._sim_start_time = time.time()
@@ -719,6 +721,10 @@ class CompLaBMainWindow(QMainWindow):
         if hrs > 0:
             return f"{hrs}:{mins:02d}:{secs:02d}"
         return f"{mins}:{secs:02d}"
+
+    def _on_diagnostic(self, report: str):
+        """Display a diagnostic report in the console with color coding."""
+        self._console.log_diagnostic(report)
 
     def _on_sim_finished(self, code, msg):
         self._elapsed_timer.stop()

@@ -133,9 +133,34 @@ class ConsoleWidget(QWidget):
         ts = datetime.datetime.now().strftime("%H:%M:%S")
         self.append(f"[{ts}] ERROR: {text}", "#c75050")
 
+    def log_warning(self, text: str):
+        ts = datetime.datetime.now().strftime("%H:%M:%S")
+        self.append(f"[{ts}] WARNING: {text}", "#c0a040")
+
     def log_success(self, text: str):
         ts = datetime.datetime.now().strftime("%H:%M:%S")
         self.append(f"[{ts}] {text}", "#5ca060")
+
+    def log_diagnostic(self, report: str):
+        """Append a multi-line diagnostic report with color coding."""
+        for line in report.split("\n"):
+            lower = line.lower()
+            if line.startswith("=") or line.startswith("-" * 10):
+                self.append(line, "#c0a040")
+            elif "error" in lower or "reason:" in lower:
+                self.append(line, "#c75050")
+            elif "suggested fix" in lower or "how to fix" in lower or "checklist" in lower:
+                self.append(line, "#6a9ec7")
+            elif line.strip().startswith(("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.")):
+                self.append(line, "#6a9ec7")
+            elif line.strip().startswith("- ") or line.strip().startswith("[ ]"):
+                self.append(line, "#6a9ec7")
+            elif "detected" in lower:
+                self.append(line, "#c0a040")
+            elif line.strip().startswith(">>"):
+                self.append(line, "#c75050")
+            else:
+                self.append(line)
 
     def set_progress(self, current: int, maximum: int):
         if maximum > 0:
