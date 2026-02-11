@@ -9,25 +9,52 @@ from pathlib import Path
 from PySide6.QtCore import QThread, Signal
 
 
+# Regex patterns for parsing solver output
+_RE_ITERATION = re.compile(r"iT\s*=\s*(\d+)")
+_RE_ADE_MAX = re.compile(r"ade_max_iT\s*=\s*(\d+)")
+_RE_NS_MAX = re.compile(r"ns_max_iT\d?\s*=\s*(\d+)")
+_RE_NS_RESIDUAL = re.compile(
+    r"NS[:\s].*(?:residual|converge|error)\s*=\s*([0-9]+\.?[0-9]*[eE]?[+-]?\d*)", re.IGNORECASE)
+_RE_ADE_RESIDUAL = re.compile(
+    r"ADE[:\s].*(?:residual|converge|error)\s*=\s*([0-9]+\.?[0-9]*[eE]?[+-]?\d*)", re.IGNORECASE)
+_RE_PHASE = re.compile(r"^[-=]{2,}\s*(Phase\s+\d+|Step\s+\d+|Running|Starting|Initializ)", re.IGNORECASE)
+
+
 class SimulationRunner(QThread):
     """Runs the CompLaB3D solver as a subprocess.
 
     Signals:
         output_line(str): Each line of stdout/stderr.
         progress(int, int): (current_iteration, max_iterations)
+        convergence(str, int, float): (solver_name, iteration, residual)
+        phase_changed(str): Current simulation phase description.
         finished_signal(int, str): (return_code, summary_message)
     """
 
     output_line = Signal(str)
     progress = Signal(int, int)
+    convergence = Signal(str, int, float)
+    phase_changed = Signal(str)
     finished_signal = Signal(int, str)
 
-    def __init__(self, executable: str, working_dir: str, parent=None):
+    def __init__(self, executable: str, working_dir: str, parent=None,
+                 mpi_command: str = "", num_cores: int = 1):
         super().__init__(parent)
         self._exe = executable
         self._cwd = working_dir
+        self._mpi_cmd = mpi_command
+        self._num_cores = num_cores
         self._process = None
         self._cancelled = False
+
+    def _build_command(self) -> list:
+        """Build the command list, with or without MPI."""
+        if self._mpi_cmd and self._num_cores > 1:
+            return [
+                self._mpi_cmd, "-np", str(self._num_cores),
+                self._exe, "CompLaB.xml",
+            ]
+        return [self._exe]
 
     def run(self):
         if not os.path.isfile(self._exe):
@@ -41,14 +68,19 @@ class SimulationRunner(QThread):
             self.finished_signal.emit(-1, "CompLaB.xml not found")
             return
 
-        self.output_line.emit(f"Starting: {self._exe}")
+        cmd = self._build_command()
+        cmd_str = " ".join(cmd)
+
+        if self._num_cores > 1:
+            self.output_line.emit(f"MPI: {self._mpi_cmd} with {self._num_cores} cores")
+        self.output_line.emit(f"Command: {cmd_str}")
         self.output_line.emit(f"Working directory: {self._cwd}")
         self.output_line.emit("-" * 60)
 
         t0 = time.time()
         try:
             self._process = subprocess.Popen(
-                [self._exe],
+                cmd,
                 cwd=self._cwd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
@@ -56,6 +88,7 @@ class SimulationRunner(QThread):
                 bufsize=1,
             )
             max_it = 0
+            cur_it = 0
             for line in iter(self._process.stdout.readline, ""):
                 if self._cancelled:
                     self._process.terminate()
@@ -63,16 +96,46 @@ class SimulationRunner(QThread):
                     break
                 line = line.rstrip("\n")
                 self.output_line.emit(line)
+
                 # Parse iteration progress
-                m = re.search(r"iT\s*=\s*(\d+)", line)
+                m = _RE_ITERATION.search(line)
                 if m:
-                    cur = int(m.group(1))
-                    if cur > max_it:
-                        max_it = cur
-                    self.progress.emit(cur, max_it)
-                m2 = re.search(r"ade_max_iT\s*=\s*(\d+)", line)
+                    cur_it = int(m.group(1))
+                    if cur_it > max_it:
+                        max_it = cur_it
+                    self.progress.emit(cur_it, max_it)
+
+                m2 = _RE_ADE_MAX.search(line)
                 if m2:
                     max_it = int(m2.group(1))
+
+                m3 = _RE_NS_MAX.search(line)
+                if m3:
+                    val = int(m3.group(1))
+                    if val > max_it:
+                        max_it = val
+
+                # Parse convergence residuals
+                m_ns = _RE_NS_RESIDUAL.search(line)
+                if m_ns:
+                    try:
+                        residual = float(m_ns.group(1))
+                        self.convergence.emit("NS", cur_it, residual)
+                    except ValueError:
+                        pass
+
+                m_ade = _RE_ADE_RESIDUAL.search(line)
+                if m_ade:
+                    try:
+                        residual = float(m_ade.group(1))
+                        self.convergence.emit("ADE", cur_it, residual)
+                    except ValueError:
+                        pass
+
+                # Parse phase changes
+                m_phase = _RE_PHASE.match(line)
+                if m_phase:
+                    self.phase_changed.emit(line.strip(" -="))
 
             self._process.stdout.close()
             rc = self._process.wait()
