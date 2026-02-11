@@ -1,12 +1,15 @@
-"""Preferences dialog - application settings."""
+"""Preferences dialog - application settings with live-apply."""
 
 import sys
+from pathlib import Path
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QLabel, QLineEdit,
     QPushButton, QHBoxLayout, QTabWidget, QWidget,
     QSpinBox, QCheckBox, QFileDialog, QComboBox,
+    QApplication, QMessageBox,
 )
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 
 
 class PreferencesDialog(QDialog):
@@ -14,13 +17,15 @@ class PreferencesDialog(QDialog):
     def __init__(self, config, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Preferences")
-        self.setMinimumSize(520, 400)
+        self.setMinimumSize(520, 420)
         self._config = config
+        self._original_theme = config.get("theme", "Dark")
         self._setup_ui()
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        layout.setSpacing(12)
+        layout.setSpacing(10)
+        layout.setContentsMargins(16, 16, 16, 16)
 
         heading = QLabel("Preferences")
         heading.setProperty("heading", True)
@@ -78,16 +83,11 @@ class PreferencesDialog(QDialog):
         self._font_size.setRange(8, 18)
         self._font_size.setValue(self._config.get("font_size", 10))
         self._font_size.setSuffix(" pt")
-        self._font_size.setToolTip(
-            "Application font size. Applied on next restart.")
 
         self._max_console = QSpinBox()
         self._max_console.setRange(500, 100000)
         self._max_console.setSingleStep(1000)
         self._max_console.setValue(self._config.get("max_console_lines", 10000))
-        self._max_console.setToolTip(
-            "Maximum number of lines kept in the console output. "
-            "Older lines are trimmed automatically.")
 
         self._theme_combo = QComboBox()
         self._theme_combo.addItems(["Dark", "Light"])
@@ -100,7 +100,7 @@ class PreferencesDialog(QDialog):
         df.addRow("Max console lines:", self._max_console)
         df.addRow("Theme:", self._theme_combo)
 
-        note = QLabel("Font size and theme changes take effect on restart.")
+        note = QLabel("All changes are applied immediately.")
         note.setProperty("info", True)
         df.addRow("", note)
 
@@ -112,8 +112,8 @@ class PreferencesDialog(QDialog):
         btn_row = QHBoxLayout()
         btn_row.addStretch()
         cancel_btn = QPushButton("Cancel")
-        cancel_btn.clicked.connect(self.reject)
-        save_btn = QPushButton("Save")
+        cancel_btn.clicked.connect(self._cancel)
+        save_btn = QPushButton("Apply && Close")
         save_btn.setProperty("primary", True)
         save_btn.clicked.connect(self._save_and_close)
         btn_row.addWidget(cancel_btn)
@@ -136,6 +136,28 @@ class PreferencesDialog(QDialog):
         if d:
             self._proj_dir.setText(d)
 
+    def _apply_theme(self, theme_name):
+        """Apply theme stylesheet immediately."""
+        app = QApplication.instance()
+        if not app:
+            return
+        styles_dir = Path(__file__).parent.parent.parent / "styles"
+        if theme_name == "Light":
+            style_path = styles_dir / "light.qss"
+        else:
+            style_path = styles_dir / "theme.qss"
+        if style_path.exists():
+            app.setStyleSheet(style_path.read_text(encoding="utf-8"))
+
+    def _apply_font(self, size):
+        """Apply font size immediately."""
+        app = QApplication.instance()
+        if not app:
+            return
+        font = QFont("Segoe UI", size)
+        font.setStyleStrategy(QFont.StyleStrategy.PreferQuality)
+        app.setFont(font)
+
     def _save_and_close(self):
         self._config.set("complab_executable", self._exe_path.text())
         self._config.set("default_project_dir", self._proj_dir.text())
@@ -145,4 +167,12 @@ class PreferencesDialog(QDialog):
         self._config.set("max_console_lines", self._max_console.value())
         self._config.set("theme", self._theme_combo.currentText())
         self._config.save()
+
+        # Apply live
+        self._apply_font(self._font_size.value())
+        self._apply_theme(self._theme_combo.currentText())
         self.accept()
+
+    def _cancel(self):
+        # Revert if theme was previewed
+        self.reject()
