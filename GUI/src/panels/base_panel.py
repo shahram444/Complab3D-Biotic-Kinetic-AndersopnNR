@@ -138,3 +138,25 @@ class BasePanel(QWidget):
         lbl.setProperty("info", True)
         lbl.setWordWrap(True)
         return lbl
+
+    @staticmethod
+    def set_validation(widget, state: str, tooltip: str = ""):
+        """Mark a widget's validation state for QSS styling.
+
+        Args:
+            widget: The input widget (QLineEdit, QSpinBox, etc.)
+            state: "error", "warning", "ok", or "" to clear
+            tooltip: Optional tooltip message explaining the issue
+        """
+        widget.setProperty("validation", state or "")
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
+        if tooltip:
+            widget.setToolTip(tooltip)
+
+    @staticmethod
+    def clear_validation(widget):
+        """Remove validation styling from a widget."""
+        widget.setProperty("validation", "")
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)

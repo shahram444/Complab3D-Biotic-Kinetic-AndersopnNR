@@ -590,3 +590,21 @@ QSlider::sub-page:horizontal {
     background: #2c5a84;
     border-radius: 2px;
 }
+
+/* --- Input Validation States --- */
+QLineEdit[validation="error"], QSpinBox[validation="error"],
+QDoubleSpinBox[validation="error"], QComboBox[validation="error"] {
+    border: 2px solid #c05050;
+    background-color: #2a1f1f;
+}
+
+QLineEdit[validation="warning"], QSpinBox[validation="warning"],
+QDoubleSpinBox[validation="warning"], QComboBox[validation="warning"] {
+    border: 2px solid #c09040;
+    background-color: #2a261f;
+}
+
+QLineEdit[validation="ok"], QSpinBox[validation="ok"],
+QDoubleSpinBox[validation="ok"], QComboBox[validation="ok"] {
+    border: 1px solid #40a040;
+}

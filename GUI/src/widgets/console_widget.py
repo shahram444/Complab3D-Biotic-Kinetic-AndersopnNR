@@ -1,16 +1,16 @@
-"""Console output widget with color-coded messages and run controls."""
+"""Console output widget with color-coded messages, search, and run controls."""
 
 import datetime
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QPushButton,
-    QLabel, QProgressBar, QFileDialog,
+    QLabel, QProgressBar, QFileDialog, QLineEdit,
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QTextCursor, QColor
+from PySide6.QtGui import QTextCursor, QColor, QTextDocument
 
 
 class ConsoleWidget(QWidget):
-    """Bottom panel: console log + progress bar + run controls."""
+    """Bottom panel: console log + progress bar + search + run controls."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -54,6 +54,38 @@ class ConsoleWidget(QWidget):
         header.addWidget(self._save_btn)
 
         layout.addLayout(header)
+
+        # Search bar
+        search_bar = QHBoxLayout()
+        search_bar.setContentsMargins(6, 2, 6, 2)
+
+        search_icon = QLabel("Search:")
+        search_icon.setProperty("info", True)
+        search_bar.addWidget(search_icon)
+
+        self._search_edit = QLineEdit()
+        self._search_edit.setPlaceholderText("Type to search console output...")
+        self._search_edit.setFixedHeight(24)
+        self._search_edit.setClearButtonEnabled(True)
+        self._search_edit.returnPressed.connect(self._search_next)
+        search_bar.addWidget(self._search_edit, 1)
+
+        self._search_prev_btn = QPushButton("Prev")
+        self._search_prev_btn.setFixedWidth(50)
+        self._search_prev_btn.clicked.connect(self._search_prev)
+        search_bar.addWidget(self._search_prev_btn)
+
+        self._search_next_btn = QPushButton("Next")
+        self._search_next_btn.setFixedWidth(50)
+        self._search_next_btn.clicked.connect(self._search_next)
+        search_bar.addWidget(self._search_next_btn)
+
+        self._search_count = QLabel("")
+        self._search_count.setProperty("info", True)
+        self._search_count.setFixedWidth(80)
+        search_bar.addWidget(self._search_count)
+
+        layout.addLayout(search_bar)
 
         # Text area
         self._text = QTextEdit()
@@ -118,9 +150,53 @@ class ConsoleWidget(QWidget):
 
     def clear(self):
         self._text.clear()
+        self._search_count.setText("")
 
     def set_max_lines(self, n: int):
         self._max_lines = n
+
+    # ── Search ──────────────────────────────────────────────────────
+
+    def _search_next(self):
+        """Find next occurrence of search text."""
+        query = self._search_edit.text()
+        if not query:
+            self._search_count.setText("")
+            return
+        found = self._text.find(query)
+        if not found:
+            # Wrap around to beginning
+            cursor = self._text.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            self._text.setTextCursor(cursor)
+            found = self._text.find(query)
+        self._update_search_count(query)
+
+    def _search_prev(self):
+        """Find previous occurrence of search text."""
+        query = self._search_edit.text()
+        if not query:
+            self._search_count.setText("")
+            return
+        found = self._text.find(query, QTextDocument.FindFlag.FindBackward)
+        if not found:
+            # Wrap around to end
+            cursor = self._text.textCursor()
+            cursor.movePosition(QTextCursor.MoveOperation.End)
+            self._text.setTextCursor(cursor)
+            found = self._text.find(query, QTextDocument.FindFlag.FindBackward)
+        self._update_search_count(query)
+
+    def _update_search_count(self, query: str):
+        """Count total matches and show in label."""
+        if not query:
+            self._search_count.setText("")
+            return
+        text = self._text.toPlainText()
+        count = text.lower().count(query.lower())
+        self._search_count.setText(f"{count} match{'es' if count != 1 else ''}")
+
+    # ── Save log ────────────────────────────────────────────────────
 
     def _save_log(self):
         path, _ = QFileDialog.getSaveFileName(
