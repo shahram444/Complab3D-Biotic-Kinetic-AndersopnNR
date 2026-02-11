@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
     QToolBar, QStatusBar, QFileDialog, QMessageBox, QLabel,
 )
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtGui import QAction, QKeySequence, QDragEnterEvent, QDropEvent
 
 from .config import AppConfig
 from .core.project import CompLaBProject
@@ -94,6 +94,12 @@ class CompLaBMainWindow(QMainWindow):
         if self._config.get("auto_save"):
             interval = self._config.get("auto_save_interval", 300) * 1000
             self._auto_save_timer.start(interval)
+
+        # Enable drag-and-drop on main window
+        self.setAcceptDrops(True)
+
+        # Restore window state from config
+        self._restore_window_state()
 
         self._load_project_to_panels()
         self._console.log_info("CompLaB Studio 2.1 ready.")
@@ -167,24 +173,24 @@ class CompLaBMainWindow(QMainWindow):
             self._config.get("max_console_lines", 10000))
 
         # Horizontal splitter: tree | viewer | settings
-        h_splitter = QSplitter(Qt.Orientation.Horizontal)
-        h_splitter.addWidget(self._tree)
-        h_splitter.addWidget(self._viewer)
-        h_splitter.addWidget(self._panel_stack)
-        h_splitter.setStretchFactor(0, 0)   # Tree: fixed
-        h_splitter.setStretchFactor(1, 3)   # Viewer: takes most space
-        h_splitter.setStretchFactor(2, 1)   # Settings: moderate
-        h_splitter.setSizes([220, 600, 380])
+        self._h_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self._h_splitter.addWidget(self._tree)
+        self._h_splitter.addWidget(self._viewer)
+        self._h_splitter.addWidget(self._panel_stack)
+        self._h_splitter.setStretchFactor(0, 0)   # Tree: fixed
+        self._h_splitter.setStretchFactor(1, 3)   # Viewer: takes most space
+        self._h_splitter.setStretchFactor(2, 1)   # Settings: moderate
+        self._h_splitter.setSizes([220, 600, 380])
 
         # Vertical splitter: [h_splitter] / console
-        v_splitter = QSplitter(Qt.Orientation.Vertical)
-        v_splitter.addWidget(h_splitter)
-        v_splitter.addWidget(self._console)
-        v_splitter.setStretchFactor(0, 4)
-        v_splitter.setStretchFactor(1, 1)
-        v_splitter.setSizes([650, 180])
+        self._v_splitter = QSplitter(Qt.Orientation.Vertical)
+        self._v_splitter.addWidget(self._h_splitter)
+        self._v_splitter.addWidget(self._console)
+        self._v_splitter.setStretchFactor(0, 4)
+        self._v_splitter.setStretchFactor(1, 1)
+        self._v_splitter.setSizes([650, 180])
 
-        self.setCentralWidget(v_splitter)
+        self.setCentralWidget(self._v_splitter)
 
     # ── Menus ───────────────────────────────────────────────────────
 
@@ -286,6 +292,25 @@ class CompLaBMainWindow(QMainWindow):
 
         act_open_vtk = view_menu.addAction("Open VTK in Viewer...")
         act_open_vtk.triggered.connect(self._viewer._open_file_dialog)
+
+        # ─── Navigate (Alt+1..9) ───
+        nav_menu = mb.addMenu("&Navigate")
+        nav_nodes = [
+            ("1", "Simulation Mode", NODE_GENERAL),
+            ("2", "Domain", NODE_DOMAIN),
+            ("3", "Fluid / Flow", NODE_FLUID),
+            ("4", "Chemistry", NODE_CHEMISTRY),
+            ("5", "Microbiology", NODE_MICROBIOLOGY),
+            ("6", "Solver Settings", NODE_SOLVER),
+            ("7", "I/O Settings", NODE_IO),
+            ("8", "Run", NODE_RUN),
+            ("9", "Post-Processing", NODE_POSTPROCESS),
+        ]
+        for key, label, node in nav_nodes:
+            act = nav_menu.addAction(f"&{label}")
+            act.setShortcut(QKeySequence(f"Alt+{key}"))
+            act.triggered.connect(
+                lambda checked, n=node: self._tree.select_node(n))
 
         # ─── Help ───
         help_menu = mb.addMenu("&Help")
@@ -914,7 +939,112 @@ class CompLaBMainWindow(QMainWindow):
             self._save_project()
             self._console.log_info("Auto-saved.")
 
+    # ── Drag-and-drop ────────────────────────────────────────────────
+
+    _DROP_EXTENSIONS = {
+        ".complab": "project",
+        ".xml": "xml",
+        ".dat": "geometry",
+        ".vti": "vtk",
+        ".vtk": "vtk",
+    }
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasUrls():
+            for url in event.mimeData().urls():
+                suffix = Path(url.toLocalFile()).suffix.lower()
+                if suffix in self._DROP_EXTENSIONS:
+                    event.acceptProposedAction()
+                    return
+        event.ignore()
+
+    def dropEvent(self, event: QDropEvent):
+        for url in event.mimeData().urls():
+            filepath = url.toLocalFile()
+            suffix = Path(filepath).suffix.lower()
+            kind = self._DROP_EXTENSIONS.get(suffix)
+            if not kind:
+                continue
+            if kind == "project":
+                self._drop_open_project(filepath)
+            elif kind == "xml":
+                self._drop_import_xml(filepath)
+            elif kind == "geometry":
+                self._drop_load_geometry(filepath)
+            elif kind == "vtk":
+                self._drop_load_vtk(filepath)
+            break  # Handle first recognized file only
+        event.acceptProposedAction()
+
+    def _drop_open_project(self, path: str):
+        if self._modified and not self._confirm_discard():
+            return
+        try:
+            self._project = ProjectManager.load_project(path)
+            self._project_file = path
+            self._config.add_recent(path)
+            self._update_recent_menu()
+            self._load_project_to_panels()
+            self._console.log_success(f"Opened (drop): {path}")
+        except Exception as e:
+            self._console.log_error(f"Failed to open: {e}")
+
+    def _drop_import_xml(self, path: str):
+        if self._modified and not self._confirm_discard():
+            return
+        try:
+            self._project = ProjectManager.import_xml(path)
+            self._project_file = ""
+            self._load_project_to_panels()
+            self._console.log_success(f"Imported (drop): {path}")
+        except Exception as e:
+            self._console.log_error(f"Import failed: {e}")
+
+    def _drop_load_geometry(self, path: str):
+        self._domain_panel.geom_file.setText(os.path.basename(path))
+        self._domain_panel._geom_filepath = path
+        nx = self._domain_panel.nx.value()
+        ny = self._domain_panel.ny.value()
+        nz = self._domain_panel.nz.value()
+        self._domain_panel._geom_preview.load_geometry(path, nx, ny, nz)
+        self._tree.select_node(NODE_DOMAIN)
+        self._console.log_info(f"Geometry loaded (drop): {path}")
+
+    def _drop_load_vtk(self, path: str):
+        self._viewer.load_vti(path)
+        self._tree.select_node(NODE_POSTPROCESS)
+        self._console.log_info(f"VTK loaded (drop): {path}")
+
+    # ── Window state persistence ─────────────────────────────────────
+
+    def _save_window_state(self):
+        """Save window geometry and splitter positions to config."""
+        geo = self.geometry()
+        self._config.set("window_geometry", [
+            geo.x(), geo.y(), geo.width(), geo.height()])
+        self._config.set("window_maximized", self.isMaximized())
+        self._config.set("h_splitter_sizes", self._h_splitter.sizes())
+        self._config.set("v_splitter_sizes", self._v_splitter.sizes())
+        self._config.save()
+
+    def _restore_window_state(self):
+        """Restore window geometry and splitter positions from config."""
+        geo = self._config.get("window_geometry")
+        if geo and len(geo) == 4:
+            self.setGeometry(geo[0], geo[1], geo[2], geo[3])
+        if self._config.get("window_maximized"):
+            self.showMaximized()
+        h_sizes = self._config.get("h_splitter_sizes")
+        if h_sizes and len(h_sizes) == 3:
+            self._h_splitter.setSizes(h_sizes)
+        v_sizes = self._config.get("v_splitter_sizes")
+        if v_sizes and len(v_sizes) == 2:
+            self._v_splitter.setSizes(v_sizes)
+
+    # ── Close event ──────────────────────────────────────────────────
+
     def closeEvent(self, event):
+        self._save_window_state()
         if self._modified:
             reply = QMessageBox.question(
                 self, "Quit",
