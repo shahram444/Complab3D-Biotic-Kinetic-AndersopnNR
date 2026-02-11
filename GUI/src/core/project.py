@@ -122,13 +122,16 @@ class EquilibriumSettings:
 
     stoichiometry: 2D list [species_index][component_index].
     log_k: list of floats, one per species (substrate).
-    Note: Anderson acceleration params are hardcoded in C++ solver
-    (max_iterations=200, tolerance=1e-10, anderson_depth=4).
+    Solver parameters match C++ defaults in complab3d_processors_part4_eqsolver.hh.
     """
     enabled: bool = False
     component_names: List[str] = field(default_factory=list)
     stoichiometry: List[List[float]] = field(default_factory=list)
     log_k: List[float] = field(default_factory=list)
+    max_iterations: int = 200
+    tolerance: float = 1e-8
+    anderson_depth: int = 4
+    beta: float = 1.0
 
 
 @dataclass
