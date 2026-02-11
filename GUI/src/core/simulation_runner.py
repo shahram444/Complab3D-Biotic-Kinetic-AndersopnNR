@@ -37,12 +37,24 @@ class SimulationRunner(QThread):
     phase_changed = Signal(str)
     finished_signal = Signal(int, str)
 
-    def __init__(self, executable: str, working_dir: str, parent=None):
+    def __init__(self, executable: str, working_dir: str, parent=None,
+                 mpi_command: str = "", num_cores: int = 1):
         super().__init__(parent)
         self._exe = executable
         self._cwd = working_dir
+        self._mpi_cmd = mpi_command
+        self._num_cores = num_cores
         self._process = None
         self._cancelled = False
+
+    def _build_command(self) -> list:
+        """Build the command list, with or without MPI."""
+        if self._mpi_cmd and self._num_cores > 1:
+            return [
+                self._mpi_cmd, "-np", str(self._num_cores),
+                self._exe, "CompLaB.xml",
+            ]
+        return [self._exe]
 
     def run(self):
         if not os.path.isfile(self._exe):
@@ -56,14 +68,19 @@ class SimulationRunner(QThread):
             self.finished_signal.emit(-1, "CompLaB.xml not found")
             return
 
-        self.output_line.emit(f"Starting: {self._exe}")
+        cmd = self._build_command()
+        cmd_str = " ".join(cmd)
+
+        if self._num_cores > 1:
+            self.output_line.emit(f"MPI: {self._mpi_cmd} with {self._num_cores} cores")
+        self.output_line.emit(f"Command: {cmd_str}")
         self.output_line.emit(f"Working directory: {self._cwd}")
         self.output_line.emit("-" * 60)
 
         t0 = time.time()
         try:
             self._process = subprocess.Popen(
-                [self._exe],
+                cmd,
                 cwd=self._cwd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,

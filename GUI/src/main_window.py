@@ -27,7 +27,7 @@ from .widgets.model_tree import (
     ModelTree, NODE_GENERAL, NODE_DOMAIN, NODE_FLUID,
     NODE_CHEMISTRY, NODE_SUBSTRATE, NODE_EQUILIBRIUM,
     NODE_MICROBIOLOGY, NODE_MICROBE, NODE_SOLVER,
-    NODE_IO, NODE_RUN, NODE_POSTPROCESS,
+    NODE_IO, NODE_PARALLEL, NODE_RUN, NODE_POSTPROCESS,
 )
 from .widgets.console_widget import ConsoleWidget
 from .widgets.vtk_viewer import VTKViewer
@@ -40,6 +40,7 @@ from .panels.equilibrium_panel import EquilibriumPanel
 from .panels.microbiology_panel import MicrobiologyPanel
 from .panels.solver_panel import SolverPanel
 from .panels.io_panel import IOPanel
+from .panels.parallel_panel import ParallelPanel
 from .panels.run_panel import RunPanel
 from .panels.postprocess_panel import PostProcessPanel
 
@@ -101,6 +102,7 @@ class CompLaBMainWindow(QMainWindow):
         self._micro_panel = MicrobiologyPanel()
         self._solver_panel = SolverPanel()
         self._io_panel = IOPanel()
+        self._parallel_panel = ParallelPanel()
         self._run_panel = RunPanel()
         self._post_panel = PostProcessPanel()
 
@@ -114,8 +116,9 @@ class CompLaBMainWindow(QMainWindow):
         self._panel_stack.addWidget(self._micro_panel)      # 5
         self._panel_stack.addWidget(self._solver_panel)     # 6
         self._panel_stack.addWidget(self._io_panel)         # 7
-        self._panel_stack.addWidget(self._run_panel)        # 8
-        self._panel_stack.addWidget(self._post_panel)       # 9
+        self._panel_stack.addWidget(self._parallel_panel)   # 8
+        self._panel_stack.addWidget(self._run_panel)        # 9
+        self._panel_stack.addWidget(self._post_panel)       # 10
 
         self._panel_map = {
             NODE_GENERAL: 0,
@@ -128,8 +131,9 @@ class CompLaBMainWindow(QMainWindow):
             NODE_MICROBE: 5,
             NODE_SOLVER: 6,
             NODE_IO: 7,
-            NODE_RUN: 8,
-            NODE_POSTPROCESS: 9,
+            NODE_PARALLEL: 8,
+            NODE_RUN: 9,
+            NODE_POSTPROCESS: 10,
         }
 
     def _setup_layout(self):
@@ -310,6 +314,14 @@ class CompLaBMainWindow(QMainWindow):
         self._act_stop.setText("Stop")
         tb.addAction(self._act_run)
         tb.addAction(self._act_stop)
+        tb.addSeparator()
+
+        # Theme toggle
+        current_theme = self._config.get("theme", "Dark")
+        theme_label = "Light" if current_theme == "Dark" else "Dark"
+        self._act_theme = tb.addAction(f"Theme: {theme_label}")
+        self._act_theme.setToolTip("Toggle between Dark and Light themes")
+        self._act_theme.triggered.connect(self._toggle_theme)
 
     def _setup_statusbar(self):
         sb = QStatusBar()
@@ -363,6 +375,9 @@ class CompLaBMainWindow(QMainWindow):
             lambda _: self._update_memory_estimate())
         self._micro_panel.microbes_changed.connect(
             lambda _: self._update_memory_estimate())
+
+        # Parallel panel data_changed
+        self._parallel_panel.data_changed.connect(self._on_data_changed)
 
     def _on_node_selected(self, node_type: str, index: int):
         """Switch right panel based on tree selection."""
@@ -571,7 +586,21 @@ class CompLaBMainWindow(QMainWindow):
         self._act_run.setEnabled(False)
         self._act_stop.setEnabled(True)
 
-        self._runner = SimulationRunner(exe, work_dir, self)
+        # MPI parallel settings
+        mpi_cmd = ""
+        num_cores = 1
+        if self._parallel_panel.is_parallel_enabled():
+            mpi_cmd = self._parallel_panel.get_mpi_command()
+            num_cores = self._parallel_panel.get_num_cores()
+
+        # Validate domain vs core count
+        d = self._project.domain
+        self._parallel_panel.validate_for_domain(d.nx, d.ny, d.nz)
+
+        self._runner = SimulationRunner(
+            exe, work_dir, self,
+            mpi_command=mpi_cmd, num_cores=num_cores,
+        )
         self._runner.output_line.connect(self._console.append)
         self._runner.progress.connect(self._run_panel.on_progress)
         self._runner.progress.connect(
@@ -682,6 +711,29 @@ class CompLaBMainWindow(QMainWindow):
 
     def _toggle_console(self):
         self._console.setVisible(not self._console.isVisible())
+
+    def _toggle_theme(self):
+        """Switch between Dark and Light themes."""
+        current = self._config.get("theme", "Dark")
+        new_theme = "Light" if current == "Dark" else "Dark"
+        self._config.set("theme", new_theme)
+        self._config.save()
+
+        styles_dir = Path(__file__).parent.parent / "styles"
+        if new_theme == "Light":
+            style_path = styles_dir / "light.qss"
+        else:
+            style_path = styles_dir / "theme.qss"
+
+        if style_path.exists():
+            from PySide6.QtWidgets import QApplication
+            QApplication.instance().setStyleSheet(
+                style_path.read_text(encoding="utf-8"))
+
+        # Update button label to show the opposite
+        next_theme = "Light" if new_theme == "Dark" else "Dark"
+        self._act_theme.setText(f"Theme: {next_theme}")
+        self._console.log_info(f"Switched to {new_theme} theme.")
 
     def _clear_3d_scene(self):
         """Remove all data from the 3D viewer."""
