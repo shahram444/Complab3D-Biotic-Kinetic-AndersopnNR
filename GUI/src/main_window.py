@@ -8,6 +8,7 @@
 """
 
 import os
+import time
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -62,6 +63,10 @@ class CompLaBMainWindow(QMainWindow):
         self._project_file = ""
         self._runner = None
         self._modified = False
+        self._sim_start_time = 0.0
+        self._sim_last_it = 0
+        self._sim_last_it_time = 0.0
+        self._sim_max_it = 0
 
         self._setup_panels()
         self._setup_layout()
@@ -69,6 +74,10 @@ class CompLaBMainWindow(QMainWindow):
         self._setup_toolbar()
         self._setup_statusbar()
         self._connect_signals()
+
+        # Elapsed time timer for status bar
+        self._elapsed_timer = QTimer()
+        self._elapsed_timer.timeout.connect(self._update_statusbar_elapsed)
 
         # Auto-save timer
         self._auto_save_timer = QTimer()
@@ -306,7 +315,13 @@ class CompLaBMainWindow(QMainWindow):
         sb = QStatusBar()
         self.setStatusBar(sb)
         self._status_label = QLabel("Ready")
-        sb.addPermanentWidget(self._status_label)
+        sb.addWidget(self._status_label, 1)
+        self._elapsed_label = QLabel("")
+        sb.addPermanentWidget(self._elapsed_label)
+        self._eta_label = QLabel("")
+        sb.addPermanentWidget(self._eta_label)
+        self._mem_label = QLabel("")
+        sb.addPermanentWidget(self._mem_label)
 
     # ── Signal connections ──────────────────────────────────────────
 
@@ -342,6 +357,13 @@ class CompLaBMainWindow(QMainWindow):
         ]:
             panel.data_changed.connect(self._on_data_changed)
 
+        # Domain/chemistry/micro changes -> update memory estimate
+        self._domain_panel.data_changed.connect(self._on_domain_changed)
+        self._chemistry_panel.substrates_changed.connect(
+            lambda _: self._update_memory_estimate())
+        self._micro_panel.microbes_changed.connect(
+            lambda _: self._update_memory_estimate())
+
     def _on_node_selected(self, node_type: str, index: int):
         """Switch right panel based on tree selection."""
         panel_idx = self._panel_map.get(node_type, 0)
@@ -364,6 +386,11 @@ class CompLaBMainWindow(QMainWindow):
         self._modified = True
         self._update_title()
 
+    def _on_domain_changed(self):
+        """Update memory estimate when domain dimensions change."""
+        self._save_panels_to_project()
+        self._update_memory_estimate()
+
     # ── Project load/save ───────────────────────────────────────────
 
     def _load_project_to_panels(self):
@@ -384,6 +411,12 @@ class CompLaBMainWindow(QMainWindow):
         self._tree.select_node(NODE_GENERAL)
         self._modified = False
         self._update_title()
+
+        # Auto-detect output directory for post-processing
+        self._update_postprocess_output_dir()
+
+        # Update domain memory estimate in status bar
+        self._update_memory_estimate()
 
     def _save_panels_to_project(self):
         """Pull data from all panels into project."""
@@ -543,24 +576,93 @@ class CompLaBMainWindow(QMainWindow):
         self._runner.progress.connect(self._run_panel.on_progress)
         self._runner.progress.connect(
             lambda c, m: self._console.set_progress(c, m))
+        self._runner.progress.connect(self._on_sim_progress)
+        self._runner.convergence.connect(self._on_convergence)
+        self._runner.phase_changed.connect(self._on_phase_changed)
         self._runner.finished_signal.connect(self._on_sim_finished)
+
+        # Start elapsed / ETA tracking
+        self._sim_start_time = time.time()
+        self._sim_last_it = 0
+        self._sim_last_it_time = 0.0
+        self._sim_max_it = 0
+        self._elapsed_timer.start(1000)
+
         self._runner.start()
         self._console.set_status("Running...")
+        self._status_label.setText("Running...")
 
     def _stop_simulation(self):
         if self._runner:
             self._runner.cancel()
 
+    def _on_sim_progress(self, current: int, maximum: int):
+        """Track iteration progress for ETA calculation."""
+        now = time.time()
+        if current > self._sim_last_it:
+            self._sim_last_it_time = now
+            self._sim_last_it = current
+        if maximum > self._sim_max_it:
+            self._sim_max_it = maximum
+
+    def _on_convergence(self, solver: str, iteration: int, residual: float):
+        """Log convergence data from the solver."""
+        self._run_panel.on_convergence(solver, iteration, residual)
+
+    def _on_phase_changed(self, phase: str):
+        """Update status when simulation phase changes."""
+        self._status_label.setText(phase)
+        self._console.log_info(f"Phase: {phase}")
+
+    def _update_statusbar_elapsed(self):
+        """Update elapsed + ETA labels every second during simulation."""
+        elapsed = time.time() - self._sim_start_time
+        self._elapsed_label.setText(
+            f"Elapsed: {self._fmt_duration(elapsed)}")
+        # ETA calculation
+        if self._sim_max_it > 0 and self._sim_last_it > 0:
+            rate = self._sim_last_it / elapsed  # iterations per second
+            if rate > 0:
+                remaining_it = self._sim_max_it - self._sim_last_it
+                eta_secs = remaining_it / rate
+                self._eta_label.setText(
+                    f"ETA: {self._fmt_duration(eta_secs)}  "
+                    f"({self._sim_last_it}/{self._sim_max_it})")
+            else:
+                self._eta_label.setText("ETA: --")
+        else:
+            self._eta_label.setText("")
+
+    @staticmethod
+    def _fmt_duration(seconds: float) -> str:
+        s = int(seconds)
+        hrs, rem = divmod(s, 3600)
+        mins, secs = divmod(rem, 60)
+        if hrs > 0:
+            return f"{hrs}:{mins:02d}:{secs:02d}"
+        return f"{mins}:{secs:02d}"
+
     def _on_sim_finished(self, code, msg):
+        self._elapsed_timer.stop()
         self._run_panel.on_finished(code, msg)
         self._console.set_status("Ready")
         self._console.set_progress(0, 0)
         self._act_run.setEnabled(True)
         self._act_stop.setEnabled(False)
+        self._status_label.setText("Ready")
+        self._eta_label.setText("")
         if code == 0:
             self._console.log_success(msg)
+            # Show final elapsed time
+            elapsed = time.time() - self._sim_start_time
+            self._elapsed_label.setText(
+                f"Finished in {self._fmt_duration(elapsed)}")
         else:
             self._console.log_error(msg)
+            self._elapsed_label.setText("")
+
+        # Auto-refresh post-process output directory
+        self._update_postprocess_output_dir()
 
     # ── Validation ──────────────────────────────────────────────────
 
@@ -637,6 +739,44 @@ class CompLaBMainWindow(QMainWindow):
             QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
         )
         return reply == QMessageBox.StandardButton.Discard
+
+    def _update_postprocess_output_dir(self):
+        """Set PostProcess panel output dir from project path + output_path."""
+        base_dir = ""
+        if self._project_file:
+            base_dir = str(Path(self._project_file).parent)
+        elif os.getcwd():
+            base_dir = os.getcwd()
+        if base_dir:
+            out_path = self._project.path_settings.output_path or "output"
+            out_dir = os.path.join(base_dir, out_path)
+            if os.path.isdir(out_dir):
+                self._post_panel.set_output_directory(out_dir)
+
+    def _update_memory_estimate(self):
+        """Show estimated memory usage for current domain in status bar."""
+        d = self._project.domain
+        n_cells = d.nx * d.ny * d.nz
+        n_subs = max(len(self._project.substrates), 1)
+        n_mic = len(self._project.microbiology.microbes)
+        # NS lattice: D3Q19 = 19 doubles per cell
+        # ADE lattice: D3Q7 = 7 doubles per cell per substrate
+        # Biomass: 1 double per cell per microbe
+        # Mask: 1 int per cell
+        bytes_per_cell = (
+            19 * 8                  # NS lattice (D3Q19, double)
+            + 7 * 8 * n_subs       # ADE lattices (D3Q7 per substrate)
+            + 8 * n_mic            # Biomass fields
+            + 4                    # Mask (int32)
+        )
+        total_bytes = n_cells * bytes_per_cell
+        if total_bytes < 1024 ** 2:
+            mem_str = f"{total_bytes / 1024:.0f} KB"
+        elif total_bytes < 1024 ** 3:
+            mem_str = f"{total_bytes / (1024 ** 2):.1f} MB"
+        else:
+            mem_str = f"{total_bytes / (1024 ** 3):.2f} GB"
+        self._mem_label.setText(f"Est. memory: {mem_str} ({n_cells:,} cells)")
 
     def _auto_save(self):
         if self._modified and self._project_file:

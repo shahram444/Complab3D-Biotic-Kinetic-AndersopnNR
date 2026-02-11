@@ -72,6 +72,23 @@ class RunPanel(BasePanel):
         self._progress.setValue(0)
         form.addRow("Progress:", self._progress)
 
+        # Convergence info
+        self.add_section("Convergence")
+        conv_form = self.add_form()
+
+        self._ns_residual = QLabel("-")
+        self._ns_residual.setProperty("info", True)
+        conv_form.addRow("NS residual:", self._ns_residual)
+
+        self._ade_residual = QLabel("-")
+        self._ade_residual.setProperty("info", True)
+        conv_form.addRow("ADE residual:", self._ade_residual)
+
+        self._phase_lbl = QLabel("-")
+        self._phase_lbl.setProperty("info", True)
+        self._phase_lbl.setWordWrap(True)
+        conv_form.addRow("Phase:", self._phase_lbl)
+
         self.add_stretch()
 
     def _on_run(self):
@@ -79,6 +96,10 @@ class RunPanel(BasePanel):
         self._run_btn.setEnabled(False)
         self._stop_btn.setEnabled(True)
         self._status.setText("Running...")
+        self._status.setStyleSheet("")
+        self._ns_residual.setText("-")
+        self._ade_residual.setText("-")
+        self._phase_lbl.setText("Starting...")
         self._start_time = time.time()
         self._timer.start(1000)
         self.run_requested.emit()
@@ -102,6 +123,7 @@ class RunPanel(BasePanel):
         if return_code == 0:
             self._status.setText("Completed successfully")
             self._status.setStyleSheet("color: #5ca060;")
+            self._phase_lbl.setText("Done")
         else:
             self._status.setText(f"Finished (code {return_code})")
             self._status.setStyleSheet("color: #c75050;")
@@ -110,6 +132,18 @@ class RunPanel(BasePanel):
         if maximum > 0:
             self._progress.setMaximum(maximum)
             self._progress.setValue(current)
+
+    def on_convergence(self, solver: str, iteration: int, residual: float):
+        """Update convergence residual display."""
+        text = f"{residual:.3e}  (iT={iteration})"
+        if solver == "NS":
+            self._ns_residual.setText(text)
+        elif solver == "ADE":
+            self._ade_residual.setText(text)
+
+    def on_phase_changed(self, phase: str):
+        """Update phase display."""
+        self._phase_lbl.setText(phase)
 
     def show_validation(self, errors: list):
         if not errors:
