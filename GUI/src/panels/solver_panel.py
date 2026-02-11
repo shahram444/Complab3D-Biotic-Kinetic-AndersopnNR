@@ -72,6 +72,24 @@ class SolverPanel(BasePanel):
 
         self.add_stretch()
 
+        # Real-time validation
+        self.ns_max_iT1.valueChanged.connect(self._validate_iterations)
+        self.ade_max_iT.valueChanged.connect(self._validate_iterations)
+
+    def _validate_iterations(self):
+        """Warn on zero max iterations (would skip solver phase)."""
+        if self.ns_max_iT1.value() == 0:
+            self.set_validation(self.ns_max_iT1, "warning",
+                                "0 iterations = NS phase 1 skipped.")
+        else:
+            self.clear_validation(self.ns_max_iT1)
+
+        if self.ade_max_iT.value() == 0:
+            self.set_validation(self.ade_max_iT, "warning",
+                                "0 iterations = ADE transport skipped.")
+        else:
+            self.clear_validation(self.ade_max_iT)
+
     def load_from_project(self, project):
         it = project.iteration
         self.ns_max_iT1.setValue(it.ns_max_iT1)

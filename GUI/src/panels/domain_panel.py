@@ -98,6 +98,15 @@ class DomainPanel(BasePanel):
 
         self.add_stretch()
 
+        # Connect dimension changes to auto-reload preview + validation
+        self.nx.valueChanged.connect(self._on_dimensions_changed)
+        self.ny.valueChanged.connect(self._on_dimensions_changed)
+        self.nz.valueChanged.connect(self._on_dimensions_changed)
+        self.dx.valueChanged.connect(self._validate_inputs)
+        self.pore.textChanged.connect(self._validate_material_numbers)
+        self.solid.textChanged.connect(self._validate_material_numbers)
+        self.bounce_back.textChanged.connect(self._validate_material_numbers)
+
     def _browse_geometry(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Geometry File", "",
@@ -122,6 +131,46 @@ class DomainPanel(BasePanel):
                 self._geom_filepath,
                 self.nx.value(), self.ny.value(), self.nz.value(),
             )
+
+    def _on_dimensions_changed(self):
+        """Auto-reload geometry preview when nx/ny/nz change."""
+        self._validate_inputs()
+        self._try_load_preview()
+
+    def _validate_inputs(self):
+        """Real-time validation of domain inputs."""
+        nx, ny, nz = self.nx.value(), self.ny.value(), self.nz.value()
+        n_cells = nx * ny * nz
+
+        # Warn on very large domains (>50M cells)
+        if n_cells > 50_000_000:
+            self.set_validation(self.nx, "warning",
+                                f"Large domain: {n_cells:,} cells. May require significant memory.")
+        else:
+            self.clear_validation(self.nx)
+
+        # Validate dx > 0
+        if self.dx.value() <= 0:
+            self.set_validation(self.dx, "error", "Grid spacing must be positive.")
+        else:
+            self.clear_validation(self.dx)
+
+    def _validate_material_numbers(self):
+        """Validate that material number fields contain valid integers."""
+        for widget, name in [(self.pore, "Pore"), (self.solid, "Solid"),
+                             (self.bounce_back, "Bounce-back")]:
+            text = widget.text().strip()
+            if not text:
+                self.set_validation(widget, "error", f"{name} material number is required.")
+                continue
+            try:
+                parts = text.split()
+                for p in parts:
+                    int(p)
+                self.clear_validation(widget)
+            except ValueError:
+                self.set_validation(widget, "error",
+                                    f"{name}: must be space-separated integers.")
 
     def load_from_project(self, project):
         d = project.domain
