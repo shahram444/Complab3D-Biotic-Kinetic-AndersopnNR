@@ -7,9 +7,16 @@
   Bottom: Console output + progress
 """
 
+import copy
 import os
 import time
 from pathlib import Path
+
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
 
 from PySide6.QtWidgets import (
     QMainWindow, QSplitter, QStackedWidget, QMenuBar, QMenu,
@@ -27,7 +34,7 @@ from .widgets.model_tree import (
     ModelTree, NODE_GENERAL, NODE_DOMAIN, NODE_FLUID,
     NODE_CHEMISTRY, NODE_SUBSTRATE, NODE_EQUILIBRIUM,
     NODE_MICROBIOLOGY, NODE_MICROBE, NODE_SOLVER,
-    NODE_IO, NODE_PARALLEL, NODE_RUN, NODE_POSTPROCESS,
+    NODE_IO, NODE_PARALLEL, NODE_SWEEP, NODE_RUN, NODE_POSTPROCESS,
 )
 from .widgets.console_widget import ConsoleWidget
 from .widgets.vtk_viewer import VTKViewer
@@ -41,6 +48,7 @@ from .panels.microbiology_panel import MicrobiologyPanel
 from .panels.solver_panel import SolverPanel
 from .panels.io_panel import IOPanel
 from .panels.parallel_panel import ParallelPanel
+from .panels.sweep_panel import SweepPanel
 from .panels.run_panel import RunPanel
 from .panels.postprocess_panel import PostProcessPanel
 
@@ -103,6 +111,7 @@ class CompLaBMainWindow(QMainWindow):
         self._solver_panel = SolverPanel()
         self._io_panel = IOPanel()
         self._parallel_panel = ParallelPanel()
+        self._sweep_panel = SweepPanel()
         self._run_panel = RunPanel()
         self._post_panel = PostProcessPanel()
 
@@ -117,8 +126,9 @@ class CompLaBMainWindow(QMainWindow):
         self._panel_stack.addWidget(self._solver_panel)     # 6
         self._panel_stack.addWidget(self._io_panel)         # 7
         self._panel_stack.addWidget(self._parallel_panel)   # 8
-        self._panel_stack.addWidget(self._run_panel)        # 9
-        self._panel_stack.addWidget(self._post_panel)       # 10
+        self._panel_stack.addWidget(self._sweep_panel)      # 9
+        self._panel_stack.addWidget(self._run_panel)        # 10
+        self._panel_stack.addWidget(self._post_panel)       # 11
 
         self._panel_map = {
             NODE_GENERAL: 0,
@@ -132,8 +142,9 @@ class CompLaBMainWindow(QMainWindow):
             NODE_SOLVER: 6,
             NODE_IO: 7,
             NODE_PARALLEL: 8,
-            NODE_RUN: 9,
-            NODE_POSTPROCESS: 10,
+            NODE_SWEEP: 9,
+            NODE_RUN: 10,
+            NODE_POSTPROCESS: 11,
         }
 
     def _setup_layout(self):
@@ -332,6 +343,8 @@ class CompLaBMainWindow(QMainWindow):
         sb.addPermanentWidget(self._elapsed_label)
         self._eta_label = QLabel("")
         sb.addPermanentWidget(self._eta_label)
+        self._resource_label = QLabel("")
+        sb.addPermanentWidget(self._resource_label)
         self._mem_label = QLabel("")
         sb.addPermanentWidget(self._mem_label)
 
@@ -378,6 +391,9 @@ class CompLaBMainWindow(QMainWindow):
 
         # Parallel panel data_changed
         self._parallel_panel.data_changed.connect(self._on_data_changed)
+
+        # Sweep panel
+        self._sweep_panel.sweep_requested.connect(self._on_sweep_requested)
 
     def _on_node_selected(self, node_type: str, index: int):
         """Switch right panel based on tree selection."""
@@ -644,7 +660,7 @@ class CompLaBMainWindow(QMainWindow):
         self._console.log_info(f"Phase: {phase}")
 
     def _update_statusbar_elapsed(self):
-        """Update elapsed + ETA labels every second during simulation."""
+        """Update elapsed + ETA + resource labels every second."""
         elapsed = time.time() - self._sim_start_time
         self._elapsed_label.setText(
             f"Elapsed: {self._fmt_duration(elapsed)}")
@@ -661,6 +677,14 @@ class CompLaBMainWindow(QMainWindow):
                 self._eta_label.setText("ETA: --")
         else:
             self._eta_label.setText("")
+        # Resource monitor
+        if HAS_PSUTIL:
+            cpu = psutil.cpu_percent(interval=0)
+            ram = psutil.virtual_memory()
+            self._resource_label.setText(
+                f"CPU: {cpu:.0f}%  RAM: {ram.percent:.0f}% "
+                f"({ram.used / (1024**3):.1f}/{ram.total / (1024**3):.1f} GB)"
+            )
 
     @staticmethod
     def _fmt_duration(seconds: float) -> str:
@@ -680,6 +704,7 @@ class CompLaBMainWindow(QMainWindow):
         self._act_stop.setEnabled(False)
         self._status_label.setText("Ready")
         self._eta_label.setText("")
+        self._resource_label.setText("")
         if code == 0:
             self._console.log_success(msg)
             # Show final elapsed time
@@ -692,6 +717,60 @@ class CompLaBMainWindow(QMainWindow):
 
         # Auto-refresh post-process output directory
         self._update_postprocess_output_dir()
+
+    # ── Sweep execution ─────────────────────────────────────────────
+
+    def _on_sweep_requested(self, runs: list):
+        """Handle parameter sweep: create subdirectories and queue runs."""
+        self._save_panels_to_project()
+        exe = self._config.get("complab_executable", "")
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not set. Go to Edit > Preferences.")
+            return
+
+        if self._project_file:
+            base_dir = str(Path(self._project_file).parent)
+        else:
+            base_dir = os.getcwd()
+
+        sweep_configs = self._sweep_panel.get_sweep_config()
+        if not sweep_configs:
+            self._console.log_error("No sweep configuration generated.")
+            return
+
+        sweep_dir = os.path.join(base_dir, "sweep_runs")
+        os.makedirs(sweep_dir, exist_ok=True)
+
+        self._console.log_info(
+            f"Queuing {len(sweep_configs)} sweep runs in {sweep_dir}")
+
+        for i, (section, field, value) in enumerate(sweep_configs):
+            run_dir = os.path.join(sweep_dir, f"run_{i:03d}")
+            os.makedirs(run_dir, exist_ok=True)
+
+            # Clone project and override the swept parameter
+            proj_copy = copy.deepcopy(self._project)
+            sub_obj = getattr(proj_copy, section, None)
+            if sub_obj is not None and hasattr(sub_obj, field):
+                setattr(sub_obj, field, value)
+            elif isinstance(sub_obj, dict):
+                sub_obj[field] = value
+
+            xml_path = os.path.join(run_dir, "CompLaB.xml")
+            try:
+                ProjectManager.export_xml(proj_copy, xml_path)
+            except Exception as e:
+                self._console.log_error(
+                    f"Sweep run {i}: XML export failed: {e}")
+                continue
+
+            self._console.log_info(
+                f"  Run {i}: {section}.{field} = {value}  -> {run_dir}")
+
+        self._console.log_success(
+            f"{len(sweep_configs)} sweep run directories created in "
+            f"{sweep_dir}.\nRun each manually or implement batch execution.")
 
     # ── Validation ──────────────────────────────────────────────────
 
