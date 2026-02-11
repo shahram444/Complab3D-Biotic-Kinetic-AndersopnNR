@@ -280,28 +280,39 @@ class SimulationRunner(QThread):
             })
             return issues
 
-        # 3. Input directory
-        input_dir = os.path.join(self._cwd, "input")
+        # 3. Input directory (use project's input_path setting, not hardcoded)
+        input_rel = "input"
+        if self._project and hasattr(self._project, 'path_settings'):
+            input_rel = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(self._cwd, input_rel)
         if not os.path.isdir(input_dir):
             issues.append({
                 "error": f"Input directory missing: {input_dir}",
-                "reason": "The solver expects an 'input' folder inside the project directory.",
+                "reason": f"The solver expects a '{input_rel}' folder inside the project directory.",
                 "suggestions": [
                     f"Create the folder: {input_dir}",
-                    "Copy your geometry .dat file into this input/ folder.",
+                    "Copy your geometry .dat file into this folder.",
                 ],
             })
 
         # 4. Geometry file
         if self._project:
             geom_name = self._project.domain.geometry_filename
-            if geom_name:
+            if not geom_name:
+                issues.append({
+                    "error": "Geometry filename is empty",
+                    "reason": "No geometry file specified in Domain settings.",
+                    "suggestions": [
+                        "Go to Domain settings and enter a geometry filename (e.g. geometry.dat).",
+                    ],
+                })
+            elif os.path.isdir(input_dir):
                 geom_path = os.path.join(input_dir, geom_name)
-                if os.path.isdir(input_dir) and not os.path.isfile(geom_path):
+                if not os.path.isfile(geom_path):
                     issues.append({
                         "error": f"Geometry file not found: {geom_path}",
                         "reason": (
-                            f"The geometry file '{geom_name}' does not exist in the input/ folder. "
+                            f"The geometry file '{geom_name}' does not exist in the {input_rel}/ folder. "
                             "The solver will crash immediately when it tries to read it."
                         ),
                         "suggestions": [
@@ -310,12 +321,27 @@ class SimulationRunner(QThread):
                             "You can use Tools > Geometry Generator to create a new geometry file.",
                         ],
                     })
-                elif os.path.isfile(geom_path):
+                else:
                     # 5. Geometry dimension check
                     self._check_geometry_dimensions(geom_path, issues)
 
-        # 6. Output directory (create if needed, warn if not writable)
-        output_dir = os.path.join(self._cwd, "output")
+        # 6. XML file (verify it exists after export)
+        xml_path = os.path.join(self._cwd, "CompLaB.xml")
+        if not os.path.isfile(xml_path):
+            issues.append({
+                "error": f"CompLaB.xml not found in {self._cwd}",
+                "reason": "The XML configuration file was not generated.",
+                "suggestions": [
+                    "Save the project (Ctrl+S) before running.",
+                    "Click 'Export CompLaB.xml' in the Run panel.",
+                ],
+            })
+
+        # 7. Output directory (use project's output_path, create if needed)
+        output_rel = "output"
+        if self._project and hasattr(self._project, 'path_settings'):
+            output_rel = self._project.path_settings.output_path or "output"
+        output_dir = os.path.join(self._cwd, output_rel)
         if not os.path.isdir(output_dir):
             try:
                 os.makedirs(output_dir, exist_ok=True)
