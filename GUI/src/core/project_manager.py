@@ -152,10 +152,9 @@ class ProjectManager:
                       _fmt_float(m.left_boundary_condition))
             _add_text(m_el, "right_boundary_condition",
                       _fmt_float(m.right_boundary_condition))
-            if m.biomass_diffusion_in_pore >= 0:
-                bd_el = ET.SubElement(m_el, "biomass_diffusion_coefficients")
-                _add_text(bd_el, "in_pore", _fmt_float(m.biomass_diffusion_in_pore))
-                _add_text(bd_el, "in_biofilm", _fmt_float(m.biomass_diffusion_in_biofilm))
+            bd_el = ET.SubElement(m_el, "biomass_diffusion_coefficients")
+            _add_text(bd_el, "in_pore", _fmt_float(m.biomass_diffusion_in_pore))
+            _add_text(bd_el, "in_biofilm", _fmt_float(m.biomass_diffusion_in_biofilm))
 
         # <equilibrium>
         eq = project.equilibrium
