@@ -29,8 +29,8 @@ def main():
     if style_path.exists():
         app.setStyleSheet(style_path.read_text(encoding="utf-8"))
 
-    # Apply configured font size
-    font_size = config.get("font_size", 10)
+    # Apply configured font size (default 9pt matches COMSOL)
+    font_size = config.get("font_size", 9)
     font = QFont("Segoe UI", font_size)
     font.setStyleStrategy(QFont.StyleStrategy.PreferQuality)
     app.setFont(font)

@@ -13,7 +13,8 @@ class AppConfig:
         "default_project_dir": "",
         "auto_save": False,
         "auto_save_interval": 300,
-        "font_size": 10,
+        "font_size": 9,
+        "theme": "Dark",
         "max_console_lines": 10000,
         "recent_projects": [],
     }

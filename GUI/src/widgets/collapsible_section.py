@@ -56,13 +56,13 @@ class CollapsibleSection(QWidget):
     def _update_arrow(self):
         title = self._toggle_btn.text().lstrip()
         # Remove existing arrow prefix
-        for prefix in (">> ", "vv "):
+        for prefix in (">> ", "vv ", "\u25b6 ", "\u25bc "):
             if title.startswith(prefix):
                 title = title[len(prefix):]
         if self._toggle_btn.isChecked():
-            self._toggle_btn.setText(f"  vv {title}")
+            self._toggle_btn.setText(f"  \u25bc {title}")
         else:
-            self._toggle_btn.setText(f"  >> {title}")
+            self._toggle_btn.setText(f"  \u25b6 {title}")
 
     def is_expanded(self) -> bool:
         return self._toggle_btn.isChecked()

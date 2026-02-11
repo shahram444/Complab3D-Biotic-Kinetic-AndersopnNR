@@ -134,11 +134,11 @@ class CompLaBMainWindow(QMainWindow):
         self._viewer = VTKViewer()
 
         # Right: Settings panels
-        self._panel_stack.setMinimumWidth(350)
+        self._panel_stack.setMinimumWidth(340)
 
         # Bottom: Console
         self._console = ConsoleWidget()
-        self._console.setMinimumHeight(120)
+        self._console.setMinimumHeight(100)
         self._console.set_max_lines(
             self._config.get("max_console_lines", 10000))
 
@@ -158,7 +158,7 @@ class CompLaBMainWindow(QMainWindow):
         v_splitter.addWidget(self._console)
         v_splitter.setStretchFactor(0, 4)
         v_splitter.setStretchFactor(1, 1)
-        v_splitter.setSizes([650, 200])
+        v_splitter.setSizes([650, 180])
 
         self.setCentralWidget(v_splitter)
 
@@ -167,7 +167,7 @@ class CompLaBMainWindow(QMainWindow):
     def _setup_menus(self):
         mb = self.menuBar()
 
-        # File
+        # ─── File ───
         file_menu = mb.addMenu("&File")
         self._act_new = file_menu.addAction("&New Project...")
         self._act_new.setShortcut(QKeySequence.StandardKey.New)
@@ -205,26 +205,61 @@ class CompLaBMainWindow(QMainWindow):
         act_quit.setShortcut(QKeySequence.StandardKey.Quit)
         act_quit.triggered.connect(self.close)
 
-        # Tools
+        # ─── Edit ───
+        edit_menu = mb.addMenu("&Edit")
+        act_prefs = edit_menu.addAction("&Preferences...")
+        act_prefs.setShortcut(QKeySequence("Ctrl+,"))
+        act_prefs.triggered.connect(self._open_preferences)
+
+        # ─── Tools ───
         tools_menu = mb.addMenu("&Tools")
+        self._act_validate = tools_menu.addAction("&Validate Configuration")
+        self._act_validate.setShortcut(QKeySequence("F5"))
+        self._act_validate.triggered.connect(self._validate)
+
+        tools_menu.addSeparator()
+
         act_kinetics = tools_menu.addAction("Kinetics &Editor...")
         act_kinetics.triggered.connect(self._open_kinetics_editor)
 
-        act_validate = tools_menu.addAction("&Validate Configuration")
-        act_validate.triggered.connect(self._validate)
-
         tools_menu.addSeparator()
-        act_prefs = tools_menu.addAction("&Preferences...")
-        act_prefs.triggered.connect(self._open_preferences)
 
-        # Help
+        self._act_run = tools_menu.addAction("&Run Simulation")
+        self._act_run.setShortcut(QKeySequence("F6"))
+        self._act_run.triggered.connect(self._run_simulation)
+
+        self._act_stop = tools_menu.addAction("&Stop Simulation")
+        self._act_stop.setShortcut(QKeySequence("Shift+F6"))
+        self._act_stop.setEnabled(False)
+        self._act_stop.triggered.connect(self._stop_simulation)
+
+        # ─── View ───
+        view_menu = mb.addMenu("&View")
+        self._act_toggle_console = view_menu.addAction("Toggle Console")
+        self._act_toggle_console.setShortcut(QKeySequence("Ctrl+`"))
+        self._act_toggle_console.triggered.connect(self._toggle_console)
+
+        view_menu.addSeparator()
+
+        act_reset_view = view_menu.addAction("Reset 3D View")
+        act_reset_view.triggered.connect(
+            lambda: self._viewer.reset_view())
+
+        act_clear_scene = view_menu.addAction("Clear 3D Scene")
+        act_clear_scene.triggered.connect(
+            lambda: self._viewer._remove_geometry()
+            if hasattr(self._viewer, '_remove_geometry')
+            else self._viewer.clear_scene())
+
+        # ─── Help ───
         help_menu = mb.addMenu("&Help")
-        act_about = help_menu.addAction("&About")
+        act_about = help_menu.addAction("&About CompLaB Studio")
         act_about.triggered.connect(self._show_about)
 
     def _setup_toolbar(self):
-        tb = QToolBar("Main Toolbar")
+        tb = QToolBar("Main")
         tb.setMovable(False)
+        tb.setFloatable(False)
         self.addToolBar(tb)
 
         tb.addAction(self._act_new)
@@ -233,6 +268,11 @@ class CompLaBMainWindow(QMainWindow):
         tb.addSeparator()
         tb.addAction(self._act_import)
         tb.addAction(self._act_export)
+        tb.addSeparator()
+        tb.addAction(self._act_validate)
+        tb.addSeparator()
+        tb.addAction(self._act_run)
+        tb.addAction(self._act_stop)
 
     def _setup_statusbar(self):
         sb = QStatusBar()
@@ -448,7 +488,7 @@ class CompLaBMainWindow(QMainWindow):
         exe = self._config.get("complab_executable", "")
         if not exe:
             self._console.log_error(
-                "CompLaB executable not set. Go to Tools > Preferences.")
+                "CompLaB executable not set. Go to Edit > Preferences.")
             return
 
         # Determine working directory
@@ -465,6 +505,9 @@ class CompLaBMainWindow(QMainWindow):
         except Exception as e:
             self._console.log_error(f"XML export failed: {e}")
             return
+
+        self._act_run.setEnabled(False)
+        self._act_stop.setEnabled(True)
 
         self._runner = SimulationRunner(exe, work_dir, self)
         self._runner.output_line.connect(self._console.append)
@@ -483,6 +526,8 @@ class CompLaBMainWindow(QMainWindow):
         self._run_panel.on_finished(code, msg)
         self._console.set_status("Ready")
         self._console.set_progress(0, 0)
+        self._act_run.setEnabled(True)
+        self._act_stop.setEnabled(False)
         if code == 0:
             self._console.log_success(msg)
         else:
@@ -502,6 +547,11 @@ class CompLaBMainWindow(QMainWindow):
         else:
             self._console.log_success("Validation passed - no errors.")
 
+    # ── View toggles ───────────────────────────────────────────────
+
+    def _toggle_console(self):
+        self._console.setVisible(not self._console.isVisible())
+
     # ── Dialogs ─────────────────────────────────────────────────────
 
     def _open_kinetics_editor(self):
@@ -513,6 +563,11 @@ class CompLaBMainWindow(QMainWindow):
         if dlg.exec():
             self._console.set_max_lines(
                 self._config.get("max_console_lines", 10000))
+            # Re-apply auto-save timer
+            self._auto_save_timer.stop()
+            if self._config.get("auto_save"):
+                interval = self._config.get("auto_save_interval", 300) * 1000
+                self._auto_save_timer.start(interval)
 
     def _show_about(self):
         dlg = AboutDialog(self)

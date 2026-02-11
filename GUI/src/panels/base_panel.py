@@ -32,8 +32,8 @@ class BasePanel(QWidget):
 
         self._content = QWidget()
         self._content_layout = QVBoxLayout(self._content)
-        self._content_layout.setContentsMargins(12, 8, 12, 8)
-        self._content_layout.setSpacing(8)
+        self._content_layout.setContentsMargins(10, 6, 10, 6)
+        self._content_layout.setSpacing(6)
 
         if title:
             heading = QLabel(title)
@@ -52,8 +52,8 @@ class BasePanel(QWidget):
     def add_form(self) -> QFormLayout:
         form = QFormLayout()
         form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
-        form.setHorizontalSpacing(12)
-        form.setVerticalSpacing(6)
+        form.setHorizontalSpacing(10)
+        form.setVerticalSpacing(5)
         self._content_layout.addLayout(form)
         return form
 
