@@ -222,6 +222,11 @@ class CompLaBMainWindow(QMainWindow):
         act_kinetics = tools_menu.addAction("Kinetics &Editor...")
         act_kinetics.triggered.connect(self._open_kinetics_editor)
 
+        act_geom_gen = tools_menu.addAction("&Geometry Generator...")
+        act_geom_gen.setToolTip(
+            "Open the geometry generator tool for creating .dat files")
+        act_geom_gen.triggered.connect(self._open_geometry_generator)
+
         tools_menu.addSeparator()
 
         self._act_run = tools_menu.addAction("&Run Simulation")
@@ -242,11 +247,21 @@ class CompLaBMainWindow(QMainWindow):
         view_menu.addSeparator()
 
         act_reset_view = view_menu.addAction("Reset 3D View")
+        act_reset_view.setShortcut(QKeySequence("Ctrl+R"))
         act_reset_view.triggered.connect(
             lambda: self._viewer.reset_view())
 
+        act_remove_vtk = view_menu.addAction("Remove Loaded VTK")
+        act_remove_vtk.setShortcut(QKeySequence("Ctrl+Shift+R"))
+        act_remove_vtk.triggered.connect(self._clear_3d_scene)
+
         act_clear_scene = view_menu.addAction("Clear 3D Scene")
         act_clear_scene.triggered.connect(self._clear_3d_scene)
+
+        view_menu.addSeparator()
+
+        act_open_vtk = view_menu.addAction("Open VTK in Viewer...")
+        act_open_vtk.triggered.connect(self._viewer._open_file_dialog)
 
         # ─── Help ───
         help_menu = mb.addMenu("&Help")
@@ -257,17 +272,33 @@ class CompLaBMainWindow(QMainWindow):
         tb = QToolBar("Main")
         tb.setMovable(False)
         tb.setFloatable(False)
+        tb.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self.addToolBar(tb)
 
+        # Project section
+        self._act_new.setText("New")
+        self._act_open.setText("Open")
+        self._act_save.setText("Save")
         tb.addAction(self._act_new)
         tb.addAction(self._act_open)
         tb.addAction(self._act_save)
         tb.addSeparator()
+
+        # XML section
+        self._act_import.setText("Import XML")
+        self._act_export.setText("Export XML")
         tb.addAction(self._act_import)
         tb.addAction(self._act_export)
         tb.addSeparator()
+
+        # Build section
+        self._act_validate.setText("Validate")
         tb.addAction(self._act_validate)
         tb.addSeparator()
+
+        # Run section
+        self._act_run.setText("Run")
+        self._act_stop.setText("Stop")
         tb.addAction(self._act_run)
         tb.addAction(self._act_stop)
 
@@ -301,6 +332,7 @@ class CompLaBMainWindow(QMainWindow):
 
         # Post-process file selection -> viewer
         self._post_panel.file_selected.connect(self._viewer.load_vti)
+        self._post_panel.remove_vtk_requested.connect(self._clear_3d_scene)
 
         # Data changed -> mark modified
         for panel in [
@@ -558,6 +590,28 @@ class CompLaBMainWindow(QMainWindow):
     def _open_kinetics_editor(self):
         dlg = KineticsEditorDialog(self)
         dlg.exec()
+
+    def _open_geometry_generator(self):
+        """Open the geometry generator script via system default."""
+        gen_path = Path(__file__).parent.parent.parent / "tools" / "geometry_generator.py"
+        if gen_path.exists():
+            import subprocess
+            import sys
+            try:
+                subprocess.Popen([sys.executable, str(gen_path)])
+                self._console.log_info(f"Launched geometry generator: {gen_path}")
+            except Exception as e:
+                self._console.log_error(f"Failed to launch geometry generator: {e}")
+        else:
+            self._console.log_error(
+                f"Geometry generator not found at: {gen_path}\n"
+                "Expected: tools/geometry_generator.py"
+            )
+            QMessageBox.warning(
+                self, "Not Found",
+                "Geometry generator tool not found.\n"
+                f"Expected at: {gen_path}"
+            )
 
     def _open_preferences(self):
         dlg = PreferencesDialog(self._config, self)

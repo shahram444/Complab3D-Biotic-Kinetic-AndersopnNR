@@ -1,7 +1,13 @@
-"""Equilibrium chemistry panel - components, stoichiometry matrix, logK."""
+"""Equilibrium chemistry panel - components, stoichiometry matrix, logK.
+
+Matches C++ solver in complab3d_processors_part4_eqsolver.hh:
+  - PCF method + Anderson Acceleration
+  - Default: max_iterations=200, tolerance=1e-8, anderson_depth=4
+  - Species concentrations via mass action law
+"""
 
 from PySide6.QtWidgets import (
-    QFormLayout, QHBoxLayout, QLabel,
+    QFormLayout, QHBoxLayout, QLabel, QMessageBox,
     QPushButton, QTableWidget, QTableWidgetItem, QHeaderView,
 )
 from PySide6.QtCore import Qt
@@ -10,7 +16,11 @@ from .base_panel import BasePanel
 
 class EquilibriumPanel(BasePanel):
     """Equilibrium chemistry: enable/disable, component names,
-    stoichiometry matrix, and logK values."""
+    stoichiometry matrix, and logK values.
+
+    Anderson acceleration solver parameters match the C++ defaults
+    in complab3d_processors_part4_eqsolver.hh.
+    """
 
     def __init__(self, parent=None):
         super().__init__("Equilibrium Chemistry", parent)
@@ -26,20 +36,65 @@ class EquilibriumPanel(BasePanel):
         form.addRow("", self.enabled)
 
         self.add_widget(self.make_info_label(
-            "PCF method with Anderson Acceleration.\n"
-            "Solver parameters (hardcoded in C++):\n"
-            "  max_iterations = 200, tolerance = 1e-10, anderson_depth = 4"))
+            "PCF method with Anderson Acceleration (Awada et al. 2025).\n"
+            "Mass action law: C_i = 10^(logK[i] + sum_j S[i][j]*logC[j])"))
+
+        # Solver parameters section (informational + configurable for XML)
+        self.add_section("Solver Parameters")
+        self.add_widget(self.make_info_label(
+            "These parameters are set in the C++ solver. The defaults below\n"
+            "match complab3d_processors_part4_eqsolver.hh. They are exported\n"
+            "to XML for documentation but currently parsed by C++ with defaults."))
+
+        pform = self.add_form()
+        self._max_iter = self.make_spin(200, 1, 10000)
+        self._max_iter.setToolTip("Maximum Newton/Anderson iterations per cell.")
+        pform.addRow("Max iterations:", self._max_iter)
+
+        self._tolerance = self.make_double_spin(1e-8, 1e-16, 1.0, 12)
+        self._tolerance.setToolTip(
+            "Convergence tolerance for residual norm.\n"
+            "C++ default: 1e-8 (relaxed from 1e-10 for better convergence).")
+        pform.addRow("Tolerance:", self._tolerance)
+
+        self._anderson_depth = self.make_spin(4, 0, 20)
+        self._anderson_depth.setToolTip(
+            "Anderson acceleration history depth.\n"
+            "0 = simple fixed-point iteration.\n"
+            "4 = default, good balance of speed and stability.")
+        pform.addRow("Anderson depth:", self._anderson_depth)
+
+        self._beta = self.make_double_spin(1.0, 0.01, 2.0, 4, step=0.1)
+        self._beta.setToolTip("Relaxation parameter (damping). 1.0 = no damping.")
+        pform.addRow("Relaxation (beta):", self._beta)
 
         self.add_section("Components")
         form2 = self.add_form()
         self._components = self.make_line_edit("", "e.g. HCO3- H+")
-        self._components.setToolTip("Space-separated list of equilibrium component names.")
+        self._components.setToolTip(
+            "Space-separated list of equilibrium component names.\n"
+            "These are the master species for the mass action law.\n"
+            "Example: HCO3- H+ for carbonate system.")
         self._components.textChanged.connect(self._on_components_changed)
         form2.addRow("Component names:", self._components)
 
-        self._rebuild_btn = self.make_button("Rebuild Matrix")
+        btn_row = QHBoxLayout()
+        self._rebuild_btn = self.make_button("Rebuild Matrix", primary=True)
+        self._rebuild_btn.setToolTip(
+            "Rebuild stoichiometry table with current substrates and components.\n"
+            "Preserves existing data where possible.")
         self._rebuild_btn.clicked.connect(self._rebuild_matrix)
-        form2.addRow("", self._rebuild_btn)
+        btn_row.addWidget(self._rebuild_btn)
+
+        self._auto_rebuild = self.make_checkbox("Auto-rebuild when substrates change")
+        self._auto_rebuild.setChecked(True)
+        btn_row.addWidget(self._auto_rebuild)
+        btn_row.addStretch()
+        self.add_layout(btn_row)
+
+        self._rebuild_status = QLabel("")
+        self._rebuild_status.setProperty("info", True)
+        self.add_widget(self._rebuild_status)
 
         # Stoichiometry + logK table
         self.add_section("Stoichiometry Matrix and logK")
@@ -52,7 +107,11 @@ class EquilibriumPanel(BasePanel):
 
         self.add_widget(self.make_info_label(
             "Each row = one species (substrate). Columns = component coefficients + logK.\n"
-            "Rows with all-zero coefficients are not participating in equilibrium."))
+            "Rows with all-zero coefficients are non-equilibrium species (transport only).\n"
+            "logK = equilibrium constant (log10) for the mass action expression.\n\n"
+            "Physical bounds enforced by C++ solver:\n"
+            "  MIN_CONC = 1e-30, MAX_CONC = 10.0\n"
+            "  MAX_RELATIVE_CHANGE = 10% per step"))
 
         self.add_stretch()
         self._on_enabled_changed(False)
@@ -61,6 +120,11 @@ class EquilibriumPanel(BasePanel):
         self._components.setEnabled(checked)
         self._rebuild_btn.setEnabled(checked)
         self._table.setEnabled(checked)
+        self._max_iter.setEnabled(checked)
+        self._tolerance.setEnabled(checked)
+        self._anderson_depth.setEnabled(checked)
+        self._beta.setEnabled(checked)
+        self._auto_rebuild.setEnabled(checked)
         self.data_changed.emit()
 
     def _on_components_changed(self):
@@ -70,13 +134,20 @@ class EquilibriumPanel(BasePanel):
         self.data_changed.emit()
 
     def _rebuild_matrix(self):
+        """Rebuild the stoichiometry + logK table."""
         comp_text = self._components.text().strip()
         if not comp_text:
+            self._rebuild_status.setText(
+                "Enter component names first (e.g. 'HCO3- H+')")
+            self._rebuild_status.setStyleSheet("color: #c75050;")
             return
         comp_names = comp_text.split()
         n_comp = len(comp_names)
         n_subs = len(self._substrate_names)
-        if n_comp == 0 or n_subs == 0:
+        if n_subs == 0:
+            self._rebuild_status.setText(
+                "No substrates defined. Add substrates in the Chemistry panel first.")
+            self._rebuild_status.setStyleSheet("color: #c75050;")
             return
 
         # Preserve existing data where possible
@@ -98,6 +169,10 @@ class EquilibriumPanel(BasePanel):
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self._table.setItem(r, c, item)
         self._table.blockSignals(False)
+
+        self._rebuild_status.setText(
+            f"Matrix built: {n_subs} species x {n_comp} components + logK")
+        self._rebuild_status.setStyleSheet("color: #5ca060;")
         self.data_changed.emit()
 
     def _read_table(self):
@@ -116,7 +191,6 @@ class EquilibriumPanel(BasePanel):
 
     def set_substrate_names(self, names: list):
         """Called when substrates change in the Chemistry panel."""
-        old_names = self._substrate_names
         self._substrate_names = list(names)
 
         # Update the vertical header labels if table has rows
@@ -139,14 +213,28 @@ class EquilibriumPanel(BasePanel):
                         item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                         self._table.setItem(r, c, item)
                 self._table.blockSignals(False)
+                self._rebuild_status.setText(
+                    f"Table resized to {n_subs} species")
+                self._rebuild_status.setStyleSheet("color: #5ca060;")
             elif n_subs == self._table.rowCount():
                 # Just update labels
                 self._table.setVerticalHeaderLabels(names)
+        elif len(names) > 0 and self._auto_rebuild.isChecked():
+            # No table yet but we have substrates - auto-rebuild if components exist
+            comp_text = self._components.text().strip()
+            if comp_text:
+                self._rebuild_matrix()
 
     def load_from_project(self, project):
         eq = project.equilibrium
         self.enabled.setChecked(eq.enabled)
         self._components.setText(" ".join(eq.component_names))
+
+        # Load solver params (use defaults if not present)
+        self._max_iter.setValue(getattr(eq, 'max_iterations', 200))
+        self._tolerance.setValue(getattr(eq, 'tolerance', 1e-8))
+        self._anderson_depth.setValue(getattr(eq, 'anderson_depth', 4))
+        self._beta.setValue(getattr(eq, 'beta', 1.0))
 
         # Populate table
         n_comp = len(eq.component_names)
@@ -174,6 +262,10 @@ class EquilibriumPanel(BasePanel):
                 item = QTableWidgetItem(f"{logk:.4g}")
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self._table.setItem(r, n_comp, item)
+
+            self._rebuild_status.setText(
+                f"Loaded: {n_subs} species x {n_comp} components + logK")
+            self._rebuild_status.setStyleSheet("color: #5ca060;")
         else:
             self._table.setRowCount(0)
             self._table.setColumnCount(0)
@@ -183,6 +275,12 @@ class EquilibriumPanel(BasePanel):
         eq = project.equilibrium
         eq.enabled = self.enabled.isChecked()
         eq.component_names = self._components.text().strip().split()
+
+        # Save solver params
+        eq.max_iterations = self._max_iter.value()
+        eq.tolerance = self._tolerance.value()
+        eq.anderson_depth = self._anderson_depth.value()
+        eq.beta = self._beta.value()
 
         n_comp = len(eq.component_names)
         n_subs = self._table.rowCount()

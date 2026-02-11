@@ -163,6 +163,11 @@ class ProjectManager:
         _add_text(eq_el, "enabled", _bool_str(eq.enabled))
         if eq.enabled and eq.component_names:
             _add_text(eq_el, "components", " ".join(eq.component_names))
+            # Solver parameters (informational - C++ uses defaults from code)
+            _add_text(eq_el, "max_iterations", str(eq.max_iterations))
+            _add_text(eq_el, "tolerance", _fmt_float(eq.tolerance))
+            _add_text(eq_el, "anderson_depth", str(eq.anderson_depth))
+            _add_text(eq_el, "beta", _fmt_float(eq.beta))
             # stoichiometry
             st_el = ET.SubElement(eq_el, "stoichiometry")
             for i, row in enumerate(eq.stoichiometry):
@@ -340,6 +345,11 @@ class ProjectManager:
             comp_text = _get(eq_el, "components", "")
             if comp_text:
                 proj.equilibrium.component_names = comp_text.split()
+            # Solver parameters
+            proj.equilibrium.max_iterations = _get_int(eq_el, "max_iterations", 200)
+            proj.equilibrium.tolerance = _get_float(eq_el, "tolerance", 1e-8)
+            proj.equilibrium.anderson_depth = _get_int(eq_el, "anderson_depth", 4)
+            proj.equilibrium.beta = _get_float(eq_el, "beta", 1.0)
             st_el = eq_el.find("stoichiometry")
             if st_el is not None:
                 n_subs = len(proj.substrates)
