@@ -34,6 +34,8 @@ NODE_MICROBIOLOGY = "microbiology"
 NODE_MICROBE = "microbe"            # + index
 NODE_SOLVER = "solver"
 NODE_IO = "io"
+NODE_PARALLEL = "parallel"
+NODE_SWEEP = "sweep"
 NODE_RUN = "run"
 NODE_POSTPROCESS = "postprocess"
 
@@ -80,6 +82,8 @@ ICON_MICROBE   = _make_icon("#d08080", "circle")    # Light red
 ICON_EQUIL     = _make_icon("#a060c0", "diamond")   # Purple eq
 ICON_SOLVER    = _make_icon("#c09040", "triangle")  # Orange solver
 ICON_IO        = _make_icon("#607090", "square")    # Gray IO
+ICON_PARALLEL  = _make_icon("#e08040", "square")    # Orange parallel
+ICON_SWEEP     = _make_icon("#c060c0", "diamond")   # Purple sweep
 ICON_RUN       = _make_icon("#40a040", "triangle")  # Green play
 ICON_POST      = _make_icon("#4080c0", "square")    # Blue post
 
@@ -142,6 +146,14 @@ class ModelTree(QTreeWidget):
         self._io = QTreeWidgetItem(self._root, ["I/O Settings"])
         self._io.setIcon(0, ICON_IO)
         self._io.setData(0, Qt.ItemDataRole.UserRole, (NODE_IO, -1))
+
+        self._parallel = QTreeWidgetItem(self._root, ["Parallel Execution"])
+        self._parallel.setIcon(0, ICON_PARALLEL)
+        self._parallel.setData(0, Qt.ItemDataRole.UserRole, (NODE_PARALLEL, -1))
+
+        self._sweep = QTreeWidgetItem(self._root, ["Parameter Sweep"])
+        self._sweep.setIcon(0, ICON_SWEEP)
+        self._sweep.setData(0, Qt.ItemDataRole.UserRole, (NODE_SWEEP, -1))
 
         self._run = QTreeWidgetItem(self._root, ["Run"])
         self._run.setIcon(0, ICON_RUN)
