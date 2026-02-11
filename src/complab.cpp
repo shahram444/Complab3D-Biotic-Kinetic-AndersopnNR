@@ -251,10 +251,28 @@ int main(int argc, char **argv) {
         if (!eq_component_names.empty()) eqSolver.setComponentNames(eq_component_names);
         if (!eq_stoich_matrix.empty()) eqSolver.setStoichiometryMatrix(eq_stoich_matrix);
         if (!eq_logK_values.empty()) eqSolver.setLogK(eq_logK_values);
-        eqSolver.setMaxIterations(200);
-        eqSolver.setTolerance(1e-10);
-        eqSolver.setAndersonDepth(4);
-        pcout << "  [EQ] Solver configured: Anderson+PCF, tol=1e-10, maxiter=200\n\n";
+
+        // Read solver parameters from XML (with defaults)
+        plint eq_max_iter = 200;
+        T eq_tolerance = 1e-10;
+        plint eq_anderson_depth = 4;
+        T eq_beta = 1.0;
+        try { doc["parameters"]["equilibrium"]["max_iterations"].read(eq_max_iter); }
+        catch (PlbIOException& exception) { eq_max_iter = 200; }
+        try { doc["parameters"]["equilibrium"]["tolerance"].read(eq_tolerance); }
+        catch (PlbIOException& exception) { eq_tolerance = 1e-10; }
+        try { doc["parameters"]["equilibrium"]["anderson_depth"].read(eq_anderson_depth); }
+        catch (PlbIOException& exception) { eq_anderson_depth = 4; }
+        try { doc["parameters"]["equilibrium"]["beta"].read(eq_beta); }
+        catch (PlbIOException& exception) { eq_beta = 1.0; }
+
+        eqSolver.setMaxIterations(eq_max_iter);
+        eqSolver.setTolerance(eq_tolerance);
+        eqSolver.setAndersonDepth(eq_anderson_depth);
+        eqSolver.setBeta(eq_beta);
+        pcout << "  [EQ] Solver configured: Anderson+PCF, tol=" << eq_tolerance
+              << ", maxiter=" << eq_max_iter << ", depth=" << eq_anderson_depth
+              << ", beta=" << eq_beta << "\n\n";
     }
 
     std::string str_inputDir=input_path, str_outputDir=output_path;

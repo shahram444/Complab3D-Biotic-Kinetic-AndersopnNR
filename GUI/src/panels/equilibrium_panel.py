@@ -2,8 +2,9 @@
 
 Matches C++ solver in complab3d_processors_part4_eqsolver.hh:
   - PCF method + Anderson Acceleration
-  - Default: max_iterations=200, tolerance=1e-8, anderson_depth=4
+  - Default: max_iterations=200, tolerance=1e-10, anderson_depth=4
   - Species concentrations via mass action law
+  - Solver params are now read from XML by C++ (with fallback to defaults)
 """
 
 from PySide6.QtWidgets import (
@@ -18,8 +19,9 @@ class EquilibriumPanel(BasePanel):
     """Equilibrium chemistry: enable/disable, component names,
     stoichiometry matrix, and logK values.
 
-    Anderson acceleration solver parameters match the C++ defaults
-    in complab3d_processors_part4_eqsolver.hh.
+    Anderson acceleration solver parameters are read from XML by the
+    C++ solver (complab.cpp) with fallback to class defaults in
+    complab3d_processors_part4_eqsolver.hh.
     """
 
     def __init__(self, parent=None):
@@ -39,22 +41,21 @@ class EquilibriumPanel(BasePanel):
             "PCF method with Anderson Acceleration (Awada et al. 2025).\n"
             "Mass action law: C_i = 10^(logK[i] + sum_j S[i][j]*logC[j])"))
 
-        # Solver parameters section (informational + configurable for XML)
+        # Solver parameters section
         self.add_section("Solver Parameters")
         self.add_widget(self.make_info_label(
-            "These parameters are set in the C++ solver. The defaults below\n"
-            "match complab3d_processors_part4_eqsolver.hh. They are exported\n"
-            "to XML for documentation but currently parsed by C++ with defaults."))
+            "These parameters are exported to XML and read by the C++ solver\n"
+            "(complab.cpp). If not present in XML, C++ uses defaults."))
 
         pform = self.add_form()
         self._max_iter = self.make_spin(200, 1, 10000)
         self._max_iter.setToolTip("Maximum Newton/Anderson iterations per cell.")
         pform.addRow("Max iterations:", self._max_iter)
 
-        self._tolerance = self.make_double_spin(1e-8, 1e-16, 1.0, 12)
+        self._tolerance = self.make_double_spin(1e-10, 1e-16, 1.0, 12)
         self._tolerance.setToolTip(
             "Convergence tolerance for residual norm.\n"
-            "C++ default: 1e-8 (relaxed from 1e-10 for better convergence).")
+            "Default: 1e-10.")
         pform.addRow("Tolerance:", self._tolerance)
 
         self._anderson_depth = self.make_spin(4, 0, 20)
@@ -70,13 +71,18 @@ class EquilibriumPanel(BasePanel):
 
         self.add_section("Components")
         form2 = self.add_form()
-        self._components = self.make_line_edit("", "e.g. HCO3- H+")
+        self._components = self.make_line_edit("", "e.g. HCO3 Hplus")
         self._components.setToolTip(
             "Space-separated list of equilibrium component names.\n"
-            "These are the master species for the mass action law.\n"
-            "Example: HCO3- H+ for carbonate system.")
+            "These must match substrate names exactly as defined in Chemistry.\n"
+            "Example: HCO3 Hplus for carbonate system.")
         self._components.textChanged.connect(self._on_components_changed)
         form2.addRow("Component names:", self._components)
+
+        # Substrate count label (helps user see current state)
+        self._subs_info = QLabel("")
+        self._subs_info.setProperty("info", True)
+        form2.addRow("Substrates:", self._subs_info)
 
         btn_row = QHBoxLayout()
         self._rebuild_btn = self.make_button("Rebuild Matrix", primary=True)
@@ -138,7 +144,7 @@ class EquilibriumPanel(BasePanel):
         comp_text = self._components.text().strip()
         if not comp_text:
             self._rebuild_status.setText(
-                "Enter component names first (e.g. 'HCO3- H+')")
+                "Enter component names first (e.g. 'HCO3 Hplus')")
             self._rebuild_status.setStyleSheet("color: #c75050;")
             return
         comp_names = comp_text.split()
@@ -146,7 +152,8 @@ class EquilibriumPanel(BasePanel):
         n_subs = len(self._substrate_names)
         if n_subs == 0:
             self._rebuild_status.setText(
-                "No substrates defined. Add substrates in the Chemistry panel first.")
+                "No substrates defined yet. Add substrates in the Chemistry panel first,\n"
+                "then return here and click Rebuild Matrix.")
             self._rebuild_status.setStyleSheet("color: #c75050;")
             return
 
@@ -192,6 +199,8 @@ class EquilibriumPanel(BasePanel):
     def set_substrate_names(self, names: list):
         """Called when substrates change in the Chemistry panel."""
         self._substrate_names = list(names)
+        self._subs_info.setText(
+            ", ".join(names) if names else "(none defined)")
 
         # Update the vertical header labels if table has rows
         if self._table.rowCount() > 0:
@@ -232,7 +241,7 @@ class EquilibriumPanel(BasePanel):
 
         # Load solver params (use defaults if not present)
         self._max_iter.setValue(getattr(eq, 'max_iterations', 200))
-        self._tolerance.setValue(getattr(eq, 'tolerance', 1e-8))
+        self._tolerance.setValue(getattr(eq, 'tolerance', 1e-10))
         self._anderson_depth.setValue(getattr(eq, 'anderson_depth', 4))
         self._beta.setValue(getattr(eq, 'beta', 1.0))
 
@@ -240,6 +249,8 @@ class EquilibriumPanel(BasePanel):
         n_comp = len(eq.component_names)
         n_subs = len(project.substrates)
         self._substrate_names = [s.name for s in project.substrates]
+        self._subs_info.setText(
+            ", ".join(self._substrate_names) if self._substrate_names else "(none defined)")
 
         self._table.blockSignals(True)
         if n_comp > 0 and n_subs > 0:
@@ -269,12 +280,17 @@ class EquilibriumPanel(BasePanel):
         else:
             self._table.setRowCount(0)
             self._table.setColumnCount(0)
+            if n_subs > 0 and n_comp == 0:
+                self._rebuild_status.setText(
+                    "No components defined. Enter component names and click Rebuild Matrix.")
+                self._rebuild_status.setStyleSheet("color: #c7a050;")
         self._table.blockSignals(False)
 
     def save_to_project(self, project):
         eq = project.equilibrium
         eq.enabled = self.enabled.isChecked()
-        eq.component_names = self._components.text().strip().split()
+        comp_text = self._components.text().strip()
+        eq.component_names = comp_text.split() if comp_text else []
 
         # Save solver params
         eq.max_iterations = self._max_iter.value()

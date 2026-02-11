@@ -20,25 +20,27 @@ SPLASH_W, SPLASH_H = 680, 440
 
 def _make_splash_pixmap():
     """Try to load splash.png, fall back to professional programmatic splash."""
-    resources = Path(__file__).parent / "gui" / "resources"
+    # Resolve resource paths (works regardless of working directory)
+    gui_dir = Path(__file__).resolve().parent
+    resources = gui_dir / "gui" / "resources"
     splash_path = resources / "splash.png"
     logo_path = resources / "logo.png"
 
     if splash_path.exists():
         raw = QPixmap(str(splash_path))
-        # Scale to consistent size if needed
-        if raw.width() < SPLASH_W:
+        if not raw.isNull() and raw.width() > 0:
+            # Scale splash to fill the canvas while preserving aspect ratio
             pm = QPixmap(SPLASH_W, SPLASH_H)
             pm.fill(QColor("#0d1829"))
             p = QPainter(pm)
             p.setRenderHint(QPainter.RenderHint.Antialiasing)
-            # Center the splash image
-            x = (SPLASH_W - raw.width()) // 2
-            y = max(0, (SPLASH_H - raw.height()) // 2 - 30)
-            p.drawPixmap(x, y, raw)
+            # Scale up to fill width, center vertically
+            scaled = raw.scaledToWidth(
+                SPLASH_W, Qt.TransformationMode.SmoothTransformation)
+            y = (SPLASH_H - scaled.height()) // 2
+            p.drawPixmap(0, y, scaled)
             p.end()
             return pm
-        return raw
 
     # --- Programmatic professional splash ---
     pm = QPixmap(SPLASH_W, SPLASH_H)
@@ -62,11 +64,14 @@ def _make_splash_pixmap():
     # Try to load and draw the logo
     if logo_path.exists():
         logo_pm = QPixmap(str(logo_path))
-        scaled_logo = logo_pm.scaledToHeight(
-            80, Qt.TransformationMode.SmoothTransformation)
-        lx = (SPLASH_W - scaled_logo.width()) // 2
-        p.drawPixmap(lx, 60, scaled_logo)
-        title_y = 160
+        if not logo_pm.isNull():
+            scaled_logo = logo_pm.scaledToHeight(
+                80, Qt.TransformationMode.SmoothTransformation)
+            lx = (SPLASH_W - scaled_logo.width()) // 2
+            p.drawPixmap(lx, 60, scaled_logo)
+            title_y = 160
+        else:
+            title_y = 100
     else:
         title_y = 100
 
@@ -168,7 +173,7 @@ def main():
 
     # Load stylesheet based on theme preference
     theme = config.get("theme", "Dark")
-    styles_dir = Path(__file__).parent / "styles"
+    styles_dir = Path(__file__).resolve().parent / "styles"
     if theme == "Light":
         style_path = styles_dir / "light.qss"
     else:
@@ -183,7 +188,7 @@ def main():
     app.setFont(font)
 
     # Set window icon
-    icon_path = Path(__file__).parent / "gui" / "resources" / "icon.png"
+    icon_path = Path(__file__).resolve().parent / "gui" / "resources" / "icon.png"
     if icon_path.exists():
         from PySide6.QtGui import QIcon
         app.setWindowIcon(QIcon(str(icon_path)))
