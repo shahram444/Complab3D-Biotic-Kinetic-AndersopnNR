@@ -1,8 +1,11 @@
 """Domain configuration panel - grid, geometry (.dat), material numbers + preview."""
 
 import os
+import shutil
 from PySide6.QtWidgets import (
     QFormLayout, QHBoxLayout, QPushButton, QFileDialog,
+    QDialog, QVBoxLayout, QLabel, QComboBox, QDialogButtonBox,
+    QMessageBox,
 )
 from PySide6.QtCore import Signal
 from .base_panel import BasePanel
@@ -71,8 +74,8 @@ class DomainPanel(BasePanel):
         form3.addRow("Filename:", row)
 
         self.add_widget(self.make_info_label(
-            "Geometry file must be a .dat file with integer material numbers.\n"
-            "Format: nx*ny*nz values, one slice per row."))
+            "Browse a .dat file to auto-detect dimensions and copy to input/.\n"
+            "The file must contain integer material numbers (nx*ny*nz values)."))
 
         # Material numbers
         self.add_section("Material Numbers")
@@ -107,22 +110,232 @@ class DomainPanel(BasePanel):
         self.solid.textChanged.connect(self._validate_material_numbers)
         self.bounce_back.textChanged.connect(self._validate_material_numbers)
 
+    # ── Geometry file browsing with auto-detect ─────────────────────
+
     def _browse_geometry(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Select Geometry File", "",
             "DAT Files (*.dat);;All Files (*)")
-        if path:
-            self.geom_file.setText(os.path.basename(path))
-            self._geom_filepath = path
-            nx = self.nx.value()
-            ny = self.ny.value()
-            nz = self.nz.value()
-            try:
-                self.geometry_loaded.emit(path, nx, ny, nz)
-            except Exception:
-                pass
-            # Load preview
-            self._geom_preview.load_geometry(path, nx, ny, nz)
+        if not path:
+            return
+
+        basename = os.path.basename(path)
+        self.geom_file.setText(basename)
+        self._geom_filepath = path
+
+        # Count values and try to auto-detect dimensions
+        total, nz_from_lines = self._analyze_dat_file(path)
+        if total <= 0:
+            QMessageBox.warning(
+                self, "Invalid File",
+                f"Could not read any integer values from:\n{basename}")
+            return
+
+        current_nx = self.nx.value()
+        current_ny = self.ny.value()
+        current_nz = self.nz.value()
+
+        # If current dimensions already match, just keep them
+        if current_nx * current_ny * current_nz == total:
+            self._finish_geometry_load(path, current_nx, current_ny, current_nz)
+            return
+
+        # Try to find valid factorizations
+        factorizations = self._find_factorizations(total, nz_from_lines)
+
+        if not factorizations:
+            QMessageBox.warning(
+                self, "Dimension Detection",
+                f"File has {total:,} values but no valid 3D factorization found.\n"
+                f"Please set nx, ny, nz manually so that nx*ny*nz = {total:,}.")
+            return
+
+        if len(factorizations) == 1:
+            # Only one option - auto-apply
+            nx, ny, nz = factorizations[0]
+            self._apply_dimensions(nx, ny, nz)
+            self._finish_geometry_load(path, nx, ny, nz)
+            return
+
+        # Multiple options - let user choose
+        chosen = self._show_dimension_picker(basename, total, factorizations)
+        if chosen:
+            nx, ny, nz = chosen
+            self._apply_dimensions(nx, ny, nz)
+            self._finish_geometry_load(path, nx, ny, nz)
+
+    def _apply_dimensions(self, nx, ny, nz):
+        """Set the nx, ny, nz spin boxes (block signals to avoid preview thrash)."""
+        self.nx.blockSignals(True)
+        self.ny.blockSignals(True)
+        self.nz.blockSignals(True)
+        self.nx.setValue(nx)
+        self.ny.setValue(ny)
+        self.nz.setValue(nz)
+        self.nx.blockSignals(False)
+        self.ny.blockSignals(False)
+        self.nz.blockSignals(False)
+
+    def _finish_geometry_load(self, path, nx, ny, nz):
+        """Emit signal and load preview after geometry is set."""
+        try:
+            self.geometry_loaded.emit(path, nx, ny, nz)
+        except Exception:
+            pass
+        self._geom_preview.load_geometry(path, nx, ny, nz)
+        self._validate_inputs()
+
+    # ── .dat file analysis ──────────────────────────────────────────
+
+    @staticmethod
+    def _analyze_dat_file(filepath):
+        """Count integer values and detect line structure in a .dat file.
+
+        Returns (total_values, nz_hint) where nz_hint is the consistent
+        tokens-per-line if > 1, or 0 if one-value-per-line / inconsistent.
+        """
+        total = 0
+        tokens_per_line = {}  # count -> frequency
+
+        try:
+            with open(filepath, "r") as f:
+                for line in f:
+                    stripped = line.strip()
+                    if not stripped:
+                        continue
+                    tokens = stripped.split()
+                    n_tokens = len(tokens)
+                    valid = 0
+                    for t in tokens:
+                        try:
+                            int(t)
+                            valid += 1
+                        except ValueError:
+                            pass
+                    total += valid
+                    if valid > 0:
+                        tokens_per_line[valid] = tokens_per_line.get(valid, 0) + 1
+        except Exception:
+            return 0, 0
+
+        # Detect nz from consistent multi-value lines
+        nz_hint = 0
+        if tokens_per_line:
+            # Find the most common token count
+            most_common = max(tokens_per_line, key=tokens_per_line.get)
+            if most_common > 1:
+                # Check if at least 90% of lines have this count
+                total_lines = sum(tokens_per_line.values())
+                if tokens_per_line[most_common] >= total_lines * 0.9:
+                    nz_hint = most_common
+
+        return total, nz_hint
+
+    @staticmethod
+    def _find_factorizations(total, nz_hint=0):
+        """Find valid (nx, ny, nz) triples where nx*ny*nz == total.
+
+        Constraints: all dimensions >= 3 (solver needs at least 3 for ghost nodes).
+        If nz_hint > 0, only consider factorizations with nz == nz_hint.
+        Returns list sorted by how "cubic" the shape is (most balanced first).
+        """
+        if total < 27:  # 3*3*3 minimum
+            return []
+
+        results = []
+        # If nz is known from line structure, constrain it
+        nz_candidates = [nz_hint] if nz_hint > 0 else None
+
+        if nz_candidates is None:
+            # Find all divisors of total for nz
+            nz_candidates = []
+            for nz in range(3, int(total ** (1/3)) + 2):
+                if total % nz == 0:
+                    nz_candidates.append(nz)
+
+        for nz in nz_candidates:
+            if nz < 3 or total % nz != 0:
+                continue
+            remaining = total // nz
+            for ny in range(nz, int(remaining ** 0.5) + 1):
+                if remaining % ny != 0:
+                    continue
+                nx = remaining // ny
+                if nx < 3:
+                    continue
+                # nx >= ny >= nz (canonical ordering, nx is longest axis)
+                results.append((nx, ny, nz))
+
+        # Also add permutations where ny > nx (user might have thin domains)
+        expanded = set()
+        for nx, ny, nz in results:
+            # Add all permutations but keep nz fixed if we had a hint
+            if nz_hint > 0:
+                expanded.add((nx, ny, nz))
+                expanded.add((ny, nx, nz))
+            else:
+                for perm in [(nx, ny, nz), (nx, nz, ny), (ny, nx, nz),
+                             (ny, nz, nx), (nz, nx, ny), (nz, ny, nx)]:
+                    if all(d >= 3 for d in perm):
+                        expanded.add(perm)
+
+        # Sort: prefer most "cubic" (smallest max/min ratio), then nx descending
+        result_list = sorted(expanded,
+                             key=lambda t: (max(t) / max(min(t), 1), -t[0]))
+
+        # Deduplicate and limit to reasonable number
+        return result_list[:20]
+
+    def _show_dimension_picker(self, filename, total, factorizations):
+        """Show a dialog for the user to pick dimensions. Returns (nx, ny, nz) or None."""
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Detect Dimensions")
+        dlg.setMinimumWidth(400)
+        layout = QVBoxLayout(dlg)
+
+        layout.addWidget(QLabel(
+            f"<b>{filename}</b> has <b>{total:,}</b> values.\n"))
+        layout.addWidget(QLabel(
+            "Select the grid dimensions (nx * ny * nz):"))
+
+        combo = QComboBox()
+        for nx, ny, nz in factorizations:
+            combo.addItem(f"nx={nx}  ny={ny}  nz={nz}   ({nx}x{ny}x{nz})")
+        layout.addWidget(combo)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(dlg.accept)
+        buttons.rejected.connect(dlg.reject)
+        layout.addWidget(buttons)
+
+        if dlg.exec() == QDialog.Accepted:
+            idx = combo.currentIndex()
+            if 0 <= idx < len(factorizations):
+                return factorizations[idx]
+        return None
+
+    # ── Copy to input directory ─────────────────────────────────────
+
+    def copy_geometry_to_input(self, input_dir):
+        """Copy the browsed geometry file into the project's input directory.
+
+        Call this from main_window after saving the project, so we know
+        where the input directory is.  Returns the destination path or ''.
+        """
+        if not self._geom_filepath or not os.path.isfile(self._geom_filepath):
+            return ""
+        basename = os.path.basename(self._geom_filepath)
+        dest = os.path.join(input_dir, basename)
+        # Don't copy if already in the right place
+        if os.path.abspath(self._geom_filepath) == os.path.abspath(dest):
+            return dest
+        os.makedirs(input_dir, exist_ok=True)
+        shutil.copy2(self._geom_filepath, dest)
+        self._geom_filepath = dest
+        return dest
+
+    # ── Other helpers ───────────────────────────────────────────────
 
     def _try_load_preview(self):
         """Try to load geometry preview from current settings."""
