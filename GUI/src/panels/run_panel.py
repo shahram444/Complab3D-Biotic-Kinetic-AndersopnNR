@@ -73,6 +73,12 @@ class RunPanel(BasePanel):
         self._progress.setValue(0)
         form.addRow("Progress:", self._progress)
 
+        self._error_detail = QLabel("")
+        self._error_detail.setWordWrap(True)
+        self._error_detail.setStyleSheet("color: #c75050; padding: 4px;")
+        self._error_detail.setVisible(False)
+        form.addRow("", self._error_detail)
+
         # Convergence info
         self.add_section("Convergence")
         conv_form = self.add_form()
@@ -133,9 +139,28 @@ class RunPanel(BasePanel):
             self._status.setText("Completed successfully")
             self._status.setStyleSheet("color: #5ca060;")
             self._phase_lbl.setText("Done")
+            self._error_detail.setText("")
+            self._error_detail.setVisible(False)
         else:
-            self._status.setText(f"Finished (code {return_code})")
+            self._status.setText(f"Failed (code {return_code})")
             self._status.setStyleSheet("color: #c75050;")
+            # Show brief error type from exit code
+            from ..core.simulation_runner import EXIT_CODE_INFO, _UNSIGNED_TO_SIGNED
+            info = EXIT_CODE_INFO.get(return_code)
+            if info is None:
+                signed = _UNSIGNED_TO_SIGNED.get(return_code)
+                if signed is not None:
+                    info = EXIT_CODE_INFO.get(signed)
+            if info is None and return_code > 2**31:
+                info = EXIT_CODE_INFO.get(return_code - 2**32)
+            if info and info["type"] != "Success":
+                self._error_detail.setText(
+                    f"Error: {info['type']}\n{info['reason']}")
+                self._error_detail.setVisible(True)
+            else:
+                self._error_detail.setText(
+                    "See console for error diagnostics.")
+                self._error_detail.setVisible(True)
 
     def on_progress(self, current: int, maximum: int):
         if maximum > 0:
