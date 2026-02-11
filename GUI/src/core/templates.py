@@ -199,7 +199,7 @@ def _planktonic():
     p.microbiology = MicrobiologySettings(
         maximum_biomass_density=100.0,
         thrd_biofilm_fraction=0.1,
-        ca_method="none",
+        ca_method="fraction",
         microbes=[
             Microbe(
                 name="Planktonic_Heterotroph", solver_type="LBM",

@@ -42,12 +42,11 @@ class MicrobiologyPanel(BasePanel):
             "When biomass exceeds max_density * threshold, expansion occurs.")
         gform.addRow("Threshold fraction:", self.thrd_fraction)
 
-        self.ca_method = self.make_combo(["fraction", "half", "none"])
+        self.ca_method = self.make_combo(["fraction", "half"])
         self.ca_method.setToolTip(
             "CA biomass expansion method:\n"
             "  fraction: Proportional distribution\n"
-            "  half: Split equally between parent and child\n"
-            "  none: No CA expansion (for planktonic-only)")
+            "  half: Split equally between parent and child")
         gform.addRow("CA method:", self.ca_method)
 
         # Microbe list
@@ -285,7 +284,7 @@ class MicrobiologyPanel(BasePanel):
         mb = project.microbiology
         self.max_density.setValue(mb.maximum_biomass_density)
         self.thrd_fraction.setValue(mb.thrd_biofilm_fraction)
-        ca_idx = {"fraction": 0, "half": 1, "none": 2}.get(mb.ca_method, 0)
+        ca_idx = {"fraction": 0, "half": 1}.get(mb.ca_method, 0)
         self.ca_method.setCurrentIndex(ca_idx)
         self._microbes = []
         for m in mb.microbes:

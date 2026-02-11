@@ -292,7 +292,10 @@ class ProjectManager:
                 mb_el, "maximum_biomass_density", 100.0)
             proj.microbiology.thrd_biofilm_fraction = _get_float(
                 mb_el, "thrd_biofilm_fraction", 0.1)
-            proj.microbiology.ca_method = _get(mb_el, "CA_method", "fraction")
+            ca_method = _get(mb_el, "CA_method", "fraction")
+            if ca_method not in ("fraction", "half"):
+                ca_method = "fraction"
+            proj.microbiology.ca_method = ca_method
             n_mic = _get_int(mb_el, "number_of_microbes", 0)
 
             # Read material numbers from domain section
