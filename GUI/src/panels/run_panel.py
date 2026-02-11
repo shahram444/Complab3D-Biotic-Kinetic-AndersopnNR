@@ -163,9 +163,14 @@ class RunPanel(BasePanel):
                 self._error_detail.setVisible(True)
 
     def on_progress(self, current: int, maximum: int):
+        _QT_INT_MAX = 2_147_483_647
         if maximum > 0:
+            if maximum > _QT_INT_MAX:
+                scale = _QT_INT_MAX / maximum
+                maximum = _QT_INT_MAX
+                current = min(int(current * scale), _QT_INT_MAX)
             self._progress.setMaximum(maximum)
-            self._progress.setValue(current)
+            self._progress.setValue(min(current, maximum))
 
     def on_convergence(self, solver: str, iteration: int, residual: float):
         """Update convergence residual display + feed to plot."""
