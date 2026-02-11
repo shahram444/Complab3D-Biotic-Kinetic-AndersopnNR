@@ -64,9 +64,12 @@ endif()
 # Palabos Library
 ###############################################################################
 # Set PALABOS_ROOT via -DPALABOS_ROOT=/path/to/palabos or environment variable
+# Default: look for palabos in versionControl/ subdirectory
 if(NOT PALABOS_ROOT)
     if(DEFINED ENV{PALABOS_ROOT})
         set(PALABOS_ROOT $ENV{PALABOS_ROOT})
+    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
+        set(PALABOS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
     else()
         message(FATAL_ERROR "PALABOS_ROOT is not set. Pass -DPALABOS_ROOT=/path/to/palabos-v2.3.0 or set the PALABOS_ROOT environment variable.")
     endif()

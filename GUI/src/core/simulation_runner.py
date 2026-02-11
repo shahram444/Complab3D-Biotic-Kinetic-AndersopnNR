@@ -4,6 +4,7 @@ import os
 import re
 import time
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
@@ -112,11 +113,13 @@ _ERROR_PATTERNS = [
     (re.compile(r"[Ee]rror:\s*could not open\s+(.*)", re.IGNORECASE), "file_missing"),
     (re.compile(r"\[ADE\]\s*ERROR:\s*tau\s*=\s*([0-9.eE+-]+)\s*invalid", re.IGNORECASE), "ade_tau_invalid"),
     (re.compile(r"Error:\s*Updating mask failed", re.IGNORECASE), "mask_update_failed"),
+    (re.compile(r"Element\s+(\S+)\s+not found in XML", re.IGNORECASE), "xml_element_missing"),
     (re.compile(r"[Ss]egmentation fault", re.IGNORECASE), "segfault"),
     (re.compile(r"[Oo]ut of memory", re.IGNORECASE), "oom"),
     (re.compile(r"[Nn]ot enough memory", re.IGNORECASE), "oom"),
     (re.compile(r"NaN|nan|inf\b", re.IGNORECASE), "nan_detected"),
     (re.compile(r"[Dd]iverg", re.IGNORECASE), "divergence"),
+    (re.compile(r"does not match.*num_of", re.IGNORECASE), "vector_length_mismatch"),
     (re.compile(r"[Nn]ot found", re.IGNORECASE), "not_found"),
     (re.compile(r"[Pp]ermission denied", re.IGNORECASE), "permission_denied"),
 ]
@@ -190,6 +193,24 @@ _PATTERN_DIAGNOSTICS = {
             "Check boundary conditions for consistency.",
         ],
     },
+    "xml_element_missing": {
+        "reason": "A required XML element is missing from CompLaB.xml.",
+        "suggestions": [
+            "The solver expects an XML parameter that was not exported.",
+            "Re-save the project (Ctrl+S) and re-export CompLaB.xml before running.",
+            "Check that all microbe/substrate settings are filled in (not left at defaults).",
+            "For biomass_diffusion_coefficients: set values in Microbe > Physical tab.",
+        ],
+    },
+    "vector_length_mismatch": {
+        "reason": "An input vector length does not match the expected count.",
+        "suggestions": [
+            "Check the console output above for which parameter has the wrong length.",
+            "Ensure the number of space-separated values matches the number of microbes or substrates.",
+            "For half_saturation_constants and maximum_uptake_flux: provide one value per substrate.",
+            "For material_number and initial_densities: provide one value per microbe variant.",
+        ],
+    },
     "not_found": {
         "reason": "A required resource was not found.",
         "suggestions": [
@@ -240,6 +261,12 @@ class SimulationRunner(QThread):
         self._cancelled = False
         self._output_buffer = []
 
+    def _log(self, text: str):
+        """Emit to GUI, print to terminal, and buffer for .out file."""
+        self.output_line.emit(text)
+        print(text, flush=True)
+        self._output_buffer.append(text)
+
     def _build_command(self) -> list:
         """Build the command list, with or without MPI."""
         if self._mpi_cmd and self._num_cores > 1:
@@ -280,28 +307,39 @@ class SimulationRunner(QThread):
             })
             return issues
 
-        # 3. Input directory
-        input_dir = os.path.join(self._cwd, "input")
+        # 3. Input directory (use project's input_path setting, not hardcoded)
+        input_rel = "input"
+        if self._project and hasattr(self._project, 'path_settings'):
+            input_rel = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(self._cwd, input_rel)
         if not os.path.isdir(input_dir):
             issues.append({
                 "error": f"Input directory missing: {input_dir}",
-                "reason": "The solver expects an 'input' folder inside the project directory.",
+                "reason": f"The solver expects a '{input_rel}' folder inside the project directory.",
                 "suggestions": [
                     f"Create the folder: {input_dir}",
-                    "Copy your geometry .dat file into this input/ folder.",
+                    "Copy your geometry .dat file into this folder.",
                 ],
             })
 
         # 4. Geometry file
         if self._project:
             geom_name = self._project.domain.geometry_filename
-            if geom_name:
+            if not geom_name:
+                issues.append({
+                    "error": "Geometry filename is empty",
+                    "reason": "No geometry file specified in Domain settings.",
+                    "suggestions": [
+                        "Go to Domain settings and enter a geometry filename (e.g. geometry.dat).",
+                    ],
+                })
+            elif os.path.isdir(input_dir):
                 geom_path = os.path.join(input_dir, geom_name)
-                if os.path.isdir(input_dir) and not os.path.isfile(geom_path):
+                if not os.path.isfile(geom_path):
                     issues.append({
                         "error": f"Geometry file not found: {geom_path}",
                         "reason": (
-                            f"The geometry file '{geom_name}' does not exist in the input/ folder. "
+                            f"The geometry file '{geom_name}' does not exist in the {input_rel}/ folder. "
                             "The solver will crash immediately when it tries to read it."
                         ),
                         "suggestions": [
@@ -310,12 +348,27 @@ class SimulationRunner(QThread):
                             "You can use Tools > Geometry Generator to create a new geometry file.",
                         ],
                     })
-                elif os.path.isfile(geom_path):
+                else:
                     # 5. Geometry dimension check
                     self._check_geometry_dimensions(geom_path, issues)
 
-        # 6. Output directory (create if needed, warn if not writable)
-        output_dir = os.path.join(self._cwd, "output")
+        # 6. XML file (verify it exists after export)
+        xml_path = os.path.join(self._cwd, "CompLaB.xml")
+        if not os.path.isfile(xml_path):
+            issues.append({
+                "error": f"CompLaB.xml not found in {self._cwd}",
+                "reason": "The XML configuration file was not generated.",
+                "suggestions": [
+                    "Save the project (Ctrl+S) before running.",
+                    "Click 'Export CompLaB.xml' in the Run panel.",
+                ],
+            })
+
+        # 7. Output directory (use project's output_path, create if needed)
+        output_rel = "output"
+        if self._project and hasattr(self._project, 'path_settings'):
+            output_rel = self._project.path_settings.output_path or "output"
+        output_dir = os.path.join(self._cwd, output_rel)
         if not os.path.isdir(output_dir):
             try:
                 os.makedirs(output_dir, exist_ok=True)
@@ -404,21 +457,25 @@ class SimulationRunner(QThread):
         for issue in preflight_issues:
             diag = self._format_single_diagnostic(issue)
             self.diagnostic_signal.emit(diag)
-            self.output_line.emit(f"ERROR: {issue['error']}")
-            # Geometry missing or executable missing = blocking
-            if "not found" in issue["error"].lower() or "missing" in issue["error"].lower():
+            self._log(f"ERROR: {issue['error']}")
+            # Block on: missing files, geometry mismatch, or non-integer values
+            err_lower = issue["error"].lower()
+            if ("not found" in err_lower
+                    or "missing" in err_lower
+                    or "mismatch" in err_lower
+                    or "non-integer" in err_lower):
                 blocking = True
 
         if blocking:
-            self.output_line.emit("-" * 60)
-            self.output_line.emit(
+            self._log("-" * 60)
+            self._log(
                 "Simulation aborted due to pre-flight errors. Fix the issues above and try again.")
             self.finished_signal.emit(-1, "Pre-flight check failed")
             return
 
         # Non-blocking warnings
         if preflight_issues:
-            self.output_line.emit(
+            self._log(
                 f"WARNING: {len(preflight_issues)} issue(s) found — simulation may fail. See diagnostics above.")
 
         # XML check
@@ -434,7 +491,7 @@ class SimulationRunner(QThread):
                 ],
             })
             self.diagnostic_signal.emit(diag)
-            self.output_line.emit(f"ERROR: CompLaB.xml not found in {self._cwd}")
+            self._log(f"ERROR: CompLaB.xml not found in {self._cwd}")
             self.finished_signal.emit(-1, "CompLaB.xml not found")
             return
 
@@ -442,10 +499,10 @@ class SimulationRunner(QThread):
         cmd_str = " ".join(cmd)
 
         if self._num_cores > 1:
-            self.output_line.emit(f"MPI: {self._mpi_cmd} with {self._num_cores} cores")
-        self.output_line.emit(f"Command: {cmd_str}")
-        self.output_line.emit(f"Working directory: {self._cwd}")
-        self.output_line.emit("-" * 60)
+            self._log(f"MPI: {self._mpi_cmd} with {self._num_cores} cores")
+        self._log(f"Command: {cmd_str}")
+        self._log(f"Working directory: {self._cwd}")
+        self._log("-" * 60)
 
         self._output_buffer.clear()
         t0 = time.time()
@@ -463,11 +520,10 @@ class SimulationRunner(QThread):
             for line in iter(self._process.stdout.readline, ""):
                 if self._cancelled:
                     self._process.terminate()
-                    self.output_line.emit("-- Simulation cancelled by user --")
+                    self._log("-- Simulation cancelled by user --")
                     break
                 line = line.rstrip("\n")
-                self.output_line.emit(line)
-                self._output_buffer.append(line)
+                self._log(line)
 
                 # Parse iteration progress
                 m = _RE_ITERATION.search(line)
@@ -512,8 +568,7 @@ class SimulationRunner(QThread):
             self._process.stdout.close()
             rc = self._process.wait()
         except Exception as e:
-            self.output_line.emit(f"ERROR: {e}")
-            self._output_buffer.append(f"ERROR: {e}")
+            self._log(f"ERROR: {e}")
             rc = -1
 
         elapsed = time.time() - t0
@@ -527,20 +582,62 @@ class SimulationRunner(QThread):
         else:
             msg = f"Exited with code {rc} after {hrs}h {mins}m {secs}s"
 
-        self.output_line.emit("-" * 60)
-        self.output_line.emit(msg)
+        self._log("-" * 60)
+        self._log(msg)
 
         # Generate error diagnostics for non-zero exit codes
         if rc != 0 and not self._cancelled:
             report = self._build_diagnostic_report(rc)
             self.diagnostic_signal.emit(report)
+            for rline in report.split("\n"):
+                self._log(rline)
 
+        # Save console output to .out file
+        self._save_output_log(rc, elapsed)
+
+        # Clamp rc to signed 32-bit range for Qt Signal(int, str).
+        # Windows can return unsigned 32-bit exit codes (e.g. 0xC0000374)
+        # that overflow a signed int and crash the signal emit.
+        if rc > 0x7FFFFFFF:
+            rc = rc - 0x100000000  # reinterpret as signed 32-bit
         self.finished_signal.emit(rc, msg)
 
     def cancel(self):
         self._cancelled = True
         if self._process and self._process.poll() is None:
             self._process.terminate()
+
+    # ── Output log saving ─────────────────────────────────────────
+
+    def _save_output_log(self, rc: int, elapsed: float):
+        """Save the captured console output to a timestamped .out file."""
+        try:
+            output_rel = "output"
+            if self._project and hasattr(self._project, 'path_settings'):
+                output_rel = self._project.path_settings.output_path or "output"
+            output_dir = os.path.join(self._cwd, output_rel)
+            os.makedirs(output_dir, exist_ok=True)
+
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            out_path = os.path.join(output_dir, f"simulation_{stamp}.out")
+
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(f"CompLaB3D Simulation Log\n")
+                f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Working directory: {self._cwd}\n")
+                f.write(f"Exit code: {rc}\n")
+                f.write(f"Elapsed: {elapsed:.1f}s\n")
+                f.write("=" * 60 + "\n\n")
+                for line in self._output_buffer:
+                    f.write(line + "\n")
+
+            msg = f"Console log saved to: {out_path}"
+            self.output_line.emit(msg)
+            print(msg, flush=True)
+        except Exception as e:
+            msg = f"WARNING: Could not save .out log: {e}"
+            self.output_line.emit(msg)
+            print(msg, flush=True)
 
     # ── Diagnostic report generation ───────────────────────────────
 
