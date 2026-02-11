@@ -24,8 +24,8 @@ class ConsoleWidget(QWidget):
 
         # Header bar
         header = QHBoxLayout()
-        header.setContentsMargins(8, 4, 8, 4)
-        lbl = QLabel("Console Output")
+        header.setContentsMargins(6, 2, 6, 2)
+        lbl = QLabel("Messages")
         lbl.setProperty("subheading", True)
         header.addWidget(lbl)
         header.addStretch()
@@ -69,11 +69,11 @@ class ConsoleWidget(QWidget):
             # Auto-color based on content
             lower = text.lower()
             if "error" in lower or "fail" in lower or "terminat" in lower:
-                html = f'<span style="color:#e06c75">{_escape(text)}</span>'
+                html = f'<span style="color:#c75050">{_escape(text)}</span>'
             elif "warning" in lower or "warn" in lower:
-                html = f'<span style="color:#e5c07b">{_escape(text)}</span>'
+                html = f'<span style="color:#c0a040">{_escape(text)}</span>'
             elif text.startswith("--") or text.startswith("=="):
-                html = f'<span style="color:#8cb4d8">{_escape(text)}</span>'
+                html = f'<span style="color:#6a9ec7">{_escape(text)}</span>'
             else:
                 html = _escape(text)
 
@@ -99,11 +99,11 @@ class ConsoleWidget(QWidget):
 
     def log_error(self, text: str):
         ts = datetime.datetime.now().strftime("%H:%M:%S")
-        self.append(f"[{ts}] ERROR: {text}", "#e06c75")
+        self.append(f"[{ts}] ERROR: {text}", "#c75050")
 
     def log_success(self, text: str):
         ts = datetime.datetime.now().strftime("%H:%M:%S")
-        self.append(f"[{ts}] {text}", "#98c379")
+        self.append(f"[{ts}] {text}", "#5ca060")
 
     def set_progress(self, current: int, maximum: int):
         if maximum > 0:

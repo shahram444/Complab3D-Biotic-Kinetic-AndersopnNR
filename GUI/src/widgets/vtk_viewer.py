@@ -4,9 +4,10 @@ Supports:
   - .vti (vtkImageData) files: substrate concentrations, biomass, masks
   - .vtk legacy files: flow velocity fields, pressure, geometry
   - .dat binary geometry files
-  - Filters: threshold, contour, slice
+  - Filters: threshold, contour, slice, clip, glyph (vectors)
   - Controls: scalar range, colormap, opacity, scale factor
   - View presets: axis-aligned and isometric
+  - Remove loaded geometry
 """
 
 import struct
@@ -16,8 +17,9 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QComboBox, QSlider, QDoubleSpinBox, QCheckBox, QFileDialog,
     QFormLayout, QSplitter, QFrame, QTabWidget, QSizePolicy,
+    QToolButton, QSpacerItem,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 
 try:
     import vtk
@@ -29,6 +31,8 @@ except ImportError:
 
 class VTKViewer(QWidget):
     """3D viewer with ParaView-like filter and display controls."""
+
+    geometry_removed = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -66,35 +70,60 @@ class VTKViewer(QWidget):
 
         # ── Top toolbar ─────────────────────────────────────────────
         toolbar = QHBoxLayout()
-        toolbar.setContentsMargins(4, 4, 4, 4)
+        toolbar.setContentsMargins(6, 3, 6, 3)
         toolbar.setSpacing(4)
 
-        open_btn = QPushButton("Open VTK")
-        open_btn.setFixedWidth(80)
+        # File operations
+        open_btn = QPushButton("Open")
+        open_btn.setToolTip("Open VTK file (.vti, .vtk)")
+        open_btn.setFixedHeight(26)
         open_btn.clicked.connect(self._open_file_dialog)
         toolbar.addWidget(open_btn)
 
+        self._remove_btn = QPushButton("Remove")
+        self._remove_btn.setToolTip("Remove loaded geometry from scene")
+        self._remove_btn.setFixedHeight(26)
+        self._remove_btn.setProperty("danger", True)
+        self._remove_btn.setEnabled(False)
+        self._remove_btn.clicked.connect(self._remove_geometry)
+        toolbar.addWidget(self._remove_btn)
+
+        sep1 = QFrame()
+        sep1.setFrameShape(QFrame.Shape.VLine)
+        sep1.setFixedWidth(2)
+        toolbar.addWidget(sep1)
+
+        # Array selector
         toolbar.addWidget(QLabel("Array:"))
         self._array_combo = QComboBox()
         self._array_combo.setMinimumWidth(120)
+        self._array_combo.setFixedHeight(24)
         self._array_combo.currentTextChanged.connect(self._on_array_changed)
         toolbar.addWidget(self._array_combo)
 
+        sep2 = QFrame()
+        sep2.setFrameShape(QFrame.Shape.VLine)
+        sep2.setFixedWidth(2)
+        toolbar.addWidget(sep2)
+
+        # View presets
         toolbar.addWidget(QLabel("View:"))
         self._view_combo = QComboBox()
         self._view_combo.addItems(["+X", "-X", "+Y", "-Y", "+Z", "-Z", "Iso"])
         self._view_combo.setCurrentText("Iso")
+        self._view_combo.setFixedHeight(24)
         self._view_combo.currentTextChanged.connect(self._set_view)
         toolbar.addWidget(self._view_combo)
 
-        reset_btn = QPushButton("Reset")
-        reset_btn.setFixedWidth(60)
+        reset_btn = QPushButton("Fit")
+        reset_btn.setToolTip("Fit view to data")
+        reset_btn.setFixedHeight(26)
         reset_btn.clicked.connect(self._reset_view)
         toolbar.addWidget(reset_btn)
 
         toolbar.addStretch()
 
-        self._file_label = QLabel("")
+        self._file_label = QLabel("No file loaded")
         self._file_label.setProperty("info", True)
         toolbar.addWidget(self._file_label)
 
@@ -106,8 +135,8 @@ class VTKViewer(QWidget):
         # VTK render widget
         self._vtk_widget = QVTKRenderWindowInteractor(self)
         self._renderer = vtk.vtkRenderer()
-        self._renderer.SetBackground(0.12, 0.12, 0.14)
-        self._renderer.SetBackground2(0.18, 0.18, 0.20)
+        self._renderer.SetBackground(0.15, 0.15, 0.17)
+        self._renderer.SetBackground2(0.22, 0.22, 0.25)
         self._renderer.GradientBackgroundOn()
         self._vtk_widget.GetRenderWindow().AddRenderer(self._renderer)
         body.addWidget(self._vtk_widget)
@@ -124,17 +153,18 @@ class VTKViewer(QWidget):
         # ── Controls sidebar ────────────────────────────────────────
         controls = QWidget()
         controls.setMinimumWidth(200)
-        controls.setMaximumWidth(280)
+        controls.setMaximumWidth(260)
         ctrl_layout = QVBoxLayout(controls)
-        ctrl_layout.setContentsMargins(4, 4, 4, 4)
-        ctrl_layout.setSpacing(4)
+        ctrl_layout.setContentsMargins(2, 2, 2, 2)
+        ctrl_layout.setSpacing(2)
 
         ctrl_tabs = QTabWidget()
 
         # -- Display tab --
         display_w = QWidget()
         dform = QFormLayout(display_w)
-        dform.setVerticalSpacing(6)
+        dform.setContentsMargins(6, 6, 6, 6)
+        dform.setVerticalSpacing(5)
 
         self._colormap_combo = QComboBox()
         self._colormap_combo.addItems([
@@ -176,54 +206,77 @@ class VTKViewer(QWidget):
         self._show_scalar_bar.toggled.connect(self._on_scalar_bar_toggled)
         dform.addRow("", self._show_scalar_bar)
 
+        self._wireframe_mode = QCheckBox("Wireframe")
+        self._wireframe_mode.toggled.connect(self._on_wireframe_changed)
+        dform.addRow("", self._wireframe_mode)
+
         ctrl_tabs.addTab(display_w, "Display")
 
         # -- Filters tab --
         filter_w = QWidget()
         fform = QFormLayout(filter_w)
-        fform.setVerticalSpacing(6)
+        fform.setContentsMargins(6, 6, 6, 6)
+        fform.setVerticalSpacing(5)
 
         self._filter_combo = QComboBox()
         self._filter_combo.addItems([
-            "None", "Threshold", "Contour", "Slice X", "Slice Y", "Slice Z",
+            "None", "Threshold", "Contour", "Clip",
+            "Slice X", "Slice Y", "Slice Z",
         ])
         self._filter_combo.currentTextChanged.connect(self._on_filter_changed)
         fform.addRow("Filter:", self._filter_combo)
 
+        self._filter_label1 = QLabel("Value / Min:")
         self._filter_val1 = QDoubleSpinBox()
         self._filter_val1.setDecimals(6)
         self._filter_val1.setRange(-1e20, 1e20)
         self._filter_val1.valueChanged.connect(self._apply_filter)
-        fform.addRow("Value / Min:", self._filter_val1)
+        fform.addRow(self._filter_label1, self._filter_val1)
 
+        self._filter_label2 = QLabel("Max:")
         self._filter_val2 = QDoubleSpinBox()
         self._filter_val2.setDecimals(6)
         self._filter_val2.setRange(-1e20, 1e20)
         self._filter_val2.setValue(1.0)
         self._filter_val2.valueChanged.connect(self._apply_filter)
-        fform.addRow("Max:", self._filter_val2)
+        fform.addRow(self._filter_label2, self._filter_val2)
 
         self._slice_pos = QSlider(Qt.Orientation.Horizontal)
         self._slice_pos.setRange(0, 100)
         self._slice_pos.setValue(50)
         self._slice_pos.valueChanged.connect(self._apply_filter)
-        fform.addRow("Slice pos:", self._slice_pos)
+        self._slice_label = QLabel("Position:")
+        fform.addRow(self._slice_label, self._slice_pos)
 
-        apply_btn = QPushButton("Apply Filter")
+        self._invert_filter = QCheckBox("Invert")
+        self._invert_filter.toggled.connect(self._apply_filter)
+        fform.addRow("", self._invert_filter)
+
+        btn_row = QHBoxLayout()
+        apply_btn = QPushButton("Apply")
         apply_btn.setProperty("primary", True)
         apply_btn.clicked.connect(self._apply_filter)
-        fform.addRow("", apply_btn)
+        btn_row.addWidget(apply_btn)
 
-        clear_btn = QPushButton("Clear Filter")
+        clear_btn = QPushButton("Clear")
         clear_btn.clicked.connect(self._clear_filter)
-        fform.addRow("", clear_btn)
+        btn_row.addWidget(clear_btn)
+        fform.addRow("", btn_row)
+
+        # Initialize filter control visibility
+        self._filter_val2.setEnabled(False)
+        self._filter_label2.setEnabled(False)
+        self._slice_pos.setEnabled(False)
+        self._slice_label.setEnabled(False)
+        self._invert_filter.setEnabled(False)
 
         ctrl_tabs.addTab(filter_w, "Filters")
 
         # -- Transform tab --
         xform_w = QWidget()
         xform_form = QFormLayout(xform_w)
-        xform_form.setVerticalSpacing(6)
+        xform_form.setContentsMargins(6, 6, 6, 6)
+        xform_form.setVerticalSpacing(5)
 
         self._scale_x = QDoubleSpinBox()
         self._scale_x.setRange(0.01, 100.0)
@@ -246,15 +299,47 @@ class VTKViewer(QWidget):
         self._scale_z.valueChanged.connect(self._on_scale_changed)
         xform_form.addRow("Scale Z:", self._scale_z)
 
+        self._uniform_scale = QCheckBox("Uniform scale")
+        self._uniform_scale.setChecked(True)
+        xform_form.addRow("", self._uniform_scale)
+
         reset_scale_btn = QPushButton("Reset Scale")
         reset_scale_btn.clicked.connect(self._reset_scale)
         xform_form.addRow("", reset_scale_btn)
 
         ctrl_tabs.addTab(xform_w, "Transform")
 
+        # -- Info tab --
+        info_w = QWidget()
+        info_form = QFormLayout(info_w)
+        info_form.setContentsMargins(6, 6, 6, 6)
+        info_form.setVerticalSpacing(5)
+
+        self._info_file = QLabel("--")
+        self._info_file.setWordWrap(True)
+        info_form.addRow("File:", self._info_file)
+
+        self._info_dims = QLabel("--")
+        info_form.addRow("Dimensions:", self._info_dims)
+
+        self._info_points = QLabel("--")
+        info_form.addRow("Points:", self._info_points)
+
+        self._info_cells = QLabel("--")
+        info_form.addRow("Cells:", self._info_cells)
+
+        self._info_arrays = QLabel("--")
+        self._info_arrays.setWordWrap(True)
+        info_form.addRow("Arrays:", self._info_arrays)
+
+        self._info_range = QLabel("--")
+        info_form.addRow("Scalar range:", self._info_range)
+
+        ctrl_tabs.addTab(info_w, "Info")
+
         ctrl_layout.addWidget(ctrl_tabs, 1)
         body.addWidget(controls)
-        body.setSizes([600, 220])
+        body.setSizes([600, 210])
 
         layout.addWidget(body, 1)
         self._vtk_widget.Initialize()
@@ -289,7 +374,6 @@ class VTKViewer(QWidget):
             n_cells = nx * ny * nz
             expected = n_cells * 4  # int32
             if len(raw) >= expected:
-                # Binary int32 format
                 img = vtk.vtkImageData()
                 img.SetDimensions(nx, ny, nz)
                 img.SetSpacing(1.0, 1.0, 1.0)
@@ -302,7 +386,6 @@ class VTKViewer(QWidget):
                 img.GetPointData().SetScalars(arr)
                 self._display_dataset(img, filepath)
             else:
-                # Try text format
                 with open(filepath, "r") as f:
                     values = [int(x) for line in f for x in line.split()]
                 if len(values) >= n_cells:
@@ -322,6 +405,10 @@ class VTKViewer(QWidget):
     def add_output_files(self, directory: str):
         """Scan a directory for VTK files and add to array combo."""
         pass  # handled by post-process panel
+
+    def has_data(self) -> bool:
+        """Return True if a dataset is currently loaded."""
+        return self._reader_output is not None
 
     # ── File loading internals ──────────────────────────────────────
 
@@ -348,6 +435,7 @@ class VTKViewer(QWidget):
         self._current_file = filepath
         self._reader_output = dataset
         self._file_label.setText(Path(filepath).name)
+        self._remove_btn.setEnabled(True)
 
         # Enumerate available arrays
         self._data_arrays = []
@@ -396,6 +484,14 @@ class VTKViewer(QWidget):
             self._range_min.blockSignals(False)
             self._range_max.blockSignals(False)
 
+            # Update filter value defaults to match data range
+            self._filter_val1.blockSignals(True)
+            self._filter_val2.blockSignals(True)
+            self._filter_val1.setValue(scalar_range[0])
+            self._filter_val2.setValue(scalar_range[1])
+            self._filter_val1.blockSignals(False)
+            self._filter_val2.blockSignals(False)
+
             # Scalar bar
             self._add_scalar_bar(mapper)
         else:
@@ -410,6 +506,56 @@ class VTKViewer(QWidget):
         self._renderer.AddActor(self._actor)
         self._renderer.ResetCamera()
         self._vtk_widget.GetRenderWindow().Render()
+
+        # Update info tab
+        self._update_info(dataset, filepath)
+
+    def _update_info(self, dataset, filepath):
+        """Populate the Info tab with dataset metadata."""
+        self._info_file.setText(Path(filepath).name)
+
+        if hasattr(dataset, 'GetDimensions'):
+            dims = dataset.GetDimensions()
+            self._info_dims.setText(f"{dims[0]} x {dims[1]} x {dims[2]}")
+        else:
+            self._info_dims.setText("--")
+
+        self._info_points.setText(f"{dataset.GetNumberOfPoints():,}")
+        self._info_cells.setText(f"{dataset.GetNumberOfCells():,}")
+
+        arr_names = []
+        pd = dataset.GetPointData()
+        for i in range(pd.GetNumberOfArrays()):
+            name = pd.GetArrayName(i)
+            if name:
+                arr_names.append(name)
+        cd = dataset.GetCellData()
+        for i in range(cd.GetNumberOfArrays()):
+            name = cd.GetArrayName(i)
+            if name:
+                arr_names.append(name)
+        self._info_arrays.setText(", ".join(arr_names) if arr_names else "--")
+
+        sr = dataset.GetScalarRange()
+        self._info_range.setText(f"[{sr[0]:.6g}, {sr[1]:.6g}]")
+
+    # ── Remove geometry ─────────────────────────────────────────────
+
+    def _remove_geometry(self):
+        """Remove all loaded geometry from the scene."""
+        self.clear_scene()
+        self._current_file = ""
+        self._file_label.setText("No file loaded")
+        self._remove_btn.setEnabled(False)
+        self._info_file.setText("--")
+        self._info_dims.setText("--")
+        self._info_points.setText("--")
+        self._info_cells.setText("--")
+        self._info_arrays.setText("--")
+        self._info_range.setText("--")
+        self._range_min.setValue(0)
+        self._range_max.setValue(1)
+        self.geometry_removed.emit()
 
     # ── Array / Colormap / Display ──────────────────────────────────
 
@@ -438,8 +584,18 @@ class VTKViewer(QWidget):
             self._range_max.setValue(scalar_range[1])
             self._range_min.blockSignals(False)
             self._range_max.blockSignals(False)
+
+            # Update filter defaults too
+            self._filter_val1.blockSignals(True)
+            self._filter_val2.blockSignals(True)
+            self._filter_val1.setValue(scalar_range[0])
+            self._filter_val2.setValue(scalar_range[1])
+            self._filter_val1.blockSignals(False)
+            self._filter_val2.blockSignals(False)
+
             if self._scalar_bar:
                 self._scalar_bar.SetTitle(name)
+            self._info_range.setText(f"[{scalar_range[0]:.6g}, {scalar_range[1]:.6g}]")
             self._vtk_widget.GetRenderWindow().Render()
 
     def _setup_colormap(self, mapper):
@@ -456,7 +612,6 @@ class VTKViewer(QWidget):
             lut.SetHueRange(0.667, 0.0)
             lut.Build()
         elif cmap_name == "Coolwarm":
-            # Blue -> White -> Red diverging
             ctf = vtk.vtkColorTransferFunction()
             ctf.AddRGBPoint(0.0, 0.231, 0.298, 0.753)
             ctf.AddRGBPoint(0.5, 0.865, 0.865, 0.865)
@@ -541,6 +696,15 @@ class VTKViewer(QWidget):
                 prop.EdgeVisibilityOff()
             self._vtk_widget.GetRenderWindow().Render()
 
+    def _on_wireframe_changed(self, checked):
+        if self._actor:
+            prop = self._actor.GetProperty()
+            if checked:
+                prop.SetRepresentationToWireframe()
+            else:
+                prop.SetRepresentationToSurface()
+            self._vtk_widget.GetRenderWindow().Render()
+
     def _on_scalar_bar_toggled(self, checked):
         if self._scalar_bar:
             self._scalar_bar.SetVisibility(checked)
@@ -568,8 +732,34 @@ class VTKViewer(QWidget):
     # ── Filters ─────────────────────────────────────────────────────
 
     def _on_filter_changed(self, text):
-        self._filter_val2.setEnabled(text == "Threshold")
-        self._slice_pos.setEnabled(text.startswith("Slice"))
+        """Update filter control visibility based on selected filter type."""
+        is_threshold = (text == "Threshold")
+        is_contour = (text == "Contour")
+        is_clip = (text == "Clip")
+        is_slice = text.startswith("Slice")
+
+        # Value 1 is used by threshold (min), contour (iso-value), clip (value)
+        self._filter_val1.setEnabled(text != "None")
+        self._filter_label1.setEnabled(text != "None")
+        if is_contour:
+            self._filter_label1.setText("Iso-value:")
+        elif is_threshold:
+            self._filter_label1.setText("Min:")
+        elif is_clip:
+            self._filter_label1.setText("Value:")
+        else:
+            self._filter_label1.setText("Value:")
+
+        # Value 2 only for threshold (max)
+        self._filter_val2.setEnabled(is_threshold)
+        self._filter_label2.setEnabled(is_threshold)
+
+        # Slice position slider
+        self._slice_pos.setEnabled(is_slice)
+        self._slice_label.setEnabled(is_slice)
+
+        # Invert for threshold and clip
+        self._invert_filter.setEnabled(is_threshold or is_clip)
 
     def _apply_filter(self):
         if not self._reader_output:
@@ -578,6 +768,11 @@ class VTKViewer(QWidget):
 
         filter_type = self._filter_combo.currentText()
         if filter_type == "None":
+            # Restore main actor opacity
+            if self._actor:
+                self._actor.GetProperty().SetOpacity(
+                    self._opacity_slider.value() / 100.0)
+                self._vtk_widget.GetRenderWindow().Render()
             return
 
         ds = self._reader_output
@@ -588,9 +783,16 @@ class VTKViewer(QWidget):
             filt.SetInputData(ds)
             low = self._filter_val1.value()
             high = self._filter_val2.value()
-            filt.SetLowerThreshold(low)
-            filt.SetUpperThreshold(high)
-            filt.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_BETWEEN)
+            if self._invert_filter.isChecked():
+                # Invert: show values outside range
+                filt.SetLowerThreshold(low)
+                filt.SetUpperThreshold(high)
+                filt.SetInvert(True)
+                filt.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_BETWEEN)
+            else:
+                filt.SetLowerThreshold(low)
+                filt.SetUpperThreshold(high)
+                filt.SetThresholdFunction(vtk.vtkThreshold.THRESHOLD_BETWEEN)
             filt.Update()
             filtered = filt.GetOutput()
 
@@ -598,6 +800,15 @@ class VTKViewer(QWidget):
             filt = vtk.vtkContourFilter()
             filt.SetInputData(ds)
             filt.SetValue(0, self._filter_val1.value())
+            filt.Update()
+            filtered = filt.GetOutput()
+
+        elif filter_type == "Clip":
+            filt = vtk.vtkClipDataSet()
+            filt.SetInputData(ds)
+            filt.SetValue(self._filter_val1.value())
+            if self._invert_filter.isChecked():
+                filt.InsideOutOn()
             filt.Update()
             filtered = filt.GetOutput()
 
@@ -643,6 +854,12 @@ class VTKViewer(QWidget):
                 self._actor.GetProperty().SetOpacity(0.15)
 
             self._vtk_widget.GetRenderWindow().Render()
+        elif filtered and filtered.GetNumberOfCells() == 0:
+            # Filter produced empty result - restore main actor
+            if self._actor:
+                self._actor.GetProperty().SetOpacity(
+                    self._opacity_slider.value() / 100.0)
+                self._vtk_widget.GetRenderWindow().Render()
 
     def _clear_filter(self):
         self._clear_filter_actor()
@@ -660,6 +877,19 @@ class VTKViewer(QWidget):
     # ── Transform / Scale ───────────────────────────────────────────
 
     def _on_scale_changed(self):
+        if self._uniform_scale.isChecked():
+            sender = self.sender()
+            val = sender.value() if sender else 1.0
+            self._scale_x.blockSignals(True)
+            self._scale_y.blockSignals(True)
+            self._scale_z.blockSignals(True)
+            self._scale_x.setValue(val)
+            self._scale_y.setValue(val)
+            self._scale_z.setValue(val)
+            self._scale_x.blockSignals(False)
+            self._scale_y.blockSignals(False)
+            self._scale_z.blockSignals(False)
+
         if self._actor:
             self._actor.SetScale(
                 self._scale_x.value(),
@@ -707,7 +937,7 @@ class VTKViewer(QWidget):
     def _open_file_dialog(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Open VTK File", "",
-            "VTK Files (*.vti *.vtk);;All Files (*)")
+            "VTK Files (*.vti *.vtk);;DAT Files (*.dat);;All Files (*)")
         if path:
             self.load_file(path)
 
