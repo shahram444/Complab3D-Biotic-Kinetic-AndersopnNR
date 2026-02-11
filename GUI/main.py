@@ -1,4 +1,4 @@
-"""CompLaB Studio 2.0 - Entry Point with Splash Screen"""
+"""CompLaB Studio 2.1 - Entry Point with Splash Screen"""
 
 import sys
 import os
@@ -14,27 +14,34 @@ from PySide6.QtCore import Qt, QTimer, QRect, QRectF
 
 from src.config import AppConfig
 
-# Splash screen dimensions (scaled up for modern displays)
+# Splash screen dimensions
 SPLASH_W, SPLASH_H = 680, 440
+
+# Version constant used everywhere
+VERSION = "2.1.0"
 
 
 def _make_splash_pixmap():
-    """Try to load splash.png, fall back to professional programmatic splash."""
-    # Resolve resource paths (works regardless of working directory)
+    """Build the splash screen pixmap.
+
+    Priority:
+      1. splash.png (full splash image) — scaled to fill canvas
+      2. logo.png drawn on dark gradient background
+      3. Pure programmatic splash (no images)
+    """
     gui_dir = Path(__file__).resolve().parent
     resources = gui_dir / "gui" / "resources"
     splash_path = resources / "splash.png"
     logo_path = resources / "logo.png"
 
+    # ── Try splash.png first ──────────────────────────────────────
     if splash_path.exists():
         raw = QPixmap(str(splash_path))
         if not raw.isNull() and raw.width() > 0:
-            # Scale splash to fill the canvas while preserving aspect ratio
             pm = QPixmap(SPLASH_W, SPLASH_H)
             pm.fill(QColor("#0d1829"))
             p = QPainter(pm)
             p.setRenderHint(QPainter.RenderHint.Antialiasing)
-            # Scale up to fill width, center vertically
             scaled = raw.scaledToWidth(
                 SPLASH_W, Qt.TransformationMode.SmoothTransformation)
             y = (SPLASH_H - scaled.height()) // 2
@@ -42,7 +49,7 @@ def _make_splash_pixmap():
             p.end()
             return pm
 
-    # --- Programmatic professional splash ---
+    # ── Programmatic splash ───────────────────────────────────────
     pm = QPixmap(SPLASH_W, SPLASH_H)
     p = QPainter(pm)
     p.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -56,24 +63,21 @@ def _make_splash_pixmap():
 
     # Subtle grid pattern
     p.setPen(QPen(QColor(255, 255, 255, 8), 1))
-    for x in range(0, SPLASH_W, 40):
-        p.drawLine(x, 0, x, SPLASH_H)
-    for y in range(0, SPLASH_H, 40):
-        p.drawLine(0, y, SPLASH_W, y)
+    for gx in range(0, SPLASH_W, 40):
+        p.drawLine(gx, 0, gx, SPLASH_H)
+    for gy in range(0, SPLASH_H, 40):
+        p.drawLine(0, gy, SPLASH_W, gy)
 
-    # Try to load and draw the logo
+    # Try to draw the logo
+    title_y = 100
     if logo_path.exists():
         logo_pm = QPixmap(str(logo_path))
-        if not logo_pm.isNull():
+        if not logo_pm.isNull() and logo_pm.width() > 0:
             scaled_logo = logo_pm.scaledToHeight(
-                80, Qt.TransformationMode.SmoothTransformation)
+                100, Qt.TransformationMode.SmoothTransformation)
             lx = (SPLASH_W - scaled_logo.width()) // 2
-            p.drawPixmap(lx, 60, scaled_logo)
-            title_y = 160
-        else:
-            title_y = 100
-    else:
-        title_y = 100
+            p.drawPixmap(lx, 40, scaled_logo)
+            title_y = 155
 
     # Title: "CompLaB"
     p.setPen(QColor("#e94560"))
@@ -82,12 +86,12 @@ def _make_splash_pixmap():
     p.drawText(QRect(0, title_y, SPLASH_W, 50),
                Qt.AlignmentFlag.AlignCenter, "CompLaB")
 
-    # Subtitle: "Studio"
+    # Subtitle: "Studio 2.1"
     p.setPen(QColor("#ffffff"))
     sub_font = QFont("Segoe UI", 20, QFont.Weight.Light)
     p.setFont(sub_font)
     p.drawText(QRect(0, title_y + 48, SPLASH_W, 36),
-               Qt.AlignmentFlag.AlignCenter, "Studio 2.0")
+               Qt.AlignmentFlag.AlignCenter, f"Studio {VERSION}")
 
     # Tagline
     p.setPen(QColor("#6a8aaa"))
@@ -145,7 +149,7 @@ def _draw_credits(splash):
     p.setPen(QColor("#4a6a8a"))
     f2 = QFont("Segoe UI", 8)
     p.setFont(f2)
-    p.drawText(pm.width() - 80, 18, "v2.0.0")
+    p.drawText(pm.width() - 80, 18, f"v{VERSION}")
 
     p.end()
     splash.setPixmap(pm)
@@ -154,7 +158,7 @@ def _draw_credits(splash):
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("CompLaB Studio")
-    app.setApplicationVersion("2.0.0")
+    app.setApplicationVersion(VERSION)
     app.setOrganizationName("MeileLab-UGA")
 
     config = AppConfig()
@@ -164,14 +168,20 @@ def main():
     splash = QSplashScreen(splash_pm, Qt.WindowType.WindowStaysOnTopHint)
     _draw_credits(splash)
     splash.show()
+    splash.raise_()
+    splash.activateWindow()
     splash.showMessage(
         "  Loading CompLaB Studio...",
         Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft,
         QColor("#8aa0b8"),
     )
+    # Force multiple repaints so user sees the splash on all platforms
+    app.processEvents()
+    splash.repaint()
+    time.sleep(0.2)
     app.processEvents()
 
-    # Load stylesheet based on theme preference
+    # Load stylesheet
     theme = config.get("theme", "Dark")
     styles_dir = Path(__file__).resolve().parent / "styles"
     if theme == "Light":
@@ -181,7 +191,7 @@ def main():
     if style_path.exists():
         app.setStyleSheet(style_path.read_text(encoding="utf-8"))
 
-    # Apply configured font size (default 9pt matches COMSOL)
+    # Apply configured font size
     font_size = config.get("font_size", 9)
     font = QFont("Segoe UI", font_size)
     font.setStyleStrategy(QFont.StyleStrategy.PreferQuality)
@@ -202,9 +212,16 @@ def main():
 
     from src.main_window import CompLaBMainWindow
     window = CompLaBMainWindow()
+    app.processEvents()
 
-    # Keep splash visible for a brief moment so user sees it
-    QTimer.singleShot(2200, lambda: (splash.finish(window), window.show()))
+    # Show splash for at least 3 seconds so user can read it
+    splash.showMessage(
+        "  Ready.",
+        Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft,
+        QColor("#8aa0b8"),
+    )
+    app.processEvents()
+    QTimer.singleShot(3000, lambda: (splash.finish(window), window.show()))
 
     sys.exit(app.exec())
 
