@@ -37,6 +37,7 @@
 #include "palabos3D.hh"
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 
@@ -1225,11 +1226,16 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
         }
 
         if (useEquilibrium) {
-            // Parse component names
+            // Parse component names (space-separated string, e.g. "HCO3 Hplus")
             try {
-                std::vector<std::string> components;
-                doc["parameters"]["equilibrium"]["components"].read(components);
-                eq_component_names = components;
+                std::string comp_str;
+                doc["parameters"]["equilibrium"]["components"].read(comp_str);
+                // Split by whitespace
+                std::istringstream iss(comp_str);
+                std::string name;
+                while (iss >> name) {
+                    eq_component_names.push_back(name);
+                }
                 pcout << "Equilibrium components (" << eq_component_names.size() << "): ";
                 for (const auto& name : eq_component_names) { pcout << name << " "; }
                 pcout << std::endl;
