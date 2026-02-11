@@ -1,4 +1,4 @@
-"""Domain configuration panel - grid, geometry (.dat), material numbers."""
+"""Domain configuration panel - grid, geometry (.dat), material numbers + preview."""
 
 import os
 from PySide6.QtWidgets import (
@@ -7,15 +7,17 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal
 from .base_panel import BasePanel
 from ..widgets.collapsible_section import CollapsibleSection
+from ..widgets.geometry_preview import GeometryPreviewWidget
 
 
 class DomainPanel(BasePanel):
-    """Domain grid dimensions, geometry file, and material numbers."""
+    """Domain grid dimensions, geometry file, material numbers, and 2D preview."""
 
     geometry_loaded = Signal(str, int, int, int)  # filepath, nx, ny, nz
 
     def __init__(self, parent=None):
         super().__init__("Domain Settings", parent)
+        self._geom_filepath = ""
         self._build_ui()
 
     def _build_ui(self):
@@ -88,6 +90,12 @@ class DomainPanel(BasePanel):
             "Microbe material numbers are set in the Microbiology section.\n"
             "CA biofilm can use multiple numbers (e.g., '3 6' for core + fringe)."))
 
+        # Geometry 2D slice preview
+        self.add_section("Geometry Preview")
+        self._geom_preview = GeometryPreviewWidget()
+        self._geom_preview.setMinimumHeight(250)
+        self.add_widget(self._geom_preview)
+
         self.add_stretch()
 
     def _browse_geometry(self):
@@ -96,13 +104,24 @@ class DomainPanel(BasePanel):
             "DAT Files (*.dat);;All Files (*)")
         if path:
             self.geom_file.setText(os.path.basename(path))
+            self._geom_filepath = path
+            nx = self.nx.value()
+            ny = self.ny.value()
+            nz = self.nz.value()
             try:
-                nx = self.nx.value()
-                ny = self.ny.value()
-                nz = self.nz.value()
                 self.geometry_loaded.emit(path, nx, ny, nz)
             except Exception:
                 pass
+            # Load preview
+            self._geom_preview.load_geometry(path, nx, ny, nz)
+
+    def _try_load_preview(self):
+        """Try to load geometry preview from current settings."""
+        if self._geom_filepath and os.path.isfile(self._geom_filepath):
+            self._geom_preview.load_geometry(
+                self._geom_filepath,
+                self.nx.value(), self.ny.value(), self.nz.value(),
+            )
 
     def load_from_project(self, project):
         d = project.domain
