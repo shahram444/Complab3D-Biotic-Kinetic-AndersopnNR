@@ -565,6 +565,11 @@ class SimulationRunner(QThread):
             report = self._build_diagnostic_report(rc)
             self.diagnostic_signal.emit(report)
 
+        # Clamp rc to signed 32-bit range for Qt Signal(int, str).
+        # Windows can return unsigned 32-bit exit codes (e.g. 0xC0000374)
+        # that overflow a signed int and crash the signal emit.
+        if rc > 0x7FFFFFFF:
+            rc = rc - 0x100000000  # reinterpret as signed 32-bit
         self.finished_signal.emit(rc, msg)
 
     def cancel(self):
