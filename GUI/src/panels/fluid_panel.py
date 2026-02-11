@@ -49,6 +49,32 @@ class FluidPanel(BasePanel):
             "the initial flow simulation."))
         self.add_stretch()
 
+        # Real-time validation
+        self.tau.valueChanged.connect(self._validate_tau)
+        self.delta_P.valueChanged.connect(self._validate_delta_P)
+
+    def _validate_tau(self):
+        val = self.tau.value()
+        if val <= 0.5:
+            self.set_validation(self.tau, "error",
+                                "tau must be > 0.5 for LBM stability.")
+        elif val > 1.5:
+            self.set_validation(self.tau, "warning",
+                                "tau > 1.5 may cause slow convergence.")
+        else:
+            self.clear_validation(self.tau)
+
+    def _validate_delta_P(self):
+        val = self.delta_P.value()
+        if val < 0:
+            self.set_validation(self.delta_P, "error",
+                                "Pressure gradient cannot be negative.")
+        elif val > 0.1:
+            self.set_validation(self.delta_P, "warning",
+                                "High pressure gradient may cause instability.")
+        else:
+            self.clear_validation(self.delta_P)
+
     def load_from_project(self, project):
         f = project.fluid
         self.delta_P.setValue(f.delta_P)
