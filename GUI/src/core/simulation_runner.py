@@ -4,6 +4,7 @@ import os
 import re
 import time
 import subprocess
+from datetime import datetime
 from pathlib import Path
 
 from PySide6.QtCore import QThread, Signal
@@ -565,6 +566,9 @@ class SimulationRunner(QThread):
             report = self._build_diagnostic_report(rc)
             self.diagnostic_signal.emit(report)
 
+        # Save console output to .out file
+        self._save_output_log(rc, elapsed)
+
         # Clamp rc to signed 32-bit range for Qt Signal(int, str).
         # Windows can return unsigned 32-bit exit codes (e.g. 0xC0000374)
         # that overflow a signed int and crash the signal emit.
@@ -576,6 +580,34 @@ class SimulationRunner(QThread):
         self._cancelled = True
         if self._process and self._process.poll() is None:
             self._process.terminate()
+
+    # ── Output log saving ─────────────────────────────────────────
+
+    def _save_output_log(self, rc: int, elapsed: float):
+        """Save the captured console output to a timestamped .out file."""
+        try:
+            output_rel = "output"
+            if self._project and hasattr(self._project, 'path_settings'):
+                output_rel = self._project.path_settings.output_path or "output"
+            output_dir = os.path.join(self._cwd, output_rel)
+            os.makedirs(output_dir, exist_ok=True)
+
+            stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            out_path = os.path.join(output_dir, f"simulation_{stamp}.out")
+
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(f"CompLaB3D Simulation Log\n")
+                f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write(f"Working directory: {self._cwd}\n")
+                f.write(f"Exit code: {rc}\n")
+                f.write(f"Elapsed: {elapsed:.1f}s\n")
+                f.write("=" * 60 + "\n\n")
+                for line in self._output_buffer:
+                    f.write(line + "\n")
+
+            self.output_line.emit(f"Console log saved to: {out_path}")
+        except Exception as e:
+            self.output_line.emit(f"WARNING: Could not save .out log: {e}")
 
     # ── Diagnostic report generation ───────────────────────────────
 
