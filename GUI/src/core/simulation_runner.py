@@ -113,11 +113,13 @@ _ERROR_PATTERNS = [
     (re.compile(r"[Ee]rror:\s*could not open\s+(.*)", re.IGNORECASE), "file_missing"),
     (re.compile(r"\[ADE\]\s*ERROR:\s*tau\s*=\s*([0-9.eE+-]+)\s*invalid", re.IGNORECASE), "ade_tau_invalid"),
     (re.compile(r"Error:\s*Updating mask failed", re.IGNORECASE), "mask_update_failed"),
+    (re.compile(r"Element\s+(\S+)\s+not found in XML", re.IGNORECASE), "xml_element_missing"),
     (re.compile(r"[Ss]egmentation fault", re.IGNORECASE), "segfault"),
     (re.compile(r"[Oo]ut of memory", re.IGNORECASE), "oom"),
     (re.compile(r"[Nn]ot enough memory", re.IGNORECASE), "oom"),
     (re.compile(r"NaN|nan|inf\b", re.IGNORECASE), "nan_detected"),
     (re.compile(r"[Dd]iverg", re.IGNORECASE), "divergence"),
+    (re.compile(r"does not match.*num_of", re.IGNORECASE), "vector_length_mismatch"),
     (re.compile(r"[Nn]ot found", re.IGNORECASE), "not_found"),
     (re.compile(r"[Pp]ermission denied", re.IGNORECASE), "permission_denied"),
 ]
@@ -189,6 +191,24 @@ _PATTERN_DIAGNOSTICS = {
             "Reduce pressure drop (delta_P) to lower the Reynolds number.",
             "Increase maximum iterations to give the solver more time.",
             "Check boundary conditions for consistency.",
+        ],
+    },
+    "xml_element_missing": {
+        "reason": "A required XML element is missing from CompLaB.xml.",
+        "suggestions": [
+            "The solver expects an XML parameter that was not exported.",
+            "Re-save the project (Ctrl+S) and re-export CompLaB.xml before running.",
+            "Check that all microbe/substrate settings are filled in (not left at defaults).",
+            "For biomass_diffusion_coefficients: set values in Microbe > Physical tab.",
+        ],
+    },
+    "vector_length_mismatch": {
+        "reason": "An input vector length does not match the expected count.",
+        "suggestions": [
+            "Check the console output above for which parameter has the wrong length.",
+            "Ensure the number of space-separated values matches the number of microbes or substrates.",
+            "For half_saturation_constants and maximum_uptake_flux: provide one value per substrate.",
+            "For material_number and initial_densities: provide one value per microbe variant.",
         ],
     },
     "not_found": {
