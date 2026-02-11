@@ -246,10 +246,7 @@ class CompLaBMainWindow(QMainWindow):
             lambda: self._viewer.reset_view())
 
         act_clear_scene = view_menu.addAction("Clear 3D Scene")
-        act_clear_scene.triggered.connect(
-            lambda: self._viewer._remove_geometry()
-            if hasattr(self._viewer, '_remove_geometry')
-            else self._viewer.clear_scene())
+        act_clear_scene.triggered.connect(self._clear_3d_scene)
 
         # ─── Help ───
         help_menu = mb.addMenu("&Help")
@@ -551,6 +548,10 @@ class CompLaBMainWindow(QMainWindow):
 
     def _toggle_console(self):
         self._console.setVisible(not self._console.isVisible())
+
+    def _clear_3d_scene(self):
+        """Remove all data from the 3D viewer."""
+        self._viewer._remove_geometry()
 
     # ── Dialogs ─────────────────────────────────────────────────────
 

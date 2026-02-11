@@ -81,7 +81,7 @@ class PreferencesDialog(QDialog):
 
         self._font_size = QSpinBox()
         self._font_size.setRange(8, 18)
-        self._font_size.setValue(self._config.get("font_size", 10))
+        self._font_size.setValue(self._config.get("font_size", 9))
         self._font_size.setSuffix(" pt")
 
         self._max_console = QSpinBox()
@@ -100,7 +100,7 @@ class PreferencesDialog(QDialog):
         df.addRow("Max console lines:", self._max_console)
         df.addRow("Theme:", self._theme_combo)
 
-        note = QLabel("All changes are applied immediately.")
+        note = QLabel("Theme and font changes apply immediately on save.")
         note.setProperty("info", True)
         df.addRow("", note)
 
@@ -136,8 +136,9 @@ class PreferencesDialog(QDialog):
         if d:
             self._proj_dir.setText(d)
 
-    def _apply_theme(self, theme_name):
-        """Apply theme stylesheet immediately."""
+    @staticmethod
+    def apply_theme(theme_name):
+        """Apply theme stylesheet immediately with full repolish."""
         app = QApplication.instance()
         if not app:
             return
@@ -147,9 +148,19 @@ class PreferencesDialog(QDialog):
         else:
             style_path = styles_dir / "theme.qss"
         if style_path.exists():
-            app.setStyleSheet(style_path.read_text(encoding="utf-8"))
+            qss = style_path.read_text(encoding="utf-8")
+            # Clear then reapply to force full repaint
+            app.setStyleSheet("")
+            app.processEvents()
+            app.setStyleSheet(qss)
+            # Force repolish on all top-level widgets
+            for w in app.topLevelWidgets():
+                w.style().unpolish(w)
+                w.style().polish(w)
+                w.update()
 
-    def _apply_font(self, size):
+    @staticmethod
+    def apply_font(size):
         """Apply font size immediately."""
         app = QApplication.instance()
         if not app:
@@ -168,11 +179,10 @@ class PreferencesDialog(QDialog):
         self._config.set("theme", self._theme_combo.currentText())
         self._config.save()
 
-        # Apply live
-        self._apply_font(self._font_size.value())
-        self._apply_theme(self._theme_combo.currentText())
+        # Apply live - font first, then theme
+        self.apply_font(self._font_size.value())
+        self.apply_theme(self._theme_combo.currentText())
         self.accept()
 
     def _cancel(self):
-        # Revert if theme was previewed
         self.reject()
