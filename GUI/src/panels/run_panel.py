@@ -101,10 +101,10 @@ class RunPanel(BasePanel):
         self._stop_btn.setEnabled(False)
         if return_code == 0:
             self._status.setText("Completed successfully")
-            self._status.setStyleSheet("color: #98c379;")
+            self._status.setStyleSheet("color: #5ca060;")
         else:
             self._status.setText(f"Finished (code {return_code})")
-            self._status.setStyleSheet("color: #e06c75;")
+            self._status.setStyleSheet("color: #c75050;")
 
     def on_progress(self, current: int, maximum: int):
         if maximum > 0:
@@ -114,8 +114,8 @@ class RunPanel(BasePanel):
     def show_validation(self, errors: list):
         if not errors:
             self._validation_lbl.setText("Configuration is valid.")
-            self._validation_lbl.setStyleSheet("color: #98c379;")
+            self._validation_lbl.setStyleSheet("color: #5ca060;")
         else:
             text = "Validation errors:\n" + "\n".join(f"  - {e}" for e in errors)
             self._validation_lbl.setText(text)
-            self._validation_lbl.setStyleSheet("color: #e06c75;")
+            self._validation_lbl.setStyleSheet("color: #c75050;")
