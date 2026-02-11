@@ -1,4 +1,4 @@
-"""Run panel - simulation execution controls."""
+"""Run panel - simulation execution controls with convergence plot."""
 
 import time
 from PySide6.QtWidgets import (
@@ -7,10 +7,11 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, QTimer
 from .base_panel import BasePanel
+from ..widgets.convergence_plot import ConvergencePlotWidget
 
 
 class RunPanel(BasePanel):
-    """Run controls: validate, start, stop simulation."""
+    """Run controls: validate, start, stop simulation + live convergence plot."""
 
     run_requested = Signal()
     stop_requested = Signal()
@@ -89,6 +90,12 @@ class RunPanel(BasePanel):
         self._phase_lbl.setWordWrap(True)
         conv_form.addRow("Phase:", self._phase_lbl)
 
+        # Live convergence plot
+        self.add_section("Convergence Plot")
+        self._conv_plot = ConvergencePlotWidget()
+        self._conv_plot.setMinimumHeight(180)
+        self.add_widget(self._conv_plot)
+
         self.add_stretch()
 
     def _on_run(self):
@@ -100,6 +107,7 @@ class RunPanel(BasePanel):
         self._ns_residual.setText("-")
         self._ade_residual.setText("-")
         self._phase_lbl.setText("Starting...")
+        self._conv_plot.clear()
         self._start_time = time.time()
         self._timer.start(1000)
         self.run_requested.emit()
@@ -120,6 +128,7 @@ class RunPanel(BasePanel):
         self._timer.stop()
         self._run_btn.setEnabled(True)
         self._stop_btn.setEnabled(False)
+        self._conv_plot.force_redraw()
         if return_code == 0:
             self._status.setText("Completed successfully")
             self._status.setStyleSheet("color: #5ca060;")
@@ -134,12 +143,13 @@ class RunPanel(BasePanel):
             self._progress.setValue(current)
 
     def on_convergence(self, solver: str, iteration: int, residual: float):
-        """Update convergence residual display."""
+        """Update convergence residual display + feed to plot."""
         text = f"{residual:.3e}  (iT={iteration})"
         if solver == "NS":
             self._ns_residual.setText(text)
         elif solver == "ADE":
             self._ade_residual.setText(text)
+        self._conv_plot.add_point(solver, iteration, residual)
 
     def on_phase_changed(self, phase: str):
         """Update phase display."""
