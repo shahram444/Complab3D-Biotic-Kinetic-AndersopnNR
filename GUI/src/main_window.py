@@ -1,4 +1,4 @@
-"""CompLaB Studio 2.0 - COMSOL-Style Main Window.
+"""CompLaB Studio 2.1 - COMSOL-Style Main Window.
 
 4-panel layout:
   Left:   Model Builder tree (navigation)
@@ -53,7 +53,7 @@ class CompLaBMainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("CompLaB Studio 2.0")
+        self.setWindowTitle("CompLaB Studio 2.1")
         self.setMinimumSize(1200, 800)
         self.resize(1400, 900)
 
@@ -78,7 +78,7 @@ class CompLaBMainWindow(QMainWindow):
             self._auto_save_timer.start(interval)
 
         self._load_project_to_panels()
-        self._console.log_info("CompLaB Studio 2.0 ready.")
+        self._console.log_info("CompLaB Studio 2.1 ready.")
 
     # ── Panel setup ─────────────────────────────────────────────────
 
@@ -400,7 +400,7 @@ class CompLaBMainWindow(QMainWindow):
     def _update_title(self):
         name = self._project.name or "Untitled"
         mod = " *" if self._modified else ""
-        self.setWindowTitle(f"CompLaB Studio 2.0 - {name}{mod}")
+        self.setWindowTitle(f"CompLaB Studio 2.1 - {name}{mod}")
 
     # ── File actions ────────────────────────────────────────────────
 
