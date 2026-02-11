@@ -261,6 +261,12 @@ class SimulationRunner(QThread):
         self._cancelled = False
         self._output_buffer = []
 
+    def _log(self, text: str):
+        """Emit to GUI, print to terminal, and buffer for .out file."""
+        self.output_line.emit(text)
+        print(text, flush=True)
+        self._output_buffer.append(text)
+
     def _build_command(self) -> list:
         """Build the command list, with or without MPI."""
         if self._mpi_cmd and self._num_cores > 1:
@@ -451,7 +457,7 @@ class SimulationRunner(QThread):
         for issue in preflight_issues:
             diag = self._format_single_diagnostic(issue)
             self.diagnostic_signal.emit(diag)
-            self.output_line.emit(f"ERROR: {issue['error']}")
+            self._log(f"ERROR: {issue['error']}")
             # Block on: missing files, geometry mismatch, or non-integer values
             err_lower = issue["error"].lower()
             if ("not found" in err_lower
@@ -461,15 +467,15 @@ class SimulationRunner(QThread):
                 blocking = True
 
         if blocking:
-            self.output_line.emit("-" * 60)
-            self.output_line.emit(
+            self._log("-" * 60)
+            self._log(
                 "Simulation aborted due to pre-flight errors. Fix the issues above and try again.")
             self.finished_signal.emit(-1, "Pre-flight check failed")
             return
 
         # Non-blocking warnings
         if preflight_issues:
-            self.output_line.emit(
+            self._log(
                 f"WARNING: {len(preflight_issues)} issue(s) found — simulation may fail. See diagnostics above.")
 
         # XML check
@@ -485,7 +491,7 @@ class SimulationRunner(QThread):
                 ],
             })
             self.diagnostic_signal.emit(diag)
-            self.output_line.emit(f"ERROR: CompLaB.xml not found in {self._cwd}")
+            self._log(f"ERROR: CompLaB.xml not found in {self._cwd}")
             self.finished_signal.emit(-1, "CompLaB.xml not found")
             return
 
@@ -493,10 +499,10 @@ class SimulationRunner(QThread):
         cmd_str = " ".join(cmd)
 
         if self._num_cores > 1:
-            self.output_line.emit(f"MPI: {self._mpi_cmd} with {self._num_cores} cores")
-        self.output_line.emit(f"Command: {cmd_str}")
-        self.output_line.emit(f"Working directory: {self._cwd}")
-        self.output_line.emit("-" * 60)
+            self._log(f"MPI: {self._mpi_cmd} with {self._num_cores} cores")
+        self._log(f"Command: {cmd_str}")
+        self._log(f"Working directory: {self._cwd}")
+        self._log("-" * 60)
 
         self._output_buffer.clear()
         t0 = time.time()
@@ -514,11 +520,10 @@ class SimulationRunner(QThread):
             for line in iter(self._process.stdout.readline, ""):
                 if self._cancelled:
                     self._process.terminate()
-                    self.output_line.emit("-- Simulation cancelled by user --")
+                    self._log("-- Simulation cancelled by user --")
                     break
                 line = line.rstrip("\n")
-                self.output_line.emit(line)
-                self._output_buffer.append(line)
+                self._log(line)
 
                 # Parse iteration progress
                 m = _RE_ITERATION.search(line)
@@ -563,8 +568,7 @@ class SimulationRunner(QThread):
             self._process.stdout.close()
             rc = self._process.wait()
         except Exception as e:
-            self.output_line.emit(f"ERROR: {e}")
-            self._output_buffer.append(f"ERROR: {e}")
+            self._log(f"ERROR: {e}")
             rc = -1
 
         elapsed = time.time() - t0
@@ -578,13 +582,15 @@ class SimulationRunner(QThread):
         else:
             msg = f"Exited with code {rc} after {hrs}h {mins}m {secs}s"
 
-        self.output_line.emit("-" * 60)
-        self.output_line.emit(msg)
+        self._log("-" * 60)
+        self._log(msg)
 
         # Generate error diagnostics for non-zero exit codes
         if rc != 0 and not self._cancelled:
             report = self._build_diagnostic_report(rc)
             self.diagnostic_signal.emit(report)
+            for rline in report.split("\n"):
+                self._log(rline)
 
         # Save console output to .out file
         self._save_output_log(rc, elapsed)
@@ -625,9 +631,13 @@ class SimulationRunner(QThread):
                 for line in self._output_buffer:
                     f.write(line + "\n")
 
-            self.output_line.emit(f"Console log saved to: {out_path}")
+            msg = f"Console log saved to: {out_path}"
+            self.output_line.emit(msg)
+            print(msg, flush=True)
         except Exception as e:
-            self.output_line.emit(f"WARNING: Could not save .out log: {e}")
+            msg = f"WARNING: Could not save .out log: {e}"
+            self.output_line.emit(msg)
+            print(msg, flush=True)
 
     # ── Diagnostic report generation ───────────────────────────────
 
