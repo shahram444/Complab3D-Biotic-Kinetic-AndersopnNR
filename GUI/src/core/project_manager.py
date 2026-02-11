@@ -28,7 +28,7 @@ class ProjectManager:
     def save_project(project: CompLaBProject, filepath: str) -> None:
         data = _project_to_dict(project)
         data["_meta"] = {
-            "version": "2.0",
+            "version": "2.1",
             "saved": datetime.datetime.now().isoformat(),
         }
         with open(filepath, "w") as f:

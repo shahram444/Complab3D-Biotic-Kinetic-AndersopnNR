@@ -35,7 +35,7 @@ class AboutDialog(QDialog):
         layout.addWidget(title)
         
         # Version
-        version = QLabel("Version 1.0.0")
+        version = QLabel("Version 2.1.0")
         version.setAlignment(Qt.AlignCenter)
         version.setStyleSheet("color: #888;")
         layout.addWidget(version)
