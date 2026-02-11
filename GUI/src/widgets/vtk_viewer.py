@@ -82,11 +82,18 @@ class VTKViewer(QWidget):
         open_btn.clicked.connect(self._open_file_dialog)
         toolbar.addWidget(open_btn)
 
-        self._remove_btn = QPushButton("\u2716 Remove Loaded")
+        self._remove_btn = QPushButton("\u2716 Remove VTK")
         self._remove_btn.setToolTip(
-            "Remove loaded VTK data from the 3D viewer (Delete key)")
+            "Remove loaded VTK data from the 3D viewer\n"
+            "Shortcut: Delete key")
         self._remove_btn.setFixedHeight(28)
         self._remove_btn.setProperty("danger", True)
+        self._remove_btn.setStyleSheet(
+            "QPushButton { background-color: #5a2020; color: #e8a0a0; "
+            "border: 1px solid #8a3030; padding: 2px 8px; }"
+            "QPushButton:hover { background-color: #7a2020; }"
+            "QPushButton:disabled { background-color: #2a2020; color: #5a4040; "
+            "border: 1px solid #3a2020; }")
         self._remove_btn.setEnabled(False)
         self._remove_btn.clicked.connect(self._remove_geometry)
         toolbar.addWidget(self._remove_btn)
