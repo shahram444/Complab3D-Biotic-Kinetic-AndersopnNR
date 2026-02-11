@@ -405,8 +405,12 @@ class SimulationRunner(QThread):
             diag = self._format_single_diagnostic(issue)
             self.diagnostic_signal.emit(diag)
             self.output_line.emit(f"ERROR: {issue['error']}")
-            # Geometry missing or executable missing = blocking
-            if "not found" in issue["error"].lower() or "missing" in issue["error"].lower():
+            # Block on: missing files, geometry mismatch, or non-integer values
+            err_lower = issue["error"].lower()
+            if ("not found" in err_lower
+                    or "missing" in err_lower
+                    or "mismatch" in err_lower
+                    or "non-integer" in err_lower):
                 blocking = True
 
         if blocking:
