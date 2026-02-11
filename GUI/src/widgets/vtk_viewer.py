@@ -7,7 +7,7 @@ Supports:
   - Filters: threshold, contour, slice, clip, glyph (vectors)
   - Controls: scalar range, colormap, opacity, scale factor
   - View presets: axis-aligned and isometric
-  - Remove loaded geometry
+  - Remove loaded geometry (button + menu + keyboard shortcut)
 """
 
 import struct
@@ -17,9 +17,10 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QComboBox, QSlider, QDoubleSpinBox, QCheckBox, QFileDialog,
     QFormLayout, QSplitter, QFrame, QTabWidget, QSizePolicy,
-    QToolButton, QSpacerItem,
+    QToolButton, QSpacerItem, QMenu,
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QAction, QKeySequence
 
 try:
     import vtk
@@ -44,6 +45,7 @@ class VTKViewer(QWidget):
         self._current_file = ""
         self._renderer = None
         self._vtk_widget = None
+        self._loaded_files = []  # track multiple loaded files
         self._setup_ui()
 
     def _setup_ui(self):
@@ -74,19 +76,26 @@ class VTKViewer(QWidget):
         toolbar.setSpacing(4)
 
         # File operations
-        open_btn = QPushButton("Open")
-        open_btn.setToolTip("Open VTK file (.vti, .vtk)")
-        open_btn.setFixedHeight(26)
+        open_btn = QPushButton("\u2750 Open VTK")
+        open_btn.setToolTip("Open VTK file (.vti, .vtk, .dat)")
+        open_btn.setFixedHeight(28)
         open_btn.clicked.connect(self._open_file_dialog)
         toolbar.addWidget(open_btn)
 
-        self._remove_btn = QPushButton("Remove")
-        self._remove_btn.setToolTip("Remove loaded geometry from scene")
-        self._remove_btn.setFixedHeight(26)
+        self._remove_btn = QPushButton("\u2716 Remove Loaded")
+        self._remove_btn.setToolTip(
+            "Remove loaded VTK data from the 3D viewer (Delete key)")
+        self._remove_btn.setFixedHeight(28)
         self._remove_btn.setProperty("danger", True)
         self._remove_btn.setEnabled(False)
         self._remove_btn.clicked.connect(self._remove_geometry)
         toolbar.addWidget(self._remove_btn)
+
+        # Delete key shortcut for remove
+        self._remove_action = QAction("Remove Loaded VTK", self)
+        self._remove_action.setShortcut(QKeySequence(Qt.Key.Key_Delete))
+        self._remove_action.triggered.connect(self._remove_geometry)
+        self.addAction(self._remove_action)
 
         sep1 = QFrame()
         sep1.setFrameShape(QFrame.Shape.VLine)
@@ -117,7 +126,7 @@ class VTKViewer(QWidget):
 
         reset_btn = QPushButton("Fit")
         reset_btn.setToolTip("Fit view to data")
-        reset_btn.setFixedHeight(26)
+        reset_btn.setFixedHeight(28)
         reset_btn.clicked.connect(self._reset_view)
         toolbar.addWidget(reset_btn)
 
@@ -128,6 +137,10 @@ class VTKViewer(QWidget):
         toolbar.addWidget(self._file_label)
 
         layout.addLayout(toolbar)
+
+        # Context menu for the viewer
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_context_menu)
 
         # ── Main area: viewer + controls sidebar ────────────────────
         body = QSplitter(Qt.Orientation.Horizontal)
@@ -539,12 +552,46 @@ class VTKViewer(QWidget):
         sr = dataset.GetScalarRange()
         self._info_range.setText(f"[{sr[0]:.6g}, {sr[1]:.6g}]")
 
+    # ── Context menu ──────────────────────────────────────────────
+
+    def _show_context_menu(self, pos):
+        """Right-click context menu for the 3D viewer."""
+        menu = QMenu(self)
+        act_open = menu.addAction("Open VTK File...")
+        act_open.triggered.connect(self._open_file_dialog)
+        menu.addSeparator()
+
+        act_remove = menu.addAction("Remove Loaded VTK")
+        act_remove.setEnabled(self._reader_output is not None)
+        act_remove.triggered.connect(self._remove_geometry)
+
+        act_clear_filter = menu.addAction("Clear Filter")
+        act_clear_filter.triggered.connect(self._clear_filter)
+        menu.addSeparator()
+
+        act_fit = menu.addAction("Fit View")
+        act_fit.triggered.connect(self._reset_view)
+
+        view_sub = menu.addMenu("View Preset")
+        for d in ["+X", "-X", "+Y", "-Y", "+Z", "-Z", "Iso"]:
+            a = view_sub.addAction(d)
+            a.triggered.connect(lambda checked, dd=d: self._set_view(dd))
+
+        menu.addSeparator()
+        act_rescale = menu.addAction("Rescale to Data")
+        act_rescale.triggered.connect(self._rescale_to_data)
+
+        menu.exec(self.mapToGlobal(pos))
+
     # ── Remove geometry ─────────────────────────────────────────────
 
     def _remove_geometry(self):
         """Remove all loaded geometry from the scene."""
+        if not self._reader_output and not self._actor:
+            return
         self.clear_scene()
         self._current_file = ""
+        self._loaded_files.clear()
         self._file_label.setText("No file loaded")
         self._remove_btn.setEnabled(False)
         self._info_file.setText("--")
@@ -555,6 +602,8 @@ class VTKViewer(QWidget):
         self._info_range.setText("--")
         self._range_min.setValue(0)
         self._range_max.setValue(1)
+        if self._renderer:
+            self._vtk_widget.GetRenderWindow().Render()
         self.geometry_removed.emit()
 
     # ── Array / Colormap / Display ──────────────────────────────────

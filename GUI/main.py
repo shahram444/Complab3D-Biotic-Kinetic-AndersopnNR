@@ -6,62 +6,141 @@ import time
 from pathlib import Path
 
 from PySide6.QtWidgets import QApplication, QSplashScreen
-from PySide6.QtGui import QFont, QPixmap, QPainter, QColor
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import (
+    QFont, QPixmap, QPainter, QColor, QLinearGradient,
+    QPen, QBrush,
+)
+from PySide6.QtCore import Qt, QTimer, QRect, QRectF
 
 from src.config import AppConfig
 
+# Splash screen dimensions (scaled up for modern displays)
+SPLASH_W, SPLASH_H = 680, 440
+
 
 def _make_splash_pixmap():
-    """Try to load splash.png, fall back to programmatic splash."""
+    """Try to load splash.png, fall back to professional programmatic splash."""
     resources = Path(__file__).parent / "gui" / "resources"
     splash_path = resources / "splash.png"
-    if splash_path.exists():
-        return QPixmap(str(splash_path))
+    logo_path = resources / "logo.png"
 
-    # Fallback: create a programmatic splash
-    pm = QPixmap(640, 400)
-    pm.fill(QColor("#0f1a2e"))
+    if splash_path.exists():
+        raw = QPixmap(str(splash_path))
+        # Scale to consistent size if needed
+        if raw.width() < SPLASH_W:
+            pm = QPixmap(SPLASH_W, SPLASH_H)
+            pm.fill(QColor("#0d1829"))
+            p = QPainter(pm)
+            p.setRenderHint(QPainter.RenderHint.Antialiasing)
+            # Center the splash image
+            x = (SPLASH_W - raw.width()) // 2
+            y = max(0, (SPLASH_H - raw.height()) // 2 - 30)
+            p.drawPixmap(x, y, raw)
+            p.end()
+            return pm
+        return raw
+
+    # --- Programmatic professional splash ---
+    pm = QPixmap(SPLASH_W, SPLASH_H)
     p = QPainter(pm)
+    p.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+    # Dark gradient background
+    grad = QLinearGradient(0, 0, 0, SPLASH_H)
+    grad.setColorAt(0.0, QColor("#0a1628"))
+    grad.setColorAt(0.5, QColor("#0f1f3a"))
+    grad.setColorAt(1.0, QColor("#0a1628"))
+    p.fillRect(0, 0, SPLASH_W, SPLASH_H, grad)
+
+    # Subtle grid pattern
+    p.setPen(QPen(QColor(255, 255, 255, 8), 1))
+    for x in range(0, SPLASH_W, 40):
+        p.drawLine(x, 0, x, SPLASH_H)
+    for y in range(0, SPLASH_H, 40):
+        p.drawLine(0, y, SPLASH_W, y)
+
+    # Try to load and draw the logo
+    if logo_path.exists():
+        logo_pm = QPixmap(str(logo_path))
+        scaled_logo = logo_pm.scaledToHeight(
+            80, Qt.TransformationMode.SmoothTransformation)
+        lx = (SPLASH_W - scaled_logo.width()) // 2
+        p.drawPixmap(lx, 60, scaled_logo)
+        title_y = 160
+    else:
+        title_y = 100
+
+    # Title: "CompLaB"
+    p.setPen(QColor("#e94560"))
+    title_font = QFont("Segoe UI", 36, QFont.Weight.Bold)
+    p.setFont(title_font)
+    p.drawText(QRect(0, title_y, SPLASH_W, 50),
+               Qt.AlignmentFlag.AlignCenter, "CompLaB")
+
+    # Subtitle: "Studio"
     p.setPen(QColor("#ffffff"))
-    f = QFont("Segoe UI", 24, QFont.Weight.Bold)
-    p.setFont(f)
-    p.drawText(pm.rect(), Qt.AlignmentFlag.AlignCenter, "CompLaB Studio 2.0")
+    sub_font = QFont("Segoe UI", 20, QFont.Weight.Light)
+    p.setFont(sub_font)
+    p.drawText(QRect(0, title_y + 48, SPLASH_W, 36),
+               Qt.AlignmentFlag.AlignCenter, "Studio 2.0")
+
+    # Tagline
+    p.setPen(QColor("#6a8aaa"))
+    tag_font = QFont("Segoe UI", 10)
+    p.setFont(tag_font)
+    p.drawText(QRect(0, title_y + 90, SPLASH_W, 24),
+               Qt.AlignmentFlag.AlignCenter,
+               "Pore-Scale Reactive Transport Modeling")
+
+    # Accent line
+    line_y = title_y + 120
+    p.setPen(Qt.PenStyle.NoPen)
+    accent_grad = QLinearGradient(SPLASH_W * 0.2, 0, SPLASH_W * 0.8, 0)
+    accent_grad.setColorAt(0.0, QColor(0, 0, 0, 0))
+    accent_grad.setColorAt(0.3, QColor("#e94560"))
+    accent_grad.setColorAt(0.7, QColor("#4a7cac"))
+    accent_grad.setColorAt(1.0, QColor(0, 0, 0, 0))
+    p.setBrush(QBrush(accent_grad))
+    p.drawRect(QRectF(SPLASH_W * 0.15, line_y, SPLASH_W * 0.7, 2))
+
     p.end()
     return pm
 
 
 def _draw_credits(splash):
-    """Draw credit text on the splash screen."""
+    """Draw credit text and version on the splash screen."""
     pm = splash.pixmap().copy()
     p = QPainter(pm)
     p.setRenderHint(QPainter.RenderHint.Antialiasing)
 
     # Semi-transparent overlay at bottom
-    p.fillRect(0, pm.height() - 110, pm.width(), 110, QColor(15, 26, 46, 200))
+    bottom_grad = QLinearGradient(0, pm.height() - 120, 0, pm.height())
+    bottom_grad.setColorAt(0.0, QColor(10, 22, 40, 180))
+    bottom_grad.setColorAt(1.0, QColor(10, 22, 40, 230))
+    p.fillRect(0, pm.height() - 120, pm.width(), 120, bottom_grad)
 
     # Credit text
-    p.setPen(QColor("#c0c8d4"))
-    f = QFont("Segoe UI", 9)
+    p.setPen(QColor("#b0b8c4"))
+    f = QFont("Segoe UI", 8)
     p.setFont(f)
 
-    y = pm.height() - 100
+    y = pm.height() - 108
     lines = [
-        "CompLaB Studio 2.0 - 3D Biogeochemical Reactive Transport Simulator",
+        "3D Biogeochemical Reactive Transport Simulator",
         "",
         "Developer: Shahram Asgari    |    PI: Christof Meile",
         "Meile Lab  -  Department of Marine Sciences  -  University of Georgia",
-        "Lattice Boltzmann | Biotic & Abiotic Kinetics | Equilibrium Chemistry | CA Biofilm",
+        "LBM Flow | Advection-Diffusion | Biotic & Abiotic Kinetics | Equilibrium Chemistry | CA Biofilm",
     ]
     for line in lines:
         p.drawText(20, y, line)
-        y += 17
+        y += 16
 
     # Version in top-right
-    p.setPen(QColor("#6a8aaa"))
+    p.setPen(QColor("#4a6a8a"))
     f2 = QFont("Segoe UI", 8)
     p.setFont(f2)
-    p.drawText(pm.width() - 100, 20, "v2.0.0")
+    p.drawText(pm.width() - 80, 18, "v2.0.0")
 
     p.end()
     splash.setPixmap(pm)
@@ -119,8 +198,8 @@ def main():
     from src.main_window import CompLaBMainWindow
     window = CompLaBMainWindow()
 
-    # Keep splash visible for a brief moment
-    QTimer.singleShot(1500, lambda: (splash.finish(window), window.show()))
+    # Keep splash visible for a brief moment so user sees it
+    QTimer.singleShot(2200, lambda: (splash.finish(window), window.show()))
 
     sys.exit(app.exec())
 
