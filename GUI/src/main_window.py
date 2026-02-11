@@ -571,6 +571,16 @@ class CompLaBMainWindow(QMainWindow):
             "XML Files (*.xml);;All Files (*)")
         if not path:
             return
+
+        # Auto-copy geometry file to input/ next to the XML
+        xml_dir = str(Path(path).parent)
+        input_rel = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(xml_dir, input_rel)
+        if hasattr(self._domain_panel, 'copy_geometry_to_input'):
+            copied = self._domain_panel.copy_geometry_to_input(input_dir)
+            if copied:
+                self._console.log_info(f"Copied geometry to {copied}")
+
         try:
             ProjectManager.export_xml(self._project, path)
             self._console.log_success(f"Exported: {path}")
@@ -619,6 +629,13 @@ class CompLaBMainWindow(QMainWindow):
         input_rel = self._project.path_settings.input_path or "input"
         input_dir = os.path.join(work_dir, input_rel)
         geom_name = self._project.domain.geometry_filename
+
+        # Auto-copy geometry file to input/ if user browsed from elsewhere
+        if hasattr(self._domain_panel, 'copy_geometry_to_input'):
+            copied = self._domain_panel.copy_geometry_to_input(input_dir)
+            if copied:
+                self._console.log_info(f"Copied geometry to {copied}")
+
         if geom_name:
             geom_path = os.path.join(input_dir, geom_name)
             if not os.path.isfile(geom_path):
