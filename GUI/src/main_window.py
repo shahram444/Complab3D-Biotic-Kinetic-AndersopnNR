@@ -571,6 +571,16 @@ class CompLaBMainWindow(QMainWindow):
             "XML Files (*.xml);;All Files (*)")
         if not path:
             return
+
+        # Auto-copy geometry file to input/ next to the XML
+        xml_dir = str(Path(path).parent)
+        input_rel = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(xml_dir, input_rel)
+        if hasattr(self._domain_panel, 'copy_geometry_to_input'):
+            copied = self._domain_panel.copy_geometry_to_input(input_dir)
+            if copied:
+                self._console.log_info(f"Copied geometry to {copied}")
+
         try:
             ProjectManager.export_xml(self._project, path)
             self._console.log_success(f"Exported: {path}")
@@ -614,6 +624,28 @@ class CompLaBMainWindow(QMainWindow):
             work_dir = str(Path(self._project_file).parent)
         else:
             work_dir = os.getcwd()
+
+        # Quick pre-check: verify geometry file exists before exporting
+        input_rel = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(work_dir, input_rel)
+        geom_name = self._project.domain.geometry_filename
+
+        # Auto-copy geometry file to input/ if user browsed from elsewhere
+        if hasattr(self._domain_panel, 'copy_geometry_to_input'):
+            copied = self._domain_panel.copy_geometry_to_input(input_dir)
+            if copied:
+                self._console.log_info(f"Copied geometry to {copied}")
+
+        if geom_name:
+            geom_path = os.path.join(input_dir, geom_name)
+            if not os.path.isfile(geom_path):
+                self._console.log_error(
+                    f"Geometry file not found: {geom_path}\n"
+                    f"  Copy your .dat file to: {input_dir}/\n"
+                    f"  Or change the filename in Domain settings.")
+                self._run_panel.on_finished(1,
+                    f"Geometry file '{geom_name}' not found in {input_rel}/")
+                return
 
         # Export XML first
         xml_path = os.path.join(work_dir, "CompLaB.xml")
@@ -808,6 +840,32 @@ class CompLaBMainWindow(QMainWindow):
     def _validate(self):
         self._save_panels_to_project()
         errors = self._project.validate()
+
+        # Also check file existence on disk
+        if self._project_file:
+            work_dir = str(Path(self._project_file).parent)
+        else:
+            work_dir = os.getcwd()
+
+        exe = self._config.get("complab_executable", "")
+        if not exe or not os.path.isfile(exe):
+            errors.append(
+                f"CompLaB executable not found: '{exe}'. "
+                "Set it in Edit > Preferences.")
+
+        input_rel = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(work_dir, input_rel)
+        if not os.path.isdir(input_dir):
+            errors.append(
+                f"Input directory not found: {input_dir}")
+
+        geom_name = self._project.domain.geometry_filename
+        if geom_name and os.path.isdir(input_dir):
+            geom_path = os.path.join(input_dir, geom_name)
+            if not os.path.isfile(geom_path):
+                errors.append(
+                    f"Geometry file not found: {geom_path}")
+
         self._run_panel.show_validation(errors)
         if errors:
             self._console.log_error(
