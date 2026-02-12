@@ -132,7 +132,9 @@ class ProjectManager:
         _add_text(mb_el, "number_of_microbes", str(len(microbes)))
         _add_text(mb_el, "maximum_biomass_density", _fmt_float(mb.maximum_biomass_density))
         _add_text(mb_el, "thrd_biofilm_fraction", _fmt_float(mb.thrd_biofilm_fraction))
-        _add_text(mb_el, "CA_method", mb.ca_method)
+        has_ca = any(m.solver_type == "CA" for m in microbes)
+        if has_ca:
+            _add_text(mb_el, "CA_method", mb.ca_method)
         for i, m in enumerate(microbes):
             m_el = ET.SubElement(mb_el, f"microbe{i}")
             _add_text(m_el, "name_of_microbes", m.name)
