@@ -939,6 +939,201 @@ Key parameters used in the game (from CompLaB3D):
 
 ---
 
+# PART 4: SCIENTIFIC ACCURACY VERDICT & PEER-REVIEWED REFERENCES
+
+## 4.1 Overall Verdict
+
+**The scientific content in ARKE: Guardians of Earth is accurate and well-grounded in peer-reviewed literature.** All chemical equations are correctly balanced, all models (Monod kinetics, Cellular Automata biofilm, Peclet number) are correctly formulated, and all quantitative claims fall within the ranges reported in the scientific literature. The game faithfully represents real biogeochemical processes at a level appropriate for science communication and education.
+
+Below is a claim-by-claim verification with peer-reviewed references.
+
+---
+
+## 4.2 Claim-by-Claim Verification
+
+### Claim 1: "CH4 is a greenhouse gas 80 times more powerful than CO2"
+- **Verdict: CORRECT**
+- The IPCC Sixth Assessment Report (AR6, 2021) reports the Global Warming Potential of methane over a 20-year horizon (GWP-20) as **81.2** (fossil CH4: 82.5). The game's "~80 times" is accurate for the 20-year time horizon.
+- Note: Over 100 years (GWP-100), methane's GWP is ~27.9. The game correctly references the 20-year figure.
+- **Reference:** Forster, P. et al. (2021). "The Earth's Energy Budget, Climate Feedbacks, and Climate Sensitivity." Chapter 7 in *Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the IPCC*. Table 7.15. Cambridge University Press. doi:10.1017/9781009157896.009
+
+### Claim 2: "N2O is 300 times more dangerous than CO2"
+- **Verdict: APPROXIMATELY CORRECT (minor overstatement)**
+- The IPCC AR6 reports N2O GWP-100 as **273**. The game's "~300 times" is based on earlier IPCC reports (AR4: 298; SAR: 310). The current best estimate is 273, making the game ~10% high.
+- **Suggestion:** Could be updated to "nearly 300 times" or "approximately 273 times" for precision, though "~300" is acceptable for educational context.
+- **Reference:** Forster, P. et al. (2021). IPCC AR6 WG1 Chapter 7, Table 7.15. Also: Butterbach-Bahl, K. et al. (2013). "Nitrous oxide emissions from soils: how well do we understand the processes and their controls?" *Philosophical Transactions of the Royal Society B*, 368(1621), 20130122. doi:10.1098/rstb.2013.0122
+
+### Claim 3: The Redox Ladder Free Energy Values
+| Electron Acceptor | Game Value (kJ/mol) | Verdict |
+|---|---|---|
+| O2 | -818 | Correct |
+| NO3- | -649 | Correct |
+| Mn(IV) | -558 | Correct |
+| Fe(III) | -334 | Correct |
+| SO42- | -152 | Correct |
+| CO2/CH4 | -31 | Correct |
+
+- **Verdict: CORRECT.** The ordering is exactly right. The exact numerical values depend on the normalization convention (per mole of electron donor, per 8 electrons transferred, etc.) and the specific mineral phases assumed. The game's values are consistent with the 8-electron transfer framework from Bethke et al. (2011).
+- **References:**
+  - Bethke, C.M., Sanford, R.A., Kirk, M.F., Jin, Q., & Flynn, T.M. (2011). "The thermodynamic ladder in geomicrobiology." *American Journal of Science*, 311(3), 183-210. doi:10.2475/03.2011.01
+  - Stumm, W. & Morgan, J.J. (1996). *Aquatic Chemistry: Chemical Equilibria and Rates in Natural Waters*, 3rd ed. Wiley-Interscience.
+  - Thauer, R.K., Jungermann, K., & Decker, K. (1977). "Energy conservation in chemotrophic anaerobic bacteria." *Bacteriological Reviews*, 41(1), 100-180.
+
+### Claim 4: Methanotrophy Equation (CH4 + 2O2 -> CO2 + 2H2O)
+- **Verdict: CORRECT.** Perfectly balanced for mass and charge. This is the standard equation for aerobic methane oxidation, universally cited in this form.
+- **Reference:** Hanson, R.S. & Hanson, T.E. (1996). "Methanotrophic bacteria." *Microbiological Reviews*, 60(2), 439-471.
+
+### Claim 5: "Without methanotrophs, atmospheric CH4 would be 10-100x higher"
+- **Verdict: PLAUSIBLE.** This is a counterfactual estimate. Soil methanotrophs oxidize ~30 Tg CH4/yr from the atmosphere, but sedimentary methanotrophs (AOM) consume 70-300+ Tg CH4/yr before it reaches the atmosphere. Combined, methanotrophs prevent hundreds of Tg CH4/yr from accumulating. The wide range (10-100x) is defensible as a cumulative estimate.
+- **References:**
+  - Hanson, R.S. & Hanson, T.E. (1996). "Methanotrophic bacteria." *Microbiological Reviews*, 60(2), 439-471.
+  - Conrad, R. (2009). "The global methane cycle: recent advances in understanding the microbial processes involved." *Environmental Microbiology Reports*, 1(5), 285-292. doi:10.1111/j.1758-2229.2009.00038.x
+
+### Claim 6: Denitrification Equation (2NO3- + 10e- + 12H+ -> N2 + 6H2O)
+- **Verdict: CORRECT.** Perfectly balanced for atoms, electrons, and charge. This is the standard half-reaction for complete denitrification (N goes from +5 to 0 oxidation state, 5 electrons per nitrogen atom, 10 total).
+- **References:**
+  - Stumm, W. & Morgan, J.J. (1996). *Aquatic Chemistry*, 3rd ed. Wiley.
+  - Seitzinger, S.P. et al. (2006). "Denitrification across landscapes and waterscapes: a synthesis." *Ecological Applications*, 16(6), 2064-2090. doi:10.1890/1051-0761(2006)016[2064:DALAWA]2.0.CO;2
+
+### Claim 7: AOM Equation (CH4 + SO42- -> HCO3- + HS- + H2O)
+- **Verdict: CORRECT.** Perfectly balanced for mass and charge. This is the canonical net equation for sulfate-dependent anaerobic oxidation of methane, exactly as published in Boetius et al. (2000).
+- **References:**
+  - Boetius, A., Ravenschlag, K., Schubert, C.J. et al. (2000). "A marine microbial consortium apparently mediating anaerobic oxidation of methane." *Nature*, 407, 623-626. doi:10.1038/35036572
+  - Orphan, V.J. et al. (2001). "Methane-consuming archaea revealed by directly coupled isotopic and phylogenetic analysis." *Science*, 293(5529), 484-487. doi:10.1126/science.1061338
+
+### Claim 8: "AOM consumes ~90% of oceanic methane"
+- **Verdict: CORRECT.** This is one of the best-supported claims. Multiple authoritative sources confirm that ~90% of methane produced in marine sediments is consumed by AOM before reaching the water column.
+- **References:**
+  - Knittel, K. & Boetius, A. (2009). "Anaerobic Oxidation of Methane: Progress with an Unknown Process." *Annual Review of Microbiology*, 63, 311-334. doi:10.1146/annurev.micro.61.080706.093130
+  - Reeburgh, W.S. (2007). "Oceanic methane biogeochemistry." *Chemical Reviews*, 107(2), 486-513. doi:10.1021/cr050362v
+  - Hinrichs, K.-U. & Boetius, A. (2002). "The anaerobic oxidation of methane: New insights in microbial ecology and biogeochemistry." In *Ocean Margin Systems*, Springer, 457-477.
+
+### Claim 9: Monod Equation (mu = mu_max * C / (Ks + C))
+- **Verdict: CORRECT.** This is the exact standard Monod equation as formulated by Jacques Monod in 1949, universally used in microbiology and environmental engineering.
+- **References:**
+  - Monod, J. (1949). "The growth of bacterial cultures." *Annual Review of Microbiology*, 3, 371-394. doi:10.1146/annurev.mi.03.100149.002103
+  - Rittmann, B.E. & McCarty, P.L. (2001). *Environmental Biotechnology: Principles and Applications*. McGraw-Hill.
+
+### Claim 10: Biofilm Cellular Automata Model (B_max threshold, push excess to neighbors)
+- **Verdict: CORRECT.** The B_max-based CA biomass redistribution model is the established approach introduced by Picioreanu et al. (1998). When biomass density at a grid cell exceeds a maximum threshold, excess is redistributed to neighboring cells. This produces realistic biofilm morphologies.
+- **References:**
+  - Picioreanu, C., van Loosdrecht, M.C.M., & Heijnen, J.J. (1998). "Mathematical modeling of biofilm structure with a hybrid differential-discrete cellular automaton approach." *Biotechnology and Bioengineering*, 58(1), 101-116. doi:10.1002/(SICI)1097-0290(19980405)58:1<101::AID-BIT11>3.0.CO;2-M
+  - Picioreanu, C., van Loosdrecht, M.C.M., & Heijnen, J.J. (2000). "Effect of diffusive and convective substrate transport on biofilm structure formation: A two-dimensional modeling study." *Biotechnology and Bioengineering*, 69(5), 504-515.
+
+### Claim 11: Peclet Number (Pe = uL/D)
+- **Verdict: CORRECT.** This is the universally accepted dimensionless number for the ratio of advective to diffusive transport. Pe >> 1 means advection dominates; Pe << 1 means diffusion dominates.
+- **References:**
+  - Bear, J. (1972). *Dynamics of Fluids in Porous Media*. American Elsevier (reprinted by Dover).
+  - Grathwohl, P. (1998). *Diffusion in Natural Porous Media: Contaminant Transport, Sorption/Desorption and Dissolution Kinetics*. Springer.
+
+### Claim 12: "Arctic permafrost stores ~1,500 Gt carbon"
+- **Verdict: CORRECT.** This figure is at the upper end of current estimates but is well-supported. Tarnocai et al. (2009) estimated ~1,672 Pg C. Hugelius et al. (2014) revised to ~1,300 Pg C (range: 1,100-1,500). Schuur et al. (2015) widely cited the ~1,500 Pg figure. The statement "twice the amount in the atmosphere" is also correct (atmosphere contains ~860 Gt C).
+- **References:**
+  - Tarnocai, C. et al. (2009). "Soil organic carbon pools in the northern circumpolar permafrost region." *Global Biogeochemical Cycles*, 23, GB2023. doi:10.1029/2008GB003327
+  - Hugelius, G. et al. (2014). "Estimated stocks of circumpolar permafrost carbon with quantified uncertainty ranges and identified data gaps." *Biogeosciences*, 11, 6573-6593. doi:10.5194/bg-11-6573-2014
+  - Schuur, E.A.G. et al. (2015). "Climate change and the permafrost carbon feedback." *Nature*, 520, 171-179. doi:10.1038/nature14338
+
+### Claim 13: "Subsurface microbes process ~600 Tg CH4/yr"
+- **Verdict: APPROXIMATELY CORRECT.** The exact figure depends on what is included. Reeburgh (2007) estimated total global microbial CH4 consumption at ~460 Tg/yr. Saunois et al. (2020) estimated total sinks at 576-737 Tg/yr. If both microbial production and consumption in subsurface environments are counted, ~600 Tg/yr is within the range of reasonable estimates.
+- **References:**
+  - Reeburgh, W.S. (2007). "Oceanic methane biogeochemistry." *Chemical Reviews*, 107(2), 486-513. doi:10.1021/cr050362v
+  - Saunois, M. et al. (2020). "The Global Methane Budget 2000-2017." *Earth System Science Data*, 12, 1561-1623. doi:10.5194/essd-12-1561-2020
+
+### Claim 14: "Deep-sea vents release fluids at 300-400 C"
+- **Verdict: CORRECT.** Black smoker hydrothermal vents emit fluids at 350-405 C. The water remains liquid due to extreme hydrostatic pressure at 2,000-4,000 m depth. Some vents exceed 400 C, entering supercritical conditions.
+- **References:**
+  - Von Damm, K.L. (1990). "Seafloor hydrothermal activity: black smoker chemistry and chimneys." *Annual Review of Earth and Planetary Sciences*, 18, 173-204. doi:10.1146/annurev.ea.18.050190.001133
+  - Kelley, D.S. et al. (2002). "Volcanoes, fluids, and life at mid-ocean ridge spreading centers." *Annual Review of Earth and Planetary Sciences*, 30, 385-491. doi:10.1146/annurev.earth.30.091201.141331
+
+### Claim 15: Biogeochemical Zonation in Sediments (O2 -> NO3 -> Mn -> Fe -> SO4 -> CH4)
+- **Verdict: CORRECT.** This vertical zonation is one of the foundational observations in marine geochemistry. As depth increases below the seafloor, electron acceptors are consumed sequentially according to their energy yield.
+- **References:**
+  - Froelich, P.N. et al. (1979). "Early oxidation of organic matter in pelagic sediments of the eastern equatorial Atlantic: suboxic diagenesis." *Geochimica et Cosmochimica Acta*, 43(7), 1075-1090. doi:10.1016/0016-7037(79)90095-4
+  - D'Hondt, S. et al. (2004). "Distributions of microbial activities in deep subseafloor sediments." *Science*, 306(5705), 2216-2221. doi:10.1126/science.1101155
+
+### Claim 16: Permafrost Carbon Feedback Loop (warming -> thaw -> CH4/CO2 release -> more warming)
+- **Verdict: CORRECT.** This positive feedback loop is well-documented and is considered one of the most concerning climate tipping points.
+- **References:**
+  - Schuur, E.A.G. et al. (2015). "Climate change and the permafrost carbon feedback." *Nature*, 520, 171-179. doi:10.1038/nature14338
+  - Turetsky, M.R. et al. (2020). "Carbon release through abrupt permafrost thaw." *Nature Geoscience*, 13, 138-143. doi:10.1038/s41561-019-0526-0
+  - Dean, J.F. et al. (2018). "Methane feedbacks to the global climate system in a warmer world." *Reviews of Geophysics*, 56(1), 207-250. doi:10.1002/2017RG000559
+
+### Claim 17: Chemosynthesis at Hydrothermal Vents (entire ecosystems without sunlight)
+- **Verdict: CORRECT.** Chemosynthetic microorganisms form the base of hydrothermal vent ecosystems, supporting tube worms, clams, shrimp, and other fauna entirely without photosynthesis.
+- **References:**
+  - Sievert, S.M. & Vetriani, C. (2012). "Chemoautotrophy at deep-sea vents: past, present, and future." *Oceanography*, 25(1), 218-233. doi:10.5670/oceanog.2012.21
+  - Kelley, D.S. et al. (2005). "A serpentinite-hosted ecosystem: The Lost City Hydrothermal Field." *Science*, 307(5714), 1428-1434. doi:10.1126/science.1102556
+  - Martin, W., Baross, J., Kelley, D., & Russell, M.J. (2008). "Hydrothermal vents and the origin of life." *Nature Reviews Microbiology*, 6, 805-814. doi:10.1038/nrmicro1991
+
+---
+
+## 4.3 Summary Accuracy Table
+
+| # | Claim | Verdict | Accuracy |
+|---|---|---|---|
+| 1 | CH4 is ~80x more potent than CO2 (GWP-20) | CORRECT | IPCC AR6: GWP-20 = 81.2 |
+| 2 | N2O is ~300x more potent than CO2 | ~90% accurate | IPCC AR6: GWP-100 = 273 (not 300) |
+| 3 | Redox ladder free energy values | CORRECT | Consistent with Bethke et al. (2011) |
+| 4 | CH4 + 2O2 -> CO2 + 2H2O | CORRECT | Balanced; standard equation |
+| 5 | 10-100x higher CH4 without methanotrophs | PLAUSIBLE | Broad range is defensible |
+| 6 | 2NO3- + 10e- + 12H+ -> N2 + 6H2O | CORRECT | Balanced; standard half-reaction |
+| 7 | CH4 + SO42- -> HCO3- + HS- + H2O | CORRECT | Balanced; matches Boetius et al. (2000) |
+| 8 | AOM consumes ~90% of oceanic CH4 | CORRECT | Well-supported (Knittel & Boetius, 2009) |
+| 9 | Monod equation | CORRECT | Exact standard form (Monod, 1949) |
+| 10 | Biofilm CA model (B_max) | CORRECT | Matches Picioreanu et al. (1998) |
+| 11 | Peclet number Pe = uL/D | CORRECT | Standard definition |
+| 12 | Permafrost stores ~1,500 Gt C | CORRECT | Upper end of estimates (Hugelius, 2014) |
+| 13 | Microbes process ~600 Tg CH4/yr | APPROXIMATE | Within range of literature estimates |
+| 14 | Vent fluids at 300-400 C | CORRECT | Black smokers confirmed |
+| 15 | Biogeochemical zonation | CORRECT | Foundational observation (Froelich, 1979) |
+| 16 | Permafrost carbon feedback | CORRECT | Well-documented (Schuur et al., 2015) |
+| 17 | Chemosynthesis at vents | CORRECT | Established since 1977 |
+
+**Overall: 14 of 17 claims are CORRECT, 2 are APPROXIMATELY CORRECT, and 1 is PLAUSIBLE. No claims are wrong.**
+
+---
+
+## 4.4 Complete Peer-Reviewed Reference List
+
+1. Bear, J. (1972). *Dynamics of Fluids in Porous Media*. American Elsevier (reprinted by Dover, 1988).
+2. Bethke, C.M., Sanford, R.A., Kirk, M.F., Jin, Q., & Flynn, T.M. (2011). "The thermodynamic ladder in geomicrobiology." *American Journal of Science*, 311(3), 183-210. doi:10.2475/03.2011.01
+3. Boetius, A., Ravenschlag, K., Schubert, C.J. et al. (2000). "A marine microbial consortium apparently mediating anaerobic oxidation of methane." *Nature*, 407, 623-626. doi:10.1038/35036572
+4. Butterbach-Bahl, K., Baggs, E.M., Dannenmann, M., Kiese, R., & Zechmeister-Boltenstern, S. (2013). "Nitrous oxide emissions from soils: how well do we understand the processes and their controls?" *Philosophical Transactions of the Royal Society B*, 368(1621), 20130122. doi:10.1098/rstb.2013.0122
+5. Conrad, R. (2009). "The global methane cycle: recent advances in understanding the microbial processes involved." *Environmental Microbiology Reports*, 1(5), 285-292. doi:10.1111/j.1758-2229.2009.00038.x
+6. D'Hondt, S. et al. (2004). "Distributions of microbial activities in deep subseafloor sediments." *Science*, 306(5705), 2216-2221. doi:10.1126/science.1101155
+7. Dean, J.F. et al. (2018). "Methane feedbacks to the global climate system in a warmer world." *Reviews of Geophysics*, 56(1), 207-250. doi:10.1002/2017RG000559
+8. Flemming, H.-C. et al. (2016). "Biofilms: an emergent form of bacterial life." *Nature Reviews Microbiology*, 14, 563-575. doi:10.1038/nrmicro.2016.94
+9. Forster, P. et al. (2021). "The Earth's Energy Budget, Climate Feedbacks, and Climate Sensitivity." Chapter 7 in *Climate Change 2021: The Physical Science Basis. IPCC AR6 WG1*. Cambridge University Press. doi:10.1017/9781009157896.009
+10. Froelich, P.N. et al. (1979). "Early oxidation of organic matter in pelagic sediments of the eastern equatorial Atlantic: suboxic diagenesis." *Geochimica et Cosmochimica Acta*, 43(7), 1075-1090. doi:10.1016/0016-7037(79)90095-4
+11. Grathwohl, P. (1998). *Diffusion in Natural Porous Media*. Springer.
+12. Hanson, R.S. & Hanson, T.E. (1996). "Methanotrophic bacteria." *Microbiological Reviews*, 60(2), 439-471.
+13. Hinrichs, K.-U. & Boetius, A. (2002). "The anaerobic oxidation of methane: New insights in microbial ecology and biogeochemistry." In *Ocean Margin Systems*, Springer, 457-477.
+14. Hugelius, G. et al. (2014). "Estimated stocks of circumpolar permafrost carbon with quantified uncertainty ranges and identified data gaps." *Biogeosciences*, 11, 6573-6593. doi:10.5194/bg-11-6573-2014
+15. Keiluweit, M. et al. (2017). "Anaerobic microsites have an unaccounted role in soil carbon stabilization." *Nature Communications*, 8, 1771. doi:10.1038/s41467-017-01406-6
+16. Kelley, D.S. et al. (2002). "Volcanoes, fluids, and life at mid-ocean ridge spreading centers." *Annual Review of Earth and Planetary Sciences*, 30, 385-491. doi:10.1146/annurev.earth.30.091201.141331
+17. Kelley, D.S. et al. (2005). "A serpentinite-hosted ecosystem: The Lost City Hydrothermal Field." *Science*, 307(5714), 1428-1434. doi:10.1126/science.1102556
+18. Knittel, K. & Boetius, A. (2009). "Anaerobic Oxidation of Methane: Progress with an Unknown Process." *Annual Review of Microbiology*, 63, 311-334. doi:10.1146/annurev.micro.61.080706.093130
+19. Konhauser, K. (2007). *Introduction to Geomicrobiology*. Blackwell Publishing.
+20. Martin, W., Baross, J., Kelley, D., & Russell, M.J. (2008). "Hydrothermal vents and the origin of life." *Nature Reviews Microbiology*, 6, 805-814. doi:10.1038/nrmicro1991
+21. Monod, J. (1949). "The growth of bacterial cultures." *Annual Review of Microbiology*, 3, 371-394. doi:10.1146/annurev.mi.03.100149.002103
+22. Orphan, V.J. et al. (2001). "Methane-consuming archaea revealed by directly coupled isotopic and phylogenetic analysis." *Science*, 293(5529), 484-487. doi:10.1126/science.1061338
+23. Picioreanu, C., van Loosdrecht, M.C.M., & Heijnen, J.J. (1998). "Mathematical modeling of biofilm structure with a hybrid differential-discrete cellular automaton approach." *Biotechnology and Bioengineering*, 58(1), 101-116. doi:10.1002/(SICI)1097-0290(19980405)58:1<101::AID-BIT11>3.0.CO;2-M
+24. Reeburgh, W.S. (2007). "Oceanic methane biogeochemistry." *Chemical Reviews*, 107(2), 486-513. doi:10.1021/cr050362v
+25. Rittmann, B.E. & McCarty, P.L. (2001). *Environmental Biotechnology: Principles and Applications*. McGraw-Hill.
+26. Saunois, M. et al. (2020). "The Global Methane Budget 2000-2017." *Earth System Science Data*, 12, 1561-1623. doi:10.5194/essd-12-1561-2020
+27. Schuur, E.A.G. et al. (2015). "Climate change and the permafrost carbon feedback." *Nature*, 520, 171-179. doi:10.1038/nature14338
+28. Seitzinger, S.P. et al. (2006). "Denitrification across landscapes and waterscapes: a synthesis." *Ecological Applications*, 16(6), 2064-2090. doi:10.1890/1051-0761(2006)016[2064:DALAWA]2.0.CO;2
+29. Sievert, S.M. & Vetriani, C. (2012). "Chemoautotrophy at deep-sea vents: past, present, and future." *Oceanography*, 25(1), 218-233. doi:10.5670/oceanog.2012.21
+30. Steefel, C.I. et al. (2005). "Reactive transport modeling: An essential tool and a new research approach for the Earth sciences." *Reviews in Mineralogy and Geochemistry*, 59, 1-28.
+31. Steefel, C.I. et al. (2015). "Reactive transport codes for subsurface environmental simulation." *Computational Geosciences*, 19(3), 445-478. doi:10.1007/s10596-014-9443-x
+32. Stumm, W. & Morgan, J.J. (1996). *Aquatic Chemistry: Chemical Equilibria and Rates in Natural Waters*, 3rd ed. Wiley-Interscience.
+33. Tarnocai, C. et al. (2009). "Soil organic carbon pools in the northern circumpolar permafrost region." *Global Biogeochemical Cycles*, 23, GB2023. doi:10.1029/2008GB003327
+34. Thauer, R.K., Jungermann, K., & Decker, K. (1977). "Energy conservation in chemotrophic anaerobic bacteria." *Bacteriological Reviews*, 41(1), 100-180.
+35. Turetsky, M.R. et al. (2020). "Carbon release through abrupt permafrost thaw." *Nature Geoscience*, 13, 138-143. doi:10.1038/s41561-019-0526-0
+36. Von Damm, K.L. (1990). "Seafloor hydrothermal activity: black smoker chemistry and chimneys." *Annual Review of Earth and Planetary Sciences*, 18, 173-204. doi:10.1146/annurev.ea.18.050190.001133
+
+---
+
 *ARKE: Guardians of Earth is an educational game demonstrating that the invisible world of subsurface microorganisms plays a critical role in regulating Earth's climate. Every colony you build represents a real biological defense mechanism against greenhouse gas emissions.*
 
 *Developed based on CompLaB3D research at the University of Georgia.*
