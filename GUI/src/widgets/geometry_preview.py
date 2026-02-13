@@ -119,8 +119,10 @@ class GeometryPreviewWidget(QWidget):
                 )
                 return
 
-            # Reshape: file is stored as nz slices of (ny x nx)
-            self._data = flat.reshape((nz, ny, nx))
+            # File written in x→z→y loop order (y varies fastest).
+            # Reshape to (nx, nz, ny) then transpose to (nz, ny, nx)
+            # so self._data is indexed as [z, y, x] for slice display.
+            self._data = flat.reshape((nx, nz, ny)).transpose(1, 2, 0)
             self._nx, self._ny, self._nz = nx, ny, nz
 
             # Set slider to middle slice
