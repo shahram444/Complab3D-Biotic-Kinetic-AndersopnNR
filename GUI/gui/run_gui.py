@@ -7,10 +7,9 @@ import sys
 import os
 import time
 
-# Add the gui directory to path
+# Add the gui directory to path (keep src as a package, don't add src/ directly)
 gui_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, gui_dir)
-sys.path.insert(0, os.path.join(gui_dir, 'src'))
 
 from PySide6.QtWidgets import QApplication, QSplashScreen
 from PySide6.QtCore import Qt, QTimer
@@ -158,7 +157,7 @@ def main():
     splash.update_progress(100, "Starting CompLaB Studio...")
     time.sleep(0.2)
     
-    from main_window import CompLaBMainWindow
+    from src.main_window import CompLaBMainWindow
     window = CompLaBMainWindow()
     
     splash.finish(window)
