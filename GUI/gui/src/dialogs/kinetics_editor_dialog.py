@@ -74,7 +74,7 @@ class KineticsEditorDialog(QDialog):
 
 double Ks = {ks};     // Half-saturation constant [mmol/L]
 double Vmax = {vmax}; // Maximum uptake rate [mmol/kgDW/h]
-double Y = {yield};   // Yield coefficient [kgDW/mmol]
+double Y = {yield_coeff};   // Yield coefficient [kgDW/mmol]
 double kd = {kd};     // Decay rate [1/s]
 
 // Monod term
@@ -92,7 +92,7 @@ bioR[0] = Y * (-subsR[0]) - kd * B[0];
 double Ks1 = {ks1};   // Half-saturation for substrate 1
 double Ks2 = {ks2};   // Half-saturation for substrate 2
 double Vmax = {vmax}; // Maximum rate
-double Y = {yield};   // Yield
+double Y = {yield_coeff};   // Yield
 double kd = {kd};     // Decay
 
 // Dual Monod
@@ -110,7 +110,7 @@ bioR[0] = Y * (-subsR[0]) - kd * B[0];
 double Ks = {ks};
 double Ki = {ki};     // Inhibition constant
 double Vmax = {vmax};
-double Y = {yield};
+double Y = {yield_coeff};
 double kd = {kd};
 
 // Haldane/Andrews inhibition
@@ -131,6 +131,18 @@ subsR[0] = -kads * C[0] * B[0] + kdes * B[0];
 
 // Biomass change due to adsorption/decay
 bioR[0] = kads * C[0] * B[0] - kdes * B[0] - mu * B[0];
+''',
+        "Abiotic Decay Chain": '''// Abiotic sequential decay chain: A -> B -> C
+// Three-species Bateman equations
+// C[0] = Parent A, C[1] = Daughter B, C[2] = GrandDaughter C
+
+double k1 = 1e-4;  // Decay rate A -> B [1/s]
+double k2 = 5e-5;  // Decay rate B -> C [1/s]
+
+// First-order decay rates
+subsR[0] = -k1 * C[0];              // Parent decays
+subsR[1] = k1 * C[0] - k2 * C[1];  // Daughter: produced from A, decays to C
+subsR[2] = k2 * C[1];               // GrandDaughter: produced from B
 ''',
         "Custom (Empty)": '''// Custom kinetics
 // Define your own reaction rates here
@@ -249,26 +261,51 @@ bioR[0] = kads * C[0] * B[0] - kdes * B[0] - mu * B[0];
         
         layout.addWidget(splitter)
         
+        # Recompilation help
+        recomp_group = QGroupBox("Recompilation Required")
+        recomp_layout = QVBoxLayout()
+        recomp_label = QLabel(
+            "<b>After modifying defineKinetics.hh you must recompile CompLaB:</b><br>"
+            "<pre>"
+            "cd /path/to/complab/build\n"
+            "cmake .. -DCMAKE_BUILD_TYPE=Release\n"
+            "make -j$(nproc)"
+            "</pre>"
+            "<b>The kinetics file location:</b><br>"
+            "<code>src/complab3d_processors_part1.hh</code> contains defineRxnKinetics()<br><br>"
+            "<b>Steps:</b><br>"
+            "1. Save the kinetics code above to <code>defineKinetics.hh</code><br>"
+            "2. Place it in the CompLaB source directory<br>"
+            "3. Recompile with cmake/make<br>"
+            "4. Copy the new <code>complab</code> binary to your project or PATH"
+        )
+        recomp_label.setWordWrap(True)
+        recomp_label.setTextFormat(Qt.RichText)
+        recomp_label.setStyleSheet("padding: 8px; font-size: 11px;")
+        recomp_layout.addWidget(recomp_label)
+        recomp_group.setLayout(recomp_layout)
+        layout.addWidget(recomp_group)
+
         # Buttons
         button_layout = QHBoxLayout()
-        
+
         validate_btn = QPushButton("Validate Syntax")
         validate_btn.clicked.connect(self._validate_syntax)
         button_layout.addWidget(validate_btn)
-        
+
         preview_btn = QPushButton("Update Preview")
         preview_btn.clicked.connect(self._update_preview)
         button_layout.addWidget(preview_btn)
-        
+
         button_layout.addStretch()
-        
+
         button_box = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         )
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         button_layout.addWidget(button_box)
-        
+
         layout.addLayout(button_layout)
         
         # Load default template
@@ -289,18 +326,21 @@ bioR[0] = kads * C[0] * B[0] - kdes * B[0] - mu * B[0];
         template = self.TEMPLATES.get(template_name, "")
         
         # Substitute parameters
-        code = template.format(
-            ks=self.ks_spin.value(),
-            ks1=self.ks_spin.value(),
-            ks2=self.ks_spin.value() * 0.5,
-            ki=self.ks_spin.value() * 10,
-            vmax=self.vmax_spin.value(),
-            yield_=self.yield_spin.value(),
-            kd=self.kd_spin.value(),
-            kads="2.1e-3",
-            kdes="1.2e-5",
-            mu=self.kd_spin.value()
-        )
+        try:
+            code = template.format(
+                ks=self.ks_spin.value(),
+                ks1=self.ks_spin.value(),
+                ks2=self.ks_spin.value() * 0.5,
+                ki=self.ks_spin.value() * 10,
+                vmax=self.vmax_spin.value(),
+                yield_coeff=self.yield_spin.value(),
+                kd=self.kd_spin.value(),
+                kads="2.1e-3",
+                kdes="1.2e-5",
+                mu=self.kd_spin.value()
+            )
+        except (KeyError, IndexError):
+            code = template  # Use raw template if substitution fails
         
         self.code_editor.setPlainText(code)
         self._update_preview()
