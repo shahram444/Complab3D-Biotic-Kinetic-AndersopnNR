@@ -165,7 +165,36 @@ class SolverPanel(BasePanel):
         
         io_layout.addStretch()
         tabs.addTab(io_tab, "I/O Settings")
-        
+
+        # === MPI / Parallel Execution Tab ===
+        mpi_tab = QWidget()
+        mpi_layout = QVBoxLayout(mpi_tab)
+
+        mpi_group = self._create_group("MPI Parallel Execution")
+        mpi_inner = self._create_form_layout()
+
+        self.mpi_enabled_check = self._create_checkbox("Enable MPI parallel run", False)
+        mpi_inner.addRow("", self.mpi_enabled_check)
+
+        self.mpi_nprocs_spin = self._create_spin_box(1, 1024, 4)
+        mpi_inner.addRow("Number of processes:", self.mpi_nprocs_spin)
+
+        self.mpi_command_edit = self._create_line_edit("mpirun", "MPI launch command")
+        mpi_inner.addRow("MPI command:", self.mpi_command_edit)
+
+        mpi_info = self._create_info_label(
+            "Uses mpirun/mpiexec to launch CompLaB in parallel. "
+            "Number of processes should match your CPU core count. "
+            "Leave MPI command empty for auto-detection."
+        )
+        mpi_inner.addRow("", mpi_info)
+
+        mpi_group.setLayout(mpi_inner)
+        mpi_layout.addWidget(mpi_group)
+
+        mpi_layout.addStretch()
+        tabs.addTab(mpi_tab, "Parallel (MPI)")
+
         content_layout.addWidget(tabs)
         
         scroll.setWidget(content)
