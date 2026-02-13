@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
     QDockWidget, QTextEdit, QProgressBar, QLabel, QFrame,
     QTabWidget, QToolButton, QSizePolicy, QApplication
 )
-from PySide6.QtCore import Qt, QSize, Signal, QTimer, QThread, QProcess
+from PySide6.QtCore import Qt, QSize, Signal, QTimer, QThread
 from PySide6.QtGui import QAction, QIcon, QFont, QColor, QPalette, QPixmap
 
 from .panels.project_panel import ProjectPanel
@@ -731,12 +731,15 @@ class CompLaBMainWindow(QMainWindow):
         
         # Start simulation
         self.simulation_runner = SimulationRunner(self.current_project)
+        self.simulation_runner.started_signal.connect(self._on_simulation_started)
         self.simulation_runner.progress.connect(self._on_simulation_progress)
-        self.simulation_runner.finished.connect(self._on_simulation_finished)
+        self.simulation_runner.finished_signal.connect(self._on_simulation_finished)
         self.simulation_runner.output.connect(self.console.append_output)
+        self.simulation_runner.output.connect(self.monitoring_panel.append_output)
+        self.simulation_runner.error.connect(
+            lambda msg: self.console.log(msg, "error")
+        )
         self.simulation_runner.start()
-        
-        self.simulation_started.emit()
         
     def _stop_simulation(self):
         """Stop the running simulation"""
@@ -773,23 +776,25 @@ class CompLaBMainWindow(QMainWindow):
         self.sim_status.setText("Running...")
         self.sim_status.setStyleSheet("color: #4CAF50;")
         
-    def _on_simulation_finished(self, exit_code):
+    def _on_simulation_finished(self, exit_code, summary=""):
         """Handle simulation completion"""
         self.run_btn.setEnabled(True)
         self.run_action.setEnabled(True)
         self.stop_btn.setEnabled(False)
         self.stop_action.setEnabled(False)
         self.progress_bar.setVisible(False)
-        
+
         if exit_code == 0:
             self.sim_status.setText("Completed")
             self.sim_status.setStyleSheet("color: #4CAF50;")
-            self.console.log("Simulation completed successfully!")
+            self.console.log(summary or "Simulation completed successfully!", "success")
             self._update_project_tree()  # Show results
         else:
             self.sim_status.setText("Failed")
             self.sim_status.setStyleSheet("color: #f44336;")
-            self.console.log(f"Simulation failed with exit code {exit_code}")
+            self.console.log(summary or f"Simulation failed (exit code {exit_code})", "error")
+
+        self.monitoring_panel.on_simulation_finished(exit_code)
             
     def _on_simulation_progress(self, iteration, message):
         """Handle simulation progress update"""
@@ -833,7 +838,8 @@ class CompLaBMainWindow(QMainWindow):
         output_dir = self.current_project.get_output_dir()
         
         try:
-            QProcess.startDetached(paraview_path, [output_dir])
+            import subprocess
+            subprocess.Popen([paraview_path, output_dir])
         except Exception as e:
             QMessageBox.warning(self, "Error", 
                               f"Failed to start ParaView:\n{str(e)}\n\n"

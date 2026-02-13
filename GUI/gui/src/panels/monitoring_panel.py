@@ -2,6 +2,10 @@
 Monitoring and Post-Processing Panels
 """
 
+import html
+import re
+import time
+
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, QGroupBox,
     QLabel, QPushButton, QProgressBar, QListWidget, QListWidgetItem,
@@ -9,93 +13,201 @@ from PySide6.QtWidgets import (
     QComboBox, QFileDialog, QTabWidget
 )
 from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QFont, QTextCursor
 
 from .base_panel import BasePanel
 
 
 class MonitoringPanel(QWidget):
     """Real-time simulation monitoring panel"""
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._start_time = None
+        self._last_iteration = 0
+        self._max_iterations = 0
         self._setup_ui()
-        
+
     def _setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
-        
+
         # Status section
         status_group = QGroupBox("Simulation Status")
         status_layout = QFormLayout()
-        
+
         self.status_label = QLabel("Idle")
         self.status_label.setStyleSheet("font-weight: bold;")
         status_layout.addRow("Status:", self.status_label)
-        
+
         self.iteration_label = QLabel("0")
         status_layout.addRow("Iteration:", self.iteration_label)
-        
+
         self.time_label = QLabel("0:00:00")
         status_layout.addRow("Elapsed:", self.time_label)
-        
+
         self.eta_label = QLabel("-")
         status_layout.addRow("ETA:", self.eta_label)
-        
+
         status_group.setLayout(status_layout)
         layout.addWidget(status_group)
-        
+
         # Progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setFormat("%p% (%v / %m)")
         layout.addWidget(self.progress_bar)
-        
+
         # Convergence section
         conv_group = QGroupBox("Convergence")
         conv_layout = QFormLayout()
-        
+
         self.ns_conv_label = QLabel("-")
         conv_layout.addRow("NS residual:", self.ns_conv_label)
-        
+
         self.ade_conv_label = QLabel("-")
         conv_layout.addRow("ADE residual:", self.ade_conv_label)
-        
+
         conv_group.setLayout(conv_layout)
         layout.addWidget(conv_group)
-        
+
+        # Real-time output display
+        output_group = QGroupBox("Solver Output")
+        output_layout = QVBoxLayout()
+
+        self.output_text = QTextEdit()
+        self.output_text.setReadOnly(True)
+        self.output_text.setFont(QFont("Consolas", 9))
+        self.output_text.setLineWrapMode(QTextEdit.NoWrap)
+        self.output_text.setStyleSheet("""
+            QTextEdit {
+                background-color: #1E1E1E;
+                color: #D4D4D4;
+                border: 1px solid #3C3C3C;
+            }
+        """)
+        output_layout.addWidget(self.output_text)
+
+        output_group.setLayout(output_layout)
+        layout.addWidget(output_group, stretch=1)
+
         # Output files
         files_group = QGroupBox("Output Files")
         files_layout = QVBoxLayout()
-        
+
         self.files_list = QListWidget()
-        self.files_list.setMaximumHeight(150)
+        self.files_list.setMaximumHeight(120)
         files_layout.addWidget(self.files_list)
-        
-        refresh_btn = QPushButton("🔄 Refresh")
+
+        refresh_btn = QPushButton("Refresh")
         refresh_btn.clicked.connect(self._refresh_files)
         files_layout.addWidget(refresh_btn)
-        
+
         files_group.setLayout(files_layout)
         layout.addWidget(files_group)
-        
-        layout.addStretch()
-        
+
     def update_progress(self, iteration, message):
         """Update progress display"""
         self.iteration_label.setText(str(iteration))
         self.status_label.setText(message)
-        
+
         if iteration > 0:
             self.progress_bar.setValue(iteration)
-            
+
     def set_running(self, running: bool):
         """Set running state"""
         if running:
+            self._start_time = time.time()
+            self._last_iteration = 0
             self.status_label.setText("Running...")
             self.status_label.setStyleSheet("font-weight: bold; color: #4CAF50;")
+            self.output_text.clear()
         else:
+            self._start_time = None
             self.status_label.setText("Idle")
             self.status_label.setStyleSheet("font-weight: bold;")
-            
+
+    def append_output(self, line: str):
+        """Append a line of real-time solver output and parse for progress info"""
+        safe_line = html.escape(line)
+        line_lower = line.lower()
+
+        # Color-code output
+        if "error" in line_lower:
+            color = "#F44336"
+        elif "warning" in line_lower:
+            color = "#FFC107"
+        elif "converge" in line_lower or "complete" in line_lower:
+            color = "#4CAF50"
+        else:
+            color = "#D4D4D4"
+
+        self.output_text.append(
+            f'<span style="color: {color};">{safe_line}</span>'
+        )
+        # Auto-scroll to bottom
+        self.output_text.verticalScrollBar().setValue(
+            self.output_text.verticalScrollBar().maximum()
+        )
+
+        # Parse iteration info from solver output
+        # CompLaB prints lines like: "Iteration 500 / 10000" or "iter= 500"
+        iter_match = re.search(
+            r'(?:iteration|iter|step)\s*[=:]?\s*(\d+)\s*(?:/\s*(\d+))?',
+            line, re.IGNORECASE
+        )
+        if iter_match:
+            current = int(iter_match.group(1))
+            self._last_iteration = current
+            self.iteration_label.setText(str(current))
+            if iter_match.group(2):
+                self._max_iterations = int(iter_match.group(2))
+                self.progress_bar.setMaximum(self._max_iterations)
+            if self._max_iterations > 0:
+                self.progress_bar.setValue(current)
+            # Update elapsed / ETA
+            if self._start_time and current > 0:
+                elapsed = time.time() - self._start_time
+                h, rem = divmod(int(elapsed), 3600)
+                m, s = divmod(rem, 60)
+                self.time_label.setText(f"{h}:{m:02d}:{s:02d}")
+                if self._max_iterations > 0 and current < self._max_iterations:
+                    eta_seconds = elapsed * (self._max_iterations - current) / current
+                    eh, erem = divmod(int(eta_seconds), 3600)
+                    em, es = divmod(erem, 60)
+                    self.eta_label.setText(f"{eh}:{em:02d}:{es:02d}")
+
+        # Parse convergence residuals
+        ns_match = re.search(r'NS\s*residual\s*[=:]\s*([0-9.eE+-]+)', line, re.IGNORECASE)
+        if ns_match:
+            self.ns_conv_label.setText(ns_match.group(1))
+        ade_match = re.search(r'ADE\s*residual\s*[=:]\s*([0-9.eE+-]+)', line, re.IGNORECASE)
+        if ade_match:
+            self.ade_conv_label.setText(ade_match.group(1))
+
+    def on_simulation_finished(self, exit_code: int):
+        """Handle simulation completion"""
+        if exit_code == 0:
+            self.status_label.setText("Completed")
+            self.status_label.setStyleSheet("font-weight: bold; color: #4CAF50;")
+            self.progress_bar.setValue(self.progress_bar.maximum())
+        elif exit_code == -1:
+            self.status_label.setText("Cancelled")
+            self.status_label.setStyleSheet("font-weight: bold; color: #FFC107;")
+        else:
+            self.status_label.setText(f"Failed (exit code {exit_code})")
+            self.status_label.setStyleSheet("font-weight: bold; color: #F44336;")
+
+        self.eta_label.setText("-")
+        # Update final elapsed time
+        if self._start_time:
+            elapsed = time.time() - self._start_time
+            h, rem = divmod(int(elapsed), 3600)
+            m, s = divmod(rem, 60)
+            self.time_label.setText(f"{h}:{m:02d}:{s:02d}")
+            self._start_time = None
+        # Refresh output files
+        self._refresh_files()
+
     def _refresh_files(self):
         """Refresh output files list"""
         self.files_list.clear()
