@@ -225,10 +225,37 @@ void defineAbioticRxnKinetics(std::vector<T> C, std::vector<T>& subsR,
 #endif
 '''
 
+ABIOTIC_DECAY_CHAIN = '''\
+// defineAbioticKinetics.hh - Sequential decay chain A -> B -> C
+// Bateman equations for radioactive decay or multi-step degradation
+
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
+
+namespace AbioticParams {
+    constexpr double k1 = 2.0e-4;  // [1/s] A -> B decay rate
+    constexpr double k2 = 1.0e-4;  // [1/s] B -> C decay rate
+}
+
+template<typename T>
+void defineAbioticRxnKinetics(std::vector<T> C, std::vector<T>& subsR,
+                              plb::plint mask) {
+    using namespace AbioticParams;
+
+    // A -> B -> C (sequential first-order decay)
+    subsR[0] = -k1 * C[0];           // A decays
+    subsR[1] = k1 * C[0] - k2 * C[1]; // B produced from A, decays to C
+    subsR[2] = k2 * C[1];            // C produced from B
+}
+
+#endif
+'''
+
 ABIOTIC_TEMPLATES = {
     "First-order decay": ABIOTIC_FIRST_ORDER,
     "Bimolecular (A + B -> C)": ABIOTIC_BIMOLECULAR,
     "Reversible (A <-> B)": ABIOTIC_REVERSIBLE,
+    "Decay chain (A -> B -> C)": ABIOTIC_DECAY_CHAIN,
 }
 
 
@@ -369,6 +396,34 @@ class KineticsEditorDialog(QDialog):
         self._tabs.addTab(self._biotic_tab, "Biotic Kinetics")
         self._tabs.addTab(self._abiotic_tab, "Abiotic Kinetics")
         layout.addWidget(self._tabs, 1)
+
+        # Recompilation help
+        recompile_group = QLabel(
+            "After modifying kinetics files, you must recompile CompLaB3D:\n\n"
+            "  1. Save the .hh file to the project root directory\n"
+            "     (same folder as CompLaB.xml)\n\n"
+            "  2. Recompile the solver:\n"
+            "     cd /path/to/CompLaB3D\n"
+            "     make clean && make\n\n"
+            "  3. If using CMake:\n"
+            "     cd build\n"
+            "     cmake .. && make -j$(nproc)\n\n"
+            "  4. The solver reads defineKinetics.hh (biotic) or\n"
+            "     defineAbioticKinetics.hh (abiotic) at compile time.\n"
+            "     These are #include'd in the source code.\n\n"
+            "  NOTE: Biotic kinetics file must define:\n"
+            "    void defineRxnKinetics(vector<T>& C, vector<T>& subsR,\n"
+            "                           vector<T>& B, vector<T>& bioR,\n"
+            "                           plint mask)\n\n"
+            "  NOTE: Abiotic kinetics file must define:\n"
+            "    void defineAbioticRxnKinetics(vector<T> C, vector<T>& subsR,\n"
+            "                                  plint mask)")
+        recompile_group.setWordWrap(True)
+        recompile_group.setStyleSheet(
+            "background: #1e293b; color: #94a3b8; padding: 12px; "
+            "border: 1px solid #334155; border-radius: 4px; "
+            "font-family: Consolas, monospace; font-size: 10px;")
+        layout.addWidget(recompile_group)
 
         # Close button
         btn_row = QHBoxLayout()
