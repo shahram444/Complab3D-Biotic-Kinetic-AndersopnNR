@@ -236,5 +236,4 @@ def _escape(text: str) -> str:
     return (text
             .replace("&", "&amp;")
             .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace(" ", "&nbsp;"))
+            .replace(">", "&gt;"))
