@@ -9,7 +9,7 @@
     "biotic_mode": false,
     "enable_kinetics": false,
     "enable_abiotic_kinetics": true,
-    "enable_validation_diagnostics": false
+    "enable_validation_diagnostics": true
   },
   "domain": {
     "nx": 50,
@@ -51,7 +51,7 @@
       "diffusion_in_biofilm": 2e-10,
       "left_boundary_type": "Dirichlet",
       "right_boundary_type": "Neumann",
-      "left_boundary_condition": 0.0,
+      "left_boundary_condition": 1.0,
       "right_boundary_condition": 0.0
     }
   ],
@@ -83,6 +83,6 @@
   },
   "_meta": {
     "version": "2.1",
-    "saved": "2026-02-13T16:25:07.351657"
+    "saved": "2026-02-13T16:50:57.366420"
   }
 }
