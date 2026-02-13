@@ -9,7 +9,7 @@
         <biotic_mode>false</biotic_mode>
         <enable_kinetics>false</enable_kinetics>
         <enable_abiotic_kinetics>true</enable_abiotic_kinetics>
-        <enable_validation_diagnostics>false</enable_validation_diagnostics>
+        <enable_validation_diagnostics>true</enable_validation_diagnostics>
     </simulation_mode>
     <LB_numerics>
         <domain>
@@ -52,7 +52,7 @@
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>0.0</left_boundary_condition>
+            <left_boundary_condition>1</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate0>
     </chemistry>
