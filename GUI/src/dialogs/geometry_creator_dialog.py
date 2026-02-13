@@ -70,6 +70,25 @@ MATERIAL_NAMES = {
     6: "Microbe-1 fringe", 7: "Microbe-2 fringe",     8: "Microbe-3 fringe",
 }
 
+# RGB colors for color slice images
+COLORS_RGB = {
+    0: (43, 43, 43),      # Solid - dark gray
+    1: (230, 159, 0),     # Interface - orange
+    2: (0, 114, 178),     # Pore - blue
+    3: (0, 158, 115),     # Microbe-1 core - green
+    4: (204, 121, 167),   # Microbe-2 core - pink
+    5: (240, 228, 66),    # Microbe-3 core - yellow
+    6: (102, 194, 165),   # Microbe-1 fringe - light green
+    7: (224, 160, 192),   # Microbe-2 fringe - light pink
+    8: (245, 240, 160),   # Microbe-3 fringe - light yellow
+}
+
+# Hex colors for matplotlib figures
+COLORS_HEX = {
+    0: '#2b2b2b', 1: '#e69f00', 2: '#0072b2', 3: '#009e73',
+    4: '#cc79a7', 5: '#f0e442', 6: '#66c2a5', 7: '#e0a0c0', 8: '#f5f0a0',
+}
+
 
 # ── Geometry generation functions ──────────────────────────────────────
 
@@ -477,6 +496,49 @@ def _place_grain_coating(geom, mi=0, coverage=0.7, **_):
     return _mark_fringe(geom, ci, fi)
 
 
+def _place_two_zones_grains(geom, thickness=2, coverage=0.7, **_):
+    """Two species on grain surfaces, split by X position."""
+    nx, ny, nz = geom.shape
+    c1, f1 = MICROBE_CORES[0], MICROBE_FRINGES[0]
+    c2, f2 = MICROBE_CORES[1], MICROBE_FRINGES[1]
+    mid_x = nx // 2
+    for x in range(nx):
+        for y in range(ny):
+            for z in range(nz):
+                if geom[x, y, z] == PORE:
+                    for dx, dy, dz in [(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]:
+                        x2, y2, z2 = x+dx, y+dy, z+dz
+                        if 0 <= x2 < nx and 0 <= y2 < ny and 0 <= z2 < nz:
+                            if geom[x2, y2, z2] == INTERFACE:
+                                if np.random.random() < coverage:
+                                    geom[x, y, z] = c1 if x < mid_x else c2
+                                break
+    geom = _mark_fringe(geom, c1, f1)
+    return _mark_fringe(geom, c2, f2)
+
+
+def _place_three_zones_grains(geom, thickness=2, coverage=0.7, **_):
+    """Three species on grain surfaces, split by X into thirds."""
+    nx, ny, nz = geom.shape
+    third = nx // 3
+    cores = [(MICROBE_CORES[i], MICROBE_FRINGES[i]) for i in range(3)]
+    for x in range(nx):
+        ci = cores[0][0] if x < third else (cores[1][0] if x < 2*third else cores[2][0])
+        for y in range(ny):
+            for z in range(nz):
+                if geom[x, y, z] == PORE:
+                    for dx, dy, dz in [(1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]:
+                        x2, y2, z2 = x+dx, y+dy, z+dz
+                        if 0 <= x2 < nx and 0 <= y2 < ny and 0 <= z2 < nz:
+                            if geom[x2, y2, z2] == INTERFACE:
+                                if np.random.random() < coverage:
+                                    geom[x, y, z] = ci
+                                break
+    for ci, fi in cores:
+        geom = _mark_fringe(geom, ci, fi)
+    return geom
+
+
 BIOFILM_FUNCS = {
     "bottom_wall": _place_bottom_wall,
     "top_wall": _place_top_wall,
@@ -572,6 +634,97 @@ def build_readme(geometry, mode_name, extra_info=""):
     return "\n".join(lines)
 
 
+def save_slice_images(geometry, folder, prefix="slice"):
+    """Save B/W YZ slice images along flow direction (X)."""
+    try:
+        from PIL import Image as PILImage
+    except ImportError:
+        return 0
+    nx, ny, nz = geometry.shape
+    os.makedirs(folder, exist_ok=True)
+    for x in range(nx):
+        img_array = np.zeros((nz, ny), dtype=np.uint8)
+        for y in range(ny):
+            for z in range(nz):
+                img_array[z, y] = 0 if geometry[x, y, z] >= PORE else 255
+        img = PILImage.fromarray(img_array, mode='L')
+        img.save(os.path.join(folder, f'{prefix}_{x:04d}.png'))
+    return nx
+
+
+def save_color_slice_images(geometry, folder, prefix="color_slice"):
+    """Save colored YZ slice images showing all material types."""
+    try:
+        from PIL import Image as PILImage
+    except ImportError:
+        return 0
+    nx, ny, nz = geometry.shape
+    os.makedirs(folder, exist_ok=True)
+    for x in range(nx):
+        img_array = np.zeros((nz, ny, 3), dtype=np.uint8)
+        for y in range(ny):
+            for z in range(nz):
+                mat_id = geometry[x, y, z]
+                img_array[z, y] = COLORS_RGB.get(mat_id, (128, 128, 128))
+        img = PILImage.fromarray(img_array, mode='RGB')
+        img.save(os.path.join(folder, f'{prefix}_{x:04d}.png'))
+    return nx
+
+
+def create_geometry_figure(geometry, filepath_base, title="Geometry"):
+    """Create publication-quality geometry visualization (PNG + PDF)."""
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        import matplotlib.patches as mpatches
+        from matplotlib.colors import ListedColormap, BoundaryNorm
+    except ImportError:
+        return
+
+    nx, ny, nz = geometry.shape
+    fig, axes = plt.subplots(1, 3, figsize=(7.2, 3))
+
+    unique_vals = np.unique(geometry)
+    colors_list = [COLORS_HEX.get(v, '#888888') for v in unique_vals]
+    cmap = ListedColormap(colors_list)
+    bounds = list(unique_vals) + [unique_vals[-1] + 1]
+    norm = BoundaryNorm(bounds, cmap.N)
+
+    mid_z = nz // 2
+    axes[0].imshow(geometry[:, :, mid_z].T, origin='lower',
+                   cmap=cmap, norm=norm, aspect='equal')
+    axes[0].set_xlabel('X (flow)')
+    axes[0].set_ylabel('Y')
+    axes[0].set_title(f'XY plane (z={mid_z})')
+
+    mid_y = ny // 2
+    axes[1].imshow(geometry[:, mid_y, :].T, origin='lower',
+                   cmap=cmap, norm=norm, aspect='equal')
+    axes[1].set_xlabel('X (flow)')
+    axes[1].set_ylabel('Z')
+    axes[1].set_title(f'XZ plane (y={mid_y})')
+
+    mid_x = nx // 2
+    axes[2].imshow(geometry[mid_x, :, :].T, origin='lower',
+                   cmap=cmap, norm=norm, aspect='equal')
+    axes[2].set_xlabel('Y')
+    axes[2].set_ylabel('Z')
+    axes[2].set_title(f'YZ plane (x={mid_x})')
+
+    patches = [mpatches.Patch(color=COLORS_HEX.get(v, '#888888'),
+               label=MATERIAL_NAMES.get(v, f'Mat {v}'))
+               for v in unique_vals]
+    fig.legend(handles=patches, loc='center right', bbox_to_anchor=(1.15, 0.5))
+
+    plt.suptitle(title, fontsize=9, fontweight='bold')
+    plt.tight_layout()
+
+    for ext in ['png', 'pdf']:
+        plt.savefig(f"{filepath_base}.{ext}", dpi=600, bbox_inches='tight')
+    plt.close()
+
+
 # ── Worker Thread ──────────────────────────────────────────────────────
 
 class GeometryWorker(QThread):
@@ -588,15 +741,14 @@ class GeometryWorker(QThread):
         try:
             p = self.params
             generator = p["generator"]  # "abiotic", "sessile", "image"
-            output_path = p["output_path"]
-            nx, ny, nz = p["nx"], p["ny"], p["nz"]
+            output_dir = p["output_dir"]
 
             if generator == "abiotic":
-                self._run_abiotic(p, output_path)
+                self._run_abiotic(p, output_dir)
             elif generator == "sessile":
-                self._run_sessile(p, output_path)
+                self._run_sessile(p, output_dir)
             elif generator == "image":
-                self._run_image(p, output_path)
+                self._run_image(p, output_dir)
             else:
                 self.finished.emit(False, f"Unknown generator: {generator}", "", "")
 
@@ -604,7 +756,46 @@ class GeometryWorker(QThread):
             import traceback
             self.finished.emit(False, f"Error: {e}\n{traceback.format_exc()}", "", "")
 
-    def _run_abiotic(self, p, output_path):
+    def _save_outputs(self, geom, output_dir, readme, label="geometry"):
+        """Save all requested output files into the directory structure."""
+        p = self.params
+        input_dir = os.path.join(output_dir, "input")
+        images_dir = os.path.join(output_dir, "images")
+        os.makedirs(input_dir, exist_ok=True)
+
+        # Always save geometry.dat and README
+        dat_path = os.path.join(input_dir, "geometry.dat")
+        n = save_dat(geom, dat_path)
+
+        readme_path = os.path.join(output_dir, "README.txt")
+        with open(readme_path, "w") as f:
+            f.write(readme)
+
+        files_created = [dat_path, readme_path]
+
+        # Optional: B/W slice images
+        if p.get("save_bw_slices", False):
+            self.progress.emit(82, "Saving B/W slice images...")
+            ns = save_slice_images(geom, images_dir, "slice")
+            files_created.append(f"{images_dir}/slice_*.png ({ns} files)")
+
+        # Optional: Color slice images
+        if p.get("save_color_slices", False):
+            self.progress.emit(88, "Saving color slice images...")
+            ns = save_color_slice_images(geom, images_dir, "color_slice")
+            files_created.append(f"{images_dir}/color_slice_*.png ({ns} files)")
+
+        # Optional: Publication figure
+        if p.get("save_pub_figure", False):
+            self.progress.emit(94, "Creating publication figure...")
+            fig_base = os.path.join(output_dir, label)
+            create_geometry_figure(geom, fig_base, title=label)
+            files_created.append(f"{fig_base}.png")
+            files_created.append(f"{fig_base}.pdf")
+
+        return dat_path, n, files_created
+
+    def _run_abiotic(self, p, output_dir):
         nx, ny, nz = p["nx"], p["ny"], p["nz"]
         medium = p["medium_func"]
         porosity = p["target_porosity"]
@@ -613,22 +804,19 @@ class GeometryWorker(QThread):
         func = MEDIUM_FUNCS[medium]
         geom = func(nx, ny, nz, target_porosity=porosity)
 
-        self.progress.emit(70, "Saving geometry.dat...")
-        n = save_dat(geom, output_path)
+        self.progress.emit(70, "Saving outputs...")
         readme = build_readme(geom, f"Abiotic - {medium}", f"Target porosity: {porosity:.2f}")
-
-        readme_path = output_path.replace(".dat", "_README.txt")
-        with open(readme_path, "w") as f:
-            f.write(readme)
+        dat_path, n, files = self._save_outputs(
+            geom, output_dir, readme, f"abiotic_{medium}")
 
         self.progress.emit(100, "Done!")
         self.finished.emit(True,
-            f"Geometry saved: {output_path}\n"
+            f"Geometry saved: {dat_path}\n"
             f"Dimensions: {nx} x {ny} x {nz} = {n:,} voxels\n"
-            f"README: {readme_path}",
-            output_path, readme)
+            f"Files created: {len(files)}",
+            dat_path, readme)
 
-    def _run_sessile(self, p, output_path):
+    def _run_sessile(self, p, output_dir):
         nx, ny, nz = p["nx"], p["ny"], p["nz"]
         medium = p["medium_func"]
         porosity = p["target_porosity"]
@@ -650,28 +838,29 @@ class GeometryWorker(QThread):
         else:
             geom = bio_func(geom, thickness=thickness, coverage=coverage)
 
-        self.progress.emit(80, "Saving geometry.dat...")
-        n = save_dat(geom, output_path)
+        self.progress.emit(70, "Saving outputs...")
         extra = (f"Scenario {sid}: {sname}\n"
                  f"  {sdesc}\n"
                  f"  Species: {n_microbes}, Thickness: {thickness}, Coverage: {coverage:.0%}")
         readme = build_readme(geom, f"Sessile Biofilm - {medium}", extra)
-
-        readme_path = output_path.replace(".dat", "_README.txt")
-        with open(readme_path, "w") as f:
-            f.write(readme)
+        dat_path, n, files = self._save_outputs(
+            geom, output_dir, readme, f"geometry_S{sid:02d}")
 
         self.progress.emit(100, "Done!")
         self.finished.emit(True,
-            f"Geometry saved: {output_path}\n"
+            f"Geometry saved: {dat_path}\n"
             f"Dimensions: {nx} x {ny} x {nz} = {n:,} voxels\n"
             f"Scenario: {sid} - {sname}\n"
-            f"README: {readme_path}",
-            output_path, readme)
+            f"Files created: {len(files)}",
+            dat_path, readme)
 
-    def _run_image(self, p, output_path):
+    def _run_image(self, p, output_dir):
         folder = p["image_folder"]
         threshold = p.get("threshold", 128)
+        bio_species = p.get("biofilm_species", 0)
+        bio_location = p.get("biofilm_location", 1)
+        bio_thickness = p.get("biofilm_thickness", 2)
+        bio_coverage = p.get("biofilm_coverage", 0.7)
 
         self.progress.emit(5, "Scanning image folder...")
         extensions = ['*.bmp', '*.png', '*.tif', '*.tiff', '*.jpg', '*.jpeg']
@@ -705,25 +894,55 @@ class GeometryWorker(QThread):
                 for z in range(min(nz, img.shape[0])):
                     geom[x, y, z] = PORE if img[z, y] < threshold else SOLID
             if (x + 1) % max(1, n_slices // 10) == 0:
-                pct = 10 + int(60 * (x + 1) / n_slices)
+                pct = 10 + int(40 * (x + 1) / n_slices)
                 self.progress.emit(pct, f"Processed {x+1}/{n_slices} slices...")
 
-        self.progress.emit(75, "Adding interface layer...")
+        self.progress.emit(55, "Adding interface layer...")
         geom = _add_interface(geom)
 
-        self.progress.emit(85, "Saving geometry.dat...")
-        n = save_dat(geom, output_path)
-        readme = build_readme(geom, f"Image Stack Import from {folder}")
+        # Add biofilm if requested
+        bio_label = ""
+        if bio_species >= 1:
+            self.progress.emit(60, f"Adding {bio_species}-species biofilm...")
+            loc_names = {1: "All surfaces", 2: "Inlet region", 3: "Outlet region",
+                         4: "Center region", 5: "Random patches", 6: "Zoned by X"}
+            bio_label = f" + {bio_species} species biofilm ({loc_names.get(bio_location, '')})"
 
-        readme_path = output_path.replace(".dat", "_README.txt")
-        with open(readme_path, "w") as f:
-            f.write(readme)
+            if bio_species == 1:
+                if bio_location == 1:
+                    geom = _place_grain_coating(geom, mi=0, coverage=bio_coverage)
+                elif bio_location == 2:
+                    geom = _place_inlet(geom, mi=0, thickness=bio_thickness, coverage=bio_coverage)
+                elif bio_location == 3:
+                    geom = _place_outlet(geom, mi=0, thickness=bio_thickness, coverage=bio_coverage)
+                elif bio_location == 4:
+                    geom = _place_center(geom, mi=0, thickness=bio_thickness, coverage=bio_coverage)
+                elif bio_location == 5:
+                    geom = _place_random_patches(geom, mi=0)
+                else:
+                    geom = _place_grain_coating(geom, mi=0, coverage=bio_coverage)
+            elif bio_species == 2:
+                if bio_location == 6:
+                    geom = _place_two_zones_grains(geom, thickness=bio_thickness, coverage=bio_coverage)
+                else:
+                    geom = _place_competing(geom, thickness=bio_thickness, coverage=bio_coverage)
+            elif bio_species == 3:
+                if bio_location == 6:
+                    geom = _place_three_zones_grains(geom, thickness=bio_thickness, coverage=bio_coverage)
+                else:
+                    geom = _place_three_zones(geom, thickness=bio_thickness, coverage=bio_coverage)
+
+        self.progress.emit(70, "Saving outputs...")
+        readme = build_readme(geom, f"Image Stack Import from {folder}{bio_label}")
+        dat_path, n, out_files = self._save_outputs(
+            geom, output_dir, readme, "image_geometry")
 
         self.progress.emit(100, "Done!")
         self.finished.emit(True,
-            f"Converted {n_slices} images -> {output_path}\n"
-            f"Dimensions: {nx} x {ny} x {nz} = {n:,} voxels",
-            output_path, readme)
+            f"Converted {n_slices} images -> {dat_path}\n"
+            f"Dimensions: {nx} x {ny} x {nz} = {n:,} voxels\n"
+            f"Files created: {len(out_files)}",
+            dat_path, readme)
 
 
 # ── Dialog ─────────────────────────────────────────────────────────────
@@ -775,17 +994,42 @@ class GeometryCreatorDialog(QDialog):
         out_group = QGroupBox("Output")
         out_layout = QVBoxLayout()
 
-        # Output file path
+        # Output directory path
         path_row = QHBoxLayout()
-        path_row.addWidget(QLabel("Output file:"))
-        self._output_edit = QLineEdit("geometry.dat")
+        path_row.addWidget(QLabel("Output folder:"))
+        self._output_edit = QLineEdit("geometry_output")
         self._output_edit.setToolTip(
-            "Output .dat file path. A README will also be created.")
+            "Output directory. Structure:\n"
+            "  folder/input/geometry.dat\n"
+            "  folder/images/slice_*.png (B/W)\n"
+            "  folder/images/color_slice_*.png\n"
+            "  folder/README.txt\n"
+            "  folder/geometry_figure.png/pdf")
         path_row.addWidget(self._output_edit)
         browse_btn = QPushButton("Browse...")
         browse_btn.clicked.connect(self._browse_output)
         path_row.addWidget(browse_btn)
         out_layout.addLayout(path_row)
+
+        # Output options
+        opts_row = QHBoxLayout()
+        self._opt_bw_slices = QCheckBox("B/W slice images")
+        self._opt_bw_slices.setChecked(True)
+        self._opt_bw_slices.setToolTip("Save black/white YZ slice images (one per X position)")
+        opts_row.addWidget(self._opt_bw_slices)
+
+        self._opt_color_slices = QCheckBox("Color slice images")
+        self._opt_color_slices.setChecked(True)
+        self._opt_color_slices.setToolTip("Save colored YZ slice images showing all material types")
+        opts_row.addWidget(self._opt_color_slices)
+
+        self._opt_pub_figure = QCheckBox("Publication figure")
+        self._opt_pub_figure.setChecked(True)
+        self._opt_pub_figure.setToolTip("Save publication-quality XY/XZ/YZ cross-section figure (PNG + PDF)")
+        opts_row.addWidget(self._opt_pub_figure)
+
+        opts_row.addStretch()
+        out_layout.addLayout(opts_row)
 
         # Generate button
         gen_row = QHBoxLayout()
@@ -1018,9 +1262,63 @@ class GeometryCreatorDialog(QDialog):
         folder_group.setLayout(folder_form)
         lay.addWidget(folder_group)
 
+        # Biofilm options for converted images
+        bio_group = QGroupBox("Add Biofilm (optional)")
+        bio_form = QFormLayout()
+
+        self._img_biofilm_species = QComboBox()
+        self._img_biofilm_species.addItems([
+            "0 - No biofilm (abiotic only)",
+            "1 - Single species",
+            "2 - Two species",
+            "3 - Three species",
+        ])
+        self._img_biofilm_species.currentIndexChanged.connect(
+            self._on_img_biofilm_changed)
+        bio_form.addRow("Biofilm species:", self._img_biofilm_species)
+
+        self._img_bio_location = QComboBox()
+        self._img_bio_location.addItems([
+            "1 - All grain surfaces",
+            "2 - Inlet region (first 20% of X)",
+            "3 - Outlet region (last 20% of X)",
+            "4 - Center region (middle 40% of X)",
+            "5 - Random patches",
+            "6 - Zoned by X (species separated)",
+        ])
+        self._img_bio_location.setEnabled(False)
+        bio_form.addRow("Location:", self._img_bio_location)
+
+        self._img_bio_thickness = QSpinBox()
+        self._img_bio_thickness.setRange(1, 20)
+        self._img_bio_thickness.setValue(2)
+        self._img_bio_thickness.setEnabled(False)
+        bio_form.addRow("Thickness:", self._img_bio_thickness)
+
+        self._img_bio_coverage = QDoubleSpinBox()
+        self._img_bio_coverage.setRange(0.1, 1.0)
+        self._img_bio_coverage.setDecimals(2)
+        self._img_bio_coverage.setValue(0.70)
+        self._img_bio_coverage.setSingleStep(0.1)
+        self._img_bio_coverage.setEnabled(False)
+        bio_form.addRow("Coverage:", self._img_bio_coverage)
+
+        bio_group.setLayout(bio_form)
+        lay.addWidget(bio_group)
+
         lay.addStretch()
         scroll.setWidget(w)
         return scroll
+
+    def _on_img_biofilm_changed(self, idx):
+        enabled = idx > 0
+        self._img_bio_location.setEnabled(enabled)
+        self._img_bio_thickness.setEnabled(enabled)
+        self._img_bio_coverage.setEnabled(enabled)
+        # Zone option only for 2+ species
+        if idx < 2:
+            if self._img_bio_location.currentIndex() == 5:
+                self._img_bio_location.setCurrentIndex(0)
 
     # ── Helpers ─────────────────────────────────────────────────
 
@@ -1041,9 +1339,8 @@ class GeometryCreatorDialog(QDialog):
                 self._bio_medium.setCurrentIndex(2)
 
     def _browse_output(self):
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Save Geometry File", "geometry.dat",
-            "DAT Files (*.dat);;All Files (*)")
+        path = QFileDialog.getExistingDirectory(
+            self, "Select Output Folder")
         if path:
             self._output_edit.setText(path)
 
@@ -1055,12 +1352,19 @@ class GeometryCreatorDialog(QDialog):
     # ── Generate ───────────────────────────────────────────────
 
     def _generate(self):
-        output_path = self._output_edit.text().strip()
-        if not output_path:
-            QMessageBox.warning(self, "Error", "Specify an output file path.")
+        output_dir = self._output_edit.text().strip()
+        if not output_dir:
+            QMessageBox.warning(self, "Error", "Specify an output folder.")
             return
 
         tab_idx = self._main_tabs.currentIndex()
+
+        # Common output options
+        output_opts = {
+            "save_bw_slices": self._opt_bw_slices.isChecked(),
+            "save_color_slices": self._opt_color_slices.isChecked(),
+            "save_pub_figure": self._opt_pub_figure.isChecked(),
+        }
 
         if tab_idx == 0:  # Abiotic
             medium_func = MEDIUM_TYPES[self._abio_medium.currentIndex()][1]
@@ -1071,7 +1375,8 @@ class GeometryCreatorDialog(QDialog):
                 "ny": self._abio_ny.value(),
                 "nz": self._abio_nz.value(),
                 "target_porosity": self._abio_porosity.value(),
-                "output_path": output_path,
+                "output_dir": output_dir,
+                **output_opts,
             }
 
         elif tab_idx == 1:  # Sessile Biofilm
@@ -1087,7 +1392,8 @@ class GeometryCreatorDialog(QDialog):
                 "target_porosity": self._bio_porosity.value(),
                 "biofilm_thickness": self._bio_thickness.value(),
                 "biofilm_coverage": self._bio_coverage.value(),
-                "output_path": output_path,
+                "output_dir": output_dir,
+                **output_opts,
             }
 
         elif tab_idx == 2:  # Image Converter
@@ -1099,8 +1405,13 @@ class GeometryCreatorDialog(QDialog):
                 "generator": "image",
                 "image_folder": folder,
                 "threshold": self._img_threshold.value(),
+                "biofilm_species": self._img_biofilm_species.currentIndex(),
+                "biofilm_location": self._img_bio_location.currentIndex() + 1,
+                "biofilm_thickness": self._img_bio_thickness.value(),
+                "biofilm_coverage": self._img_bio_coverage.value(),
                 "nx": 0, "ny": 0, "nz": 0,  # determined by images
-                "output_path": output_path,
+                "output_dir": output_dir,
+                **output_opts,
             }
         else:
             return
