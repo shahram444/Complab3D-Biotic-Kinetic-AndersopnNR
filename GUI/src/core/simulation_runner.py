@@ -10,6 +10,7 @@ Supports:
 
 import os
 import re
+import struct
 import time
 import subprocess
 from pathlib import Path
@@ -132,6 +133,10 @@ class SimulationRunner(QThread):
             msg = f"Exited with code {rc} after {hrs}h {mins}m {secs}s"
 
         self.output_line.emit(msg)
+        # Convert unsigned 32-bit Windows exit codes to signed to avoid
+        # OverflowError in Qt Signal(int, str) which expects a C signed int.
+        if rc > 2147483647 or rc < -2147483648:
+            rc = struct.unpack('i', struct.pack('I', rc & 0xFFFFFFFF))[0]
         self.finished_signal.emit(rc, msg)
 
     def cancel(self):
