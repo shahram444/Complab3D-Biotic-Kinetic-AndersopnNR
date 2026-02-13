@@ -1,0 +1,33 @@
+CompLaB3D Simulation Log
+Date: 2026-02-11 19:12:45
+Working directory: C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR
+Exit code: 1
+Elapsed: 354.3s
+============================================================
+
+Number of kinetic models = 1
+
+CompLaB main directory = C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR/
+CompLaB input directory = C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR/input
+CompLaB output directory = C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR/output_planktonic
+
+Reading the geometry file (input/OS_R1_3D_phi08.dat).
+Saving geometry vti file (inputGeom).
+
+Initializing the fluid lattice (deltaP = 0.002).
+nsLatticeTau = 0.8, nsLatticeOmega = 1.25, nsLatticeNu = 0.1
+
+========== LBM NS simulation begins ==========
+Run a new simulation for nsLattice
+average=7.06831e-10; stdDev/average=6.79208
+average=1.35935e-12; stdDev/average=0.231171
+average=8.0301e-13; stdDev/average=0.0983493
+average=6.06134e-13; stdDev/average=0.0686688
+average=4.86861e-13; stdDev/average=0.0589722
+average=4.00246e-13; stdDev/average=0.0545324
+average=3.32921e-13; stdDev/average=0.0520153
+average=2.78865e-13; stdDev/average=0.0504236
+average=2.34655e-13; stdDev/average=0.0493484
+average=1.98079e-13; stdDev/average=0.0485804
+------------------------------------------------------------
+Cancelled after 0h 5m 54s
