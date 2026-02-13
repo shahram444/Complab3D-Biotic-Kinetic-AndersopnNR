@@ -239,13 +239,84 @@ def _biofilm_equilibrium():
     return p
 
 
+@_register("abiotic_decay_chain", "Abiotic - Sequential Decay Chain",
+           "Sequential decay A -> B -> C (Bateman equations).")
+def _abiotic_decay_chain():
+    p = CompLaBProject(name="Abiotic Decay Chain")
+    p.simulation_mode = SimulationMode(
+        biotic_mode=False, enable_kinetics=False,
+        enable_abiotic_kinetics=True)
+    p.domain = DomainSettings(
+        nx=20, ny=10, nz=10, dx=1.0,
+        geometry_filename="geometry_open.dat")
+    p.iteration.ade_max_iT = 50000
+    p.substrates = [
+        Substrate(name="Parent_A", initial_concentration=1.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
+                  left_boundary_type="Neumann", right_boundary_type="Neumann",
+                  left_boundary_condition=0.0, right_boundary_condition=0.0),
+        Substrate(name="Daughter_B", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
+                  left_boundary_type="Neumann", right_boundary_type="Neumann",
+                  left_boundary_condition=0.0, right_boundary_condition=0.0),
+        Substrate(name="GrandDaughter_C", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
+                  left_boundary_type="Neumann", right_boundary_type="Neumann",
+                  left_boundary_condition=0.0, right_boundary_condition=0.0),
+    ]
+    p.io_settings.save_vtk_interval = 10000
+    return p
+
+
+@_register("abiotic_equilibrium", "Abiotic + Equilibrium Solver",
+           "Abiotic kinetics coupled with equilibrium chemistry solver.")
+def _abiotic_equilibrium():
+    p = CompLaBProject(name="Abiotic + Equilibrium")
+    p.simulation_mode = SimulationMode(
+        biotic_mode=False, enable_kinetics=False,
+        enable_abiotic_kinetics=True)
+    p.substrates = _default_substrates_5()
+    # No biofilm diffusion needed for abiotic
+    for s in p.substrates:
+        s.diffusion_in_biofilm = s.diffusion_in_pore
+    p.equilibrium = EquilibriumSettings(
+        enabled=True,
+        component_names=["HCO3-", "H+"],
+        stoichiometry=[
+            [0.0, 0.0],    # DOC (not in equilibrium)
+            [1.0, 1.0],    # CO2 -> H2CO3
+            [1.0, 0.0],    # HCO3-
+            [1.0, -1.0],   # CO3--
+            [0.0, 1.0],    # H+
+        ],
+        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
+    )
+    return p
+
+
+@_register("planktonic_equilibrium", "Planktonic + Equilibrium",
+           "Planktonic bacteria with LBM solver coupled to equilibrium chemistry.")
+def _planktonic_equilibrium():
+    p = _planktonic()
+    p.name = "Planktonic + Equilibrium"
+    p.equilibrium = EquilibriumSettings(
+        enabled=True,
+        component_names=["HCO3-", "H+"],
+        stoichiometry=[
+            [0.0, 0.0], [1.0, 1.0], [1.0, 0.0], [1.0, -1.0], [0.0, 1.0],
+        ],
+        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
+    )
+    return p
+
+
 @_register("full_coupled", "Full Coupled System",
-           "Biofilm + planktonic + abiotic kinetics + equilibrium chemistry.")
+           "Biofilm (CA) + planktonic (LBM) with Monod kinetics + equilibrium.")
 def _full_coupled():
     p = CompLaBProject(name="Full Coupled")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True,
-        enable_abiotic_kinetics=True)
+        enable_abiotic_kinetics=False)
     p.substrates = _default_substrates_5()
     p.microbiology = MicrobiologySettings(
         maximum_biomass_density=100.0,

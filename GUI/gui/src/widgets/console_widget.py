@@ -2,6 +2,7 @@
 Console Widget for simulation output
 """
 
+import html as html_mod
 from datetime import datetime
 
 from PySide6.QtWidgets import (
@@ -91,7 +92,8 @@ class ConsoleWidget(QFrame):
         }
         color = colors.get(level, "#CCCCCC")
         
-        html = f'<span style="color: #666;">[{timestamp}]</span> <span style="color: {color};">{message}</span>'
+        safe_msg = html_mod.escape(message)
+        html = f'<span style="color: #666;">[{timestamp}]</span> <span style="color: {color};">{safe_msg}</span>'
         self.text_area.append(html)
         
         # Scroll to bottom
@@ -115,7 +117,8 @@ class ConsoleWidget(QFrame):
         else:
             color = "#AAAAAA"
             
-        html = f'<span style="color: {color}; font-family: Consolas, monospace;">{text}</span>'
+        safe_text = html_mod.escape(text)
+        html = f'<span style="color: {color}; font-family: Consolas, monospace;">{safe_text}</span>'
         self.text_area.append(html)
         
         # Scroll to bottom
