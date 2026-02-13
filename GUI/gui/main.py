@@ -11,8 +11,8 @@ import sys
 import os
 from pathlib import Path
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+# Ensure gui directory is on path so 'src' is importable as a package
+sys.path.insert(0, str(Path(__file__).parent))
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QFile, QTextStream
