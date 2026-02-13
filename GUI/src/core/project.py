@@ -185,10 +185,6 @@ class CompLaBProject:
 
         # ── 2. Simulation mode consistency ──────────────────────────
         sm = self.simulation_mode
-        if sm.biotic_mode and sm.enable_abiotic_kinetics:
-            errors.append(
-                "[Mode] biotic_mode=true and enable_abiotic_kinetics=true "
-                "are mutually exclusive. Use enable_kinetics for biotic mode.")
         if not sm.biotic_mode and sm.enable_kinetics:
             errors.append(
                 "[Mode] enable_kinetics=true but biotic_mode=false. "
@@ -198,6 +194,23 @@ class CompLaBProject:
             errors.append(
                 "[Mode] biotic_mode=false but microbes are defined. "
                 "Set biotic_mode=true or remove microbes.")
+
+        # Warn about abiotic kinetics with zero substrate concentrations
+        if sm.enable_abiotic_kinetics and len(self.substrates) > 0:
+            all_zero = all(
+                s.initial_concentration == 0.0
+                and s.left_boundary_condition == 0.0
+                and s.right_boundary_condition == 0.0
+                for s in self.substrates
+            )
+            if all_zero:
+                errors.append(
+                    "[Mode] Abiotic kinetics is enabled but all substrate "
+                    "concentrations and boundary conditions are zero. "
+                    "Reactions need non-zero concentrations to produce "
+                    "meaningful results. Set a non-zero inlet concentration "
+                    "or initial concentration, or switch to 'Transport only' "
+                    "mode if no reactions are needed.")
 
         # ── 3. Domain settings ──────────────────────────────────────
         d = self.domain
