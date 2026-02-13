@@ -41,7 +41,7 @@ class CompLaBMainWindow(QMainWindow):
     """Main application window for CompLaB Studio"""
     
     simulation_started = Signal()
-    simulation_finished = Signal(int)
+    simulation_finished = Signal(int, str)
     simulation_progress = Signal(int, str)
     
     def __init__(self):
@@ -731,6 +731,16 @@ class CompLaBMainWindow(QMainWindow):
         
         # Start simulation
         self.simulation_runner = SimulationRunner(self.current_project)
+
+        # Apply MPI settings from solver panel
+        solver = self.solver_panel
+        if hasattr(solver, 'mpi_enabled_check'):
+            self.simulation_runner.mpi_enabled = solver.mpi_enabled_check.isChecked()
+            self.simulation_runner.mpi_nprocs = solver.mpi_nprocs_spin.value()
+            mpi_cmd = solver.mpi_command_edit.text().strip()
+            if mpi_cmd:
+                self.simulation_runner.mpi_command = mpi_cmd
+
         self.simulation_runner.started_signal.connect(self._on_simulation_started)
         self.simulation_runner.progress.connect(self._on_simulation_progress)
         self.simulation_runner.finished_signal.connect(self._on_simulation_finished)
