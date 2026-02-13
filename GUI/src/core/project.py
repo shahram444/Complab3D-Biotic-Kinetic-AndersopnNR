@@ -165,83 +165,368 @@ class CompLaBProject:
         return copy.deepcopy(self)
 
     def validate(self) -> List[str]:
-        """Return list of validation error strings. Empty = valid."""
+        """Comprehensive validation against C++ solver expectations.
+
+        Checks every aspect of the XML that the GUI generates:
+        domain, chemistry, microbiology, solver, I/O, equilibrium,
+        cross-references, and consistency.
+        """
         errors = []
+        warnings = []
+
+        # ── 1. Path settings ────────────────────────────────────────
+        ps = self.path_settings
+        if not ps.src_path:
+            errors.append("[Path] src_path is empty.")
+        if not ps.input_path:
+            errors.append("[Path] input_path is empty.")
+        if not ps.output_path:
+            errors.append("[Path] output_path is empty.")
+
+        # ── 2. Simulation mode consistency ──────────────────────────
+        sm = self.simulation_mode
+        if sm.biotic_mode and sm.enable_abiotic_kinetics:
+            errors.append(
+                "[Mode] biotic_mode=true and enable_abiotic_kinetics=true "
+                "are mutually exclusive. Use enable_kinetics for biotic mode.")
+        if not sm.biotic_mode and sm.enable_kinetics:
+            errors.append(
+                "[Mode] enable_kinetics=true but biotic_mode=false. "
+                "Kinetics requires biotic_mode=true (for Monod kinetics). "
+                "Use enable_abiotic_kinetics for abiotic reactions.")
+        if not sm.biotic_mode and len(self.microbiology.microbes) > 0:
+            errors.append(
+                "[Mode] biotic_mode=false but microbes are defined. "
+                "Set biotic_mode=true or remove microbes.")
+
+        # ── 3. Domain settings ──────────────────────────────────────
         d = self.domain
         if d.nx < 1 or d.ny < 1 or d.nz < 1:
-            errors.append("Domain dimensions must be positive integers.")
+            errors.append("[Domain] Dimensions (nx, ny, nz) must be >= 1.")
+        if d.nx < 3:
+            errors.append(
+                "[Domain] nx must be >= 3 (need at least inlet + 1 cell + outlet).")
         if d.dx <= 0:
-            errors.append("Grid spacing dx must be positive.")
+            errors.append("[Domain] Grid spacing dx must be > 0.")
+        if d.dy < 0:
+            errors.append("[Domain] Grid spacing dy cannot be negative.")
+        if d.dz < 0:
+            errors.append("[Domain] Grid spacing dz cannot be negative.")
         if d.unit not in ("m", "mm", "um"):
-            errors.append("Unit must be m, mm, or um.")
+            errors.append("[Domain] Unit must be 'm', 'mm', or 'um'.")
         if not d.geometry_filename:
-            errors.append("Geometry filename is required.")
-        if not d.geometry_filename.endswith(".dat"):
-            errors.append("Geometry file must be a .dat file.")
+            errors.append("[Domain] Geometry filename is required.")
+        elif not d.geometry_filename.endswith(".dat"):
+            errors.append("[Domain] Geometry file must be a .dat file.")
 
-        f = self.fluid
-        if f.tau <= 0.5:
-            errors.append("Relaxation time tau must be > 0.5 for stability.")
+        # Material numbers
+        try:
+            pore_val = int(d.pore)
+            solid_val = int(d.solid)
+            bb_val = int(d.bounce_back)
+            mat_set = {pore_val, solid_val, bb_val}
+            if len(mat_set) < 3:
+                errors.append(
+                    f"[Domain] Material numbers must be distinct: "
+                    f"pore={pore_val}, solid={solid_val}, bounce_back={bb_val}.")
+        except ValueError:
+            errors.append(
+                "[Domain] Material numbers (pore, solid, bounce_back) "
+                "must be integers.")
 
+        # Characteristic length for Peclet
+        fl = self.fluid
+        if fl.peclet > 0 and d.characteristic_length <= 0:
+            errors.append(
+                "[Domain] characteristic_length must be > 0 when Peclet > 0.")
+
+        # ── 4. Fluid / LBM settings ────────────────────────────────
+        if fl.tau <= 0.5:
+            errors.append(
+                "[Solver] Relaxation time tau must be > 0.5 for LBM stability.")
+        if fl.tau > 2.0:
+            errors.append(
+                "[Solver] tau > 2.0 is numerically unstable. "
+                "Recommended range: 0.5 < tau < 2.0.")
+        if fl.delta_P < 0:
+            errors.append("[Solver] Pressure gradient delta_P cannot be negative.")
+        if fl.peclet < 0:
+            errors.append("[Solver] Peclet number cannot be negative.")
+
+        # ── 5. Iteration settings ───────────────────────────────────
+        it = self.iteration
+        if it.ns_max_iT1 < 100:
+            errors.append("[Iteration] ns_max_iT1 should be >= 100.")
+        if it.ns_max_iT2 < 100:
+            errors.append("[Iteration] ns_max_iT2 should be >= 100.")
+        if it.ade_max_iT < 100:
+            errors.append("[Iteration] ade_max_iT should be >= 100.")
+        if it.ns_converge_iT1 <= 0:
+            errors.append("[Iteration] NS convergence (phase 1) must be > 0.")
+        if it.ns_converge_iT2 <= 0:
+            errors.append("[Iteration] NS convergence (phase 2) must be > 0.")
+        if it.ade_converge_iT <= 0:
+            errors.append("[Iteration] ADE convergence must be > 0.")
+        if it.ns_update_interval < 1:
+            errors.append("[Iteration] NS update interval must be >= 1.")
+        if it.ade_update_interval < 1:
+            errors.append("[Iteration] ADE update interval must be >= 1.")
+
+        # ── 6. Chemistry / Substrates ───────────────────────────────
         num_subs = len(self.substrates)
+        sub_names = set()
         for i, s in enumerate(self.substrates):
-            if not s.name:
-                errors.append(f"Substrate {i} must have a name.")
-            if s.left_boundary_type not in ("Dirichlet", "Neumann"):
-                errors.append(f"Substrate {i}: left BC must be Dirichlet or Neumann.")
-            if s.right_boundary_type not in ("Dirichlet", "Neumann"):
-                errors.append(f"Substrate {i}: right BC must be Dirichlet or Neumann.")
+            prefix = f"[Substrate {i} '{s.name}']"
+            if not s.name or not s.name.strip():
+                errors.append(f"[Substrate {i}] Name is empty.")
+            elif s.name in sub_names:
+                errors.append(f"{prefix} Duplicate substrate name.")
+            else:
+                sub_names.add(s.name)
 
-        sm = self.simulation_mode
+            if s.initial_concentration < 0:
+                errors.append(f"{prefix} Initial concentration cannot be negative.")
+            if s.diffusion_in_pore <= 0:
+                errors.append(
+                    f"{prefix} Diffusion coefficient in pore must be > 0.")
+            if s.diffusion_in_biofilm < 0:
+                errors.append(
+                    f"{prefix} Diffusion coefficient in biofilm cannot be negative.")
+            if s.diffusion_in_biofilm > s.diffusion_in_pore:
+                errors.append(
+                    f"{prefix} Biofilm diffusion ({s.diffusion_in_biofilm}) should be "
+                    f"<= pore diffusion ({s.diffusion_in_pore}).")
+            if s.left_boundary_type not in ("Dirichlet", "Neumann"):
+                errors.append(
+                    f"{prefix} Left BC type must be 'Dirichlet' or 'Neumann' "
+                    f"(got '{s.left_boundary_type}').")
+            if s.right_boundary_type not in ("Dirichlet", "Neumann"):
+                errors.append(
+                    f"{prefix} Right BC type must be 'Dirichlet' or 'Neumann' "
+                    f"(got '{s.right_boundary_type}').")
+            if s.left_boundary_type == "Dirichlet" and s.left_boundary_condition < 0:
+                errors.append(
+                    f"{prefix} Left Dirichlet BC value cannot be negative.")
+            if s.right_boundary_type == "Dirichlet" and s.right_boundary_condition < 0:
+                errors.append(
+                    f"{prefix} Right Dirichlet BC value cannot be negative.")
+
+        # ── 7. Microbiology ─────────────────────────────────────────
         if sm.biotic_mode:
-            for i, m in enumerate(self.microbiology.microbes):
+            microbes = self.microbiology.microbes
+            if len(microbes) == 0:
+                errors.append(
+                    "[Microbiology] biotic_mode=true but no microbes defined.")
+
+            mic_names = set()
+            used_mat_numbers = set()
+            try:
+                used_mat_numbers.update(
+                    {int(d.pore), int(d.solid), int(d.bounce_back)})
+            except ValueError:
+                pass
+
+            for i, m in enumerate(microbes):
+                prefix = f"[Microbe {i} '{m.name}']"
+                if not m.name or not m.name.strip():
+                    errors.append(f"[Microbe {i}] Name is empty.")
+                elif m.name in mic_names:
+                    errors.append(f"{prefix} Duplicate microbe name.")
+                else:
+                    mic_names.add(m.name)
+
                 if m.solver_type not in ("CA", "LBM", "FD"):
-                    errors.append(f"Microbe {i}: solver must be CA, LBM, or FD.")
-                # Material number is only required for sessile (CA) microbes
-                if m.material_number.strip():
-                    mat_nums = m.material_number.strip().split()
-                    init_dens = m.initial_densities.strip().split()
-                    if len(mat_nums) != len(init_dens):
-                        errors.append(
-                            f"Microbe {i}: material_number count ({len(mat_nums)}) "
-                            f"must match initial_densities count ({len(init_dens)})."
-                        )
+                    errors.append(
+                        f"{prefix} Solver type must be 'CA', 'LBM', or 'FD' "
+                        f"(got '{m.solver_type}').")
+
+                if m.reaction_type not in ("kinetics", "kns", "none", "no", "0", ""):
+                    errors.append(
+                        f"{prefix} Reaction type must be 'kinetics' or 'none' "
+                        f"(got '{m.reaction_type}').")
+
+                # Material number validation
                 if m.solver_type == "CA":
+                    if not m.material_number.strip():
+                        errors.append(
+                            f"{prefix} CA solver requires material_number(s) "
+                            f"(e.g., '3' or '3 6').")
+                    else:
+                        mat_nums = m.material_number.strip().split()
+                        init_dens = m.initial_densities.strip().split()
+                        if len(mat_nums) != len(init_dens):
+                            errors.append(
+                                f"{prefix} material_number count ({len(mat_nums)}) "
+                                f"must match initial_densities count ({len(init_dens)}).")
+                        for mn_str in mat_nums:
+                            try:
+                                mn = int(mn_str)
+                                if mn in used_mat_numbers:
+                                    errors.append(
+                                        f"{prefix} Material number {mn} conflicts "
+                                        f"with another material assignment.")
+                                used_mat_numbers.add(mn)
+                            except ValueError:
+                                errors.append(
+                                    f"{prefix} Material number '{mn_str}' is not an integer.")
+
                     if self.microbiology.maximum_biomass_density <= 0:
-                        errors.append("CA solver requires positive maximum_biomass_density.")
+                        errors.append(
+                            f"{prefix} CA solver requires positive maximum_biomass_density.")
+                    if m.viscosity_ratio_in_biofilm <= 0:
+                        errors.append(
+                            f"{prefix} CA solver requires positive viscosity_ratio_in_biofilm.")
+
                 if m.solver_type == "FD":
                     if m.biomass_diffusion_in_pore < 0:
-                        errors.append(f"Microbe {i}: FD solver requires biomass_diffusion_in_pore.")
+                        errors.append(
+                            f"{prefix} FD solver requires biomass_diffusion_in_pore >= 0.")
                     if m.biomass_diffusion_in_biofilm < 0:
-                        errors.append(f"Microbe {i}: FD solver requires biomass_diffusion_in_biofilm.")
-                if num_subs > 0 and m.half_saturation_constants.strip():
-                    ks_vals = m.half_saturation_constants.strip().split()
-                    if len(ks_vals) != num_subs:
                         errors.append(
-                            f"Microbe {i}: half_saturation_constants length ({len(ks_vals)}) "
-                            f"must equal number of substrates ({num_subs})."
-                        )
-                if num_subs > 0 and m.maximum_uptake_flux.strip():
-                    vmax_vals = m.maximum_uptake_flux.strip().split()
-                    if len(vmax_vals) != num_subs:
+                            f"{prefix} FD solver requires biomass_diffusion_in_biofilm >= 0.")
+
+                # Initial densities must be valid numbers
+                for val_str in m.initial_densities.strip().split():
+                    try:
+                        val = float(val_str)
+                        if val < 0:
+                            errors.append(
+                                f"{prefix} initial_density '{val_str}' is negative.")
+                    except ValueError:
                         errors.append(
-                            f"Microbe {i}: maximum_uptake_flux length ({len(vmax_vals)}) "
-                            f"must equal number of substrates ({num_subs})."
-                        )
+                            f"{prefix} initial_density '{val_str}' is not a number.")
 
-        if sm.enable_abiotic_kinetics and num_subs < 1:
-            errors.append("Abiotic kinetics requires at least one substrate.")
+                if m.decay_coefficient < 0:
+                    errors.append(f"{prefix} decay_coefficient cannot be negative.")
 
+                # Half-saturation constants must match substrate count
+                if num_subs > 0:
+                    if m.half_saturation_constants.strip():
+                        ks_vals = m.half_saturation_constants.strip().split()
+                        if len(ks_vals) != num_subs:
+                            errors.append(
+                                f"{prefix} half_saturation_constants has {len(ks_vals)} "
+                                f"values but there are {num_subs} substrates.")
+                        for ks_str in ks_vals:
+                            try:
+                                float(ks_str)
+                            except ValueError:
+                                errors.append(
+                                    f"{prefix} half_saturation_constants value "
+                                    f"'{ks_str}' is not a number.")
+
+                    if m.maximum_uptake_flux.strip():
+                        vmax_vals = m.maximum_uptake_flux.strip().split()
+                        if len(vmax_vals) != num_subs:
+                            errors.append(
+                                f"{prefix} maximum_uptake_flux has {len(vmax_vals)} "
+                                f"values but there are {num_subs} substrates.")
+                        for vmax_str in vmax_vals:
+                            try:
+                                float(vmax_str)
+                            except ValueError:
+                                errors.append(
+                                    f"{prefix} maximum_uptake_flux value "
+                                    f"'{vmax_str}' is not a number.")
+
+                # Microbe boundary conditions
+                if m.left_boundary_type not in ("Dirichlet", "Neumann"):
+                    errors.append(
+                        f"{prefix} Left BC must be 'Dirichlet' or 'Neumann'.")
+                if m.right_boundary_type not in ("Dirichlet", "Neumann"):
+                    errors.append(
+                        f"{prefix} Right BC must be 'Dirichlet' or 'Neumann'.")
+
+            # CA method check
+            ca_method = self.microbiology.ca_method.lower()
+            if ca_method not in ("half", "fraction"):
+                errors.append(
+                    f"[Microbiology] CA_method must be 'half' or 'fraction' "
+                    f"(got '{self.microbiology.ca_method}').")
+
+            # Biofilm fraction threshold
+            bft = self.microbiology.thrd_biofilm_fraction
+            if bft < 0 or bft > 1:
+                errors.append(
+                    f"[Microbiology] thrd_biofilm_fraction must be in [0, 1] "
+                    f"(got {bft}).")
+
+        # ── 8. Abiotic kinetics ─────────────────────────────────────
+        if sm.enable_abiotic_kinetics:
+            if num_subs < 1:
+                errors.append(
+                    "[Mode] Abiotic kinetics requires at least one substrate.")
+            if sm.biotic_mode:
+                errors.append(
+                    "[Mode] Abiotic kinetics should not be used with biotic_mode=true.")
+
+        # ── 9. Equilibrium solver ───────────────────────────────────
         eq = self.equilibrium
         if eq.enabled:
             if not eq.component_names:
-                errors.append("Equilibrium enabled but no components defined.")
+                errors.append(
+                    "[Equilibrium] Enabled but no component species defined.")
+            if num_subs < 1:
+                errors.append(
+                    "[Equilibrium] Requires at least one substrate.")
             n_comp = len(eq.component_names)
+
+            # Stoichiometry matrix
+            if len(eq.stoichiometry) != num_subs:
+                errors.append(
+                    f"[Equilibrium] Stoichiometry has {len(eq.stoichiometry)} rows "
+                    f"but there are {num_subs} substrates.")
             for i, row in enumerate(eq.stoichiometry):
                 if len(row) != n_comp:
                     errors.append(
-                        f"Stoichiometry row {i} length ({len(row)}) "
-                        f"must match component count ({n_comp})."
-                    )
+                        f"[Equilibrium] Stoichiometry row {i} has {len(row)} columns "
+                        f"but there are {n_comp} components.")
+
+            # logK values
+            if len(eq.log_k) != num_subs:
+                errors.append(
+                    f"[Equilibrium] logK has {len(eq.log_k)} entries "
+                    f"but there are {num_subs} substrates.")
+
+            # Solver parameters
+            if eq.max_iterations < 1:
+                errors.append("[Equilibrium] max_iterations must be >= 1.")
+            if eq.tolerance <= 0:
+                errors.append("[Equilibrium] tolerance must be > 0.")
+            if eq.anderson_depth < 0:
+                errors.append("[Equilibrium] anderson_depth must be >= 0.")
+            if eq.beta <= 0 or eq.beta > 2:
+                errors.append(
+                    "[Equilibrium] beta (relaxation) should be in (0, 2].")
+
+        # ── 10. I/O settings ───────────────────────────────────────
+        io = self.io_settings
+        if io.save_vtk_interval < 1:
+            errors.append("[IO] VTK save interval must be >= 1.")
+        if io.save_chk_interval < 1:
+            errors.append("[IO] Checkpoint save interval must be >= 1.")
+        if io.save_vtk_interval > it.ade_max_iT:
+            errors.append(
+                f"[IO] VTK save interval ({io.save_vtk_interval}) is larger than "
+                f"max ADE iterations ({it.ade_max_iT}). No VTK files will be saved.")
+
+        # ── 11. Cross-checks ───────────────────────────────────────
+        # No substrates at all
+        if num_subs == 0 and (sm.enable_kinetics or sm.enable_abiotic_kinetics):
+            errors.append(
+                "[Cross-check] Kinetics enabled but no substrates defined.")
+
+        # All Neumann BCs on all substrates (no source) - might not reach steady state
+        if num_subs > 0:
+            all_neumann = all(
+                s.left_boundary_type == "Neumann" and
+                s.right_boundary_type == "Neumann" and
+                s.initial_concentration == 0.0
+                for s in self.substrates)
+            if all_neumann and not sm.enable_abiotic_kinetics:
+                errors.append(
+                    "[Cross-check] All substrates have Neumann BCs and zero initial "
+                    "concentration. No substrate source exists - simulation will have "
+                    "zero concentrations everywhere.")
 
         return errors
