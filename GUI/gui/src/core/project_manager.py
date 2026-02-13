@@ -13,9 +13,10 @@ from xml.dom import minidom
 
 from .project import (
     CompLaBProject, DomainSettings, FluidSettings, IterationSettings,
-    IOSettings, MicrobiologySettings, Substrate, Microbe, 
+    IOSettings, MicrobiologySettings, Substrate, Microbe,
     DiffusionCoefficients, BoundaryCondition, BoundaryType, SolverType,
-    MicrobeDistribution, DistributionType
+    MicrobeDistribution, DistributionType,
+    SimulationMode, EquilibriumSettings,
 )
 
 # Try to import templates (may not exist yet)
@@ -138,6 +139,21 @@ class ProjectManager:
             if out is not None:
                 project.output_path = out.text.strip()
                 
+        # Parse simulation mode
+        mode_elem = root.find("simulation_mode")
+        if mode_elem is not None:
+            def _parse_bool(elem, tag, default=False):
+                el = elem.find(tag)
+                if el is not None:
+                    return el.text.strip().lower() in ("yes", "true", "1")
+                return default
+            project.simulation_mode = SimulationMode(
+                biotic_mode=_parse_bool(mode_elem, "biotic_mode"),
+                enable_kinetics=_parse_bool(mode_elem, "enable_kinetics"),
+                enable_abiotic_kinetics=_parse_bool(mode_elem, "enable_abiotic_kinetics"),
+                enable_validation_diagnostics=_parse_bool(mode_elem, "enable_validation_diagnostics"),
+            )
+
         # Parse LB numerics
         lb_elem = root.find("LB_numerics")
         if lb_elem is not None:
@@ -183,7 +199,14 @@ class ProjectManager:
         path_elem = ET.SubElement(root, "path")
         ET.SubElement(path_elem, "input_path").text = f" {project.input_path} "
         ET.SubElement(path_elem, "output_path").text = f" {project.output_path} "
-        
+
+        # Simulation mode section
+        mode_elem = ET.SubElement(root, "simulation_mode")
+        ET.SubElement(mode_elem, "biotic_mode").text = " yes " if project.simulation_mode.biotic_mode else " no "
+        ET.SubElement(mode_elem, "enable_kinetics").text = " yes " if project.simulation_mode.enable_kinetics else " no "
+        ET.SubElement(mode_elem, "enable_abiotic_kinetics").text = " yes " if project.simulation_mode.enable_abiotic_kinetics else " no "
+        ET.SubElement(mode_elem, "enable_validation_diagnostics").text = " yes " if project.simulation_mode.enable_validation_diagnostics else " no "
+
         # LB_numerics section
         lb_elem = ET.SubElement(root, "LB_numerics")
         ET.SubElement(lb_elem, "delta_P").text = f" {project.fluid.delta_p} "
@@ -274,6 +297,17 @@ class ProjectManager:
         ET.SubElement(bio_elem, "thrd_biofilm_fraction").text = f" {project.microbiology.thrd_biofilm_fraction} "
         ET.SubElement(bio_elem, "CA_method").text = f" {project.microbiology.ca_method} "
         
+        # Equilibrium section (if enabled)
+        eq = project.equilibrium
+        eq_elem = ET.SubElement(root, "equilibrium")
+        ET.SubElement(eq_elem, "enabled").text = " yes " if eq.enabled else " no "
+        if eq.enabled and eq.component_names:
+            ET.SubElement(eq_elem, "components").text = " " + " ".join(eq.component_names) + " "
+            # Stoichiometry matrix: one row per substrate
+            for i, row in enumerate(eq.stoichiometry):
+                ET.SubElement(eq_elem, f"stoichiometry_row{i}").text = " " + " ".join(str(v) for v in row) + " "
+            ET.SubElement(eq_elem, "logK").text = " " + " ".join(str(v) for v in eq.log_k) + " "
+
         # IO section
         io_elem = ET.SubElement(root, "IO")
         ET.SubElement(io_elem, "read_NS_file").text = " yes " if project.io.read_ns_file else " no "
