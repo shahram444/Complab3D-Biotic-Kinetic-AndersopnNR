@@ -245,6 +245,10 @@ class SimulationRunner(QThread):
             )
             self._log_and_emit("=" * 60)
             self._close_log_file()
+            # Convert unsigned 32-bit Windows exit codes to signed to avoid
+            # OverflowError in Qt Signal(int, str) which expects a C signed int.
+            if exit_code > 2147483647 or exit_code < -2147483648:
+                exit_code = struct.unpack('i', struct.pack('I', exit_code & 0xFFFFFFFF))[0]
             self.finished_signal.emit(exit_code, summary)
 
         except Exception as e:
