@@ -141,12 +141,12 @@ int main(int argc, char **argv) {
 
     // asserted variables
     plint kns_count=0, fd_count=0, lb_count=0, ca_count=0, bfilm_count=0, bfree_count=0;
-    char *main_path = (char*)malloc(100 * sizeof(char));
-    getcwd(main_path, 100 * sizeof(char));
-    char *src_path = (char*)malloc(100 * sizeof(char));
-    char *input_path = (char*)malloc(100 * sizeof(char));
-    char *output_path = (char*)malloc(100 * sizeof(char));
-    char *ns_filename = (char*)malloc(100 * sizeof(char));
+    char *main_path = (char*)malloc(4096 * sizeof(char));
+    getcwd(main_path, 4096 * sizeof(char));
+    char *src_path = (char*)malloc(4096 * sizeof(char));
+    char *input_path = (char*)malloc(4096 * sizeof(char));
+    char *output_path = (char*)malloc(4096 * sizeof(char));
+    char *ns_filename = (char*)malloc(4096 * sizeof(char));
     plint nx, ny, nz, num_of_microbes, num_of_substrates;
     T dx, dy, dz, deltaP, Pe, charcs_length;
     std::string geom_filename, mask_filename;
