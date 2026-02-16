@@ -195,6 +195,9 @@ class CompLaBProject:
                 "[Mode] biotic_mode=false but microbes are defined. "
                 "Set biotic_mode=true or remove microbes.")
 
+        # Flow-only: no substrates is fine (solver only runs NS)
+        # Diffusion-only: Pe=0 is fine (pure diffusion, no advection)
+
         # Warn about abiotic kinetics with zero substrate concentrations
         if sm.enable_abiotic_kinetics and len(self.substrates) > 0:
             all_zero = all(
@@ -272,7 +275,7 @@ class CompLaBProject:
             errors.append("[Iteration] ns_max_iT1 should be >= 100.")
         if it.ns_max_iT2 < 100:
             errors.append("[Iteration] ns_max_iT2 should be >= 100.")
-        if it.ade_max_iT < 100:
+        if it.ade_max_iT < 100 and num_subs > 0:
             errors.append("[Iteration] ade_max_iT should be >= 100.")
         if it.ns_converge_iT1 <= 0:
             errors.append("[Iteration] NS convergence (phase 1) must be > 0.")
@@ -524,10 +527,13 @@ class CompLaBProject:
                 f"max ADE iterations ({it.ade_max_iT}). No VTK files will be saved.")
 
         # ── 11. Cross-checks ───────────────────────────────────────
-        # No substrates at all
-        if num_subs == 0 and (sm.enable_kinetics or sm.enable_abiotic_kinetics):
+        # No substrates with kinetics enabled (flow-only with 0 substrates is OK)
+        if num_subs == 0 and sm.enable_kinetics:
             errors.append(
-                "[Cross-check] Kinetics enabled but no substrates defined.")
+                "[Cross-check] Biotic kinetics enabled but no substrates defined.")
+        if num_subs == 0 and sm.enable_abiotic_kinetics:
+            errors.append(
+                "[Cross-check] Abiotic kinetics enabled but no substrates defined.")
 
         # All Neumann BCs on all substrates (no source) - might not reach steady state
         if num_subs > 0:
