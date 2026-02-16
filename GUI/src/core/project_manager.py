@@ -257,7 +257,7 @@ class ProjectManager:
                 proj.iteration.ns_max_iT2 = _get_int(it, "ns_max_iT2", 100000)
                 proj.iteration.ns_converge_iT1 = _get_float(it, "ns_converge_iT1", 1e-8)
                 proj.iteration.ns_converge_iT2 = _get_float(it, "ns_converge_iT2", 1e-6)
-                proj.iteration.ade_max_iT = _get_int(it, "ade_max_iT", 50000)
+                proj.iteration.ade_max_iT = _get_int(it, "ade_max_iT", 10000000)
                 proj.iteration.ade_converge_iT = _get_float(it, "ade_converge_iT", 1e-8)
                 proj.iteration.ns_rerun_iT0 = _get_int(it, "ns_rerun_iT0", 0)
                 proj.iteration.ade_rerun_iT0 = _get_int(it, "ade_rerun_iT0", 0)
@@ -346,7 +346,7 @@ class ProjectManager:
                 proj.equilibrium.component_names = comp_text.split()
             # Solver parameters
             proj.equilibrium.max_iterations = _get_int(eq_el, "max_iterations", 200)
-            proj.equilibrium.tolerance = _get_float(eq_el, "tolerance", 1e-8)
+            proj.equilibrium.tolerance = _get_float(eq_el, "tolerance", 1e-10)
             proj.equilibrium.anderson_depth = _get_int(eq_el, "anderson_depth", 4)
             proj.equilibrium.beta = _get_float(eq_el, "beta", 1.0)
             st_el = eq_el.find("stoichiometry")
