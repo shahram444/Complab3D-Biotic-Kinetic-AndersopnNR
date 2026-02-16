@@ -552,7 +552,7 @@ public:
                                 T nbrB = lattices[bMtLloc]->get(iXb+delx,iYb+dely,iZb+delz).computeDensity();
                                 if ( nbrAge >= age && (nbrB-Bmax)>-COMPLAB_THRD) { ++count; }
                             }
-                            if (count == del_iX.size()) { newAge = (T) (age+1); }
+                            if ((size_t)count == del_iX.size()) { newAge = (T) (age+1); }
                             else { updateflag = 0; }
                         }
                         if (updateflag == 1) {
