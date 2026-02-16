@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\build_win\CMakeFiles\6bcdaffc370616e70ffbd3a6a40183c5\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{37BEEA4C-AF06-3B39-B1B5-3C3CD742ADD3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

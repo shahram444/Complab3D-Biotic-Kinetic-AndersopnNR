@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\src\complab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4A35B7B4-C106-35AF-8E39-9C0FF0C12904}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

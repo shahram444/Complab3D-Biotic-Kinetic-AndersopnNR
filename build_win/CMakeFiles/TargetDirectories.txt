@@ -1,0 +1,4 @@
+C:/Users/shahr/OneDrive/Desktop/Shahram Files/Github-mirror/Complab3D-Biotic-Kinetic-AndersopnNR/build_win/CMakeFiles/palabos.dir
+C:/Users/shahr/OneDrive/Desktop/Shahram Files/Github-mirror/Complab3D-Biotic-Kinetic-AndersopnNR/build_win/CMakeFiles/complab.dir
+C:/Users/shahr/OneDrive/Desktop/Shahram Files/Github-mirror/Complab3D-Biotic-Kinetic-AndersopnNR/build_win/CMakeFiles/ALL_BUILD.dir
+C:/Users/shahr/OneDrive/Desktop/Shahram Files/Github-mirror/Complab3D-Biotic-Kinetic-AndersopnNR/build_win/CMakeFiles/ZERO_CHECK.dir
