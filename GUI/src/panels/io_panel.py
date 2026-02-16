@@ -14,16 +14,18 @@ class IOPanel(BasePanel):
         self.add_section("Output Intervals")
         form = self.add_form()
 
-        self.vtk_interval = self.make_spin(500, 1)
+        self.vtk_interval = self.make_spin(1000, 1)
         self.vtk_interval.setToolTip(
             "Save VTK output every N ADE iterations.\n"
-            "Lower = more output files, more disk usage.")
+            "Lower = more output files, more disk usage.\n"
+            "C++ default: 1000.")
         form.addRow("VTK save interval:", self.vtk_interval)
 
-        self.chk_interval = self.make_spin(5000, 1)
+        self.chk_interval = self.make_spin(1000000, 1)
         self.chk_interval.setToolTip(
             "Save checkpoint files every N ADE iterations.\n"
-            "Used for restart capability.")
+            "Used for restart capability.\n"
+            "C++ default: 1000000.")
         form.addRow("Checkpoint interval:", self.chk_interval)
 
         self.add_section("Restart Files")
