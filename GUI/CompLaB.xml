@@ -42,10 +42,10 @@
         </iteration>
     </LB_numerics>
     <chemistry>
-        <number_of_substrates>2</number_of_substrates>
+        <number_of_substrates>1</number_of_substrates>
         <substrate0>
-            <name_of_substrates>Reactant</name_of_substrates>
-            <initial_concentration>1</initial_concentration>
+            <name_of_substrates>Tracer</name_of_substrates>
+            <initial_concentration>0.0</initial_concentration>
             <substrate_diffusion_coefficients>
                 <in_pore>1.000000e-09</in_pore>
                 <in_biofilm>1.000000e-09</in_biofilm>
@@ -55,18 +55,6 @@
             <left_boundary_condition>1</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate0>
-        <substrate1>
-            <name_of_substrates>Product</name_of_substrates>
-            <initial_concentration>0.0</initial_concentration>
-            <substrate_diffusion_coefficients>
-                <in_pore>1.000000e-09</in_pore>
-                <in_biofilm>1.000000e-09</in_biofilm>
-            </substrate_diffusion_coefficients>
-            <left_boundary_type>Dirichlet</left_boundary_type>
-            <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>0.0</left_boundary_condition>
-            <right_boundary_condition>0.0</right_boundary_condition>
-        </substrate1>
     </chemistry>
     <microbiology>
         <number_of_microbes>0</number_of_microbes>

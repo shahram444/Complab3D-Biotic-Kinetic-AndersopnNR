@@ -1,0 +1,50 @@
+========================================================================
+  CompLaB CRASH DIAGNOSTIC REPORT
+  Generated: 2026-02-16 17:42:46
+========================================================================
+
+Exit code : -1073740940
+Error type: Heap Corruption (0xC0000374)
+Reason    : An array or vector was accessed out of bounds.
+XML file  : C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\CompLaB.xml
+
+------------------------------------------------------------------------
+  ERRORS DETECTED: 2
+------------------------------------------------------------------------
+  1. [Geometry] Size MISMATCH: file has 135000 bytes but nx*ny*nz = 50*30*30 = 45000.
+    >> This is the most common cause of heap corruption!
+    >> Fix: change nx/ny/nz in XML to match the geometry file,
+    >>       or regenerate geometry.dat with the correct dimensions.
+    File: C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\input\geometry.dat
+
+  2. [defineKinetics] defineKinetics.hh accesses C[1] / subsR[1] but XML has only 1 substrate(s) (valid indices: 0..0).
+    >> This out-of-bounds access causes heap corruption!
+    >> Fix: add more substrates in the XML, or edit defineKinetics.hh
+    >>       to only access C[0]..C[0].
+    Indices found in code: [0, 1]
+
+------------------------------------------------------------------------
+  DIAGNOSTIC INFO
+------------------------------------------------------------------------
+  - XML parsed successfully: C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\CompLaB.xml
+  - Domain: nx=50, ny=30, nz=30  (total=45000)
+  - Substrates: 1
+  - Microbes: 0
+  - Biotic mode: False, kinetics: False, abiotic kinetics: True
+  - Analysing defineKinetics.hh (14908 bytes)
+  - defineKinetics.hh: uses .size() bounds checks (good)
+  - Analysing defineAbioticKinetics.hh (9984 bytes)
+  - defineAbioticKinetics.hh: substrate indices [0] — all within 0..0 OK
+  - defineAbioticKinetics.hh: uses .size() bounds checks (good)
+
+------------------------------------------------------------------------
+  HOW TO FIX
+------------------------------------------------------------------------
+  Fix the errors above, then:
+  1. Run 'Validate Configuration' in the Run panel
+  2. Verify geometry file has exactly nx * ny * nz bytes
+  3. Check that defineKinetics.hh array indices match substrate count
+  4. Check half_saturation_constants / maximum_uptake_flux counts
+  5. Re-export CompLaB.xml and run again
+
+========================================================================
