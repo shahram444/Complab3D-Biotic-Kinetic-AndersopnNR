@@ -1,6 +1,7 @@
 """Parallel execution panel - MPI auto-detect, core selection, and validation."""
 
 import os
+import sys
 import shutil
 import subprocess
 import multiprocessing
@@ -204,7 +205,8 @@ class ParallelPanel(BasePanel):
 
         # ── Run Command Preview ────────────────────────────────
         self.add_section("Run Command Preview")
-        self._cmd_lbl = QLabel("complab.exe CompLaB.xml")
+        _exe = "complab.exe" if sys.platform == "win32" else "./complab"
+        self._cmd_lbl = QLabel(_exe)
         self._cmd_lbl.setWordWrap(True)
         self._cmd_lbl.setStyleSheet(
             "font-family: Consolas, monospace; padding: 4px;"
@@ -342,12 +344,13 @@ class ParallelPanel(BasePanel):
 
     def _update_cmd_preview(self):
         mpi_path = self._mpi_path_edit.text().strip()
+        exe_name = "complab.exe" if sys.platform == "win32" else "./complab"
         if self._enabled and mpi_path and self._num_cores > 1:
             self._cmd_lbl.setText(
-                f"{mpi_path} -np {self._num_cores} complab.exe CompLaB.xml"
+                f"{mpi_path} -np {self._num_cores} {exe_name}"
             )
         else:
-            self._cmd_lbl.setText("complab.exe CompLaB.xml")
+            self._cmd_lbl.setText(exe_name)
 
     # ── Public API ─────────────────────────────────────────────
 

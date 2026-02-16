@@ -49,6 +49,14 @@ class SimulationRunner(QThread):
             self.finished_signal.emit(-1, "Executable not found")
             return
 
+        # Ensure executable permission on Unix
+        if os.name != "nt" and not os.access(self._exe, os.X_OK):
+            try:
+                os.chmod(self._exe, os.stat(self._exe).st_mode | 0o111)
+                self.output_line.emit(f"Set executable permission on {self._exe}")
+            except OSError as e:
+                self.output_line.emit(f"WARNING: Could not set +x: {e}")
+
         xml_path = os.path.join(self._cwd, "CompLaB.xml")
         if not os.path.isfile(xml_path):
             self.output_line.emit(
@@ -111,9 +119,19 @@ class SimulationRunner(QThread):
                     f"ERROR: MPI command not found: {self._mpi_command}")
                 self.output_line.emit(
                     "Make sure MPI is installed and the path is correct.")
+                self.output_line.emit(
+                    "  Linux:   sudo apt install openmpi-bin")
+                self.output_line.emit(
+                    "  macOS:   brew install open-mpi")
+                self.output_line.emit(
+                    "  Windows: Install MS-MPI from microsoft.com")
+                self.output_line.emit(
+                    "Or go to the Parallel panel and use Auto-detect / Browse.")
             else:
                 self.output_line.emit(
                     f"ERROR: Executable not found: {self._exe}")
+                self.output_line.emit(
+                    "Build with: cd build && cmake .. && make")
             rc = -1
         except Exception as e:
             self.output_line.emit(f"ERROR: {e}")

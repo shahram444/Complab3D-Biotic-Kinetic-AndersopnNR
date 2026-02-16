@@ -526,19 +526,63 @@ class CompLaBMainWindow(QMainWindow):
 
     # ── Simulation ──────────────────────────────────────────────────
 
+    def _find_executable(self, work_dir: str) -> str:
+        """Auto-detect the complab executable in common locations."""
+        import sys
+        exe_name = "complab.exe" if sys.platform == "win32" else "complab"
+
+        # 1. Check user-configured path first
+        configured = self._config.get("complab_executable", "")
+        if configured and os.path.isfile(configured):
+            return configured
+
+        # 2. Search common locations relative to the working directory
+        search_dirs = [
+            work_dir,                                    # project root
+            os.path.join(work_dir, "build"),             # build directory
+            os.path.join(work_dir, "Release"),           # MSVC Release
+            os.path.join(work_dir, "Debug"),             # MSVC Debug
+            os.path.join(work_dir, "GUI", "bin"),        # GUI bundled
+        ]
+        # Also search relative to the GUI directory
+        gui_dir = str(Path(__file__).resolve().parent.parent)
+        search_dirs.append(os.path.join(gui_dir, "bin"))
+        # And one level up from GUI (the repo root)
+        repo_root = str(Path(gui_dir).parent)
+        if repo_root != work_dir:
+            search_dirs.extend([
+                repo_root,
+                os.path.join(repo_root, "build"),
+                os.path.join(repo_root, "Release"),
+            ])
+
+        for d in search_dirs:
+            candidate = os.path.join(d, exe_name)
+            if os.path.isfile(candidate):
+                return candidate
+
+        return ""
+
     def _run_simulation(self):
         self._save_panels_to_project()
-        exe = self._config.get("complab_executable", "")
-        if not exe:
-            self._console.log_error(
-                "CompLaB executable not set. Go to Edit > Preferences.")
-            return
 
         # Determine working directory
         if self._project_file:
             work_dir = str(Path(self._project_file).parent)
         else:
             work_dir = os.getcwd()
+
+        # Auto-detect executable
+        exe = self._find_executable(work_dir)
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not found. Searched project root, "
+                "build/, Release/, and GUI/bin/. "
+                "Set the path in Edit > Preferences, or build with "
+                "'cd build && cmake .. && make'.")
+            return
+
+        self._console.log_info(f"Using executable: {exe}")
 
         # Export XML first
         xml_path = os.path.join(work_dir, "CompLaB.xml")
@@ -551,6 +595,9 @@ class CompLaBMainWindow(QMainWindow):
 
         self._act_run.setEnabled(False)
         self._act_stop.setEnabled(True)
+
+        # Sync MPI settings from parallel panel before reading run panel config
+        self._sync_mpi_from_parallel()
 
         # Get MPI config from run panel
         mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
@@ -590,29 +637,31 @@ class CompLaBMainWindow(QMainWindow):
         pp = self._parallel_panel
         rp = self._run_panel
         is_on = pp.is_parallel_enabled()
-        rp._mpi_enabled.setChecked(is_on)
-        if is_on:
-            rp._nprocs_spin.setValue(pp.get_num_cores())
-            mpi_cmd = pp.get_mpi_command()
-            if mpi_cmd:
-                rp._mpirun_edit.setText(mpi_cmd)
+        rp.set_mpi_config(
+            enabled=is_on,
+            nprocs=pp.get_num_cores() if is_on else 1,
+            command=pp.get_mpi_command() if is_on else "",
+        )
 
     def _run_sweep(self, runs: list):
         """Execute a parameter sweep: run simulation for each value."""
         if not runs:
             return
         self._save_panels_to_project()
-        exe = self._config.get("complab_executable", "")
-        if not exe:
-            self._console.log_error(
-                "CompLaB executable not set. Go to Edit > Preferences.")
-            return
 
         if self._project_file:
             base_dir = str(Path(self._project_file).parent)
         else:
             base_dir = os.getcwd()
 
+        exe = self._find_executable(base_dir)
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not found. Set path in Edit > Preferences "
+                "or build with 'cd build && cmake .. && make'.")
+            return
+
+        self._sync_mpi_from_parallel()
         mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
 
         self._console.log_info(

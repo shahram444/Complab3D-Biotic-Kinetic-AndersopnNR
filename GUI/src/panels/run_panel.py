@@ -322,6 +322,14 @@ class RunPanel(BasePanel):
             self._mpirun_edit.text().strip(),
         )
 
+    def set_mpi_config(self, enabled: bool, nprocs: int = 1, command: str = ""):
+        """Set MPI config from an external source (e.g., Parallel panel)."""
+        self._mpi_enabled.setChecked(enabled)
+        if enabled:
+            self._nprocs_spin.setValue(nprocs)
+            if command:
+                self._mpirun_edit.setText(command)
+
     # ── Run / Stop ──────────────────────────────────────────────────
 
     def _on_run(self):
@@ -538,7 +546,7 @@ class RunPanel(BasePanel):
             f"  1. Run 'Validate Configuration' to check settings\n"
             f"  2. Verify geometry file has exactly nx*ny*nz values\n"
             f"  3. Check the Output tab for error details\n"
-            f"  4. Try running from command line: ./complab CompLaB.xml"
+            f"  4. Try running from command line: ./complab"
         )
 
     # ── Validation display ──────────────────────────────────────────
