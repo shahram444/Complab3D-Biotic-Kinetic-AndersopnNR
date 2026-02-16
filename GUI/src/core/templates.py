@@ -61,25 +61,36 @@ def _default_substrates_5():
 # ── Templates ───────────────────────────────────────────────────────────
 
 @_register("flow_only", "Flow Only",
-           "Navier-Stokes flow simulation without transport or reactions.")
+           "Navier-Stokes flow simulation only (no substrates defined).")
 def _flow_only():
     p = CompLaBProject(name="Flow Only")
-    p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=False)
     p.fluid.delta_P = 2e-3
     p.fluid.peclet = 0.0
-    p.iteration.ade_max_iT = 0
+    # No substrates → solver only runs NS flow
     return p
 
 
-@_register("transport_only", "Transport Only",
+@_register("diffusion_only", "Diffusion Only",
+           "Pure diffusion transport with Pe=0 (no advection/flow).")
+def _diffusion_only():
+    p = CompLaBProject(name="Diffusion Only")
+    p.fluid.delta_P = 0.0
+    p.fluid.peclet = 0.0
+    p.substrates = [
+        Substrate(name="Tracer", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=1.0, right_boundary_condition=0.0),
+    ]
+    return p
+
+
+@_register("transport_only", "Transport (Flow + Diffusion)",
            "Flow + advection-diffusion transport, no reactions.")
 def _transport_only():
-    p = CompLaBProject(name="Transport Only")
-    p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=False)
+    p = CompLaBProject(name="Transport")
+    p.fluid.delta_P = 2e-3
+    p.fluid.peclet = 1.0
     p.substrates = [
         Substrate(name="Tracer", initial_concentration=0.0,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
