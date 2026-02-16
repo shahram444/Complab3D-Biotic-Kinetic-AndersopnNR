@@ -560,14 +560,24 @@ BIOFILM_FUNCS = {
 # ── File I/O ──────────────────────────────────────────────────────────
 
 def save_dat(geometry, filepath):
-    """Save geometry in CompLaB3D .dat text format."""
+    """Save geometry in CompLaB3D binary .dat format (1 byte per voxel).
+
+    The C++ solver reads raw bytes: each byte is a material number
+    (0=solid, 1=bounce-back, 2=pore).  Loop order is x→z→y
+    (y varies fastest) to match the solver's read order.
+    """
     nx, ny, nz = geometry.shape
     os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
-    with open(filepath, 'w') as f:
-        for x in range(nx):
-            for z in range(nz):
-                for y in range(ny):
-                    f.write(f"{geometry[x, y, z]}\n")
+    import numpy as np
+    # Build flat array in x→z→y order (y fastest)
+    flat = np.empty(nx * ny * nz, dtype=np.uint8)
+    idx = 0
+    for x in range(nx):
+        for z in range(nz):
+            for y in range(ny):
+                flat[idx] = geometry[x, y, z]
+                idx += 1
+    flat.tofile(filepath)
     return nx * ny * nz
 
 
