@@ -273,6 +273,9 @@ class CompLaBMainWindow(QMainWindow):
 
         # ─── Help ───
         help_menu = mb.addMenu("&Help")
+        act_workflow = help_menu.addAction("&Workflow Guide")
+        act_workflow.triggered.connect(self._show_workflow_guide)
+        help_menu.addSeparator()
         act_about = help_menu.addAction("&About CompLaB Studio")
         act_about.triggered.connect(self._show_about)
 
@@ -504,10 +507,8 @@ class CompLaBMainWindow(QMainWindow):
             deployed = ProjectManager.deploy_kinetics(self._project, xml_dir)
             for dp in deployed:
                 self._console.log_success(f"Deployed: {dp}")
-            if deployed:
-                self._console.log_info(
-                    "Kinetics .hh files saved. Copy them to your solver "
-                    "source root and recompile to use the new kinetics.")
+            # Show post-export workflow dialog
+            self._show_post_export_guide(path, deployed)
         except Exception as e:
             self._console.log_error(f"Export failed: {e}")
 
@@ -858,13 +859,20 @@ class CompLaBMainWindow(QMainWindow):
             # Save any edits back to the project
             biotic_text = dlg._biotic_tab._editor.toPlainText()
             abiotic_text = dlg._abiotic_tab._editor.toPlainText()
+            changed = False
             if biotic_text.strip():
-                self._project.kinetics_source = biotic_text
+                if biotic_text != self._project.kinetics_source:
+                    self._project.kinetics_source = biotic_text
+                    changed = True
             if abiotic_text.strip():
-                self._project.abiotic_kinetics_source = abiotic_text
-            self._modified = True
-            self._update_title()
-            self._console.log_info("Kinetics source updated from editor.")
+                if abiotic_text != self._project.abiotic_kinetics_source:
+                    self._project.abiotic_kinetics_source = abiotic_text
+                    changed = True
+            if changed:
+                self._modified = True
+                self._update_title()
+                self._console.log_info("Kinetics source updated from editor.")
+                self._show_kinetics_recompile_reminder()
 
     def _open_geometry_generator(self):
         """Open the geometry generator as a GUI dialog."""
@@ -887,6 +895,158 @@ class CompLaBMainWindow(QMainWindow):
     def _show_about(self):
         dlg = AboutDialog(self)
         dlg.exec()
+
+    # ── Workflow guides ──────────────────────────────────────────────
+
+    def _show_post_export_guide(self, xml_path: str, deployed: list):
+        """Show a post-export dialog with full next-steps workflow."""
+        sm = self._project.simulation_mode
+        needs_kinetics = (
+            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+
+        if not needs_kinetics:
+            # Simple case: no kinetics, just run
+            QMessageBox.information(
+                self, "Export Complete",
+                f"CompLaB.xml saved to:\n  {xml_path}\n\n"
+                "This project does not use kinetics reactions.\n"
+                "You can run the simulation directly — no recompilation "
+                "needed.\n\n"
+                "  Click 'Run Simulation' or run from command line:\n"
+                "    ./complab  (or complab.exe on Windows)")
+            return
+
+        # Build the file list
+        hh_list = "\n".join(f"  - {Path(p).name}" for p in deployed)
+        if not hh_list:
+            hh_list = "  (no .hh files were deployed — check kinetics editor)"
+
+        msg = (
+            f"CompLaB.xml saved to:\n  {xml_path}\n\n"
+            f"Kinetics files deployed:\n{hh_list}\n\n"
+            "═══ WHAT TO DO NEXT ═══\n\n"
+            "Step 1: Copy .hh files to solver source root\n"
+            "   Copy the .hh files from the export directory to your\n"
+            "   CompLaB3D source root (same folder as CMakeLists.txt).\n"
+            "   File names MUST be exactly:\n"
+            "     defineKinetics.hh         (biotic kinetics)\n"
+            "     defineAbioticKinetics.hh  (abiotic kinetics)\n\n"
+            "Step 2: Recompile the solver\n"
+            "   Linux / Mac:\n"
+            "     cd build\n"
+            "     cmake ..\n"
+            "     make -j$(nproc)\n\n"
+            "   Windows (MSYS2/MinGW):\n"
+            "     cd build\n"
+            "     cmake .. -G \"MinGW Makefiles\"\n"
+            "     mingw32-make -j%NUMBER_OF_PROCESSORS%\n\n"
+            "   Windows (Visual Studio):\n"
+            "     cd build\n"
+            "     cmake ..\n"
+            "     cmake --build . --config Release\n\n"
+            "Step 3: Run the NEW executable\n"
+            "   Use the freshly compiled complab binary.\n"
+            "   The old binary will NOT have the new kinetics.\n\n"
+            "NOTE: Every time you change kinetics parameters or switch\n"
+            "templates, you must repeat steps 1-3."
+        )
+        QMessageBox.information(self, "Export Complete — Next Steps", msg)
+
+    def _show_kinetics_recompile_reminder(self):
+        """Show reminder that kinetics changes require recompilation."""
+        QMessageBox.information(
+            self, "Kinetics Updated — Recompilation Required",
+            "Kinetics source code has been updated.\n\n"
+            "IMPORTANT: Because the .hh files are compiled into the\n"
+            "C++ solver at build time, you MUST:\n\n"
+            "  1. Export CompLaB.xml  (File > Export XML)\n"
+            "     This saves the new .hh files alongside the XML.\n\n"
+            "  2. Copy the .hh files to your solver source root\n"
+            "     (same directory as CMakeLists.txt)\n\n"
+            "  3. Recompile:\n"
+            "       cd build && cmake .. && make -j$(nproc)\n\n"
+            "  4. Run with the NEW executable\n\n"
+            "If you skip recompilation, the solver will still use\n"
+            "the OLD kinetics code — your changes will have no effect.")
+
+    def _show_workflow_guide(self):
+        """Show the complete CompLaB Studio workflow guide."""
+        sm = self._project.simulation_mode
+        needs_kinetics = (
+            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+
+        guide = (
+            "═══════════════════════════════════════════════\n"
+            "       CompLaB Studio — Complete Workflow\n"
+            "═══════════════════════════════════════════════\n\n"
+            "STEP 1: Create or Open a Project\n"
+            "   File > New Project — pick a template that matches\n"
+            "   your simulation type. Each template comes with matching\n"
+            "   defineKinetics.hh / defineAbioticKinetics.hh code.\n\n"
+            "STEP 2: Configure Parameters\n"
+            "   Use the panels on the right to set:\n"
+            "   - Domain dimensions (nx, ny, nz)\n"
+            "   - Fluid properties\n"
+            "   - Substrates (concentrations, BCs, diffusion)\n"
+            "   - Microbes (if biotic mode)\n"
+            "   - Iteration settings\n\n"
+            "STEP 3: Generate or Import Geometry\n"
+            "   Tools > Geometry Generator\n"
+            "   The geometry file MUST have exactly nx×ny×nz bytes.\n"
+            "   This is the #1 cause of crashes if wrong!\n\n"
+            "STEP 4: Validate\n"
+            "   Click 'Validate' in the Run panel.\n"
+            "   Fix ALL errors before proceeding.\n\n"
+        )
+
+        if needs_kinetics:
+            guide += (
+                "STEP 5: Review / Edit Kinetics Code\n"
+                "   Tools > Kinetics Editor\n"
+                "   The .hh code defines the reaction equations.\n"
+                "   Make sure array indices (C[0], B[0], etc.) match\n"
+                "   the number of substrates/microbes you defined.\n\n"
+                "STEP 6: Export XML\n"
+                "   File > Export XML\n"
+                "   This saves CompLaB.xml AND the .hh files.\n\n"
+                "STEP 7: Copy .hh Files to Solver Source\n"
+                "   Copy defineKinetics.hh and/or defineAbioticKinetics.hh\n"
+                "   to the CompLaB3D source root (where CMakeLists.txt is).\n"
+                "   The C++ solver includes them at compile time:\n"
+                '     #include "../defineKinetics.hh"\n'
+                '     #include "../defineAbioticKinetics.hh"\n\n'
+                "STEP 8: Recompile the Solver\n"
+                "   Linux/Mac:   cd build && cmake .. && make -j$(nproc)\n"
+                "   Windows:     cd build && cmake .. && cmake --build . --config Release\n"
+                "   MSYS2/MinGW: cd build && cmake .. -G \"MinGW Makefiles\" && mingw32-make\n\n"
+                "STEP 9: Run Simulation\n"
+                "   Click 'Run' in CompLaB Studio, or run from terminal:\n"
+                "     ./complab  (Linux/Mac)\n"
+                "     complab.exe  (Windows)\n\n"
+                "═══ WHEN TO RECOMPILE ═══\n"
+                "You MUST recompile (repeat steps 6-9) when you:\n"
+                "  • Change kinetics equations in the editor\n"
+                "  • Switch to a different template\n"
+                "  • Add or remove substrates/microbes\n"
+                "    (changes array sizes in .hh code)\n\n"
+                "You do NOT need to recompile when you only change:\n"
+                "  • Concentrations, BCs, diffusion coefficients\n"
+                "  • Domain dimensions (but regenerate geometry!)\n"
+                "  • Iteration count or output settings\n"
+                "  • Fluid properties\n"
+                "  These are read from CompLaB.xml at runtime.\n"
+            )
+        else:
+            guide += (
+                "STEP 5: Export XML\n"
+                "   File > Export XML\n"
+                "   This saves CompLaB.xml.\n\n"
+                "STEP 6: Run Simulation\n"
+                "   Click 'Run' in CompLaB Studio, or run from terminal.\n"
+                "   No recompilation needed for non-kinetics simulations.\n"
+            )
+
+        QMessageBox.information(self, "CompLaB Studio — Workflow Guide", guide)
 
     # ── Helpers ─────────────────────────────────────────────────────
 
