@@ -6,6 +6,7 @@ Supports:
   - Real-time stdout/stderr parsing
   - Progress tracking from iteration output
   - Cancellation support
+  - Crash diagnostics: analyses XML + kinetics headers on failure
 """
 
 import os
@@ -25,11 +26,13 @@ class SimulationRunner(QThread):
         output_line(str): Each line of stdout/stderr.
         progress(int, int): (current_iteration, max_iterations)
         finished_signal(int, str): (return_code, summary_message)
+        diagnostic_report(str): Crash diagnostic text (emitted on failure).
     """
 
     output_line = Signal(str)
     progress = Signal(int, int)
     finished_signal = Signal(int, str)
+    diagnostic_report = Signal(str)
 
     def __init__(self, executable: str, working_dir: str, parent=None,
                  mpi_enabled: bool = False, mpi_nprocs: int = 1,
@@ -151,13 +154,37 @@ class SimulationRunner(QThread):
             msg = f"Exited with code {rc} after {hrs}h {mins}m {secs}s"
 
         self.output_line.emit(msg)
+
         # Convert unsigned 32-bit Windows exit codes to signed to avoid
         # OverflowError in Qt Signal(int, str) which expects a C signed int.
         if rc > 2147483647 or rc < -2147483648:
             rc = struct.unpack('i', struct.pack('I', rc & 0xFFFFFFFF))[0]
+
+        # ── Run crash diagnostics on failure ───────────────────────
+        if rc != 0 and not self._cancelled:
+            self._run_crash_diagnostic(rc)
+
         self.finished_signal.emit(rc, msg)
 
     def cancel(self):
         self._cancelled = True
         if self._process and self._process.poll() is None:
             self._process.terminate()
+
+    def _run_crash_diagnostic(self, rc: int):
+        """Analyse CompLaB.xml + kinetics headers and emit a report."""
+        xml_path = os.path.join(self._cwd, "CompLaB.xml")
+        if not os.path.isfile(xml_path):
+            return
+
+        try:
+            from .xml_diagnostic import diagnose_crash
+            report = diagnose_crash(xml_path, rc, kinetics_dir=self._cwd)
+        except Exception as exc:
+            report = f"Crash diagnostic failed: {exc}"
+
+        self.output_line.emit("")
+        for line in report.split("\n"):
+            self.output_line.emit(line)
+
+        self.diagnostic_report.emit(report)

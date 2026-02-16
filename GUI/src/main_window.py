@@ -614,6 +614,7 @@ class CompLaBMainWindow(QMainWindow):
         self._runner.progress.connect(
             lambda c, m: self._console.set_progress(c, m))
         self._runner.finished_signal.connect(self._on_sim_finished)
+        self._runner.diagnostic_report.connect(self._on_diagnostic_report)
         self._runner.start()
         self._console.set_status("Running...")
 
@@ -631,6 +632,33 @@ class CompLaBMainWindow(QMainWindow):
             self._console.log_success(msg)
         else:
             self._console.log_error(msg)
+
+    def _on_diagnostic_report(self, report: str):
+        """Handle crash diagnostic report: show in console + save to output."""
+        # Forward to the run panel's validation tab
+        self._run_panel.on_diagnostic_report(report)
+
+        # Print a colour-coded version to the console widget
+        self._console.log_diagnostic(report)
+
+        # Save report to the project's output folder
+        output_dir = self._project.path_settings.output_path
+        if not os.path.isabs(output_dir):
+            # Make relative to project file or cwd
+            if self._project_file:
+                base = str(Path(self._project_file).parent)
+            else:
+                base = os.getcwd()
+            output_dir = os.path.join(base, output_dir)
+
+        from .core.xml_diagnostic import save_diagnostic_report
+        saved_path = save_diagnostic_report(report, output_dir)
+        if saved_path:
+            self._console.log_info(
+                f"Crash diagnostic saved: {saved_path}")
+        else:
+            self._console.log_warning(
+                f"Could not save crash diagnostic to {output_dir}")
 
     def _sync_mpi_from_parallel(self):
         """Push parallel-panel MPI settings into the run-panel widgets."""
