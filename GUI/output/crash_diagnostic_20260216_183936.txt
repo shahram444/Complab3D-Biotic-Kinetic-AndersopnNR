@@ -1,0 +1,41 @@
+========================================================================
+  CompLaB CRASH DIAGNOSTIC REPORT
+  Generated: 2026-02-16 18:39:36
+========================================================================
+
+Exit code : -1073741819
+Error type: Access Violation (0xC0000005)
+Reason    : A null or invalid pointer was dereferenced.
+XML file  : C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\CompLaB.xml
+
+------------------------------------------------------------------------
+  ERRORS DETECTED: 1
+------------------------------------------------------------------------
+  1. [Geometry] Size MISMATCH: file has 135000 bytes but nx*ny*nz = 50*30*30 = 45000.
+    >> This is the most common cause of heap corruption!
+    >> Fix: change nx/ny/nz in XML to match the geometry file,
+    >>       or regenerate geometry.dat with the correct dimensions.
+    File: C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\input\geometry.dat
+
+------------------------------------------------------------------------
+  DIAGNOSTIC INFO
+------------------------------------------------------------------------
+  - XML parsed successfully: C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\CompLaB.xml
+  - Domain: nx=50, ny=30, nz=30  (total=45000)
+  - Substrates: 0
+  - Microbes: 0
+  - Biotic mode: False, kinetics: False, abiotic kinetics: False
+  - Analysing defineKinetics.hh (3286 bytes)
+  - Analysing defineAbioticKinetics.hh (1681 bytes)
+
+------------------------------------------------------------------------
+  HOW TO FIX
+------------------------------------------------------------------------
+  Fix the errors above, then:
+  1. Run 'Validate Configuration' in the Run panel
+  2. Verify geometry file has exactly nx * ny * nz bytes
+  3. Check that defineKinetics.hh array indices match substrate count
+  4. Check half_saturation_constants / maximum_uptake_flux counts
+  5. Re-export CompLaB.xml and run again
+
+========================================================================
