@@ -26,21 +26,28 @@ class GeneralPanel(BasePanel):
         self._mode_group = QButtonGroup(self)
         self._mode_group.setExclusive(True)
 
+        self._radio_flow = QRadioButton(
+            "Flow only  (Navier-Stokes, no substrates)")
+        self._radio_diffusion = QRadioButton(
+            "Diffusion only  (Pe=0, no advection/flow)")
         self._radio_transport = QRadioButton(
-            "Transport only  (flow + advection-diffusion, no reactions)")
+            "Transport  (flow + advection-diffusion, no reactions)")
         self._radio_abiotic = QRadioButton(
-            "Abiotic  (chemical kinetics between substrates, no microbes)")
+            "Abiotic  (chemical kinetics, defineAbioticKinetics.hh)")
         self._radio_biotic = QRadioButton(
-            "Biotic  (microbial growth with Monod kinetics)")
+            "Biotic  (microbial Monod kinetics, defineKinetics.hh)")
         self._radio_coupled = QRadioButton(
             "Coupled  (biotic + abiotic kinetics simultaneously)")
 
-        self._mode_group.addButton(self._radio_transport, 0)
-        self._mode_group.addButton(self._radio_abiotic, 1)
-        self._mode_group.addButton(self._radio_biotic, 2)
-        self._mode_group.addButton(self._radio_coupled, 3)
+        self._mode_group.addButton(self._radio_flow, 0)
+        self._mode_group.addButton(self._radio_diffusion, 1)
+        self._mode_group.addButton(self._radio_transport, 2)
+        self._mode_group.addButton(self._radio_abiotic, 3)
+        self._mode_group.addButton(self._radio_biotic, 4)
+        self._mode_group.addButton(self._radio_coupled, 5)
 
-        for rb in [self._radio_transport, self._radio_abiotic,
+        for rb in [self._radio_flow, self._radio_diffusion,
+                   self._radio_transport, self._radio_abiotic,
                    self._radio_biotic, self._radio_coupled]:
             self.add_widget(rb)
 
@@ -85,31 +92,39 @@ class GeneralPanel(BasePanel):
     def _update_summary(self):
         mode_id = self._mode_group.checkedId()
         lines = []
-        if mode_id == 0:
+        if mode_id == 0:  # Flow only
             lines = [
                 "Navier-Stokes flow solver: ON",
-                "Advection-Diffusion transport: ON",
-                "Biotic kinetics (defineKinetics.hh): OFF",
-                "Abiotic kinetics (defineAbioticKinetics.hh): OFF",
-                "Microbiology / biomass: OFF",
+                "Substrates / transport: none (no substrates defined)",
+                "Kinetics: none",
             ]
-        elif mode_id == 1:
+        elif mode_id == 1:  # Diffusion only
+            lines = [
+                "Navier-Stokes flow: OFF (Pe=0, delta_P=0)",
+                "Diffusion transport: ON",
+                "Kinetics: none",
+            ]
+        elif mode_id == 2:  # Transport
+            lines = [
+                "Navier-Stokes flow solver: ON",
+                "Advection-Diffusion transport: ON (Pe > 0)",
+                "Kinetics: none",
+            ]
+        elif mode_id == 3:  # Abiotic
             lines = [
                 "Navier-Stokes flow solver: ON",
                 "Advection-Diffusion transport: ON",
-                "Biotic kinetics: OFF",
                 "Abiotic kinetics (defineAbioticKinetics.hh): ON",
                 "Microbiology / biomass: OFF",
             ]
-        elif mode_id == 2:
+        elif mode_id == 4:  # Biotic
             lines = [
                 "Navier-Stokes flow solver: ON",
                 "Advection-Diffusion transport: ON",
                 "Biotic kinetics (defineKinetics.hh): ON",
-                "Abiotic kinetics: OFF",
                 "Microbiology / biomass: ON",
             ]
-        elif mode_id == 3:
+        elif mode_id == 5:  # Coupled
             lines = [
                 "Navier-Stokes flow solver: ON",
                 "Advection-Diffusion transport: ON",
@@ -120,32 +135,64 @@ class GeneralPanel(BasePanel):
         self._summary.setText("\n".join(lines))
 
     def _get_mode_flags(self):
-        """Convert radio selection to the three boolean flags."""
+        """Convert radio selection to (biotic, kinetics, abiotic) flags.
+
+        Flow Only / Diffusion Only / Transport modes don't need special
+        boolean flags — they are controlled by physics parameters
+        (Pe, delta_P, substrates).  The XML flags only matter for
+        kinetics activation.
+        """
         mode_id = self._mode_group.checkedId()
-        if mode_id == 0:  # Transport only
+        if mode_id <= 2:  # Flow only / Diffusion only / Transport
             return False, False, False
-        elif mode_id == 1:  # Abiotic
+        elif mode_id == 3:  # Abiotic
             return False, False, True
-        elif mode_id == 2:  # Biotic
+        elif mode_id == 4:  # Biotic
             return True, True, False
         else:  # Coupled
             return True, True, True
 
-    def _set_mode_from_flags(self, biotic, kinetics, abiotic):
-        """Set radio button from the three boolean flags."""
+    def get_mode_id(self):
+        """Return current mode id for fluid panel hints."""
+        return self._mode_group.checkedId()
+
+    def _set_mode_from_flags(self, biotic, kinetics, abiotic,
+                             delta_P=None, peclet=None, num_subs=None):
+        """Set radio button from the three boolean flags.
+
+        When biotic/kinetics/abiotic are all False, uses physics parameters
+        to disambiguate Flow Only / Diffusion Only / Transport:
+          - No substrates, delta_P > 0  →  Flow Only
+          - Pe == 0 and delta_P == 0    →  Diffusion Only
+          - otherwise                   →  Transport
+        """
         if biotic and abiotic:
             self._radio_coupled.setChecked(True)
         elif biotic and kinetics:
             self._radio_biotic.setChecked(True)
         elif abiotic:
             self._radio_abiotic.setChecked(True)
+        elif not biotic and not kinetics and not abiotic:
+            # Disambiguate Flow Only / Diffusion Only / Transport
+            is_no_subs = (num_subs is not None and num_subs == 0)
+            is_no_flow = (peclet is not None and peclet == 0
+                          and delta_P is not None and delta_P == 0)
+            if is_no_subs:
+                self._radio_flow.setChecked(True)
+            elif is_no_flow:
+                self._radio_diffusion.setChecked(True)
+            else:
+                self._radio_transport.setChecked(True)
         else:
             self._radio_transport.setChecked(True)
 
     def load_from_project(self, project):
         sm = project.simulation_mode
         self._set_mode_from_flags(
-            sm.biotic_mode, sm.enable_kinetics, sm.enable_abiotic_kinetics)
+            sm.biotic_mode, sm.enable_kinetics, sm.enable_abiotic_kinetics,
+            delta_P=project.fluid.delta_P,
+            peclet=project.fluid.peclet,
+            num_subs=len(project.substrates))
         self.enable_diagnostics.setChecked(sm.enable_validation_diagnostics)
         self.src_path.setText(project.path_settings.src_path)
         self.input_path.setText(project.path_settings.input_path)

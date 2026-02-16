@@ -61,25 +61,48 @@ def _default_substrates_5():
 # ── Templates ───────────────────────────────────────────────────────────
 
 @_register("flow_only", "Flow Only",
-           "Navier-Stokes flow simulation without transport or reactions.")
+           "Navier-Stokes flow simulation only (no substrates defined).")
 def _flow_only():
     p = CompLaBProject(name="Flow Only")
-    p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=False)
     p.fluid.delta_P = 2e-3
     p.fluid.peclet = 0.0
-    p.iteration.ade_max_iT = 0
+    # No substrates → solver only runs NS flow
     return p
 
 
-@_register("transport_only", "Transport Only",
-           "Flow + advection-diffusion transport, no reactions.")
-def _transport_only():
-    p = CompLaBProject(name="Transport Only")
+@_register("diffusion_only", "Diffusion Only",
+           "Pure diffusion transport with Pe=0 (no advection/flow).")
+def _diffusion_only():
+    p = CompLaBProject(name="Diffusion Only")
     p.simulation_mode = SimulationMode(
         biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=False)
+        enable_abiotic_kinetics=False,
+        enable_validation_diagnostics=True)
+    p.path_settings.output_path = "output_diffusion"
+    p.domain = DomainSettings(
+        nx=30, ny=10, nz=10, dx=1.0, unit="um",
+        characteristic_length=10.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=0.0, peclet=0.0, tau=0.8, track_performance=False)
+    p.iteration = IterationSettings(
+        ade_max_iT=5000, ade_converge_iT=1e-10)
+    p.substrates = [
+        Substrate(name="Tracer", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=1.0, right_boundary_condition=0.0),
+    ]
+    p.io_settings = IOSettings(
+        save_vtk_interval=1000, save_chk_interval=5000)
+    return p
+
+
+@_register("transport_only", "Transport (Flow + Diffusion)",
+           "Flow + advection-diffusion transport, no reactions.")
+def _transport_only():
+    p = CompLaBProject(name="Transport")
+    p.fluid.delta_P = 2e-3
+    p.fluid.peclet = 1.0
     p.substrates = [
         Substrate(name="Tracer", initial_concentration=0.0,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
@@ -199,7 +222,7 @@ def _planktonic():
     p.microbiology = MicrobiologySettings(
         maximum_biomass_density=100.0,
         thrd_biofilm_fraction=0.1,
-        ca_method="none",
+        ca_method="fraction",
         microbes=[
             Microbe(
                 name="Planktonic_Heterotroph", solver_type="LBM",

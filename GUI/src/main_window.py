@@ -26,7 +26,7 @@ from .widgets.model_tree import (
     ModelTree, NODE_GENERAL, NODE_DOMAIN, NODE_FLUID,
     NODE_CHEMISTRY, NODE_SUBSTRATE, NODE_EQUILIBRIUM,
     NODE_MICROBIOLOGY, NODE_MICROBE, NODE_SOLVER,
-    NODE_IO, NODE_RUN, NODE_POSTPROCESS,
+    NODE_IO, NODE_PARALLEL, NODE_SWEEP, NODE_RUN, NODE_POSTPROCESS,
 )
 from .widgets.console_widget import ConsoleWidget
 from .widgets.vtk_viewer import VTKViewer
@@ -39,6 +39,8 @@ from .panels.equilibrium_panel import EquilibriumPanel
 from .panels.microbiology_panel import MicrobiologyPanel
 from .panels.solver_panel import SolverPanel
 from .panels.io_panel import IOPanel
+from .panels.parallel_panel import ParallelPanel
+from .panels.sweep_panel import SweepPanel
 from .panels.run_panel import RunPanel
 from .panels.postprocess_panel import PostProcessPanel
 
@@ -92,6 +94,8 @@ class CompLaBMainWindow(QMainWindow):
         self._micro_panel = MicrobiologyPanel()
         self._solver_panel = SolverPanel()
         self._io_panel = IOPanel()
+        self._parallel_panel = ParallelPanel()
+        self._sweep_panel = SweepPanel()
         self._run_panel = RunPanel()
         self._post_panel = PostProcessPanel()
 
@@ -105,8 +109,10 @@ class CompLaBMainWindow(QMainWindow):
         self._panel_stack.addWidget(self._micro_panel)      # 5
         self._panel_stack.addWidget(self._solver_panel)     # 6
         self._panel_stack.addWidget(self._io_panel)         # 7
-        self._panel_stack.addWidget(self._run_panel)        # 8
-        self._panel_stack.addWidget(self._post_panel)       # 9
+        self._panel_stack.addWidget(self._parallel_panel)   # 8
+        self._panel_stack.addWidget(self._sweep_panel)      # 9
+        self._panel_stack.addWidget(self._run_panel)        # 10
+        self._panel_stack.addWidget(self._post_panel)       # 11
 
         self._panel_map = {
             NODE_GENERAL: 0,
@@ -119,8 +125,10 @@ class CompLaBMainWindow(QMainWindow):
             NODE_MICROBE: 5,
             NODE_SOLVER: 6,
             NODE_IO: 7,
-            NODE_RUN: 8,
-            NODE_POSTPROCESS: 9,
+            NODE_PARALLEL: 8,
+            NODE_SWEEP: 9,
+            NODE_RUN: 10,
+            NODE_POSTPROCESS: 11,
         }
 
     def _setup_layout(self):
@@ -324,6 +332,12 @@ class CompLaBMainWindow(QMainWindow):
         self._domain_panel.geometry_loaded.connect(
             self._viewer.load_geometry_dat)
 
+        # Parallel panel -> sync MPI config to Run panel
+        self._parallel_panel.data_changed.connect(self._sync_mpi_from_parallel)
+
+        # Sweep panel
+        self._sweep_panel.sweep_requested.connect(self._run_sweep)
+
         # Run panel
         self._run_panel.run_requested.connect(self._run_simulation)
         self._run_panel.stop_requested.connect(self._stop_simulation)
@@ -512,19 +526,63 @@ class CompLaBMainWindow(QMainWindow):
 
     # ── Simulation ──────────────────────────────────────────────────
 
+    def _find_executable(self, work_dir: str) -> str:
+        """Auto-detect the complab executable in common locations."""
+        import sys
+        exe_name = "complab.exe" if sys.platform == "win32" else "complab"
+
+        # 1. Check user-configured path first
+        configured = self._config.get("complab_executable", "")
+        if configured and os.path.isfile(configured):
+            return configured
+
+        # 2. Search common locations relative to the working directory
+        search_dirs = [
+            work_dir,                                    # project root
+            os.path.join(work_dir, "build"),             # build directory
+            os.path.join(work_dir, "Release"),           # MSVC Release
+            os.path.join(work_dir, "Debug"),             # MSVC Debug
+            os.path.join(work_dir, "GUI", "bin"),        # GUI bundled
+        ]
+        # Also search relative to the GUI directory
+        gui_dir = str(Path(__file__).resolve().parent.parent)
+        search_dirs.append(os.path.join(gui_dir, "bin"))
+        # And one level up from GUI (the repo root)
+        repo_root = str(Path(gui_dir).parent)
+        if repo_root != work_dir:
+            search_dirs.extend([
+                repo_root,
+                os.path.join(repo_root, "build"),
+                os.path.join(repo_root, "Release"),
+            ])
+
+        for d in search_dirs:
+            candidate = os.path.join(d, exe_name)
+            if os.path.isfile(candidate):
+                return candidate
+
+        return ""
+
     def _run_simulation(self):
         self._save_panels_to_project()
-        exe = self._config.get("complab_executable", "")
-        if not exe:
-            self._console.log_error(
-                "CompLaB executable not set. Go to Edit > Preferences.")
-            return
 
         # Determine working directory
         if self._project_file:
             work_dir = str(Path(self._project_file).parent)
         else:
             work_dir = os.getcwd()
+
+        # Auto-detect executable
+        exe = self._find_executable(work_dir)
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not found. Searched project root, "
+                "build/, Release/, and GUI/bin/. "
+                "Set the path in Edit > Preferences, or build with "
+                "'cd build && cmake .. && make'.")
+            return
+
+        self._console.log_info(f"Using executable: {exe}")
 
         # Export XML first
         xml_path = os.path.join(work_dir, "CompLaB.xml")
@@ -537,6 +595,9 @@ class CompLaBMainWindow(QMainWindow):
 
         self._act_run.setEnabled(False)
         self._act_stop.setEnabled(True)
+
+        # Sync MPI settings from parallel panel before reading run panel config
+        self._sync_mpi_from_parallel()
 
         # Get MPI config from run panel
         mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
@@ -570,6 +631,89 @@ class CompLaBMainWindow(QMainWindow):
             self._console.log_success(msg)
         else:
             self._console.log_error(msg)
+
+    def _sync_mpi_from_parallel(self):
+        """Push parallel-panel MPI settings into the run-panel widgets."""
+        pp = self._parallel_panel
+        rp = self._run_panel
+        is_on = pp.is_parallel_enabled()
+        rp.set_mpi_config(
+            enabled=is_on,
+            nprocs=pp.get_num_cores() if is_on else 1,
+            command=pp.get_mpi_command() if is_on else "",
+        )
+
+    def _run_sweep(self, runs: list):
+        """Execute a parameter sweep: run simulation for each value."""
+        if not runs:
+            return
+        self._save_panels_to_project()
+
+        if self._project_file:
+            base_dir = str(Path(self._project_file).parent)
+        else:
+            base_dir = os.getcwd()
+
+        exe = self._find_executable(base_dir)
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not found. Set path in Edit > Preferences "
+                "or build with 'cd build && cmake .. && make'.")
+            return
+
+        self._sync_mpi_from_parallel()
+        mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
+
+        self._console.log_info(
+            f"Starting parameter sweep: {len(runs)} runs")
+
+        for i, (param_name, value) in enumerate(runs):
+            run_dir = os.path.join(base_dir, f"sweep_{i+1:03d}_{param_name}_{value}")
+            os.makedirs(run_dir, exist_ok=True)
+
+            # Apply swept parameter to project
+            from .panels.sweep_panel import SWEEP_PARAMS
+            if param_name in SWEEP_PARAMS:
+                section, field = SWEEP_PARAMS[param_name]
+                self._apply_sweep_param(section, field, value)
+
+            # Export XML for this run
+            xml_path = os.path.join(run_dir, "CompLaB.xml")
+            try:
+                ProjectManager.export_xml(self._project, xml_path)
+            except Exception as e:
+                self._console.log_error(f"Sweep run {i+1}: XML export failed: {e}")
+                continue
+
+            # Copy geometry file if it exists in base_dir
+            geom_src = os.path.join(base_dir, "geometry.dat")
+            geom_dst = os.path.join(run_dir, "geometry.dat")
+            if os.path.isfile(geom_src) and not os.path.isfile(geom_dst):
+                import shutil
+                shutil.copy2(geom_src, geom_dst)
+
+            self._console.log_info(
+                f"  Run {i+1}/{len(runs)}: {param_name} = {value} -> {run_dir}")
+
+        self._console.log_success(
+            f"Sweep setup complete. {len(runs)} run directories created in {base_dir}")
+
+    def _apply_sweep_param(self, section: str, field: str, value):
+        """Apply a single swept parameter value to the project."""
+        p = self._project
+        try:
+            if section == "fluid":
+                setattr(p.fluid, field, value)
+            elif section == "iteration":
+                setattr(p.iteration, field, int(value) if "iT" in field else value)
+            elif section == "domain":
+                setattr(p.domain, field, int(value) if field in ("nx", "ny", "nz") else value)
+            elif section == "microbiology":
+                setattr(p.microbiology, field, value)
+            elif section == "io_settings":
+                setattr(p.io_settings, field, int(value))
+        except Exception as e:
+            self._console.log_error(f"Failed to set {section}.{field} = {value}: {e}")
 
     # ── Validation ──────────────────────────────────────────────────
 

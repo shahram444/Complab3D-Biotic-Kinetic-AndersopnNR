@@ -1,155 +1,132 @@
 <?xml version="1.0" ?>
 <parameters>
-
     <path>
         <src_path>src</src_path>
         <input_path>input</input_path>
         <output_path>output_planktonic</output_path>
     </path>
-
-    <!-- ════════════════════════════════════════════════════════════════════════════
-         SIMULATION MODE CONTROL (Planktonic Version)
-         ════════════════════════════════════════════════════════════════════════════
-         biotic_mode: true (planktonic bacteria are biotic organisms)
-         enable_kinetics: true (Monod kinetics for planktonic growth)
-         enable_validation_diagnostics: true/false
-           - Detailed per-iteration output for debugging/validation
-           - Shows collision, kinetics, equilibrium steps with sample values
-           - Use for verifying code correctness (adds overhead)
-    -->
     <simulation_mode>
         <biotic_mode>true</biotic_mode>
         <enable_kinetics>true</enable_kinetics>
+        <enable_abiotic_kinetics>false</enable_abiotic_kinetics>
         <enable_validation_diagnostics>false</enable_validation_diagnostics>
     </simulation_mode>
-
     <LB_numerics>
         <domain>
-            <nx>50</nx>
-            <ny>30</ny>
-            <nz>30</nz>
-            <dx>1.0</dx>
+            <nx>100</nx>
+            <ny>100</ny>
+            <nz>100</nz>
+            <dx>1</dx>
             <unit>um</unit>
             <characteristic_length>30</characteristic_length>
-            <filename>geometry.dat</filename>
+            <filename>OS_R1_3D_phi08.dat</filename>
             <material_numbers>
                 <pore>2</pore>
                 <solid>0</solid>
                 <bounce_back>1</bounce_back>
-                <microbe0>2</microbe0>
             </material_numbers>
         </domain>
-        <delta_P>2.0e-3</delta_P>
-        <Peclet>1.0</Peclet>
+        <delta_P>2.000000e-03</delta_P>
+        <Peclet>1</Peclet>
         <tau>0.8</tau>
         <track_performance>false</track_performance>
         <iteration>
             <ns_max_iT1>100000</ns_max_iT1>
             <ns_max_iT2>100000</ns_max_iT2>
-            <ns_converge_iT1>1e-8</ns_converge_iT1>
-            <ns_converge_iT2>1e-6</ns_converge_iT2>
+            <ns_converge_iT1>1.000000e-08</ns_converge_iT1>
+            <ns_converge_iT2>1.000000e-06</ns_converge_iT2>
             <ade_max_iT>50000</ade_max_iT>
-            <ade_converge_iT>1e-8</ade_converge_iT>
+            <ade_converge_iT>1.000000e-08</ade_converge_iT>
             <ns_update_interval>1</ns_update_interval>
             <ade_update_interval>1</ade_update_interval>
         </iteration>
     </LB_numerics>
-
     <chemistry>
         <number_of_substrates>5</number_of_substrates>
-
         <substrate0>
             <name_of_substrates>DOC</name_of_substrates>
             <initial_concentration>0.1</initial_concentration>
             <substrate_diffusion_coefficients>
-                <in_pore>1.0e-9</in_pore>
-                <in_biofilm>1.0e-9</in_biofilm>
+                <in_pore>1.000000e-09</in_pore>
+                <in_biofilm>1.000000e-09</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
             <left_boundary_condition>0.1</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate0>
-
         <substrate1>
             <name_of_substrates>CO2</name_of_substrates>
-            <initial_concentration>1.0e-5</initial_concentration>
+            <initial_concentration>1.000000e-05</initial_concentration>
             <substrate_diffusion_coefficients>
-                <in_pore>1.9e-9</in_pore>
-                <in_biofilm>1.9e-9</in_biofilm>
+                <in_pore>1.900000e-09</in_pore>
+                <in_biofilm>1.900000e-09</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>1.0e-5</left_boundary_condition>
+            <left_boundary_condition>1.000000e-05</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate1>
-
         <substrate2>
             <name_of_substrates>HCO3</name_of_substrates>
-            <initial_concentration>2.0e-3</initial_concentration>
+            <initial_concentration>2.000000e-03</initial_concentration>
             <substrate_diffusion_coefficients>
-                <in_pore>1.2e-9</in_pore>
-                <in_biofilm>1.2e-9</in_biofilm>
+                <in_pore>1.200000e-09</in_pore>
+                <in_biofilm>1.200000e-09</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>2.0e-3</left_boundary_condition>
+            <left_boundary_condition>2.000000e-03</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate2>
-
         <substrate3>
             <name_of_substrates>CO3</name_of_substrates>
-            <initial_concentration>1.0e-5</initial_concentration>
+            <initial_concentration>1.000000e-05</initial_concentration>
             <substrate_diffusion_coefficients>
-                <in_pore>0.9e-9</in_pore>
-                <in_biofilm>0.9e-9</in_biofilm>
+                <in_pore>9.000000e-10</in_pore>
+                <in_biofilm>9.000000e-10</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>1.0e-5</left_boundary_condition>
+            <left_boundary_condition>1.000000e-05</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate3>
-
         <substrate4>
             <name_of_substrates>Hplus</name_of_substrates>
-            <initial_concentration>1.0e-7</initial_concentration>
+            <initial_concentration>1.000000e-07</initial_concentration>
             <substrate_diffusion_coefficients>
-                <in_pore>9.3e-9</in_pore>
-                <in_biofilm>9.3e-9</in_biofilm>
+                <in_pore>9.300000e-09</in_pore>
+                <in_biofilm>9.300000e-09</in_biofilm>
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>1.0e-7</left_boundary_condition>
+            <left_boundary_condition>1.000000e-07</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </substrate4>
     </chemistry>
-
     <microbiology>
         <number_of_microbes>1</number_of_microbes>
-        <maximum_biomass_density>100.0</maximum_biomass_density>
+        <maximum_biomass_density>100</maximum_biomass_density>
         <thrd_biofilm_fraction>0.1</thrd_biofilm_fraction>
         <CA_method>none</CA_method>
-
         <microbe0>
             <name_of_microbes>Planktonic_Heterotroph</name_of_microbes>
             <solver_type>LBM</solver_type>
             <reaction_type>kinetics</reaction_type>
-            <initial_densities>0.0 10.0</initial_densities>
-            <decay_coefficient>1.0e-9</decay_coefficient>
-            <viscosity_ratio_in_biofilm>1.0</viscosity_ratio_in_biofilm>
-            <half_saturation_constants>1.0e-5 0.0 0.0 0.0 0.0</half_saturation_constants>
+            <initial_densities>10.0</initial_densities>
+            <decay_coefficient>1.000000e-09</decay_coefficient>
+            <viscosity_ratio_in_biofilm>1</viscosity_ratio_in_biofilm>
+            <half_saturation_constants>1e-5 0.0 0.0 0.0 0.0</half_saturation_constants>
             <maximum_uptake_flux>2.5 0.0 0.0 0.0 0.0</maximum_uptake_flux>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>
-            <left_boundary_condition>10.0</left_boundary_condition>
+            <left_boundary_condition>10</left_boundary_condition>
             <right_boundary_condition>0.0</right_boundary_condition>
         </microbe0>
     </microbiology>
-
     <equilibrium>
         <enabled>false</enabled>
     </equilibrium>
-
     <IO>
         <read_NS_file>false</read_NS_file>
         <read_ADE_file>false</read_ADE_file>
@@ -160,5 +137,4 @@
         <save_VTK_interval>500</save_VTK_interval>
         <save_CHK_interval>5000</save_CHK_interval>
     </IO>
-
 </parameters>

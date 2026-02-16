@@ -60,7 +60,7 @@ class IterationSettings:
     ns_max_iT2: int = 100000
     ns_converge_iT1: float = 1e-8
     ns_converge_iT2: float = 1e-6
-    ade_max_iT: int = 50000
+    ade_max_iT: int = 10000000
     ade_converge_iT: float = 1e-8
     ns_rerun_iT0: int = 0
     ade_rerun_iT0: int = 0
@@ -129,7 +129,7 @@ class EquilibriumSettings:
     stoichiometry: List[List[float]] = field(default_factory=list)
     log_k: List[float] = field(default_factory=list)
     max_iterations: int = 200
-    tolerance: float = 1e-8
+    tolerance: float = 1e-10
     anderson_depth: int = 4
     beta: float = 1.0
 
@@ -143,8 +143,8 @@ class IOSettings:
     mask_filename: str = "maskLattice"
     subs_filename: str = "subsLattice"
     bio_filename: str = "bioLattice"
-    save_vtk_interval: int = 500
-    save_chk_interval: int = 5000
+    save_vtk_interval: int = 1000
+    save_chk_interval: int = 1000000
 
 
 @dataclass
@@ -173,6 +173,7 @@ class CompLaBProject:
         """
         errors = []
         warnings = []
+        num_subs = len(self.substrates)
 
         # ── 1. Path settings ────────────────────────────────────────
         ps = self.path_settings
@@ -185,10 +186,6 @@ class CompLaBProject:
 
         # ── 2. Simulation mode consistency ──────────────────────────
         sm = self.simulation_mode
-        if sm.biotic_mode and sm.enable_abiotic_kinetics:
-            errors.append(
-                "[Mode] biotic_mode=true and enable_abiotic_kinetics=true "
-                "are mutually exclusive. Use enable_kinetics for biotic mode.")
         if not sm.biotic_mode and sm.enable_kinetics:
             errors.append(
                 "[Mode] enable_kinetics=true but biotic_mode=false. "
@@ -198,6 +195,26 @@ class CompLaBProject:
             errors.append(
                 "[Mode] biotic_mode=false but microbes are defined. "
                 "Set biotic_mode=true or remove microbes.")
+
+        # Flow-only: no substrates is fine (solver only runs NS)
+        # Diffusion-only: Pe=0 is fine (pure diffusion, no advection)
+
+        # Warn about abiotic kinetics with zero substrate concentrations
+        if sm.enable_abiotic_kinetics and len(self.substrates) > 0:
+            all_zero = all(
+                s.initial_concentration == 0.0
+                and s.left_boundary_condition == 0.0
+                and s.right_boundary_condition == 0.0
+                for s in self.substrates
+            )
+            if all_zero:
+                errors.append(
+                    "[Mode] Abiotic kinetics is enabled but all substrate "
+                    "concentrations and boundary conditions are zero. "
+                    "Reactions need non-zero concentrations to produce "
+                    "meaningful results. Set a non-zero inlet concentration "
+                    "or initial concentration, or switch to 'Transport only' "
+                    "mode if no reactions are needed.")
 
         # ── 3. Domain settings ──────────────────────────────────────
         d = self.domain
@@ -219,20 +236,20 @@ class CompLaBProject:
         elif not d.geometry_filename.endswith(".dat"):
             errors.append("[Domain] Geometry file must be a .dat file.")
 
-        # Material numbers
+        # Material numbers (pore can be space-separated, e.g. "2 4")
         try:
-            pore_val = int(d.pore)
+            pore_vals = [int(x) for x in d.pore.strip().split()]
             solid_val = int(d.solid)
             bb_val = int(d.bounce_back)
-            mat_set = {pore_val, solid_val, bb_val}
-            if len(mat_set) < 3:
+            mat_set = set(pore_vals) | {solid_val, bb_val}
+            if solid_val in pore_vals or bb_val in pore_vals or solid_val == bb_val:
                 errors.append(
                     f"[Domain] Material numbers must be distinct: "
-                    f"pore={pore_val}, solid={solid_val}, bounce_back={bb_val}.")
+                    f"pore={d.pore}, solid={solid_val}, bounce_back={bb_val}.")
         except ValueError:
             errors.append(
                 "[Domain] Material numbers (pore, solid, bounce_back) "
-                "must be integers.")
+                "must be space-separated integers.")
 
         # Characteristic length for Peclet
         fl = self.fluid
@@ -259,7 +276,7 @@ class CompLaBProject:
             errors.append("[Iteration] ns_max_iT1 should be >= 100.")
         if it.ns_max_iT2 < 100:
             errors.append("[Iteration] ns_max_iT2 should be >= 100.")
-        if it.ade_max_iT < 100:
+        if it.ade_max_iT < 100 and num_subs > 0:
             errors.append("[Iteration] ade_max_iT should be >= 100.")
         if it.ns_converge_iT1 <= 0:
             errors.append("[Iteration] NS convergence (phase 1) must be > 0.")
@@ -273,7 +290,6 @@ class CompLaBProject:
             errors.append("[Iteration] ADE update interval must be >= 1.")
 
         # ── 6. Chemistry / Substrates ───────────────────────────────
-        num_subs = len(self.substrates)
         sub_names = set()
         for i, s in enumerate(self.substrates):
             prefix = f"[Substrate {i} '{s.name}']"
@@ -321,8 +337,10 @@ class CompLaBProject:
             mic_names = set()
             used_mat_numbers = set()
             try:
-                used_mat_numbers.update(
-                    {int(d.pore), int(d.solid), int(d.bounce_back)})
+                for p in d.pore.strip().split():
+                    used_mat_numbers.add(int(p))
+                used_mat_numbers.add(int(d.solid))
+                used_mat_numbers.add(int(d.bounce_back))
             except ValueError:
                 pass
 
@@ -456,9 +474,6 @@ class CompLaBProject:
             if num_subs < 1:
                 errors.append(
                     "[Mode] Abiotic kinetics requires at least one substrate.")
-            if sm.biotic_mode:
-                errors.append(
-                    "[Mode] Abiotic kinetics should not be used with biotic_mode=true.")
 
         # ── 9. Equilibrium solver ───────────────────────────────────
         eq = self.equilibrium
@@ -511,10 +526,13 @@ class CompLaBProject:
                 f"max ADE iterations ({it.ade_max_iT}). No VTK files will be saved.")
 
         # ── 11. Cross-checks ───────────────────────────────────────
-        # No substrates at all
-        if num_subs == 0 and (sm.enable_kinetics or sm.enable_abiotic_kinetics):
+        # No substrates with kinetics enabled (flow-only with 0 substrates is OK)
+        if num_subs == 0 and sm.enable_kinetics:
             errors.append(
-                "[Cross-check] Kinetics enabled but no substrates defined.")
+                "[Cross-check] Biotic kinetics enabled but no substrates defined.")
+        if num_subs == 0 and sm.enable_abiotic_kinetics:
+            errors.append(
+                "[Cross-check] Abiotic kinetics enabled but no substrates defined.")
 
         # All Neumann BCs on all substrates (no source) - might not reach steady state
         if num_subs > 0:
