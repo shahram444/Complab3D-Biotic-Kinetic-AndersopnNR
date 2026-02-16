@@ -1,0 +1,98 @@
+{
+  "name": "Untitled",
+  "path_settings": {
+    "src_path": "src",
+    "input_path": "input",
+    "output_path": "output"
+  },
+  "simulation_mode": {
+    "biotic_mode": false,
+    "enable_kinetics": false,
+    "enable_abiotic_kinetics": true,
+    "enable_validation_diagnostics": true
+  },
+  "domain": {
+    "nx": 50,
+    "ny": 30,
+    "nz": 30,
+    "dx": 1.0,
+    "dy": 0.0,
+    "dz": 0.0,
+    "unit": "um",
+    "characteristic_length": 30.0,
+    "geometry_filename": "geometry.dat",
+    "pore": "2",
+    "solid": "0",
+    "bounce_back": "1"
+  },
+  "fluid": {
+    "delta_P": 0.002,
+    "peclet": 1.0,
+    "tau": 0.8,
+    "track_performance": false
+  },
+  "iteration": {
+    "ns_max_iT1": 100000,
+    "ns_max_iT2": 100000,
+    "ns_converge_iT1": 1e-08,
+    "ns_converge_iT2": 1e-06,
+    "ade_max_iT": 10000000,
+    "ade_converge_iT": 1e-08,
+    "ns_rerun_iT0": 0,
+    "ade_rerun_iT0": 0,
+    "ns_update_interval": 1,
+    "ade_update_interval": 1
+  },
+  "substrates": [
+    {
+      "name": "Reactant",
+      "initial_concentration": 1.0,
+      "diffusion_in_pore": 1e-09,
+      "diffusion_in_biofilm": 1e-09,
+      "left_boundary_type": "Dirichlet",
+      "right_boundary_type": "Neumann",
+      "left_boundary_condition": 1.0,
+      "right_boundary_condition": 0.0
+    },
+    {
+      "name": "Product",
+      "initial_concentration": 0.0,
+      "diffusion_in_pore": 1e-09,
+      "diffusion_in_biofilm": 1e-09,
+      "left_boundary_type": "Dirichlet",
+      "right_boundary_type": "Neumann",
+      "left_boundary_condition": 0.0,
+      "right_boundary_condition": 0.0
+    }
+  ],
+  "microbiology": {
+    "maximum_biomass_density": 100.0,
+    "thrd_biofilm_fraction": 0.1,
+    "ca_method": "fraction",
+    "microbes": []
+  },
+  "equilibrium": {
+    "enabled": false,
+    "component_names": [],
+    "stoichiometry": [],
+    "log_k": [],
+    "max_iterations": 200,
+    "tolerance": 1e-10,
+    "anderson_depth": 4,
+    "beta": 1.0
+  },
+  "io_settings": {
+    "read_ns_file": false,
+    "read_ade_file": false,
+    "ns_filename": "nsLattice",
+    "mask_filename": "maskLattice",
+    "subs_filename": "subsLattice",
+    "bio_filename": "bioLattice",
+    "save_vtk_interval": 1000,
+    "save_chk_interval": 1000000
+  },
+  "_meta": {
+    "version": "2.1",
+    "saved": "2026-02-16T13:45:25.820567"
+  }
+}
