@@ -800,6 +800,10 @@ _INDEX_PATTERN = re.compile(
     r"\b(C|B|subsR|bioR)\s*\[\s*(\d+)\s*\]"
 )
 
+# Expected C++ function signatures (name only - parameter styles vary)
+_BIOTIC_FUNC_NAME = "defineRxnKinetics"
+_ABIOTIC_FUNC_NAME = "defineAbioticRxnKinetics"
+
 
 def parse_hh_indices(source: str) -> Dict[str, List[int]]:
     """Parse a .hh source string and return the array indices accessed.
@@ -821,6 +825,59 @@ def parse_hh_indices(source: str) -> Dict[str, List[int]]:
             idx = int(m.group(2))
             indices.setdefault(arr, set()).add(idx)
     return {k: sorted(v) for k, v in indices.items()}
+
+
+def verify_function_signature(source: str, kind: str) -> List[str]:
+    """Verify that a .hh file defines the expected function.
+
+    *kind* is ``"biotic"`` or ``"abiotic"``.
+    Returns a list of error strings (empty = OK).
+    """
+    errors: List[str] = []
+    if not source or not source.strip():
+        return errors  # empty source checked elsewhere
+
+    # Strip block comments  /* ... */
+    stripped = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    # Strip line comments
+    stripped = re.sub(r"//[^\n]*", "", stripped)
+
+    if kind == "biotic":
+        fname = _BIOTIC_FUNC_NAME
+        if fname not in stripped:
+            errors.append(
+                f"[Kinetics] defineKinetics.hh does not define the function "
+                f"'{fname}'. The C++ solver calls this function name exactly. "
+                f"Check spelling and ensure the function is not commented out.")
+        else:
+            # Check it has the right parameter names
+            for param in ("subsR", "bioR"):
+                if param not in stripped:
+                    errors.append(
+                        f"[Kinetics] defineKinetics.hh defines {fname} but "
+                        f"is missing the '{param}' parameter. "
+                        f"Expected signature: void {fname}("
+                        f"vector<double> B, vector<double> C, "
+                        f"vector<double>& subsR, vector<double>& bioR, "
+                        f"plint mask)")
+
+    elif kind == "abiotic":
+        fname = _ABIOTIC_FUNC_NAME
+        if fname not in stripped:
+            errors.append(
+                f"[Kinetics] defineAbioticKinetics.hh does not define the "
+                f"function '{fname}'. The C++ solver calls this function "
+                f"name exactly. Check spelling and ensure it is not "
+                f"commented out.")
+        else:
+            if "subsR" not in stripped:
+                errors.append(
+                    f"[Kinetics] defineAbioticKinetics.hh defines {fname} "
+                    f"but is missing the 'subsR' parameter. "
+                    f"Expected signature: void {fname}("
+                    f"vector<double> C, vector<double>& subsR, plint mask)")
+
+    return errors
 
 
 def validate_kinetics_vs_project(
@@ -845,6 +902,9 @@ def validate_kinetics_vs_project(
                 "[Kinetics] Biotic kinetics enabled but defineKinetics.hh "
                 "is empty or missing. Use a template or write your own code.")
         else:
+            # Verify function signature
+            errors.extend(verify_function_signature(biotic_source, "biotic"))
+
             idx = parse_hh_indices(biotic_source)
 
             # Check substrate indices
@@ -904,6 +964,9 @@ def validate_kinetics_vs_project(
                 "defineAbioticKinetics.hh is empty or missing. "
                 "Use a template or write your own code.")
         else:
+            # Verify function signature
+            errors.extend(verify_function_signature(abiotic_source, "abiotic"))
+
             idx = parse_hh_indices(abiotic_source)
 
             c_indices = idx.get("C", [])

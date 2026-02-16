@@ -606,6 +606,21 @@ class CompLaBMainWindow(QMainWindow):
             self._console.log_error(f"XML export failed: {e}")
             return
 
+        # Pre-run validation gate: data-model + file-system checks
+        self._load_kinetics_from_disk_if_empty()
+        errors = self._project.validate()
+        file_errors = self._project.validate_files(work_dir)
+        errors.extend(file_errors)
+        if errors:
+            self._run_panel.show_validation(errors)
+            self._console.log_error(
+                f"Pre-run validation failed with {len(errors)} error(s):")
+            for e in errors:
+                self._console.log_error(f"  {e}")
+            self._console.log_error(
+                "Fix the issues above before running the simulation.")
+            return
+
         self._act_run.setEnabled(False)
         self._act_stop.setEnabled(True)
 
@@ -765,6 +780,15 @@ class CompLaBMainWindow(QMainWindow):
         self._load_kinetics_from_disk_if_empty()
 
         errors = self._project.validate()
+
+        # File-system checks: geometry size, on-disk .hh / XML consistency
+        if self._project_file:
+            work_dir = str(Path(self._project_file).parent)
+        else:
+            work_dir = os.getcwd()
+        file_errors = self._project.validate_files(work_dir)
+        errors.extend(file_errors)
+
         self._run_panel.show_validation(errors)
         if errors:
             self._console.log_error(
