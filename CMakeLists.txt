@@ -83,9 +83,35 @@ include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
 
 link_directories("/usr/local/lib")
 
-file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
-file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
-add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+option(REBUILD_PALABOS "Rebuild Palabos library from source (OFF = use pre-built)" OFF)
+
+if(REBUILD_PALABOS)
+    message("Building Palabos from source...")
+    file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
+    file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
+    add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+else()
+    message("Using pre-built Palabos library (use -DREBUILD_PALABOS=ON to rebuild)")
+    # Look for pre-built library in build directory
+    if(WIN32)
+        set(PALABOS_LIB_NAME "palabos.lib")
+        if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PALABOS_LIB_NAME}")
+            set(PALABOS_LIB_NAME "libpalabos.a")  # MinGW uses .a
+        endif()
+    else()
+        set(PALABOS_LIB_NAME "libpalabos.a")
+    endif()
+
+    set(PALABOS_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/${PALABOS_LIB_NAME}")
+    if(NOT EXISTS "${PALABOS_LIB_PATH}")
+        message(FATAL_ERROR
+            "Pre-built Palabos library not found at ${PALABOS_LIB_PATH}.\n"
+            "Run cmake with -DREBUILD_PALABOS=ON first to build it, then use -DREBUILD_PALABOS=OFF for fast rebuilds.")
+    endif()
+
+    add_library(palabos STATIC IMPORTED)
+    set_target_properties(palabos PROPERTIES IMPORTED_LOCATION "${PALABOS_LIB_PATH}")
+endif()
 ###############################################################################
 add_executable(${EXECUTABLE_NAME} "./src/${EXECUTABLE_NAME}.cpp")
 # Link with the following libraries
