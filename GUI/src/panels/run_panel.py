@@ -600,9 +600,13 @@ class RunPanel(BasePanel):
             f"{desc}\n\n"
             f"Suggestions:\n"
             f"  1. Run 'Validate Configuration' to check settings\n"
-            f"  2. Verify geometry file has exactly nx*ny*nz values\n"
-            f"  3. Check the Output tab for error details\n"
-            f"  4. Try running from command line: ./complab"
+            f"  2. Verify geometry file has exactly nx*ny*nz bytes\n"
+            f"  3. If you changed kinetics (.hh files) or switched\n"
+            f"     templates, did you recompile the solver?\n"
+            f"     → Export XML, copy .hh files to source root,\n"
+            f"       cd build && cmake .. && make -j$(nproc)\n"
+            f"  4. Check the Output tab for error details\n"
+            f"  5. See Help > Workflow Guide for full instructions"
         )
 
     # ── Validation display ──────────────────────────────────────────
