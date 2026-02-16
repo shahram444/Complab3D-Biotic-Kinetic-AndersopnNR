@@ -1,19 +1,30 @@
 cmake_minimum_required(VERSION 3.5)
+
 #set the project name
 project(complab)
 enable_language(CXX)
+
 set(EXECUTABLE_NAME "complab")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
+
 #if(NOT CMAKE_BUILD_TYPE)
     #set(CMAKE_BUILD_TYPE "Release")
     #set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 #endif()
+
+
+
+
 if(NOT CMAKE_BUILD_TYPE)
     #set(CMAKE_BUILD_TYPE "Debug")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
+
+
+
 message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
 message(${CMAKE_BUILD_TYPE})
+
 # Compiler flags
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
@@ -34,6 +45,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 else()
     message( FATAL_ERROR "CXX compiler not recognized. CMake will quit." )
 endif()
+
 option(ENABLE_MPI "Enable MPI" ON)
 if(ENABLE_MPI)
     message("Enabling MPI")
@@ -45,53 +57,53 @@ if(ENABLE_MPI)
         add_definitions(-DPLB_MPI_PARALLEL)
     endif()
 endif()
+
 if(WIN32)
     option(ENABLE_POSIX "Enable POSIX" OFF)
 else()
     option(ENABLE_POSIX "Enable POSIX" ON)
 endif()
+
 if(ENABLE_POSIX)
     message("Enabling POSIX")
     add_definitions(-DPLB_USE_POSIX)
 endif()
+
 if(APPLE)
     add_definitions(-DPLB_MAC_OS_X)
 endif()
+
 if(WIN32 OR CYGWIN)
     add_definitions(-DPLB_WINDOWS)
 endif()
 ###############################################################################
 # Palabos Library
 ###############################################################################
-# Set PALABOS_ROOT via -DPALABOS_ROOT=/path/to/palabos or environment variable
-# Default: look for palabos in versionControl/ subdirectory
-if(NOT PALABOS_ROOT)
-    if(DEFINED ENV{PALABOS_ROOT})
-        set(PALABOS_ROOT $ENV{PALABOS_ROOT})
-    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
-        set(PALABOS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
-    else()
-        message(FATAL_ERROR "PALABOS_ROOT is not set. Pass -DPALABOS_ROOT=/path/to/palabos-v2.3.0 or set the PALABOS_ROOT environment variable.")
-    endif()
-endif()
-message("Using Palabos from: ${PALABOS_ROOT}")
+
 
 include_directories("/usr/local/include")
-include_directories("${PALABOS_ROOT}/src")
-include_directories("${PALABOS_ROOT}/externalLibraries")
-include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
-
+include_directories("/scratch/sa01687/NEW-REALIZATIONS/versionControl/palabos-v2.3.0/src")
+include_directories("/scratch/sa01687/NEW-REALIZATIONS/versionControl/palabos-v2.3.0/externalLibraries")
+include_directories("/scratch/sa01687/NEW-REALIZATIONS/versionControl/palabos-v2.3.0/externalLibraries/Eigen3")
+#include_directories("/apps/eb/Anaconda3/5.0.1/include/python3.6m") # location for Python.h
 link_directories("/usr/local/lib")
+#link_directories("/apps/eb/Anaconda3/5.0.1/lib")
 
-file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
-file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
+file(GLOB_RECURSE PALABOS_SRC "/scratch/sa01687/NEW-REALIZATIONS/versionControl/palabos-v2.3.0/src/*.cpp")
+file(GLOB_RECURSE EXT_SRC "/scratch/sa01687/NEW-REALIZATIONS/versionControl/palabos-v2.3.0/externalLibraries/tinyxml/*.cpp")
+
 add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
+
+
 ###############################################################################
+
 add_executable(${EXECUTABLE_NAME} "./src/${EXECUTABLE_NAME}.cpp")
+
 # Link with the following libraries
 target_link_libraries(${EXECUTABLE_NAME} palabos)
 #target_link_libraries(${EXECUTABLE_NAME} glpk)
 #target_link_libraries(${EXECUTABLE_NAME} python3.6m)
+
 if(ENABLE_MPI)
     target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()
