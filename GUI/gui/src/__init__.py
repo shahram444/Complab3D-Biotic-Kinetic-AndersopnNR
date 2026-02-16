@@ -1,3 +1,0 @@
-"""
-CompLaB Studio Source Package
-"""

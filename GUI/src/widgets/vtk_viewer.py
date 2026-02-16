@@ -13,6 +13,8 @@ Supports:
 import struct
 from pathlib import Path
 
+import numpy as np
+
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QComboBox, QSlider, QDoubleSpinBox, QCheckBox, QFileDialog,
@@ -386,41 +388,57 @@ class VTKViewer(QWidget):
         self.load_vti(filepath)
 
     def load_geometry_dat(self, filepath: str, nx: int, ny: int, nz: int):
-        """Load binary .dat geometry file as vtkImageData."""
+        """Load .dat geometry file as vtkImageData.
+
+        CompLaB3D .dat files store voxel values in x→z→y loop order
+        (y varies fastest).  VTK point data uses x-fastest ordering
+        (index = x + y*nx + z*nx*ny).  This method reorders accordingly.
+        """
         if not HAS_VTK or not self._renderer:
             return
         filepath = str(filepath)
         try:
-            with open(filepath, "rb") as f:
-                raw = f.read()
             n_cells = nx * ny * nz
-            expected = n_cells * 4  # int32
-            if len(raw) >= expected:
-                img = vtk.vtkImageData()
-                img.SetDimensions(nx, ny, nz)
-                img.SetSpacing(1.0, 1.0, 1.0)
-                arr = vtk.vtkIntArray()
-                arr.SetName("MaterialNumber")
-                arr.SetNumberOfTuples(n_cells)
-                for i in range(n_cells):
-                    val = struct.unpack_from("<i", raw, i * 4)[0]
-                    arr.SetValue(i, val)
-                img.GetPointData().SetScalars(arr)
-                self._display_dataset(img, filepath)
-            else:
+
+            # Try text first (most common from geometry generator)
+            values = None
+            try:
                 with open(filepath, "r") as f:
-                    values = [int(x) for line in f for x in line.split()]
-                if len(values) >= n_cells:
-                    img = vtk.vtkImageData()
-                    img.SetDimensions(nx, ny, nz)
-                    img.SetSpacing(1.0, 1.0, 1.0)
-                    arr = vtk.vtkIntArray()
-                    arr.SetName("MaterialNumber")
-                    arr.SetNumberOfTuples(n_cells)
-                    for i, val in enumerate(values[:n_cells]):
-                        arr.SetValue(i, val)
-                    img.GetPointData().SetScalars(arr)
-                    self._display_dataset(img, filepath)
+                    values = [int(x) for line in f for x in line.split()
+                              if x.strip()]
+            except (ValueError, UnicodeDecodeError):
+                values = None
+
+            if values is None or len(values) < n_cells:
+                # Fall back to binary int32
+                with open(filepath, "rb") as f:
+                    raw = f.read()
+                expected = n_cells * 4
+                if len(raw) >= expected:
+                    values = list(np.frombuffer(
+                        raw[:expected], dtype="<i4"))
+
+            if values is None or len(values) < n_cells:
+                return
+
+            # .dat file loop order: for x: for z: for y: → y fastest
+            # Reshape to (nx, nz, ny) then transpose to (nx, ny, nz)
+            file_arr = np.array(values[:n_cells], dtype=np.int32)
+            geom = file_arr.reshape((nx, nz, ny)).transpose(0, 2, 1)
+
+            # VTK point order: x fastest → Fortran-order flatten
+            vtk_flat = geom.flatten(order="F")
+
+            img = vtk.vtkImageData()
+            img.SetDimensions(nx, ny, nz)
+            img.SetSpacing(1.0, 1.0, 1.0)
+            arr = vtk.vtkIntArray()
+            arr.SetName("MaterialNumber")
+            arr.SetNumberOfTuples(n_cells)
+            for i in range(n_cells):
+                arr.SetValue(i, int(vtk_flat[i]))
+            img.GetPointData().SetScalars(arr)
+            self._display_dataset(img, filepath)
         except Exception:
             pass
 

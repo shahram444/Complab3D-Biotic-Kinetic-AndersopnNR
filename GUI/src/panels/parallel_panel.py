@@ -1,10 +1,13 @@
 """Parallel execution panel - MPI auto-detect, core selection, and validation."""
 
 import os
+import sys
 import shutil
+import subprocess
 import multiprocessing
 from PySide6.QtWidgets import (
     QHBoxLayout, QLabel, QSlider, QSpinBox,
+    QLineEdit, QPushButton, QFileDialog,
 )
 from PySide6.QtCore import Signal, Qt
 from .base_panel import BasePanel
@@ -89,26 +92,70 @@ class ParallelPanel(BasePanel):
         det_form.addRow("Detected:", self._detected_lbl)
 
         if self._mpi_cmd:
-            mpi_str = f"{self._mpi_cmd} found"
-            self._mpi_lbl = QLabel(mpi_str)
-            self._mpi_lbl.setStyleSheet("color: #5ca060; font-weight: bold;")
+            mpi_str = f"{self._mpi_cmd} found at {self._mpi_path}"
+            self._mpi_status_lbl = QLabel(mpi_str)
+            self._mpi_status_lbl.setStyleSheet(
+                "color: #5ca060; font-weight: bold;")
         else:
-            self._mpi_lbl = QLabel("Not found - install MPI to enable")
-            self._mpi_lbl.setStyleSheet("color: #c75050;")
-        det_form.addRow("MPI:", self._mpi_lbl)
+            self._mpi_status_lbl = QLabel(
+                "Not auto-detected. You can specify the path manually below.")
+            self._mpi_status_lbl.setStyleSheet("color: #c0a040;")
+        self._mpi_status_lbl.setWordWrap(True)
+        det_form.addRow("MPI:", self._mpi_status_lbl)
 
+        # ── MPI Path (manual entry) ───────────────────────────
+        self.add_section("MPI Command")
+        mpi_form = self.add_form()
+
+        self._mpi_path_edit = QLineEdit(self._mpi_path or "mpirun")
+        self._mpi_path_edit.setPlaceholderText(
+            "Path to mpirun or mpiexec (e.g. /usr/bin/mpirun)")
+        self._mpi_path_edit.setToolTip(
+            "Full path to MPI launcher command.\n"
+            "Common options:\n"
+            "  mpirun   (OpenMPI)\n"
+            "  mpiexec  (MPICH / MS-MPI)\n"
+            "  srun     (Slurm)\n"
+            "You can also type the full path manually.")
+        self._mpi_path_edit.textChanged.connect(self._on_mpi_path_changed)
+        mpi_form.addRow("MPI command:", self._mpi_path_edit)
+
+        mpi_btn_row = QHBoxLayout()
+        browse_btn = QPushButton("Browse...")
+        browse_btn.setToolTip("Browse for MPI executable")
+        browse_btn.clicked.connect(self._browse_mpi)
+        mpi_btn_row.addWidget(browse_btn)
+
+        detect_btn = QPushButton("Auto-detect")
+        detect_btn.setToolTip(
+            "Scan PATH for mpirun, mpiexec, or srun")
+        detect_btn.clicked.connect(self._auto_detect_mpi)
+        mpi_btn_row.addWidget(detect_btn)
+
+        mpi_btn_row.addStretch()
+        mpi_form.addRow("", mpi_btn_row)
+
+        self._mpi_version_lbl = QLabel("")
+        self._mpi_version_lbl.setProperty("info", True)
+        self._mpi_version_lbl.setWordWrap(True)
+        mpi_form.addRow("", self._mpi_version_lbl)
+
+        # Show version info if auto-detected
         if self._mpi_path:
-            path_lbl = QLabel(self._mpi_path)
-            path_lbl.setProperty("info", True)
-            path_lbl.setWordWrap(True)
-            det_form.addRow("Path:", path_lbl)
+            self._verify_mpi_path(self._mpi_path)
+
+        self.add_widget(self.make_info_label(
+            "If MPI is not found automatically, install OpenMPI or MPICH:\n"
+            "  Linux:   sudo apt install openmpi-bin\n"
+            "  macOS:   brew install open-mpi\n"
+            "  Windows: Install MS-MPI from microsoft.com"))
 
         # ── Enable MPI ─────────────────────────────────────────
         self.add_section("Configuration")
         cfg_form = self.add_form()
 
         self._enable_cb = self.make_checkbox("Enable MPI Parallel")
-        self._enable_cb.setEnabled(bool(self._mpi_cmd))
+        # Always allow enabling - user may have set path manually
         self._enable_cb.toggled.connect(self._on_enable_toggled)
         cfg_form.addRow("", self._enable_cb)
 
@@ -158,7 +205,8 @@ class ParallelPanel(BasePanel):
 
         # ── Run Command Preview ────────────────────────────────
         self.add_section("Run Command Preview")
-        self._cmd_lbl = QLabel("complab.exe CompLaB.xml")
+        _exe = "complab.exe" if sys.platform == "win32" else "./complab"
+        self._cmd_lbl = QLabel(_exe)
         self._cmd_lbl.setWordWrap(True)
         self._cmd_lbl.setStyleSheet(
             "font-family: Consolas, monospace; padding: 4px;"
@@ -167,6 +215,69 @@ class ParallelPanel(BasePanel):
         self._update_cmd_preview()
 
         self.add_stretch()
+
+    # ── MPI path handling ──────────────────────────────────────
+
+    def _browse_mpi(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Select MPI Launcher", "",
+            "Executables (*);;All Files (*)")
+        if path:
+            self._mpi_path_edit.setText(path)
+
+    def _auto_detect_mpi(self):
+        """Scan PATH for known MPI commands."""
+        for cmd in ("mpirun", "mpiexec", "srun"):
+            path = shutil.which(cmd)
+            if path:
+                self._mpi_cmd = cmd
+                self._mpi_path = path
+                self._mpi_path_edit.setText(path)
+                self._mpi_status_lbl.setText(f"{cmd} found at {path}")
+                self._mpi_status_lbl.setStyleSheet(
+                    "color: #5ca060; font-weight: bold;")
+                self._verify_mpi_path(path)
+                self._update_warnings()
+                self._update_cmd_preview()
+                self.data_changed.emit()
+                return
+        self._mpi_status_lbl.setText(
+            "MPI not found on PATH. Specify the full path manually.")
+        self._mpi_status_lbl.setStyleSheet("color: #c75050;")
+        self._mpi_version_lbl.setText("")
+
+    def _on_mpi_path_changed(self, text):
+        """Update MPI command when user types or browses a path."""
+        text = text.strip()
+        if text:
+            self._mpi_cmd = os.path.basename(text).replace(".exe", "")
+            self._mpi_path = text
+        else:
+            self._mpi_cmd = ""
+            self._mpi_path = ""
+        self._update_warnings()
+        self._update_cmd_preview()
+        self.data_changed.emit()
+
+    def _verify_mpi_path(self, path):
+        """Try to run --version and display result."""
+        try:
+            result = subprocess.run(
+                [path, "--version"],
+                capture_output=True, text=True, timeout=5)
+            first_line = (result.stdout or result.stderr).strip().split('\n')[0]
+            if first_line:
+                self._mpi_version_lbl.setText(f"Version: {first_line}")
+                self._mpi_version_lbl.setStyleSheet("color: #5ca060;")
+            else:
+                self._mpi_version_lbl.setText("MPI found (no version info)")
+                self._mpi_version_lbl.setStyleSheet("color: #5ca060;")
+        except FileNotFoundError:
+            self._mpi_version_lbl.setText(
+                "Command not found at this path")
+            self._mpi_version_lbl.setStyleSheet("color: #c75050;")
+        except Exception:
+            self._mpi_version_lbl.setText("")
 
     # ── Slots ──────────────────────────────────────────────────
 
@@ -209,17 +320,19 @@ class ParallelPanel(BasePanel):
                     "Using all cores may freeze the GUI during simulation."
                 )
             if self._total_ram > 0:
-                # Rough estimate: warn if < 1 GB per core
                 ram_per_core = self._total_ram / self._num_cores
                 if ram_per_core < 1.0:
                     warnings.append(
                         f"Low RAM per core: {ram_per_core:.1f} GB. "
                         "Consider using fewer cores."
                     )
-        if not self._mpi_cmd:
+            if not self._mpi_path:
+                warnings.append(
+                    "No MPI path specified. Set the MPI command above.")
+        elif not self._mpi_path:
             warnings.append(
-                "MPI runtime not found. Install OpenMPI or MPICH to enable "
-                "parallel execution."
+                "MPI runtime not found. Install OpenMPI or MPICH, "
+                "or specify the path above to enable parallel execution."
             )
 
         if warnings:
@@ -230,23 +343,25 @@ class ParallelPanel(BasePanel):
             self._warn_lbl.setStyleSheet("color: #5ca060;")
 
     def _update_cmd_preview(self):
-        if self._enabled and self._mpi_cmd and self._num_cores > 1:
+        mpi_path = self._mpi_path_edit.text().strip()
+        exe_name = "complab.exe" if sys.platform == "win32" else "./complab"
+        if self._enabled and mpi_path and self._num_cores > 1:
             self._cmd_lbl.setText(
-                f"{self._mpi_cmd} -np {self._num_cores} complab.exe CompLaB.xml"
+                f"{mpi_path} -np {self._num_cores} {exe_name}"
             )
         else:
-            self._cmd_lbl.setText("complab.exe CompLaB.xml")
+            self._cmd_lbl.setText(exe_name)
 
     # ── Public API ─────────────────────────────────────────────
 
     def is_parallel_enabled(self) -> bool:
-        return self._enabled and bool(self._mpi_cmd) and self._num_cores > 1
+        return self._enabled and bool(self._mpi_path) and self._num_cores > 1
 
     def get_num_cores(self) -> int:
         return self._num_cores if self._enabled else 1
 
     def get_mpi_command(self) -> str:
-        return self._mpi_cmd
+        return self._mpi_path_edit.text().strip() or self._mpi_cmd
 
     def validate_for_domain(self, nx: int, ny: int, nz: int):
         """Update warnings based on domain size vs core count."""
@@ -264,14 +379,12 @@ class ParallelPanel(BasePanel):
                     f"Only {cells_per_core:.0f} cells/core. "
                     "Consider using fewer cores for this domain."
                 )
-            # Warn if cores > any dimension (poor decomposition)
             min_dim = min(nx, ny, nz)
             if self._num_cores > min_dim:
                 extra.append(
                     f"Cores ({self._num_cores}) > smallest dimension "
                     f"({min_dim}). Domain cannot be split efficiently."
                 )
-        # Rebuild warnings with domain-aware info
         self._update_warnings()
         if extra:
             current = self._warn_lbl.text()
