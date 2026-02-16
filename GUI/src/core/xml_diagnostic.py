@@ -131,10 +131,12 @@ def diagnose_crash(xml_path: str, exit_code: int,
             break
 
     expected_size = nx * ny * nz
+    # geometry.dat can be binary (1 byte/voxel) or text (one digit per
+    # line: 2 bytes/voxel on Unix, 3 bytes/voxel on Windows).
+    valid_sizes = {expected_size, expected_size * 2, expected_size * 3}
     if geom_file:
         actual_bytes = os.path.getsize(geom_file)
-        # Geometry is stored as raw bytes (1 byte per voxel)
-        if actual_bytes == expected_size:
+        if actual_bytes in valid_sizes:
             info.append(f"Geometry file OK: {actual_bytes} bytes = "
                         f"nx*ny*nz ({nx}*{ny}*{nz}={expected_size})")
         else:
