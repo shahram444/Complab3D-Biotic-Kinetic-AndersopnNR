@@ -1,0 +1,40 @@
+========================================================================
+  CompLaB CRASH DIAGNOSTIC REPORT
+  Generated: 2026-02-16 18:49:28
+========================================================================
+
+Exit code : -1073740940
+Error type: Heap Corruption (0xC0000374)
+Reason    : An array or vector was accessed out of bounds.
+XML file  : C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\CompLaB.xml
+
+------------------------------------------------------------------------
+  No configuration errors detected.
+  The crash may be caused by:
+    - A bug in the C++ solver
+    - Numerical instability during iteration
+    - Insufficient memory for the domain size
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+  DIAGNOSTIC INFO
+------------------------------------------------------------------------
+  - XML parsed successfully: C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR\GUI\CompLaB.xml
+  - Domain: nx=50, ny=30, nz=30  (total=45000)
+  - Substrates: 0
+  - Microbes: 0
+  - Biotic mode: False, kinetics: False, abiotic kinetics: False
+  - Geometry file OK: 45000 bytes = nx*ny*nz (50*30*30=45000)
+  - Analysing defineKinetics.hh (3286 bytes)
+  - Analysing defineAbioticKinetics.hh (1681 bytes)
+
+------------------------------------------------------------------------
+  HOW TO FIX
+------------------------------------------------------------------------
+  1. Run 'Validate Configuration' in the Run panel
+  2. Verify geometry file has exactly nx * ny * nz bytes
+  3. Check that defineKinetics.hh array indices match substrate count
+  4. Check half_saturation_constants / maximum_uptake_flux counts
+  5. Re-export CompLaB.xml and run again
+
+========================================================================
