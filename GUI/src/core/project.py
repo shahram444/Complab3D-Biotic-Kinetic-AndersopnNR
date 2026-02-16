@@ -337,8 +337,10 @@ class CompLaBProject:
             mic_names = set()
             used_mat_numbers = set()
             try:
-                used_mat_numbers.update(
-                    {int(d.pore), int(d.solid), int(d.bounce_back)})
+                for p in d.pore.strip().split():
+                    used_mat_numbers.add(int(p))
+                used_mat_numbers.add(int(d.solid))
+                used_mat_numbers.add(int(d.bounce_back))
             except ValueError:
                 pass
 

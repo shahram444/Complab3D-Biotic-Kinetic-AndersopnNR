@@ -156,21 +156,43 @@ class GeneralPanel(BasePanel):
         """Return current mode id for fluid panel hints."""
         return self._mode_group.checkedId()
 
-    def _set_mode_from_flags(self, biotic, kinetics, abiotic):
-        """Set radio button from the three boolean flags."""
+    def _set_mode_from_flags(self, biotic, kinetics, abiotic,
+                             delta_P=None, peclet=None, num_subs=None):
+        """Set radio button from the three boolean flags.
+
+        When biotic/kinetics/abiotic are all False, uses physics parameters
+        to disambiguate Flow Only / Diffusion Only / Transport:
+          - No substrates, delta_P > 0  →  Flow Only
+          - Pe == 0 and delta_P == 0    →  Diffusion Only
+          - otherwise                   →  Transport
+        """
         if biotic and abiotic:
             self._radio_coupled.setChecked(True)
         elif biotic and kinetics:
             self._radio_biotic.setChecked(True)
         elif abiotic:
             self._radio_abiotic.setChecked(True)
+        elif not biotic and not kinetics and not abiotic:
+            # Disambiguate Flow Only / Diffusion Only / Transport
+            is_no_subs = (num_subs is not None and num_subs == 0)
+            is_no_flow = (peclet is not None and peclet == 0
+                          and delta_P is not None and delta_P == 0)
+            if is_no_subs:
+                self._radio_flow.setChecked(True)
+            elif is_no_flow:
+                self._radio_diffusion.setChecked(True)
+            else:
+                self._radio_transport.setChecked(True)
         else:
             self._radio_transport.setChecked(True)
 
     def load_from_project(self, project):
         sm = project.simulation_mode
         self._set_mode_from_flags(
-            sm.biotic_mode, sm.enable_kinetics, sm.enable_abiotic_kinetics)
+            sm.biotic_mode, sm.enable_kinetics, sm.enable_abiotic_kinetics,
+            delta_P=project.fluid.delta_P,
+            peclet=project.fluid.peclet,
+            num_subs=len(project.substrates))
         self.enable_diagnostics.setChecked(sm.enable_validation_diagnostics)
         self.src_path.setText(project.path_settings.src_path)
         self.input_path.setText(project.path_settings.input_path)
