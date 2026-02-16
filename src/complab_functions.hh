@@ -873,39 +873,39 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             doc["parameters"]["path"]["src_path"].read(item);
             src_path = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { src_path[i] = item[i]; }
-            src_path[item.size()+1] = '\0';
+            src_path[item.size()] = '\0';
         }
         catch (PlbIOException& exception) {
             std::string item = "src";
             src_path = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { src_path[i] = item[i]; }
-            src_path[item.size()+1] = '\0';
+            src_path[item.size()] = '\0';
         }
         try {
             std::string item;
             doc["parameters"]["path"]["input_path"].read(item);
             input_path = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { input_path[i] = item[i]; }
-            input_path[item.size()+1] = '\0';
+            input_path[item.size()] = '\0';
         }
         catch (PlbIOException& exception) {
             std::string item = "input";
             input_path = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { input_path[i] = item[i]; }
-            input_path[item.size()+1] = '\0';
+            input_path[item.size()] = '\0';
         }
         try {
             std::string item;
             doc["parameters"]["path"]["output_path"].read(item);
             output_path = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { output_path[i] = item[i]; }
-            output_path[item.size()+1] = '\0';
+            output_path[item.size()] = '\0';
         }
         catch (PlbIOException& exception) {
             std::string item = "output";
             output_path = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { output_path[i] = item[i]; }
-            output_path[item.size()+1] = '\0';
+            output_path[item.size()] = '\0';
         }
 
         // LB_numerics
@@ -1168,13 +1168,13 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
             doc["parameters"]["IO"]["ns_filename"].read(item);
             ns_filename = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { ns_filename[i] = item[i]; }
-            ns_filename[item.size()+1] = '\0';
+            ns_filename[item.size()] = '\0';
         }
         catch (PlbIOException& exception) {
             std::string item = "nsLattice";
             ns_filename = (char *) calloc(item.size()+1,sizeof(char));
             for (size_t i = 0; i < item.size(); ++i) { ns_filename[i] = item[i]; }
-            ns_filename[item.size()+1] = '\0';
+            ns_filename[item.size()] = '\0';
         }
         try { doc["parameters"]["IO"]["mask_filename"].read(mask_filename); }
         catch (PlbIOException& exception) { mask_filename="maskLattice"; }
