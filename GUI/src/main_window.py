@@ -536,6 +536,43 @@ class CompLaBMainWindow(QMainWindow):
 
     # ── Simulation ──────────────────────────────────────────────────
 
+    def _ensure_binary_geometry(self, work_dir: str):
+        """Convert text-format geometry.dat to binary if needed.
+
+        The C++ solver expects raw bytes (1 byte per voxel).  Geometry
+        files created by older versions or external tools may be in text
+        format (one ASCII digit per line).  Detect and convert in-place.
+        """
+        import numpy as np
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        for candidate in [
+            os.path.join(work_dir, geom_name),
+            os.path.join(work_dir, "input", geom_name),
+        ]:
+            if os.path.isfile(candidate):
+                expected = d.nx * d.ny * d.nz
+                file_size = os.path.getsize(candidate)
+                if file_size == expected:
+                    return  # already binary
+                # Text format: try to convert
+                try:
+                    raw = np.loadtxt(candidate, dtype=np.uint8).flatten()
+                    if raw.size == expected:
+                        raw.tofile(candidate)
+                        self._console.log_info(
+                            f"Converted {geom_name} from text to binary "
+                            f"({file_size} -> {expected} bytes)")
+                    else:
+                        self._console.log_warning(
+                            f"Geometry has {raw.size} values but expected "
+                            f"{expected} (nx*ny*nz). Cannot auto-convert.")
+                except Exception as e:
+                    self._console.log_warning(
+                        f"Could not auto-convert geometry: {e}")
+                return
+
     def _find_executable(self, work_dir: str) -> str:
         """Auto-detect the complab executable in common locations."""
         import sys
@@ -606,6 +643,9 @@ class CompLaBMainWindow(QMainWindow):
         except Exception as e:
             self._console.log_error(f"XML export failed: {e}")
             return
+
+        # Auto-convert text-format geometry.dat to binary if needed
+        self._ensure_binary_geometry(work_dir)
 
         # Pre-run validation gate: data-model + file-system checks
         self._load_kinetics_from_disk_if_empty()
