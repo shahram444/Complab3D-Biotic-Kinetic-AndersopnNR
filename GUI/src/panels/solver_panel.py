@@ -41,8 +41,10 @@ class SolverPanel(BasePanel):
         self.add_section("Advection-Diffusion (Transport) Solver")
         form2 = self.add_form()
 
-        self.ade_max_iT = self.make_spin(50000, 0)
-        self.ade_max_iT.setToolTip("Maximum ADE iterations for transport.")
+        self.ade_max_iT = self.make_spin(10000000, 0)
+        self.ade_max_iT.setToolTip(
+            "Maximum ADE iterations for transport.\n"
+            "C++ default: 10000000.")
         form2.addRow("Max ADE iterations:", self.ade_max_iT)
 
         self.ade_converge = self.make_double_spin(1e-8, 0, 1, 12)

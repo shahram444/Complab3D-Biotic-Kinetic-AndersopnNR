@@ -60,7 +60,7 @@ class IterationSettings:
     ns_max_iT2: int = 100000
     ns_converge_iT1: float = 1e-8
     ns_converge_iT2: float = 1e-6
-    ade_max_iT: int = 50000
+    ade_max_iT: int = 10000000
     ade_converge_iT: float = 1e-8
     ns_rerun_iT0: int = 0
     ade_rerun_iT0: int = 0
@@ -129,7 +129,7 @@ class EquilibriumSettings:
     stoichiometry: List[List[float]] = field(default_factory=list)
     log_k: List[float] = field(default_factory=list)
     max_iterations: int = 200
-    tolerance: float = 1e-8
+    tolerance: float = 1e-10
     anderson_depth: int = 4
     beta: float = 1.0
 
@@ -143,8 +143,8 @@ class IOSettings:
     mask_filename: str = "maskLattice"
     subs_filename: str = "subsLattice"
     bio_filename: str = "bioLattice"
-    save_vtk_interval: int = 500
-    save_chk_interval: int = 5000
+    save_vtk_interval: int = 1000
+    save_chk_interval: int = 1000000
 
 
 @dataclass
@@ -173,6 +173,7 @@ class CompLaBProject:
         """
         errors = []
         warnings = []
+        num_subs = len(self.substrates)
 
         # ── 1. Path settings ────────────────────────────────────────
         ps = self.path_settings
@@ -235,20 +236,20 @@ class CompLaBProject:
         elif not d.geometry_filename.endswith(".dat"):
             errors.append("[Domain] Geometry file must be a .dat file.")
 
-        # Material numbers
+        # Material numbers (pore can be space-separated, e.g. "2 4")
         try:
-            pore_val = int(d.pore)
+            pore_vals = [int(x) for x in d.pore.strip().split()]
             solid_val = int(d.solid)
             bb_val = int(d.bounce_back)
-            mat_set = {pore_val, solid_val, bb_val}
-            if len(mat_set) < 3:
+            mat_set = set(pore_vals) | {solid_val, bb_val}
+            if solid_val in pore_vals or bb_val in pore_vals or solid_val == bb_val:
                 errors.append(
                     f"[Domain] Material numbers must be distinct: "
-                    f"pore={pore_val}, solid={solid_val}, bounce_back={bb_val}.")
+                    f"pore={d.pore}, solid={solid_val}, bounce_back={bb_val}.")
         except ValueError:
             errors.append(
                 "[Domain] Material numbers (pore, solid, bounce_back) "
-                "must be integers.")
+                "must be space-separated integers.")
 
         # Characteristic length for Peclet
         fl = self.fluid
@@ -289,7 +290,6 @@ class CompLaBProject:
             errors.append("[Iteration] ADE update interval must be >= 1.")
 
         # ── 6. Chemistry / Substrates ───────────────────────────────
-        num_subs = len(self.substrates)
         sub_names = set()
         for i, s in enumerate(self.substrates):
             prefix = f"[Substrate {i} '{s.name}']"
@@ -472,9 +472,6 @@ class CompLaBProject:
             if num_subs < 1:
                 errors.append(
                     "[Mode] Abiotic kinetics requires at least one substrate.")
-            if sm.biotic_mode:
-                errors.append(
-                    "[Mode] Abiotic kinetics should not be used with biotic_mode=true.")
 
         # ── 9. Equilibrium solver ───────────────────────────────────
         eq = self.equilibrium
