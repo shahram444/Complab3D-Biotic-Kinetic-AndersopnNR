@@ -499,6 +499,15 @@ class CompLaBMainWindow(QMainWindow):
         try:
             ProjectManager.export_xml(self._project, path)
             self._console.log_success(f"Exported: {path}")
+            # Deploy kinetics .hh files alongside the XML
+            xml_dir = str(Path(path).parent)
+            deployed = ProjectManager.deploy_kinetics(self._project, xml_dir)
+            for dp in deployed:
+                self._console.log_success(f"Deployed: {dp}")
+            if deployed:
+                self._console.log_info(
+                    "Kinetics .hh files saved. Copy them to your solver "
+                    "source root and recompile to use the new kinetics.")
         except Exception as e:
             self._console.log_error(f"Export failed: {e}")
 
@@ -589,6 +598,10 @@ class CompLaBMainWindow(QMainWindow):
         try:
             ProjectManager.export_xml(self._project, xml_path)
             self._console.log_info(f"Exported {xml_path}")
+            # Deploy kinetics .hh files alongside the XML
+            deployed = ProjectManager.deploy_kinetics(self._project, work_dir)
+            for dp in deployed:
+                self._console.log_info(f"Deployed: {dp}")
         except Exception as e:
             self._console.log_error(f"XML export failed: {e}")
             return
@@ -747,6 +760,10 @@ class CompLaBMainWindow(QMainWindow):
 
     def _validate(self):
         self._save_panels_to_project()
+
+        # If project has no embedded kinetics, try to read from disk
+        self._load_kinetics_from_disk_if_empty()
+
         errors = self._project.validate()
         self._run_panel.show_validation(errors)
         if errors:
@@ -756,6 +773,40 @@ class CompLaBMainWindow(QMainWindow):
                 self._console.log_error(f"  {e}")
         else:
             self._console.log_success("Validation passed - no errors.")
+
+    def _load_kinetics_from_disk_if_empty(self):
+        """If the project has no embedded kinetics source, try to read
+        defineKinetics.hh / defineAbioticKinetics.hh from the project
+        directory so that validation can cross-check them."""
+        if self._project.kinetics_source and self._project.abiotic_kinetics_source:
+            return  # already have both
+
+        if self._project_file:
+            base = str(Path(self._project_file).parent)
+        else:
+            base = os.getcwd()
+
+        if not self._project.kinetics_source:
+            biotic_path = os.path.join(base, "defineKinetics.hh")
+            if os.path.isfile(biotic_path):
+                try:
+                    with open(biotic_path, "r") as f:
+                        self._project.kinetics_source = f.read()
+                    self._console.log_info(
+                        f"Loaded defineKinetics.hh from {biotic_path} for validation")
+                except OSError:
+                    pass
+
+        if not self._project.abiotic_kinetics_source:
+            abiotic_path = os.path.join(base, "defineAbioticKinetics.hh")
+            if os.path.isfile(abiotic_path):
+                try:
+                    with open(abiotic_path, "r") as f:
+                        self._project.abiotic_kinetics_source = f.read()
+                    self._console.log_info(
+                        f"Loaded defineAbioticKinetics.hh from {abiotic_path} for validation")
+                except OSError:
+                    pass
 
     # ── View toggles ───────────────────────────────────────────────
 
@@ -769,8 +820,27 @@ class CompLaBMainWindow(QMainWindow):
     # ── Dialogs ─────────────────────────────────────────────────────
 
     def _open_kinetics_editor(self):
+        self._save_panels_to_project()
         dlg = KineticsEditorDialog(self)
-        dlg.exec()
+        # Pre-load project kinetics source into the editor
+        if self._project.kinetics_source:
+            dlg._biotic_tab._editor.setPlainText(self._project.kinetics_source)
+            dlg._biotic_tab._path_label.setText("(from project template)")
+        if self._project.abiotic_kinetics_source:
+            dlg._abiotic_tab._editor.setPlainText(
+                self._project.abiotic_kinetics_source)
+            dlg._abiotic_tab._path_label.setText("(from project template)")
+        if dlg.exec():
+            # Save any edits back to the project
+            biotic_text = dlg._biotic_tab._editor.toPlainText()
+            abiotic_text = dlg._abiotic_tab._editor.toPlainText()
+            if biotic_text.strip():
+                self._project.kinetics_source = biotic_text
+            if abiotic_text.strip():
+                self._project.abiotic_kinetics_source = abiotic_text
+            self._modified = True
+            self._update_title()
+            self._console.log_info("Kinetics source updated from editor.")
 
     def _open_geometry_generator(self):
         """Open the geometry generator as a GUI dialog."""

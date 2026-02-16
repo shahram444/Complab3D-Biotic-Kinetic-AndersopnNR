@@ -44,6 +44,26 @@ class ProjectManager:
     # ── XML export (CompLaB.xml) ────────────────────────────────────────
 
     @staticmethod
+    def deploy_kinetics(project: CompLaBProject, directory: str) -> list:
+        """Write defineKinetics.hh and/or defineAbioticKinetics.hh to *directory*.
+
+        Only writes files that have non-empty source code in the project.
+        Returns a list of paths that were written.
+        """
+        deployed = []
+        if project.kinetics_source and project.kinetics_source.strip():
+            path = os.path.join(directory, "defineKinetics.hh")
+            with open(path, "w") as f:
+                f.write(project.kinetics_source)
+            deployed.append(path)
+        if project.abiotic_kinetics_source and project.abiotic_kinetics_source.strip():
+            path = os.path.join(directory, "defineAbioticKinetics.hh")
+            with open(path, "w") as f:
+                f.write(project.abiotic_kinetics_source)
+            deployed.append(path)
+        return deployed
+
+    @staticmethod
     def export_xml(project: CompLaBProject, filepath: str) -> None:
         root = ET.Element("parameters")
 
@@ -477,5 +497,10 @@ def _dict_to_project(d: dict) -> CompLaBProject:
 
     if "io_settings" in d:
         proj.io_settings = IOSettings(**d["io_settings"])
+
+    # Kinetics .hh source code (added in v2.2)
+    proj.template_key = d.get("template_key", "")
+    proj.kinetics_source = d.get("kinetics_source", "")
+    proj.abiotic_kinetics_source = d.get("abiotic_kinetics_source", "")
 
     return proj

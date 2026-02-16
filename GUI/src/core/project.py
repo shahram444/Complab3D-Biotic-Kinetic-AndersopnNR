@@ -160,6 +160,10 @@ class CompLaBProject:
     microbiology: MicrobiologySettings = field(default_factory=MicrobiologySettings)
     equilibrium: EquilibriumSettings = field(default_factory=EquilibriumSettings)
     io_settings: IOSettings = field(default_factory=IOSettings)
+    # Kinetics .hh source code (deployed alongside CompLaB.xml on export)
+    template_key: str = ""
+    kinetics_source: str = ""
+    abiotic_kinetics_source: str = ""
 
     def deep_copy(self) -> "CompLaBProject":
         return copy.deepcopy(self)
@@ -546,5 +550,19 @@ class CompLaBProject:
                     "[Cross-check] All substrates have Neumann BCs and zero initial "
                     "concentration. No substrate source exists - simulation will have "
                     "zero concentrations everywhere.")
+
+        # ── 12. Kinetics .hh cross-validation ─────────────────────────
+        from .kinetics_templates import validate_kinetics_vs_project
+        num_mic = len(self.microbiology.microbes)
+        kin_errors = validate_kinetics_vs_project(
+            biotic_source=self.kinetics_source,
+            abiotic_source=self.abiotic_kinetics_source,
+            num_substrates=num_subs,
+            num_microbes=num_mic,
+            biotic_mode=sm.biotic_mode,
+            enable_kinetics=sm.enable_kinetics,
+            enable_abiotic=sm.enable_abiotic_kinetics,
+        )
+        errors.extend(kin_errors)
 
         return errors
