@@ -9,6 +9,7 @@ from .project import (
     MicrobiologySettings, EquilibriumSettings, DomainSettings,
     FluidSettings, IterationSettings, IOSettings, PathSettings,
 )
+from .kinetics_templates import get_kinetics_info
 
 # Template registry: {key: (display_name, description, factory_function)}
 TEMPLATES = {}
@@ -27,9 +28,17 @@ def get_template_list():
 
 
 def create_from_template(key: str) -> CompLaBProject:
+    """Create a project from template, including matching kinetics .hh code."""
     if key not in TEMPLATES:
         return CompLaBProject()
-    return TEMPLATES[key][2]()
+    project = TEMPLATES[key][2]()
+    # Attach matching kinetics source code
+    project.template_key = key
+    info = get_kinetics_info(key)
+    if info:
+        project.kinetics_source = info.biotic_hh or ""
+        project.abiotic_kinetics_source = info.abiotic_hh or ""
+    return project
 
 
 def _default_substrates_5():
@@ -378,4 +387,21 @@ def _full_coupled():
         ],
         log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
     )
+    return p
+
+
+@_register("scratch", "Start from Scratch",
+           "Blank project with empty kinetics templates. "
+           "Configure everything yourself from the ground up.")
+def _scratch():
+    p = CompLaBProject(name="Custom Project")
+    p.simulation_mode = SimulationMode(
+        biotic_mode=False, enable_kinetics=False,
+        enable_abiotic_kinetics=False)
+    p.substrates = [
+        Substrate(name="substrate_0", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=1.0, right_boundary_condition=0.0),
+    ]
     return p
