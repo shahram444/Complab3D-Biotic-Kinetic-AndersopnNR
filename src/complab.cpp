@@ -164,8 +164,7 @@ int main(int argc, char **argv) {
     T tau=0.8, max_bMassRho=1., ns_converge_iT1=1e-8, ns_converge_iT2=1e-4, ade_converge_iT=1e-8, thrd_bFilmFrac;
 
     T DarcyOutletUx=0., permeability=0., u_target=0., deltaP_new=0., u_final=0., Pe_achieved=0.;
-    T tau_ADE_fixed=0.8, D_lattice_fixed=0., tortuosity_factor=3.0, safety_factor=1.5;
-    plint estimated_iterations=0;
+    T tau_ADE_fixed=0.8, D_lattice_fixed=0.;
 
     std::vector<bool> bmass_type;
     std::vector<plint> pore_dynamics, solver_type, reaction_type;
@@ -753,9 +752,7 @@ int main(int argc, char **argv) {
             if (bfilm_count > 0) {
                 pcout << "║ BIOMASS:\n";
                 for (plint iM = 0; iM < bfilm_count; ++iM) {
-                    T bMin = computeMin(*computeDensity(vec_bFilm_lattices[iM]));
                     T bMax = computeMax(*computeDensity(vec_bFilm_lattices[iM]));
-                    T bAvg = computeAverage(*computeDensity(vec_bFilm_lattices[iM]));
                     T growth = (diag_initial_biomass > 0) ? ((bMax - diag_initial_biomass) / diag_initial_biomass * 100.0) : 0.0;
                     pcout << "║   " << vec_microbes_names[iM] << ": max=" << std::scientific << bMax 
                           << "/" << max_bMassRho << std::fixed << " (" << growth << "% growth)";
