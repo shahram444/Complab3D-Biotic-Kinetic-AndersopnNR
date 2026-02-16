@@ -501,7 +501,7 @@ class RunPanel(BasePanel):
                 "font-weight: bold; font-size: 12px; color: #c75050;")
             self._phase_label.setText("Error")
 
-            # Show error analysis
+            # Show brief error analysis in the error summary label
             error_info = self._analyze_exit_code(return_code)
             self._error_summary.setText(error_info)
             self._error_summary.setStyleSheet(
@@ -509,6 +509,62 @@ class RunPanel(BasePanel):
                 "border: 1px solid #f44336; padding: 8px;"
                 "border-radius: 4px;")
             self._error_summary.setVisible(True)
+
+    def on_diagnostic_report(self, report: str):
+        """Called when crash diagnostic report is ready.
+
+        Displays the full diagnostic in the Validation tab with color coding
+        so the user sees the real problem, not just the exit code.
+        """
+        html_parts = [
+            '<span style="color:#c75050; font-weight:bold;">'
+            'CRASH DIAGNOSTIC REPORT</span><br><br>']
+        for line in report.split("\n"):
+            lower = line.lower()
+            if line.startswith("=") or line.startswith("-" * 10):
+                html_parts.append(
+                    f'<span style="color:#569cd6;">'
+                    f'{_escape_html(line)}</span><br>')
+            elif "error" in lower and "detect" in lower:
+                html_parts.append(
+                    f'<span style="color:#f44336; font-weight:bold;">'
+                    f'{_escape_html(line)}</span><br>')
+            elif ">>" in line:
+                html_parts.append(
+                    f'<span style="color:#f44336;">'
+                    f'{_escape_html(line)}</span><br>')
+            elif line.strip().startswith(("1.", "2.", "3.", "4.",
+                                          "5.", "6.", "7.", "8.", "9.")):
+                # Could be an error item or a how-to-fix step
+                if "fix" in lower or "how" in lower:
+                    html_parts.append(
+                        f'<span style="color:#5ca060;">'
+                        f'{_escape_html(line)}</span><br>')
+                else:
+                    html_parts.append(
+                        f'<span style="color:#f44336;">'
+                        f'{_escape_html(line)}</span><br>')
+            elif "warning" in lower:
+                html_parts.append(
+                    f'<span style="color:#ffc107;">'
+                    f'{_escape_html(line)}</span><br>')
+            elif "ok" in lower or "good" in lower:
+                html_parts.append(
+                    f'<span style="color:#5ca060;">'
+                    f'{_escape_html(line)}</span><br>')
+            elif "how to fix" in lower or "suggested" in lower:
+                html_parts.append(
+                    f'<span style="color:#5ca060; font-weight:bold;">'
+                    f'{_escape_html(line)}</span><br>')
+            else:
+                html_parts.append(
+                    f'<span style="color:#cccccc;">'
+                    f'{_escape_html(line)}</span><br>')
+
+        self._validation_text.setHtml("".join(html_parts))
+        self._validation_lbl.setText(
+            "Crash diagnostic available — see Validation tab")
+        self._validation_lbl.setStyleSheet("color: #f44336;")
 
     def _analyze_exit_code(self, code: int) -> str:
         """Return human-readable error analysis."""
