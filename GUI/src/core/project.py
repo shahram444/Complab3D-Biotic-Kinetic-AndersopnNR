@@ -650,10 +650,18 @@ class CompLaBProject:
                     f"Tools > Geometry Generator.")
         else:
             # Check file size vs nx*ny*nz
+            # geometry.dat can be binary (1 byte/voxel) or text (one digit
+            # per line, so 2 bytes/voxel on Unix "\n" or 3 bytes on
+            # Windows "\r\n").
             try:
                 file_size = os.path.getsize(found_geom)
                 expected = d.nx * d.ny * d.nz
-                if file_size != expected:
+                valid_sizes = {
+                    expected,          # binary: 1 byte per voxel
+                    expected * 2,      # text Unix: digit + \n
+                    expected * 3,      # text Windows: digit + \r\n
+                }
+                if file_size not in valid_sizes:
                     ratio = file_size / expected if expected > 0 else 0
                     errors.append(
                         f"[Geometry] SIZE MISMATCH: {d.geometry_filename} has "
