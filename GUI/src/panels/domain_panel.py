@@ -191,9 +191,29 @@ class DomainPanel(BasePanel):
     def _analyze_dat_file(filepath):
         """Count integer values and detect line structure in a .dat file.
 
+        Handles both binary format (1 byte per voxel, used by the solver)
+        and text format (one integer per line or space-separated).
+
         Returns (total_values, nz_hint) where nz_hint is the consistent
-        tokens-per-line if > 1, or 0 if one-value-per-line / inconsistent.
+        tokens-per-line if > 1, or 0 if one-value-per-line / binary.
         """
+        import numpy as np
+
+        file_size = os.path.getsize(filepath)
+        if file_size == 0:
+            return 0, 0
+
+        # Try binary format first: raw bytes where every byte is a valid
+        # material number (small integers, typically 0-10).
+        try:
+            raw = np.fromfile(filepath, dtype=np.uint8)
+            if raw.max() <= 10:
+                # Looks like binary: all values are small material numbers
+                return int(raw.size), 0
+        except Exception:
+            pass
+
+        # Fall back to text format
         total = 0
         tokens_per_line = {}  # count -> frequency
 
@@ -204,7 +224,6 @@ class DomainPanel(BasePanel):
                     if not stripped:
                         continue
                     tokens = stripped.split()
-                    n_tokens = len(tokens)
                     valid = 0
                     for t in tokens:
                         try:
