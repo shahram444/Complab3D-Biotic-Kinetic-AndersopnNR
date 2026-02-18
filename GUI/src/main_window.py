@@ -428,7 +428,16 @@ class CompLaBMainWindow(QMainWindow):
             self._config.get("default_project_dir", ""), self)
         if dlg.exec():
             self._project = dlg.get_project()
-            self._project_file = ""
+            # Use the selected directory as the working base so that
+            # run/export targets the right folder even before Save.
+            chosen_dir = dlg.get_directory()
+            if chosen_dir and os.path.isdir(chosen_dir):
+                proj_dir = os.path.join(chosen_dir, self._project.name)
+                os.makedirs(proj_dir, exist_ok=True)
+                self._project_file = os.path.join(
+                    proj_dir, self._project.name + ".complab")
+            else:
+                self._project_file = ""
             self._load_project_to_panels()
             self._console.log_info(f"New project: {self._project.name}")
 
@@ -573,15 +582,57 @@ class CompLaBMainWindow(QMainWindow):
                         f"Could not auto-convert geometry: {e}")
                 return
 
+    def _deploy_geometry(self, work_dir: str):
+        """Ensure geometry file exists in the input/ subdirectory.
+
+        The C++ solver reads geometry from <input_path>/<filename>
+        (typically input/geometry.dat).  The domain panel may have browsed
+        a file from an arbitrary location; copy it into the right place.
+        Also copies from work_dir root into input/ if only found at root.
+        """
+        import shutil
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        input_subdir = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(work_dir, input_subdir)
+        dest = os.path.join(input_dir, geom_name)
+
+        # Already in place?
+        if os.path.isfile(dest):
+            return
+
+        # Try the domain panel's browsed file first
+        copied = self._domain_panel.copy_geometry_to_input(input_dir)
+        if copied:
+            self._console.log_info(
+                f"Copied geometry to {copied}")
+            return
+
+        # Fall back: if file exists at work_dir root, copy to input/
+        root_geom = os.path.join(work_dir, geom_name)
+        if os.path.isfile(root_geom):
+            os.makedirs(input_dir, exist_ok=True)
+            shutil.copy2(root_geom, dest)
+            self._console.log_info(
+                f"Copied {geom_name} from project root to {input_subdir}/")
+
     def _find_executable(self, work_dir: str) -> str:
         """Auto-detect the complab executable in common locations."""
         import sys
         exe_name = "complab.exe" if sys.platform == "win32" else "complab"
 
-        # 1. Check user-configured path first
+        import shutil as _shutil
+
+        # 1. Check user-configured path first (file path or command name)
         configured = self._config.get("complab_executable", "")
-        if configured and os.path.isfile(configured):
-            return configured
+        if configured:
+            if os.path.isfile(configured):
+                return configured
+            # Try resolving as a command name on PATH
+            resolved = _shutil.which(configured)
+            if resolved:
+                return resolved
 
         # 2. Search common locations relative to the working directory
         search_dirs = [
@@ -607,6 +658,11 @@ class CompLaBMainWindow(QMainWindow):
             candidate = os.path.join(d, exe_name)
             if os.path.isfile(candidate):
                 return candidate
+
+        # 3. Last resort: check system PATH
+        on_path = _shutil.which(exe_name)
+        if on_path:
+            return on_path
 
         return ""
 
@@ -644,14 +700,22 @@ class CompLaBMainWindow(QMainWindow):
             self._console.log_error(f"XML export failed: {e}")
             return
 
+        # Ensure geometry file is in the input/ subdirectory where C++ expects it
+        self._deploy_geometry(work_dir)
+
         # Auto-convert text-format geometry.dat to binary if needed
         self._ensure_binary_geometry(work_dir)
 
         # Pre-run validation gate: data-model + file-system checks
         self._load_kinetics_from_disk_if_empty()
-        errors = self._project.validate()
+        all_issues = self._project.validate()
         file_errors = self._project.validate_files(work_dir)
-        errors.extend(file_errors)
+        all_issues.extend(file_errors)
+        # Separate warnings (non-blocking) from errors (blocking)
+        warnings = [e for e in all_issues if "Warning:" in e]
+        errors = [e for e in all_issues if "Warning:" not in e]
+        for w in warnings:
+            self._console.log_warning(f"  {w}")
         if errors:
             self._run_panel.show_validation(errors)
             self._console.log_error(
@@ -782,12 +846,23 @@ class CompLaBMainWindow(QMainWindow):
                 self._console.log_error(f"Sweep run {i+1}: XML export failed: {e}")
                 continue
 
-            # Copy geometry file if it exists in base_dir
-            geom_src = os.path.join(base_dir, "geometry.dat")
-            geom_dst = os.path.join(run_dir, "geometry.dat")
-            if os.path.isfile(geom_src) and not os.path.isfile(geom_dst):
-                import shutil
-                shutil.copy2(geom_src, geom_dst)
+            # Copy geometry file into input/ subdirectory (where C++ expects it)
+            import shutil
+            geom_name = self._project.domain.geometry_filename or "geometry.dat"
+            input_subdir = self._project.path_settings.input_path or "input"
+            input_dir = os.path.join(run_dir, input_subdir)
+            geom_dst = os.path.join(input_dir, geom_name)
+            if not os.path.isfile(geom_dst):
+                # Search source geometry in order: base_dir/input/, base_dir/
+                for src_dir in [
+                    os.path.join(base_dir, input_subdir),
+                    base_dir,
+                ]:
+                    geom_src = os.path.join(src_dir, geom_name)
+                    if os.path.isfile(geom_src):
+                        os.makedirs(input_dir, exist_ok=True)
+                        shutil.copy2(geom_src, geom_dst)
+                        break
 
             self._console.log_info(
                 f"  Run {i+1}/{len(runs)}: {param_name} = {value} -> {run_dir}")
