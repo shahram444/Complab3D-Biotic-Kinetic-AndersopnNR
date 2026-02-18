@@ -1,0 +1,110 @@
+/* ARKE: Guardians of Earth — Cinematic Trailer Styles */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Courier New', monospace;
+}
+
+#container {
+  position: relative;
+  width: 100vw; height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+#screen {
+  width: 100vw;
+  height: 56.25vw; /* 16:9 */
+  max-height: 100vh;
+  max-width: 177.78vh;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+/* Cinematic letterbox bars */
+#letterbox-top, #letterbox-bot {
+  position: absolute;
+  left: 0; right: 0;
+  height: 8%;
+  background: #000;
+  z-index: 5;
+  transition: height 1.5s ease;
+}
+#letterbox-top { top: 0; }
+#letterbox-bot { bottom: 0; }
+.letterbox-wide #letterbox-top,
+.letterbox-wide #letterbox-bot { height: 12%; }
+.letterbox-none #letterbox-top,
+.letterbox-none #letterbox-bot { height: 0; }
+
+/* Play overlay */
+#overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+  cursor: pointer;
+  transition: opacity 0.8s ease;
+}
+#overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#play-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+}
+
+#play-btn {
+  width: 100px; height: 100px;
+  border: 3px solid #2acfaf;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  color: #2acfaf;
+  padding-left: 8px;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 20px #2acfaf;
+}
+#play-btn:hover {
+  background: rgba(42,207,175,0.15);
+  transform: scale(1.1);
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -60%);
+  width: 100px; height: 100px;
+  border: 2px solid rgba(42,207,175,0.4);
+  border-radius: 50%;
+  animation: pulse-out 2s ease-out infinite;
+}
+
+@keyframes pulse-out {
+  0% { width: 100px; height: 100px; opacity: 1; }
+  100% { width: 200px; height: 200px; opacity: 0; }
+}
+
+#play-text {
+  color: #2acfaf;
+  font-size: 16px;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(42,207,175,0.6);
+}
