@@ -427,11 +427,12 @@ int main(int argc, char **argv) {
     global::timer("NS").stop();
     T nstime = global::timer("NS").getTime();
 
-    if (ade_maxiTer == 0) { pcout << "  [ADE] ade_maxiTer=0, done.\n"; return 0; }
-
-    // Pure-flow mode: no substrates or microbes → skip reactive transport entirely
-    if (num_of_substrates == 0 && num_of_microbes == 0) {
-        pcout << "  [ADE] No substrates or microbes configured. Pure flow simulation.\n";
+    // Pure-flow mode: no substrates/microbes or ade_maxiTer=0 → skip ADE entirely
+    if (ade_maxiTer == 0 || (num_of_substrates == 0 && num_of_microbes == 0)) {
+        if (num_of_substrates == 0 && num_of_microbes == 0)
+            pcout << "  [ADE] No substrates or microbes configured. Pure flow simulation.\n";
+        else
+            pcout << "  [ADE] ade_maxiTer=0, skipping transport.\n";
         if (track_performance == 0 && Pe > thrd) {
             writeNsVTI(nsLattice, 0, "nsLatticeFinal_");
             saveBinaryBlock(nsLattice, str_outputDir+ns_filename+".chk");
@@ -439,7 +440,7 @@ int main(int argc, char **argv) {
         }
         T TET = global::timer("total").getTime(); global::timer("total").stop();
         pcout << "\n  Wall time: " << TET << " s (" << TET/60 << " min)\n";
-        pcout << "  CompLaB3D finished successfully (pure flow).\n";
+        pcout << "  CompLaB3D finished successfully.\n";
         return 0;
     }
 
