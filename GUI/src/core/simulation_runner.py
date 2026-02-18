@@ -5,13 +5,16 @@ Supports:
   - MPI parallel execution via mpirun/mpiexec
   - Real-time stdout/stderr parsing
   - Progress tracking from iteration output
+  - Auto-save all output to timestamped .out log file
   - Cancellation support
+  - Crash diagnostics: analyses XML + kinetics headers on failure
 """
 
 import os
 import re
 import struct
 import time
+import datetime
 import subprocess
 from pathlib import Path
 
@@ -25,11 +28,13 @@ class SimulationRunner(QThread):
         output_line(str): Each line of stdout/stderr.
         progress(int, int): (current_iteration, max_iterations)
         finished_signal(int, str): (return_code, summary_message)
+        diagnostic_report(str): Crash diagnostic text (emitted on failure).
     """
 
     output_line = Signal(str)
     progress = Signal(int, int)
     finished_signal = Signal(int, str)
+    diagnostic_report = Signal(str)
 
     def __init__(self, executable: str, working_dir: str, parent=None,
                  mpi_enabled: bool = False, mpi_nprocs: int = 1,
@@ -44,10 +49,20 @@ class SimulationRunner(QThread):
         self._mpi_command = mpi_command
 
     def run(self):
-        if not os.path.isfile(self._exe):
-            self.output_line.emit(f"ERROR: Executable not found: {self._exe}")
-            self.finished_signal.emit(-1, "Executable not found")
-            return
+        import shutil as _shutil
+
+        # Resolve the executable: accept both file paths and command names
+        exe = self._exe
+        if not os.path.isfile(exe):
+            resolved = _shutil.which(exe)
+            if resolved:
+                exe = resolved
+            else:
+                self.output_line.emit(
+                    f"ERROR: Executable not found: {self._exe}")
+                self.finished_signal.emit(-1, "Executable not found")
+                return
+        self._exe = exe
 
         # Ensure executable permission on Unix
         if os.name != "nt" and not os.access(self._exe, os.X_OK):
@@ -79,6 +94,20 @@ class SimulationRunner(QThread):
             self.output_line.emit(f"Starting: {self._exe}")
 
         self.output_line.emit(f"Working directory: {self._cwd}")
+
+        # Open log file in the output directory (or working dir)
+        log_file = None
+        self._log_path = ""
+        try:
+            output_dir = os.path.join(self._cwd, "output")
+            os.makedirs(output_dir, exist_ok=True)
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            self._log_path = os.path.join(output_dir, f"simulation_{ts}.out")
+            log_file = open(self._log_path, "w", buffering=1)
+            self.output_line.emit(f"Log file: {self._log_path}")
+        except Exception as e:
+            self.output_line.emit(f"WARNING: Could not create log file: {e}")
+
         self.output_line.emit("=" * 60)
 
         t0 = time.time()
@@ -100,6 +129,8 @@ class SimulationRunner(QThread):
                     break
                 line = line.rstrip("\n")
                 self.output_line.emit(line)
+                if log_file:
+                    log_file.write(line + "\n")
                 # Parse iteration progress
                 m = re.search(r"iT\s*=\s*(\d+)", line)
                 if m:
@@ -151,13 +182,44 @@ class SimulationRunner(QThread):
             msg = f"Exited with code {rc} after {hrs}h {mins}m {secs}s"
 
         self.output_line.emit(msg)
+
+        # Close log file
+        if log_file:
+            log_file.write("=" * 60 + "\n")
+            log_file.write(msg + "\n")
+            log_file.close()
+            self.output_line.emit(f"Log saved: {self._log_path}")
+
         # Convert unsigned 32-bit Windows exit codes to signed to avoid
         # OverflowError in Qt Signal(int, str) which expects a C signed int.
         if rc > 2147483647 or rc < -2147483648:
             rc = struct.unpack('i', struct.pack('I', rc & 0xFFFFFFFF))[0]
+
+        # ── Run crash diagnostics on failure ───────────────────────
+        if rc != 0 and not self._cancelled:
+            self._run_crash_diagnostic(rc)
+
         self.finished_signal.emit(rc, msg)
 
     def cancel(self):
         self._cancelled = True
         if self._process and self._process.poll() is None:
             self._process.terminate()
+
+    def _run_crash_diagnostic(self, rc: int):
+        """Analyse CompLaB.xml + kinetics headers and emit a report."""
+        xml_path = os.path.join(self._cwd, "CompLaB.xml")
+        if not os.path.isfile(xml_path):
+            return
+
+        try:
+            from .xml_diagnostic import diagnose_crash
+            report = diagnose_crash(xml_path, rc, kinetics_dir=self._cwd)
+        except Exception as exc:
+            report = f"Crash diagnostic failed: {exc}"
+
+        self.output_line.emit("")
+        for line in report.split("\n"):
+            self.output_line.emit(line)
+
+        self.diagnostic_report.emit(report)

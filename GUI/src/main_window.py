@@ -273,6 +273,9 @@ class CompLaBMainWindow(QMainWindow):
 
         # ─── Help ───
         help_menu = mb.addMenu("&Help")
+        act_workflow = help_menu.addAction("&Workflow Guide")
+        act_workflow.triggered.connect(self._show_workflow_guide)
+        help_menu.addSeparator()
         act_about = help_menu.addAction("&About CompLaB Studio")
         act_about.triggered.connect(self._show_about)
 
@@ -425,7 +428,16 @@ class CompLaBMainWindow(QMainWindow):
             self._config.get("default_project_dir", ""), self)
         if dlg.exec():
             self._project = dlg.get_project()
-            self._project_file = ""
+            # Use the selected directory as the working base so that
+            # run/export targets the right folder even before Save.
+            chosen_dir = dlg.get_directory()
+            if chosen_dir and os.path.isdir(chosen_dir):
+                proj_dir = os.path.join(chosen_dir, self._project.name)
+                os.makedirs(proj_dir, exist_ok=True)
+                self._project_file = os.path.join(
+                    proj_dir, self._project.name + ".complab")
+            else:
+                self._project_file = ""
             self._load_project_to_panels()
             self._console.log_info(f"New project: {self._project.name}")
 
@@ -499,6 +511,13 @@ class CompLaBMainWindow(QMainWindow):
         try:
             ProjectManager.export_xml(self._project, path)
             self._console.log_success(f"Exported: {path}")
+            # Deploy kinetics .hh files alongside the XML
+            xml_dir = str(Path(path).parent)
+            deployed = ProjectManager.deploy_kinetics(self._project, xml_dir)
+            for dp in deployed:
+                self._console.log_success(f"Deployed: {dp}")
+            # Show post-export workflow dialog
+            self._show_post_export_guide(path, deployed)
         except Exception as e:
             self._console.log_error(f"Export failed: {e}")
 
@@ -526,15 +545,94 @@ class CompLaBMainWindow(QMainWindow):
 
     # ── Simulation ──────────────────────────────────────────────────
 
+    def _ensure_binary_geometry(self, work_dir: str):
+        """Convert text-format geometry.dat to binary if needed.
+
+        The C++ solver expects raw bytes (1 byte per voxel).  Geometry
+        files created by older versions or external tools may be in text
+        format (one ASCII digit per line).  Detect and convert in-place.
+        """
+        import numpy as np
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        for candidate in [
+            os.path.join(work_dir, geom_name),
+            os.path.join(work_dir, "input", geom_name),
+        ]:
+            if os.path.isfile(candidate):
+                expected = d.nx * d.ny * d.nz
+                file_size = os.path.getsize(candidate)
+                if file_size == expected:
+                    return  # already binary
+                # Text format: try to convert
+                try:
+                    raw = np.loadtxt(candidate, dtype=np.uint8).flatten()
+                    if raw.size == expected:
+                        raw.tofile(candidate)
+                        self._console.log_info(
+                            f"Converted {geom_name} from text to binary "
+                            f"({file_size} -> {expected} bytes)")
+                    else:
+                        self._console.log_warning(
+                            f"Geometry has {raw.size} values but expected "
+                            f"{expected} (nx*ny*nz). Cannot auto-convert.")
+                except Exception as e:
+                    self._console.log_warning(
+                        f"Could not auto-convert geometry: {e}")
+                return
+
+    def _deploy_geometry(self, work_dir: str):
+        """Ensure geometry file exists in the input/ subdirectory.
+
+        The C++ solver reads geometry from <input_path>/<filename>
+        (typically input/geometry.dat).  The domain panel may have browsed
+        a file from an arbitrary location; copy it into the right place.
+        Also copies from work_dir root into input/ if only found at root.
+        """
+        import shutil
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        input_subdir = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(work_dir, input_subdir)
+        dest = os.path.join(input_dir, geom_name)
+
+        # Already in place?
+        if os.path.isfile(dest):
+            return
+
+        # Try the domain panel's browsed file first
+        copied = self._domain_panel.copy_geometry_to_input(input_dir)
+        if copied:
+            self._console.log_info(
+                f"Copied geometry to {copied}")
+            return
+
+        # Fall back: if file exists at work_dir root, copy to input/
+        root_geom = os.path.join(work_dir, geom_name)
+        if os.path.isfile(root_geom):
+            os.makedirs(input_dir, exist_ok=True)
+            shutil.copy2(root_geom, dest)
+            self._console.log_info(
+                f"Copied {geom_name} from project root to {input_subdir}/")
+
     def _find_executable(self, work_dir: str) -> str:
         """Auto-detect the complab executable in common locations."""
         import sys
         exe_name = "complab.exe" if sys.platform == "win32" else "complab"
 
-        # 1. Check user-configured path first
+        import shutil as _shutil
+
+        # 1. Check user-configured path first (file path or command name)
         configured = self._config.get("complab_executable", "")
-        if configured and os.path.isfile(configured):
-            return configured
+        if configured:
+            if os.path.isfile(configured):
+                return configured
+            # Try resolving as a command name on PATH
+            resolved = _shutil.which(configured)
+            if resolved:
+                return resolved
 
         # 2. Search common locations relative to the working directory
         search_dirs = [
@@ -560,6 +658,11 @@ class CompLaBMainWindow(QMainWindow):
             candidate = os.path.join(d, exe_name)
             if os.path.isfile(candidate):
                 return candidate
+
+        # 3. Last resort: check system PATH
+        on_path = _shutil.which(exe_name)
+        if on_path:
+            return on_path
 
         return ""
 
@@ -589,8 +692,38 @@ class CompLaBMainWindow(QMainWindow):
         try:
             ProjectManager.export_xml(self._project, xml_path)
             self._console.log_info(f"Exported {xml_path}")
+            # Deploy kinetics .hh files alongside the XML
+            deployed = ProjectManager.deploy_kinetics(self._project, work_dir)
+            for dp in deployed:
+                self._console.log_info(f"Deployed: {dp}")
         except Exception as e:
             self._console.log_error(f"XML export failed: {e}")
+            return
+
+        # Ensure geometry file is in the input/ subdirectory where C++ expects it
+        self._deploy_geometry(work_dir)
+
+        # Auto-convert text-format geometry.dat to binary if needed
+        self._ensure_binary_geometry(work_dir)
+
+        # Pre-run validation gate: data-model + file-system checks
+        self._load_kinetics_from_disk_if_empty()
+        all_issues = self._project.validate()
+        file_errors = self._project.validate_files(work_dir)
+        all_issues.extend(file_errors)
+        # Separate warnings (non-blocking) from errors (blocking)
+        warnings = [e for e in all_issues if "Warning:" in e]
+        errors = [e for e in all_issues if "Warning:" not in e]
+        for w in warnings:
+            self._console.log_warning(f"  {w}")
+        if errors:
+            self._run_panel.show_validation(errors)
+            self._console.log_error(
+                f"Pre-run validation failed with {len(errors)} error(s):")
+            for e in errors:
+                self._console.log_error(f"  {e}")
+            self._console.log_error(
+                "Fix the issues above before running the simulation.")
             return
 
         self._act_run.setEnabled(False)
@@ -614,6 +747,7 @@ class CompLaBMainWindow(QMainWindow):
         self._runner.progress.connect(
             lambda c, m: self._console.set_progress(c, m))
         self._runner.finished_signal.connect(self._on_sim_finished)
+        self._runner.diagnostic_report.connect(self._on_diagnostic_report)
         self._runner.start()
         self._console.set_status("Running...")
 
@@ -631,6 +765,33 @@ class CompLaBMainWindow(QMainWindow):
             self._console.log_success(msg)
         else:
             self._console.log_error(msg)
+
+    def _on_diagnostic_report(self, report: str):
+        """Handle crash diagnostic report: show in console + save to output."""
+        # Forward to the run panel's validation tab
+        self._run_panel.on_diagnostic_report(report)
+
+        # Print a colour-coded version to the console widget
+        self._console.log_diagnostic(report)
+
+        # Save report to the project's output folder
+        output_dir = self._project.path_settings.output_path
+        if not os.path.isabs(output_dir):
+            # Make relative to project file or cwd
+            if self._project_file:
+                base = str(Path(self._project_file).parent)
+            else:
+                base = os.getcwd()
+            output_dir = os.path.join(base, output_dir)
+
+        from .core.xml_diagnostic import save_diagnostic_report
+        saved_path = save_diagnostic_report(report, output_dir)
+        if saved_path:
+            self._console.log_info(
+                f"Crash diagnostic saved: {saved_path}")
+        else:
+            self._console.log_warning(
+                f"Could not save crash diagnostic to {output_dir}")
 
     def _sync_mpi_from_parallel(self):
         """Push parallel-panel MPI settings into the run-panel widgets."""
@@ -685,12 +846,23 @@ class CompLaBMainWindow(QMainWindow):
                 self._console.log_error(f"Sweep run {i+1}: XML export failed: {e}")
                 continue
 
-            # Copy geometry file if it exists in base_dir
-            geom_src = os.path.join(base_dir, "geometry.dat")
-            geom_dst = os.path.join(run_dir, "geometry.dat")
-            if os.path.isfile(geom_src) and not os.path.isfile(geom_dst):
-                import shutil
-                shutil.copy2(geom_src, geom_dst)
+            # Copy geometry file into input/ subdirectory (where C++ expects it)
+            import shutil
+            geom_name = self._project.domain.geometry_filename or "geometry.dat"
+            input_subdir = self._project.path_settings.input_path or "input"
+            input_dir = os.path.join(run_dir, input_subdir)
+            geom_dst = os.path.join(input_dir, geom_name)
+            if not os.path.isfile(geom_dst):
+                # Search source geometry in order: base_dir/input/, base_dir/
+                for src_dir in [
+                    os.path.join(base_dir, input_subdir),
+                    base_dir,
+                ]:
+                    geom_src = os.path.join(src_dir, geom_name)
+                    if os.path.isfile(geom_src):
+                        os.makedirs(input_dir, exist_ok=True)
+                        shutil.copy2(geom_src, geom_dst)
+                        break
 
             self._console.log_info(
                 f"  Run {i+1}/{len(runs)}: {param_name} = {value} -> {run_dir}")
@@ -719,7 +891,20 @@ class CompLaBMainWindow(QMainWindow):
 
     def _validate(self):
         self._save_panels_to_project()
+
+        # If project has no embedded kinetics, try to read from disk
+        self._load_kinetics_from_disk_if_empty()
+
         errors = self._project.validate()
+
+        # File-system checks: geometry size, on-disk .hh / XML consistency
+        if self._project_file:
+            work_dir = str(Path(self._project_file).parent)
+        else:
+            work_dir = os.getcwd()
+        file_errors = self._project.validate_files(work_dir)
+        errors.extend(file_errors)
+
         self._run_panel.show_validation(errors)
         if errors:
             self._console.log_error(
@@ -728,6 +913,40 @@ class CompLaBMainWindow(QMainWindow):
                 self._console.log_error(f"  {e}")
         else:
             self._console.log_success("Validation passed - no errors.")
+
+    def _load_kinetics_from_disk_if_empty(self):
+        """If the project has no embedded kinetics source, try to read
+        defineKinetics.hh / defineAbioticKinetics.hh from the project
+        directory so that validation can cross-check them."""
+        if self._project.kinetics_source and self._project.abiotic_kinetics_source:
+            return  # already have both
+
+        if self._project_file:
+            base = str(Path(self._project_file).parent)
+        else:
+            base = os.getcwd()
+
+        if not self._project.kinetics_source:
+            biotic_path = os.path.join(base, "defineKinetics.hh")
+            if os.path.isfile(biotic_path):
+                try:
+                    with open(biotic_path, "r") as f:
+                        self._project.kinetics_source = f.read()
+                    self._console.log_info(
+                        f"Loaded defineKinetics.hh from {biotic_path} for validation")
+                except OSError:
+                    pass
+
+        if not self._project.abiotic_kinetics_source:
+            abiotic_path = os.path.join(base, "defineAbioticKinetics.hh")
+            if os.path.isfile(abiotic_path):
+                try:
+                    with open(abiotic_path, "r") as f:
+                        self._project.abiotic_kinetics_source = f.read()
+                    self._console.log_info(
+                        f"Loaded defineAbioticKinetics.hh from {abiotic_path} for validation")
+                except OSError:
+                    pass
 
     # ── View toggles ───────────────────────────────────────────────
 
@@ -741,8 +960,34 @@ class CompLaBMainWindow(QMainWindow):
     # ── Dialogs ─────────────────────────────────────────────────────
 
     def _open_kinetics_editor(self):
+        self._save_panels_to_project()
         dlg = KineticsEditorDialog(self)
-        dlg.exec()
+        # Pre-load project kinetics source into the editor
+        if self._project.kinetics_source:
+            dlg._biotic_tab._editor.setPlainText(self._project.kinetics_source)
+            dlg._biotic_tab._path_label.setText("(from project template)")
+        if self._project.abiotic_kinetics_source:
+            dlg._abiotic_tab._editor.setPlainText(
+                self._project.abiotic_kinetics_source)
+            dlg._abiotic_tab._path_label.setText("(from project template)")
+        if dlg.exec():
+            # Save any edits back to the project
+            biotic_text = dlg._biotic_tab._editor.toPlainText()
+            abiotic_text = dlg._abiotic_tab._editor.toPlainText()
+            changed = False
+            if biotic_text.strip():
+                if biotic_text != self._project.kinetics_source:
+                    self._project.kinetics_source = biotic_text
+                    changed = True
+            if abiotic_text.strip():
+                if abiotic_text != self._project.abiotic_kinetics_source:
+                    self._project.abiotic_kinetics_source = abiotic_text
+                    changed = True
+            if changed:
+                self._modified = True
+                self._update_title()
+                self._console.log_info("Kinetics source updated from editor.")
+                self._show_kinetics_recompile_reminder()
 
     def _open_geometry_generator(self):
         """Open the geometry generator as a GUI dialog."""
@@ -765,6 +1010,193 @@ class CompLaBMainWindow(QMainWindow):
     def _show_about(self):
         dlg = AboutDialog(self)
         dlg.exec()
+
+    # ── Workflow guides ──────────────────────────────────────────────
+
+    def _show_post_export_guide(self, xml_path: str, deployed: list):
+        """Show a post-export dialog with full next-steps workflow."""
+        sm = self._project.simulation_mode
+        needs_kinetics = (
+            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+
+        if not needs_kinetics:
+            # Simple case: no kinetics, just run
+            QMessageBox.information(
+                self, "Export Complete",
+                f"CompLaB.xml saved to:\n  {xml_path}\n\n"
+                "This project does not use kinetics reactions.\n"
+                "You can run the simulation directly — no recompilation "
+                "needed.\n\n"
+                "  Click 'Run Simulation' or run from command line:\n"
+                "    ./complab  (or complab.exe on Windows)")
+            return
+
+        # Build the file list
+        hh_list = "\n".join(f"  - {Path(p).name}" for p in deployed)
+        if not hh_list:
+            hh_list = "  (no .hh files were deployed — check kinetics editor)"
+
+        msg = (
+            f"CompLaB.xml saved to:\n  {xml_path}\n\n"
+            f"Kinetics files deployed:\n{hh_list}\n\n"
+            "═══ WHAT TO DO NEXT ═══\n\n"
+            "Step 1: Copy .hh files to solver source root\n"
+            "   Copy the .hh files from the export directory to your\n"
+            "   CompLaB3D source root (same folder as CMakeLists.txt).\n"
+            "   File names MUST be exactly:\n"
+            "     defineKinetics.hh         (biotic kinetics)\n"
+            "     defineAbioticKinetics.hh  (abiotic kinetics)\n\n"
+            "Step 2: Recompile the solver\n"
+            "   Linux / Mac:\n"
+            "     cd build\n"
+            "     cmake ..\n"
+            "     make -j$(nproc)\n\n"
+            "   Windows (MSYS2/MinGW):\n"
+            "     cd build\n"
+            "     cmake .. -G \"MinGW Makefiles\"\n"
+            "     mingw32-make -j%NUMBER_OF_PROCESSORS%\n\n"
+            "   Windows (Visual Studio):\n"
+            "     cd build\n"
+            "     cmake ..\n"
+            "     cmake --build . --config Release\n\n"
+            "Step 3: Run the NEW executable\n"
+            "   Use the freshly compiled complab binary.\n"
+            "   The old binary will NOT have the new kinetics.\n\n"
+            "NOTE: Every time you change kinetics parameters or switch\n"
+            "templates, you must repeat steps 1-3."
+        )
+        QMessageBox.information(self, "Export Complete — Next Steps", msg)
+
+    def _show_kinetics_recompile_reminder(self):
+        """Show reminder that kinetics changes require recompilation."""
+        QMessageBox.information(
+            self, "Kinetics Updated — Recompilation Required",
+            "Kinetics source code has been updated.\n\n"
+            "IMPORTANT: Because the .hh files are compiled into the\n"
+            "C++ solver at build time, you MUST:\n\n"
+            "  1. Export CompLaB.xml  (File > Export XML)\n"
+            "     This saves the new .hh files alongside the XML.\n\n"
+            "  2. Copy the .hh files to your solver source root\n"
+            "     (same directory as CMakeLists.txt)\n\n"
+            "  3. Recompile:\n"
+            "       cd build && cmake .. && make -j$(nproc)\n\n"
+            "  4. Run with the NEW executable\n\n"
+            "If you skip recompilation, the solver will still use\n"
+            "the OLD kinetics code — your changes will have no effect.")
+
+    def _show_workflow_guide(self):
+        """Show the complete CompLaB Studio workflow guide."""
+        sm = self._project.simulation_mode
+        needs_kinetics = (
+            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+
+        guide = (
+            "========================================\n"
+            "   CompLaB Studio -- Quick Start Guide\n"
+            "========================================\n\n"
+
+            "STEP 1  Create a Project\n"
+            "   File > New Project\n"
+            "   Pick a template:\n"
+            "     - Flow Only: pure Navier-Stokes\n"
+            "     - Diffusion Only: 1 tracer, no flow\n"
+            "     - Transport: flow + tracer\n"
+            "     - Abiotic - First Order: decay reaction\n"
+            "     - Biofilm Sessile: 1-substrate Monod\n"
+            "     - Planktonic: 1-substrate Monod (LBM)\n"
+            "   Choose a directory. The project folder is created there.\n\n"
+
+            "STEP 2  Set Parameters\n"
+            "   Domain:  nx, ny, nz (grid size)\n"
+            "   Fluid:   delta_P, tau (flow driving force)\n"
+            "   Chemistry: add substrates, set BCs and diffusion\n"
+            "   Microbes: (if biotic) add microbes, set Ks/mu\n"
+            "   Solver:   iteration limits, convergence\n\n"
+
+            "STEP 3  Generate Geometry\n"
+            "   Tools > Geometry Generator\n"
+            "   The file MUST have exactly nx * ny * nz bytes\n"
+            "   (1 byte per voxel: 0=solid, 1=bounce-back, 2=pore).\n"
+            "   Or browse an existing geometry.dat file.\n"
+            "   The GUI auto-copies it to input/ when you click Run.\n\n"
+
+            "STEP 4  Validate\n"
+            "   Click 'Validate' in the Run panel.\n"
+            "   Fix all errors (red). Warnings (yellow) are non-blocking.\n\n"
+        )
+
+        if needs_kinetics:
+            guide += (
+                "STEP 5  Kinetics .hh Files\n"
+                "   The C++ solver compiles kinetics equations from:\n"
+                "     defineKinetics.hh       (biotic reactions)\n"
+                "     defineAbioticKinetics.hh (abiotic reactions)\n"
+                "   BOTH files must always exist (use no-op stubs).\n\n"
+                "   Option A: Use a pre-made pair from kinetics/ folder\n"
+                "     Copy both .hh files from one of:\n"
+                "       kinetics/01_flow_only/\n"
+                "       kinetics/03_abiotic_first_order/\n"
+                "       kinetics/05_biofilm_single_substrate/\n"
+                "       kinetics/06_planktonic_single_substrate/\n"
+                "     to the repository root (next to CMakeLists.txt)\n\n"
+                "   Option B: Use the GUI Kinetics Editor\n"
+                "     Tools > Kinetics Editor to edit code\n"
+                "     File > Export XML deploys .hh files automatically\n"
+                "     Then copy .hh from project folder to source root\n\n"
+
+                "STEP 6  Recompile the Solver\n"
+                "   Windows:\n"
+                "     cd build\n"
+                "     cmake ..\n"
+                "     cmake --build . --config Release\n"
+                "   Linux/Mac:\n"
+                "     cd build && cmake .. && make -j$(nproc)\n"
+                "   MSYS2/MinGW:\n"
+                "     cd build && cmake .. -G \"MinGW Makefiles\"\n"
+                "     mingw32-make\n\n"
+
+                "STEP 7  Run\n"
+                "   Click the Run button, or from terminal:\n"
+                "     ./complab     (Linux/Mac)\n"
+                "     complab.exe   (Windows)\n"
+                "   Output goes to output/ folder.\n"
+                "   A .out log file is auto-saved there.\n\n"
+
+                "=== WHEN TO RECOMPILE ===\n"
+                "MUST recompile when you change:\n"
+                "  * Kinetics equations (.hh code)\n"
+                "  * Template (switches .hh code)\n"
+                "  * Number of substrates or microbes\n\n"
+                "NO recompile needed for:\n"
+                "  * Concentrations, BCs, diffusion coefficients\n"
+                "  * Domain dimensions (regenerate geometry!)\n"
+                "  * Iteration count, output settings\n"
+                "  * Fluid properties (delta_P, tau)\n"
+                "  These are in CompLaB.xml, read at runtime.\n\n"
+
+                "=== EXECUTABLE ===\n"
+                "The build target is 'complab' (not complab3d).\n"
+                "  Linux:   ./complab\n"
+                "  Windows: GUI/bin/complab.exe  or  build/Release/complab.exe\n"
+                "Set the path in Edit > Preferences if auto-detect fails.\n"
+            )
+        else:
+            guide += (
+                "STEP 5  Run\n"
+                "   Click the Run button.\n"
+                "   No recompilation needed for non-kinetics simulations.\n"
+                "   The solver reads all parameters from CompLaB.xml.\n"
+                "   Output goes to output/ folder.\n"
+                "   A .out log file is auto-saved there.\n\n"
+
+                "=== EXECUTABLE ===\n"
+                "The build target is 'complab' (not complab3d).\n"
+                "  Linux:   ./complab\n"
+                "  Windows: GUI/bin/complab.exe  or  build/Release/complab.exe\n"
+                "Set the path in Edit > Preferences if auto-detect fails.\n"
+            )
+
+        QMessageBox.information(self, "CompLaB Studio -- Quick Start Guide", guide)
 
     # ── Helpers ─────────────────────────────────────────────────────
 
