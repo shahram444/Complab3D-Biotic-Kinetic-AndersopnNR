@@ -259,21 +259,22 @@ const AudioEngine = (() => {
   }
 
   /* ════════════════════════════════════════════════════════════
-     THE SCORE — ~125 seconds
+     THE SCORE — ~160 seconds
      Dark industrial cinematic — relentless, metallic, mechanical
+     Rhythm pattern closely inspired by Brad Fiedel's T2 Main Title
 
-     Key: E minor (Em)  |  Core BPM: 96
+     Key: E minor (Em)  |  Core BPM: 95
      Signature sound: Metallic anvil percussion pattern
      ════════════════════════════════════════════════════════════ */
   function composeScore() {
     if (!ctx) return;
 
     /* ── CONSTANTS ── */
-    const BPM = 96;
-    const BEAT = 60 / BPM;            // ~0.625s per beat
-    const EIGHTH = BEAT / 2;           // ~0.3125s
-    const SIXTEENTH = BEAT / 4;        // ~0.15625s
-    const BAR = BEAT * 4;              // ~2.5s per bar
+    const BPM = 95;
+    const BEAT = 60 / BPM;            // ~0.632s per beat
+    const EIGHTH = BEAT / 2;           // ~0.316s
+    const SIXTEENTH = BEAT / 4;        // ~0.158s
+    const BAR = BEAT * 4;              // ~2.526s per bar
 
     // E minor scale frequencies
     const E1 = 41.2, B1 = 61.74, E2 = 82.41, G2 = 98.0, A2 = 110.0, B2 = 123.47;
@@ -282,17 +283,17 @@ const AudioEngine = (() => {
     const E5 = 659.25;
 
     /* ── THE MAIN INDUSTRIAL RHYTHM PATTERN ──
-       16th notes, 1 bar (16 steps)
-       Pattern: X.x.X.x.Xx..X.x.  (X=heavy, x=light, .=rest)
-       This is DIFFERENT from T2's pattern but has that same
-       relentless, mechanical, factory-floor feel */
-    const MAIN_PATTERN = [1, 0, 0.5, 0, 1, 0, 0.5, 0, 1, 0.5, 0, 0, 1, 0, 0.5, 0];
+       16-step (16th notes), 1 bar
+       Very close to T2's iconic pattern: X...X.x...X.X...
+       Accents on positions 0,4,6,10,12 — with a subtle ghost on 9
+       to make it just slightly different from Fiedel's original */
+    const MAIN_PATTERN = [1, 0, 0, 0, 1, 0, 0.7, 0, 0, 0.3, 1, 0, 1, 0, 0, 0];
 
-    /* Variation pattern for builds */
-    const BUILD_PATTERN = [1, 0.5, 0.5, 0, 1, 0.5, 0.5, 0.5, 1, 0.5, 0.5, 0, 1, 0.5, 1, 0.5];
+    /* Variation pattern for builds — fills in gaps */
+    const BUILD_PATTERN = [1, 0, 0.4, 0, 1, 0.3, 0.7, 0, 0.4, 0.3, 1, 0, 1, 0.3, 0.5, 0];
 
     /* Double-time fill pattern */
-    const FILL_PATTERN = [1, 0.5, 1, 0.5, 1, 0.5, 1, 0.5, 1, 0.5, 1, 0.5, 1, 1, 1, 1];
+    const FILL_PATTERN = [1, 0.5, 0.7, 0.4, 1, 0.5, 0.7, 0.4, 1, 0.5, 0.7, 0.5, 1, 0.7, 1, 0.7];
 
     /* Play a 1-bar rhythm pattern starting at time t */
     function playPattern(pattern, t, intensity) {
@@ -303,8 +304,10 @@ const AudioEngine = (() => {
         const hitT = t + i * SIXTEENTH;
         if (hitVol >= 0.8) {
           anvil(hitT, 0.14 * v * hitVol);
+        } else if (hitVol >= 0.5) {
+          anvil(hitT, 0.08 * v * hitVol);
         } else {
-          tick(hitT, 0.07 * v * hitVol);
+          tick(hitT, 0.06 * v * hitVol);
         }
       }
     }
@@ -335,19 +338,19 @@ const AudioEngine = (() => {
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 1: THE VOID (0-12s) — 0-~5 bars
-       Darkness. Sub bass. Sparse metallic echoes in the dark.
+       SECTION 1: THE VOID (0-12s)
+       Darkness. Sub bass. Sparse metallic echoes.
        ═══════════════════════════════════════════════════════════ */
 
     // Deep sub drone fading in
     subPulse(0, 12, E1, 0.06);
-    osc('sine', E1 * 1.5, 0, 12, 0.02);  // 5th harmonic hint
+    osc('sine', E1 * 1.5, 0, 12, 0.02);
 
-    // Eerie high metallic resonance (like distant factory)
+    // Eerie high metallic resonance (distant factory)
     osc('sine', 1480, 2, 8, 0.008);
     osc('sine', 2100, 4, 9, 0.005);
 
-    // Isolated anvil hits — like something stirring in the dark
+    // Isolated anvil hits — stirring in the dark
     anvil(3.0, 0.06);
     anvil(5.2, 0.08);
     tick(6.5, 0.04);
@@ -355,7 +358,7 @@ const AudioEngine = (() => {
     tick(8.8, 0.03);
     anvil(9.5, 0.07);
     tick(10.2, 0.04);
-    anvil(10.8, 0.12);      // getting closer...
+    anvil(10.8, 0.12);
     tick(11.2, 0.05);
     anvil(11.5, 0.10);
 
@@ -366,378 +369,458 @@ const AudioEngine = (() => {
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 2: AWAKENING (12-22s) — ~4 bars
-       The machine starts. Rhythm crystallizes from chaos.
-       Heartbeat → the Pattern begins.
+       SECTION 2: ARKE CLOSEUP / AWAKENING (12-20s)
+       The machine starts. Rhythm crystallizes.
        ═══════════════════════════════════════════════════════════ */
 
-    // Sub bass deepens
-    subPulse(12, 10, E1, 0.12);
+    subPulse(12, 8, E1, 0.1);
 
     // Heartbeat continues, steadying
     for (let t = 12; t < 16; t += BEAT * 2) {
       heartbeat(t, 0.08);
     }
 
-    // The Pattern emerges — sparse at first (just heavy hits)
-    // Bar 1: only the heavy hits from the pattern
+    // Pattern emerges — sparse at first
     for (let i = 0; i < 16; i++) {
       if (MAIN_PATTERN[i] >= 0.8) {
-        const ht = 16 + i * SIXTEENTH;
-        anvil(ht, 0.08);
+        anvil(15 + i * SIXTEENTH, 0.07);
       }
     }
 
-    // Bar 2: full pattern starts — THE MACHINE AWAKENS
-    playPattern(MAIN_PATTERN, 16 + BAR, 0.7);
+    // Full pattern starts
+    playPattern(MAIN_PATTERN, 15 + BAR, 0.65);
+    playPattern(MAIN_PATTERN, 15 + BAR * 2, 0.75);
 
     // Dark atmospheric pad
-    darkPad(14, 8, E2, 0.03);
-    darkPad(16, 6, B2, 0.02);
+    darkPad(13, 7, E2, 0.03);
+    darkPad(15, 5, B2, 0.02);
 
-    // The motif enters — haunting, distant
-    playMotif(17, 0.04, 1);
+    // Motif enters — haunting, distant
+    playMotif(16, 0.04, 1);
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 3: WORLD REVEAL (22-38s) — ~6.5 bars
-       Full industrial rhythm. Bass pulse locked in.
-       Each world gets the machine treatment.
+       SECTION 3: ELDER CLOSEUP (20-27s)
+       Deeper, more ceremonial. Ancient wisdom.
        ═══════════════════════════════════════════════════════════ */
 
-    // Locked sub bass pulse on every beat
-    for (let t = 22; t < 38; t += BEAT) {
+    subPulse(20, 7, E1, 0.1);
+
+    // Slower, weightier pattern
+    for (let t = 20; t < 27; t += BEAT * 2) {
+      heartbeat(t, 0.07);
+    }
+
+    // Pattern continues but with more weight
+    const numBars27 = Math.floor((27 - 20) / BAR);
+    for (let bar = 0; bar < numBars27; bar++) {
+      playPattern(MAIN_PATTERN, 20 + bar * BAR, 0.7 + bar * 0.05);
+    }
+
+    // Deeper pad — purple/elder tones
+    darkPad(20, 7, E2, 0.035);
+    darkPad(20, 7, G2, 0.025);
+    darkPad(23, 4, B2, 0.03);
+
+    // Counter-motif for elder
+    playCounter(22, 0.04, 1);
+
+    // Boom on elder reveal
+    boom(21, 0.7);
+
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 4: ELDER CALLS / DIALOGUE (27-38s)
+       Full industrial rhythm. Bass pulse locked in.
+       ═══════════════════════════════════════════════════════════ */
+
+    // Locked sub bass pulse
+    for (let t = 27; t < 38; t += BEAT) {
       kick(t, 0.12);
       osc('sine', E1, t, BEAT * 0.8, 0.1);
     }
 
-    // THE PATTERN — relentless, 6+ bars
-    const numBars38 = Math.floor((38 - 22) / BAR);
+    // THE PATTERN — relentless
+    const numBars38 = Math.floor((38 - 27) / BAR);
     for (let bar = 0; bar < numBars38; bar++) {
-      const bt = 22 + bar * BAR;
-      playPattern(MAIN_PATTERN, bt, 0.85 + bar * 0.03);
-      // Add clang accent on beat 1 of every other bar
-      if (bar % 2 === 0) clang(bt, 0.06);
+      const bt = 27 + bar * BAR;
+      playPattern(MAIN_PATTERN, bt, 0.8 + bar * 0.04);
+      if (bar % 2 === 0) clang(bt, 0.05);
     }
 
-    // Low bass riff under the rhythm (E - G - A - G progression)
-    const bassRiff = [E2, E2, G2, G2, A2, A2, G2, G2];
-    for (let i = 0; i < bassRiff.length; i++) {
-      const bt = 22 + i * BAR * numBars38 / bassRiff.length;
-      subPulse(bt, BAR * numBars38 / bassRiff.length, bassRiff[i] * 0.5, 0.08);
+    // Bass riff
+    const bassRiff4 = [E2, E2, G2, A2, G2];
+    for (let i = 0; i < bassRiff4.length; i++) {
+      const dur = (38 - 27) / bassRiff4.length;
+      subPulse(27 + i * dur, dur, bassRiff4[i] * 0.5, 0.07);
     }
 
-    // Dark pad shifts for each world transition (~3.2s each)
-    const worldDur = (38 - 22) / 5;
-    const worldChords = [
-      [E2, B2],                // Soil: Em
-      [D3, A2],                // Deep: Dm
-      [G2, D3],                // Seeps: G5
-      [A2, E3],                // Perma: Am
-      [E2, B2, G3]             // Hydro: Em full
-    ];
-    for (let w = 0; w < 5; w++) {
-      const wt = 22 + w * worldDur;
-      for (const f of worldChords[w]) {
-        darkPad(wt, worldDur, f, 0.025);
-      }
-      // Boom on each world entry
-      boom(wt + 0.05, 0.6 + w * 0.1);
-    }
+    // Dark pads
+    darkPad(27, 5.5, E2, 0.03);
+    darkPad(27, 5.5, B2, 0.025);
+    darkPad(32.5, 5.5, A2, 0.03);
+    darkPad(32.5, 5.5, E3, 0.025);
 
-    // Motif plays during world reveal
-    playMotif(24, 0.05, 1);
-    playCounter(30, 0.04, 1);
-    // Rising metallic tension
-    noiseSwept(34, 4, 0.03, 500, 4000, 8);
+    // Motif
+    playMotif(29, 0.05, 1);
+
+    // Rising tension into earth cross
+    noiseSwept(35, 3, 0.03, 500, 3500, 7);
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 4: THE THREAT (38-50s) — ~5 bars
-       Intensity increases. Double-time hints. Danger.
+       SECTION 5: EARTH CROSS-SECTION (38-63s)
+       Grand, scientific, revelatory. Each world gets a boom.
+       The rhythm is steady, the pad shifts with each environment.
        ═══════════════════════════════════════════════════════════ */
 
-    // Heavier sub
-    for (let t = 38; t < 50; t += BEAT) {
+    // Deep sustained sub
+    subPulse(38, 25, E1, 0.09);
+
+    // Locked beats
+    for (let t = 38; t < 63; t += BEAT) {
+      kick(t, 0.11);
+      osc('sine', E1, t, BEAT * 0.7, 0.09);
+    }
+
+    // THE PATTERN — steady, scientific, relentless
+    const numBars63 = Math.floor((63 - 38) / BAR);
+    for (let bar = 0; bar < numBars63; bar++) {
+      const bt = 38 + bar * BAR;
+      playPattern(MAIN_PATTERN, bt, 0.8 + bar * 0.02);
+      if (bar % 3 === 0) clang(bt, 0.05);
+    }
+
+    // Each world (~5s each): pad shifts + boom
+    const worldDur = (63 - 38) / 5;
+    const worldChords = [
+      [E2, B2],          // Soil: Em
+      [D3, A2],          // Deep: Dm
+      [G2, D3],          // Seeps: G5
+      [A2, E3],          // Perma: Am
+      [E2, B2, G3]       // Hydro: Em full
+    ];
+    for (let w = 0; w < 5; w++) {
+      const wt = 38 + w * worldDur;
+      for (const f of worldChords[w]) {
+        darkPad(wt, worldDur, f, 0.025);
+      }
+      boom(wt + 0.05, 0.6 + w * 0.08);
+      heavyAnvil(wt + 0.1, 0.08 + w * 0.01);
+    }
+
+    // Motif during earth reveal
+    playMotif(40, 0.05, 1);
+    playCounter(47, 0.04, 1);
+    playMotif(54, 0.05, 1);
+
+    // Rising tension at end
+    noiseSwept(59, 4, 0.03, 400, 4500, 6);
+
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 6: RIVAL CLOSEUP (63-69s)
+       Menacing. Dark. Red. The rhythm gets heavier.
+       ═══════════════════════════════════════════════════════════ */
+
+    subPulse(63, 6, E1, 0.12);
+
+    // Heavy hits
+    for (let t = 63; t < 69; t += BEAT) {
+      kick(t, 0.15);
+      osc('sine', E1, t, BEAT * 0.6, 0.13);
+    }
+
+    // Pattern intensifies
+    const numBars69 = Math.floor((69 - 63) / BAR);
+    for (let bar = 0; bar < numBars69; bar++) {
+      playPattern(BUILD_PATTERN, 63 + bar * BAR, 1.0);
+      heavyAnvil(63 + bar * BAR, 0.12);
+    }
+
+    // Danger stinger on entry
+    boom(63.5, 1.0);
+    clang(64, 0.1);
+
+    // Menacing pad
+    darkPad(63, 6, E2, 0.04);
+    darkPad(63, 6, G2, 0.035);
+    darkPad(66, 3, B2, 0.04);
+
+    // Descending threat melody fragment
+    darkNote(64, 1.0, E3, 0.06);
+    darkNote(65.2, 1.0, D3, 0.055);
+    darkNote(66.4, 1.0, B2, 0.05);
+    darkNote(67.6, 1.5, A2, 0.06);
+
+    // Industrial noise
+    noiseSwept(64, 5, 0.015, 200, 1200, 4);
+
+
+    /* ═══════════════════════════════════════════════════════════
+       SECTION 7: RIVALS THREAT (69-81s)
+       Intensity increases. Danger chase. Double-time hints.
+       ═══════════════════════════════════════════════════════════ */
+
+    for (let t = 69; t < 81; t += BEAT) {
       kick(t, 0.16);
       osc('sine', E1, t, BEAT * 0.7, 0.14);
     }
 
-    // Pattern with increasing intensity
-    const numBars50 = Math.floor((50 - 38) / BAR);
-    for (let bar = 0; bar < numBars50; bar++) {
-      const bt = 38 + bar * BAR;
-      const pattern = bar >= numBars50 - 1 ? BUILD_PATTERN : MAIN_PATTERN;
-      playPattern(pattern, bt, 1.0 + bar * 0.05);
-
-      // Heavy anvil accent every bar
+    const numBars81 = Math.floor((81 - 69) / BAR);
+    for (let bar = 0; bar < numBars81; bar++) {
+      const bt = 69 + bar * BAR;
+      const pattern = bar >= numBars81 - 1 ? BUILD_PATTERN : MAIN_PATTERN;
+      playPattern(pattern, bt, 1.0 + bar * 0.04);
       heavyAnvil(bt, 0.1 + bar * 0.01);
     }
 
-    // Menacing low melody — descending, threatening
+    // Menacing melody
     const threatMelody = [E3, D3, B2, A2, G2, A2, B2, G2];
     for (let i = 0; i < threatMelody.length; i++) {
-      darkNote(39 + i * 1.4, 1.0, threatMelody[i], 0.055);
+      darkNote(70 + i * 1.3, 0.9, threatMelody[i], 0.05);
     }
 
-    // Dark pad: Em → Cm → Bm (descending darkness)
-    darkPad(38, 4, E2, 0.04);
-    darkPad(38, 4, B2, 0.03);
-    darkPad(42, 4, A2, 0.04);   // Am (relative minor feel)
-    darkPad(42, 4, E3, 0.03);
-    darkPad(46, 4, B2, 0.04);   // B5 (tension)
-    darkPad(46, 4, G2, 0.035);
+    // Dark pads
+    darkPad(69, 4, E2, 0.04);
+    darkPad(69, 4, B2, 0.03);
+    darkPad(73, 4, A2, 0.04);
+    darkPad(73, 4, E3, 0.03);
+    darkPad(77, 4, B2, 0.04);
+    darkPad(77, 4, G2, 0.035);
 
     // Danger stingers
-    boom(39, 0.9);
-    clang(43, 0.1);
-    boom(47, 1.0);
+    boom(70, 0.9);
+    clang(74, 0.1);
+    boom(78, 1.0);
 
-    // Industrial noise texture underneath
-    noiseSwept(40, 10, 0.015, 200, 1500, 4);
+    noiseSwept(71, 10, 0.015, 200, 1500, 4);
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 5: POWER / GROWTH (50-65s) — ~6 bars
-       Impact moments for CONSUME/GROW/MULTIPLY
-       Then the machine resumes with heroic undertone
+       SECTION 8: POWER / GROWTH (81-96s)
+       CONSUME / GROW / MULTIPLY impacts + machine resume
        ═══════════════════════════════════════════════════════════ */
 
-    // Sub foundation
-    subPulse(50, 15, E1, 0.1);
+    subPulse(81, 15, E1, 0.1);
 
-    // CONSUME — massive hit (51s)
-    stinger(51, 0.9);
-    darkNote(51.3, 2.5, E3, 0.08);
-    // Sparse ticks after impact
-    tick(52.0, 0.05); tick(52.5, 0.04); tick(53.0, 0.05);
+    // CONSUME
+    stinger(82, 0.9);
+    darkNote(82.3, 2.5, E3, 0.08);
+    tick(83.0, 0.05); tick(83.5, 0.04); tick(84.0, 0.05);
 
-    // GROW — second impact (54s)
-    boom(54, 1.1);
-    heavyAnvil(54, 0.15);
-    darkNote(54.3, 2.5, G3, 0.08);
-    tick(55.0, 0.05); tick(55.5, 0.04); tick(56.0, 0.05);
+    // GROW
+    boom(86, 1.1);
+    heavyAnvil(86, 0.15);
+    darkNote(86.3, 2.5, G3, 0.08);
+    tick(87.0, 0.05); tick(87.5, 0.04); tick(88.0, 0.05);
 
-    // MULTIPLY — biggest impact (57s)
-    stinger(57, 1.2);
-    darkNote(57.3, 2.5, B3, 0.09);
+    // MULTIPLY
+    stinger(90, 1.2);
+    darkNote(90.3, 2.5, B3, 0.09);
 
-    // The machine resumes — building back up
+    // Machine resumes
     for (let bar = 0; bar < 3; bar++) {
-      const bt = 59 + bar * BAR;
-      playPattern(BUILD_PATTERN, bt, 0.8 + bar * 0.15);
-      kick(bt, 0.14 + bar * 0.03);
+      const bt = 91 + bar * BAR;
+      playPattern(BUILD_PATTERN, bt, 0.8 + bar * 0.12);
+      kick(bt, 0.14 + bar * 0.02);
     }
-    // Bass locked again
-    for (let t = 59; t < 65; t += BEAT) {
+    for (let t = 91; t < 96; t += BEAT) {
       kick(t, 0.13);
       osc('sine', E1, t, BEAT * 0.7, 0.1);
     }
 
-    // Motif returns — now with more power
-    playMotif(60, 0.06, 1);
+    // Motif returns
+    playMotif(92, 0.06, 1);
 
-    // Heroic pad (adding the 5th — brighter but still dark)
-    darkPad(60, 5, E2, 0.04);
-    darkPad(60, 5, B2, 0.035);
-    darkPad(60, 5, E3, 0.03);
+    // Heroic pad
+    darkPad(92, 4, E2, 0.04);
+    darkPad(92, 4, B2, 0.035);
+    darkPad(92, 4, E3, 0.03);
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 6: JOURNEY MONTAGE (65-82s) — ~7 bars
-       PEAK INTENSITY. Everything at once.
-       Fast cuts = double-time hints, max energy.
+       SECTION 9: JOURNEY MONTAGE (96-113s)
+       PEAK INTENSITY. Everything at once. Max energy.
        ═══════════════════════════════════════════════════════════ */
 
-    // Relentless sub
-    for (let t = 65; t < 82; t += BEAT) {
+    for (let t = 96; t < 113; t += BEAT) {
       kick(t, 0.18);
       osc('sine', E1, t, BEAT * 0.6, 0.15);
     }
 
-    // The Pattern at full power with variations
-    const numBars82 = Math.floor((82 - 65) / BAR);
-    for (let bar = 0; bar < numBars82; bar++) {
-      const bt = 65 + bar * BAR;
-      // Alternate between main and build patterns
+    const numBars113 = Math.floor((113 - 96) / BAR);
+    for (let bar = 0; bar < numBars113; bar++) {
+      const bt = 96 + bar * BAR;
       const pattern = bar % 4 === 3 ? FILL_PATTERN : (bar % 2 === 0 ? MAIN_PATTERN : BUILD_PATTERN);
       playPattern(pattern, bt, 1.1);
-      // Heavy accent every bar
       heavyAnvil(bt, 0.12);
-      // Clang on odd bars
       if (bar % 2 === 1) clang(bt + BEAT * 2, 0.07);
     }
 
-    // Bass riff intensifies — moving between notes
+    // Bass riff intensifies
     const journeyBass = [E2, E2, G2, A2, B2, A2, G2];
     for (let i = 0; i < journeyBass.length; i++) {
-      const dur = (82 - 65) / journeyBass.length;
-      subPulse(65 + i * dur, dur, journeyBass[i] * 0.5, 0.1);
+      const dur = (113 - 96) / journeyBass.length;
+      subPulse(96 + i * dur, dur, journeyBass[i] * 0.5, 0.1);
     }
 
     // Chapter booms
-    const chapterHits = [66, 69.5, 72.5, 75.5, 78.5];
+    const chapterHits = [97, 100.5, 103.5, 106.5, 109.5];
     for (let i = 0; i < chapterHits.length; i++) {
       boom(chapterHits[i], 0.8 + i * 0.08);
       heavyAnvil(chapterHits[i], 0.12 + i * 0.02);
     }
 
     // Motif fragments — faster, more urgent
-    darkNote(66, BEAT * 1.2, E3, 0.06);
-    darkNote(67, BEAT * 1.2, G3, 0.06);
-    darkNote(69.5, BEAT * 1.2, D3, 0.06);
-    darkNote(70.5, BEAT * 1.2, E3, 0.06);
-    // Ascending through the journey
-    darkNote(72.5, BEAT * 1.2, G3, 0.06);
-    darkNote(73.5, BEAT * 1.2, A3, 0.06);
-    darkNote(75.5, BEAT * 1.2, B3, 0.07);
-    darkNote(76.5, BEAT * 1.2, D4, 0.07);
-    darkNote(78.5, BEAT * 1.5, E4, 0.08);  // Peak note!
+    darkNote(97, BEAT * 1.2, E3, 0.06);
+    darkNote(98, BEAT * 1.2, G3, 0.06);
+    darkNote(100.5, BEAT * 1.2, D3, 0.06);
+    darkNote(101.5, BEAT * 1.2, E3, 0.06);
+    darkNote(103.5, BEAT * 1.2, G3, 0.06);
+    darkNote(104.5, BEAT * 1.2, A3, 0.06);
+    darkNote(106.5, BEAT * 1.2, B3, 0.07);
+    darkNote(107.5, BEAT * 1.2, D4, 0.07);
+    darkNote(109.5, BEAT * 1.5, E4, 0.08);
 
-    // Pad layers building
-    darkPad(65, 8, E2, 0.04);
-    darkPad(65, 8, B2, 0.03);
-    darkPad(73, 9, A2, 0.04);
-    darkPad(73, 9, E3, 0.035);
+    // Pad layers
+    darkPad(96, 8, E2, 0.04);
+    darkPad(96, 8, B2, 0.03);
+    darkPad(104, 9, A2, 0.04);
+    darkPad(104, 9, E3, 0.035);
 
-    // Rising metallic sweep to climax
-    noiseSwept(78, 4, 0.04, 300, 6000, 6);
+    // Rising sweep
+    noiseSwept(109, 4, 0.04, 300, 6000, 6);
 
-    // Ticking accelerates at very end
+    // Accelerating ticks
     for (let i = 0; i < 16; i++) {
-      tick(80 + i * 0.12, 0.04 + i * 0.003);
+      tick(111 + i * 0.12, 0.04 + i * 0.003);
     }
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 7: THE STAKES (82-95s) — ~5 bars
-       Emotional weight. Slower. The motif in full.
-       Heartbeat returns. Building to the title.
+       SECTION 10: EARTH STAKES (113-126s)
+       Emotional weight. Slower. Heartbeat. Building to title.
        ═══════════════════════════════════════════════════════════ */
 
-    // Deep sub
-    subPulse(82, 13, E1, 0.12);
+    subPulse(113, 13, E1, 0.12);
 
-    // Slow, heavy beats — half-time feel
-    for (let t = 82; t < 92; t += BEAT * 2) {
+    // Half-time feel
+    for (let t = 113; t < 123; t += BEAT * 2) {
       kick(t, 0.2);
       heavyAnvil(t, 0.1);
     }
 
-    // Light ticking continues underneath
-    for (let t = 82; t < 92; t += BEAT) {
+    // Light ticking
+    for (let t = 113; t < 123; t += BEAT) {
       tick(t + BEAT * 0.5, 0.03);
     }
 
     // Heartbeat — fate
-    for (let t = 82; t < 92; t += BEAT * 2.5) {
+    for (let t = 113; t < 123; t += BEAT * 2.5) {
       heartbeat(t + BEAT, 0.07);
     }
 
-    // THE MOTIF — slow, full, emotional, final statement
-    playMotif(83, 0.07, 1);
-    // Counter-motif answers
-    playCounter(88, 0.06, 1);
+    // THE MOTIF — full, emotional
+    playMotif(114, 0.07, 1);
+    playCounter(119, 0.06, 1);
 
-    // Emotional pad: Em → C → Am → B (cinematic chord progression)
-    darkPad(82, 3.5, E2, 0.05);
-    darkPad(82, 3.5, G2, 0.04);
-    darkPad(82, 3.5, B2, 0.035);
+    // Emotional pads
+    darkPad(113, 3.5, E2, 0.05);
+    darkPad(113, 3.5, G2, 0.04);
+    darkPad(113, 3.5, B2, 0.035);
+    darkPad(116.5, 3.5, A2, 0.05);
+    darkPad(116.5, 3.5, E3, 0.04);
+    darkPad(120, 3, G2, 0.05);
+    darkPad(120, 3, D3, 0.04);
+    darkPad(120, 3, B2, 0.035);
 
-    darkPad(85.5, 3.5, A2, 0.05);   // Am → C
-    darkPad(85.5, 3.5, E3, 0.04);
-
-    darkPad(89, 3, G2, 0.05);       // G
-    darkPad(89, 3, D3, 0.04);
-    darkPad(89, 3, B2, 0.035);
-
-    // BUILD TO TITLE: accelerating pattern
-    playPattern(BUILD_PATTERN, 91, 0.8);
-    // Accelerating anvil hits into title
+    // BUILD TO TITLE
+    playPattern(BUILD_PATTERN, 122, 0.8);
     for (let i = 0; i < 16; i++) {
-      const ht = 92 + i * (0.2 - i * 0.008);
-      if (ht < 95.8) {
-        const hv = 0.08 + i * 0.008;
-        anvil(ht, hv);
+      const ht = 123 + i * (0.2 - i * 0.008);
+      if (ht < 126.8) {
+        anvil(ht, 0.08 + i * 0.008);
         if (i % 3 === 0) kick(ht, 0.1 + i * 0.01);
       }
     }
 
-    // Rising sweep into title hit
-    noiseSwept(92, 4, 0.05, 200, 8000, 5);
-    oscSweep('sawtooth', 80, 2000, 93, 3, 0.03);
+    // Rising sweep
+    noiseSwept(123, 4, 0.05, 200, 8000, 5);
+    oscSweep('sawtooth', 80, 2000, 124, 3, 0.03);
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 8: TITLE REVEAL (95-108s)
-       MASSIVE STINGER. Power chord sustain. Motif one final time.
+       SECTION 11: TITLE REVEAL (126-139s)
+       MASSIVE STINGER. Power chord. Motif one final time.
        ═══════════════════════════════════════════════════════════ */
 
-    // THE HIT — everything at once
-    stinger(96, 1.3);
-    clang(96, 0.15);
-    // Extra sub impact
-    osc('sine', E1, 96, 4, 0.2);
-    osc('sine', E1 * 0.5, 96, 5, 0.1);  // Sub-sub
+    // THE HIT
+    stinger(127, 1.3);
+    clang(127, 0.15);
+    osc('sine', E1, 127, 4, 0.2);
+    osc('sine', E1 * 0.5, 127, 5, 0.1);
 
     // Sustained power chord: Em
-    darkPad(96, 10, E2, 0.06);
-    darkPad(96, 10, B2, 0.05);
-    darkPad(96, 10, E3, 0.05);
-    darkPad(96, 10, G3, 0.04);
-    osc('triangle', E2, 96, 10, 0.04);
-    osc('triangle', E3, 96, 10, 0.03);
+    darkPad(127, 10, E2, 0.06);
+    darkPad(127, 10, B2, 0.05);
+    darkPad(127, 10, E3, 0.05);
+    darkPad(127, 10, G3, 0.04);
+    osc('triangle', E2, 127, 10, 0.04);
+    osc('triangle', E3, 127, 10, 0.03);
 
-    // Slow heartbeat under the title
-    for (let t = 97.5; t < 106; t += BEAT * 3) {
+    // Slow heartbeat under title
+    for (let t = 128.5; t < 137; t += BEAT * 3) {
       heartbeat(t, 0.08);
     }
 
-    // Sparse heavy hits - like a clock ticking fate
-    for (let t = 98; t < 106; t += BEAT * 2) {
+    // Sparse heavy hits
+    for (let t = 129; t < 137; t += BEAT * 2) {
       heavyAnvil(t, 0.08);
     }
 
-    // The motif — final time, high octave, triumphant/fatalistic
-    playMotif(98, 0.07, 2);  // octave up
+    // Final motif — octave up
+    playMotif(129, 0.07, 2);
 
     // Subtitle boom
-    boom(101.5, 1.0);
+    boom(133, 1.0);
 
     // Tagline stinger
-    boom(106, 0.7);
-    clang(106, 0.08);
+    boom(137, 0.7);
+    clang(137, 0.08);
 
 
     /* ═══════════════════════════════════════════════════════════
-       SECTION 9: CLOSING (108-125s)
-       Fade. Sparse echoes. The machine winds down.
+       SECTION 12: CLOSING (139-160s)
+       Fade. Sparse echoes. The machine winds down to silence.
        ═══════════════════════════════════════════════════════════ */
 
     // Fading sub
-    subPulse(108, 12, E1, 0.06);
+    subPulse(139, 16, E1, 0.05);
 
     // Sparse pad
-    darkPad(108, 8, E2, 0.025);
-    darkPad(108, 8, B2, 0.02);
+    darkPad(139, 10, E2, 0.025);
+    darkPad(139, 10, B2, 0.02);
 
-    // Isolated motif notes — echoing into darkness
-    darkNote(110, 2.5, E3, 0.04);
-    darkNote(113, 2.5, G3, 0.03);
-    darkNote(116, 3.0, B2, 0.025);
+    // Isolated motif notes echoing
+    darkNote(141, 2.5, E3, 0.04);
+    darkNote(144, 2.5, G3, 0.03);
+    darkNote(147, 3.0, B2, 0.025);
 
-    // Last few metallic echoes
-    tick(110, 0.03);
-    anvil(112, 0.04);
-    tick(115, 0.025);
-    anvil(118, 0.03);
+    // Metallic echoes
+    tick(141, 0.03);
+    anvil(143, 0.04);
+    tick(146, 0.025);
+    anvil(149, 0.03);
+    tick(152, 0.02);
 
-    // Final heartbeat
-    heartbeat(119, 0.06);
+    // Final heartbeats
+    heartbeat(150, 0.06);
+    heartbeat(153, 0.04);
 
     // Last sub rumble
-    osc('sine', E1, 119, 6, 0.04);
-    osc('sine', E1 * 0.5, 120, 5, 0.02);
+    osc('sine', E1, 152, 8, 0.03);
+    osc('sine', E1 * 0.5, 153, 7, 0.015);
 
     // Silence falls
   }

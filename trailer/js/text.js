@@ -162,17 +162,18 @@ const TextRenderer = (() => {
   function update(ctx, currentTime) {
     for (const n of NARRATION) {
       const elapsed = currentTime - n.t;
-      if (elapsed < 0 || elapsed > n.dur + 1.0) continue;
+      if (elapsed < 0 || elapsed > n.dur + 2.0) continue;
 
-      // Calculate progress and alpha
-      let progress = Math.min(1, elapsed * (n.speaker ? 8 : 12) / Math.max(1, n.text.length));
+      // Calculate progress — SLOWER typing so users can read
+      // Speaker dialogue: ~4 chars/sec effective, cinematic text: ~6 chars/sec
+      let progress = Math.min(1, elapsed * (n.speaker ? 4 : 6) / Math.max(1, n.text.length));
       let alpha = 1;
 
-      // Fade in
-      if (elapsed < 0.3) alpha = elapsed / 0.3;
-      // Fade out
-      const fadeStart = n.dur - 0.5;
-      if (elapsed > fadeStart) alpha = Math.max(0, 1 - (elapsed - fadeStart) / 0.8);
+      // Fade in — gentle 0.6s ease in
+      if (elapsed < 0.6) alpha = elapsed / 0.6;
+      // Fade out — starts 1.5s before end, fades over 1.8s for readability
+      const fadeStart = n.dur - 1.5;
+      if (elapsed > fadeStart) alpha = Math.max(0, 1 - (elapsed - fadeStart) / 1.8);
 
       if (alpha <= 0) continue;
 

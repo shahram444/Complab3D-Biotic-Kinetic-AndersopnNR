@@ -175,7 +175,164 @@ const Scenes = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     SCENE 3: ELDER CALLS (12-22s) - Elder appears, dialogue
+     SCENE 3: ARKE CLOSE-UP (12-20s) — Big face reveal
+     ═══════════════════════════════════════════════════════════ */
+  function renderArkeCloseup(ctx, t, dt) {
+    const sceneT = t - TIMELINE.ARKE_CLOSEUP.start;
+    const ch = CHARACTERS.ARKE;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+
+    const cx = CFG.W / 2;
+    const cy = CFG.H * 0.40;
+
+    // Radial glow background — teal aura
+    const auraAlpha = Math.min(0.25, sceneT * 0.05);
+    const grad = ctx.createRadialGradient(cx, cy, 40, cx, cy, 500);
+    grad.addColorStop(0, `rgba(42,207,175,${auraAlpha})`);
+    grad.addColorStop(0.5, `rgba(42,207,175,${auraAlpha * 0.3})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+
+    // Particle ring spinning around character
+    ctx.save();
+    for (let i = 0; i < 24; i++) {
+      const angle = (i / 24) * Math.PI * 2 + sceneT * 0.8;
+      const dist = 220 + Math.sin(sceneT * 2 + i) * 20;
+      const px = cx + Math.cos(angle) * dist;
+      const py = cy + Math.sin(angle) * dist * 0.5;
+      const pAlpha = 0.15 + Math.sin(sceneT * 3 + i * 0.5) * 0.1;
+      ctx.globalAlpha = Math.min(pAlpha, sceneT * 0.1);
+      ctx.fillStyle = '#2acfaf';
+      ctx.shadowColor = '#5fffdf';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(px - 2, py - 2, 4, 4);
+    }
+    ctx.restore();
+
+    // ARKE sprite — BIG close-up, scale 24-28
+    const spriteScale = Math.min(28, 12 + sceneT * 4);
+    const spriteAlpha = Math.min(1, sceneT / 1.5);
+    const bob = Math.sin(t * 2) * 4;
+    SpriteRenderer.drawGlow(ctx, ch.sprite, cx, cy + bob, Math.floor(spriteScale), ch.color, 50 * spriteAlpha, spriteAlpha);
+
+    // Corner scan brackets
+    if (sceneT > 1.5) {
+      const bAlpha = Math.min(1, (sceneT - 1.5) * 1.5);
+      const spr = SpriteRenderer.get(ch.sprite, Math.floor(spriteScale));
+      if (spr) {
+        const hw = spr.width / 2 + 20, hh = spr.height / 2 + 20;
+        ctx.save();
+        ctx.globalAlpha = bAlpha * 0.7;
+        ctx.strokeStyle = ch.color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = ch.glow;
+        ctx.shadowBlur = 12;
+        const len = 30;
+        ctx.beginPath(); ctx.moveTo(cx - hw, cy - hh + len); ctx.lineTo(cx - hw, cy - hh); ctx.lineTo(cx - hw + len, cy - hh); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + hw - len, cy - hh); ctx.lineTo(cx + hw, cy - hh); ctx.lineTo(cx + hw, cy - hh + len); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx - hw, cy + hh - len); ctx.lineTo(cx - hw, cy + hh); ctx.lineTo(cx - hw + len, cy + hh); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + hw - len, cy + hh); ctx.lineTo(cx + hw, cy + hh); ctx.lineTo(cx + hw, cy + hh - len); ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // "SCANNING..." text flicker
+    if (sceneT > 1 && sceneT < 3) {
+      const scanAlpha = Math.sin(sceneT * 8) * 0.3 + 0.5;
+      ctx.save();
+      ctx.globalAlpha = scanAlpha;
+      ctx.font = '18px "Courier New", monospace';
+      ctx.fillStyle = '#2acfaf';
+      ctx.textAlign = 'left';
+      ctx.fillText('SCANNING...', 80, CFG.H * 0.12);
+      ctx.restore();
+    }
+
+    TextRenderer.drawVignette(ctx, 0.5);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     SCENE 4: ELDER CLOSE-UP (20-27s) — Elder face reveal
+     ═══════════════════════════════════════════════════════════ */
+  function renderElderCloseup(ctx, t, dt) {
+    const sceneT = t - TIMELINE.ELDER_CLOSEUP.start;
+    const ch = CHARACTERS.ELDER;
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+
+    const cx = CFG.W / 2;
+    const cy = CFG.H * 0.40;
+
+    // Purple/blue aura
+    const auraAlpha = Math.min(0.2, sceneT * 0.04);
+    const grad = ctx.createRadialGradient(cx, cy, 30, cx, cy, 450);
+    grad.addColorStop(0, `rgba(72,72,208,${auraAlpha})`);
+    grad.addColorStop(0.5, `rgba(112,80,192,${auraAlpha * 0.4})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+
+    // Wisdom particles — slow drifting
+    ctx.save();
+    for (let i = 0; i < 30; i++) {
+      const angle = (i / 30) * Math.PI * 2 + sceneT * 0.3;
+      const dist = 150 + i * 12 + Math.sin(sceneT + i * 0.4) * 30;
+      const px = cx + Math.cos(angle) * dist;
+      const py = cy + Math.sin(angle) * dist * 0.6;
+      const pAlpha = 0.1 + Math.sin(sceneT * 1.5 + i) * 0.08;
+      ctx.globalAlpha = Math.min(pAlpha, sceneT * 0.08);
+      ctx.fillStyle = i % 3 === 0 ? '#7050c0' : '#4848d0';
+      ctx.shadowColor = '#7050c0';
+      ctx.shadowBlur = 6;
+      const sz = 2 + Math.sin(i * 1.2) * 1;
+      ctx.fillRect(px - sz / 2, py - sz / 2, sz, sz);
+    }
+    ctx.restore();
+
+    // ELDER sprite — BIG close-up
+    const spriteScale = Math.min(26, 10 + sceneT * 5);
+    const spriteAlpha = Math.min(1, sceneT / 1.2);
+    const bob = Math.sin(t * 1.5) * 3;
+    SpriteRenderer.drawGlow(ctx, ch.sprite, cx, cy + bob, Math.floor(spriteScale), ch.glow, 45 * spriteAlpha, spriteAlpha);
+
+    // Ancient rune-like border decorations
+    if (sceneT > 1) {
+      const runeAlpha = Math.min(0.4, (sceneT - 1) * 0.3);
+      ctx.save();
+      ctx.globalAlpha = runeAlpha;
+      ctx.strokeStyle = '#4848d0';
+      ctx.lineWidth = 2;
+      ctx.shadowColor = '#7050c0';
+      ctx.shadowBlur = 10;
+      // Top decorative line
+      ctx.beginPath();
+      ctx.moveTo(CFG.W * 0.2, CFG.H * 0.08);
+      ctx.lineTo(CFG.W * 0.8, CFG.H * 0.08);
+      ctx.stroke();
+      // Bottom decorative line
+      ctx.beginPath();
+      ctx.moveTo(CFG.W * 0.2, CFG.H * 0.92);
+      ctx.lineTo(CFG.W * 0.8, CFG.H * 0.92);
+      ctx.stroke();
+      // Diamond accents
+      for (let d = 0; d < 5; d++) {
+        const dx = CFG.W * (0.25 + d * 0.125);
+        const dy = CFG.H * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(dx, dy - 8); ctx.lineTo(dx + 6, dy); ctx.lineTo(dx, dy + 8); ctx.lineTo(dx - 6, dy);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    TextRenderer.drawVignette(ctx, 0.5);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     SCENE 5: ELDER CALLS (27-38s) - Elder appears, dialogue
      ═══════════════════════════════════════════════════════════ */
   function renderElderCalls(ctx, t, dt) {
     const sceneT = t - TIMELINE.ELDER_CALLS.start;
@@ -227,87 +384,282 @@ const Scenes = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     SCENE 4: WORLD REVEAL (22-38s) - Pan across 5 environments
+     SCENE 7: EARTH CROSS-SECTION (38-63s) — High-res Earth
+     with scientifically accurate cross-section showing
+     where each of the 5 environments exists
      ═══════════════════════════════════════════════════════════ */
-  function renderWorldReveal(ctx, t, dt) {
-    const sceneT = t - TIMELINE.WORLD_REVEAL.start;
-    const sceneDur = TIMELINE.WORLD_REVEAL.end - TIMELINE.WORLD_REVEAL.start;
+  function renderEarthCross(ctx, t, dt) {
+    const sceneT = t - TIMELINE.EARTH_CROSS.start;
+    const sceneDur = TIMELINE.EARTH_CROSS.end - TIMELINE.EARTH_CROSS.start;
 
-    // Determine which environment to show
-    const envDur = sceneDur / 5;
-    const envIdx = Math.min(4, Math.floor(sceneT / envDur));
-    const envLocalT = sceneT - envIdx * envDur;
-    const envProgress = envLocalT / envDur;
-
-    const ep = ENV_PAL[envIdx];
-    const land = getLandscape(envIdx);
-
-    // Transition flash between environments
-    let transAlpha = 0;
-    if (envLocalT < 0.3) transAlpha = 1 - envLocalT / 0.3;
-
-    // Slow pan across the landscape
-    const panX = -envProgress * land.canvas.width * 0.3;
-
-    ctx.fillStyle = ep.bg;
+    // Deep space background
+    ctx.fillStyle = '#010108';
     ctx.fillRect(0, 0, CFG.W, CFG.H);
 
-    // Camera pan with zoom
-    Camera.cinematicPan(
-      land.canvas.width * 0.3, land.canvas.height * 0.5,
-      land.canvas.width * 0.6, land.canvas.height * 0.5,
-      0.7, 0.85,
-      envDur, envLocalT
-    );
-    Camera.apply(ctx);
-    ctx.drawImage(land.canvas, 0, 0);
-
-    // Draw some substrate particles over landscape
-    const subTypes = [['O2','NO3','CH4'], ['NO3','FE3','CH4'], ['SO4','CH4'], ['O2','NO3','CH4'], ['SO4','FE3','MN4','CH4']];
-    const types = subTypes[envIdx];
-    let seed = envIdx * 999 + Math.floor(t * 2);
+    // Stars
+    let seed = 5555;
     const rng = () => { seed = (seed * 16807) % 2147483647; return (seed & 0x7fffffff) / 0x7fffffff; };
-    for (let i = 0; i < 12; i++) {
-      const type = types[i % types.length];
-      const info = SUBSTRATES[type];
-      const sx = rng() * land.canvas.width;
-      const sy = rng() * land.canvas.height;
-      const pulse = 0.5 + Math.sin(t * 3 + i * 0.7) * 0.5;
-      SpriteRenderer.drawGlow(ctx, info.sprite, sx, sy, 2, info.glow, 8, pulse * 0.7);
-    }
-
-    Camera.restore(ctx);
-
-    // Environment name overlay
     ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(0, CFG.H * 0.06, CFG.W, 60);
-    ctx.font = 'bold 32px "Courier New", monospace';
-    ctx.fillStyle = '#2acfaf';
-    ctx.textAlign = 'center';
-    ctx.shadowColor = '#2acfaf';
-    ctx.shadowBlur = 10;
-    ctx.fillText(`CHAPTER ${envIdx + 1}`, CFG.W / 2, CFG.H * 0.06 + 26);
-    ctx.shadowBlur = 0;
-    ctx.font = '22px "Courier New", monospace';
-    ctx.fillStyle = '#8899aa';
-    ctx.fillText(ep.name, CFG.W / 2, CFG.H * 0.06 + 52);
+    for (let i = 0; i < 120; i++) {
+      const sx = rng() * CFG.W;
+      const sy = rng() * CFG.H;
+      const brightness = 0.15 + Math.sin(t * 1.5 + i * 0.4) * 0.1;
+      ctx.globalAlpha = brightness;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(sx, sy, 1 + (rng() > 0.85 ? 1 : 0), 1);
+    }
     ctx.restore();
 
-    // Transition white flash
-    if (transAlpha > 0) {
-      ctx.save();
-      ctx.globalAlpha = transAlpha * 0.6;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, CFG.W, CFG.H);
-      ctx.restore();
+    // Phase 1 (0-6s): Show full Earth from space, then start zoom
+    // Phase 2 (6-sceneDur): Earth cross-section with environment layers
+
+    const earthCenterX = CFG.W * 0.35;
+    const earthCenterY = CFG.H * 0.5;
+
+    // Earth radius grows as we "zoom in"
+    const baseR = 220;
+    let earthR, crossVisible;
+    if (sceneT < 6) {
+      // Full Earth view, gentle zoom
+      earthR = baseR + sceneT * 8;
+      crossVisible = 0;
+    } else {
+      // Cross-section view — Earth much bigger
+      const zoomT = Math.min(1, (sceneT - 6) / 3);
+      earthR = baseR + 48 + Camera.easeInOut(zoomT) * 300;
+      crossVisible = Camera.easeInOut(Math.min(1, (sceneT - 6) / 2));
     }
 
-    TextRenderer.drawVignette(ctx, 0.5);
+    // Draw Earth body (pixelated)
+    const pixSize = Math.max(4, Math.floor(earthR / 50));
+    ctx.save();
+    for (let py = -earthR; py < earthR; py += pixSize) {
+      for (let px = -earthR; px < earthR; px += pixSize) {
+        const dist = Math.sqrt(px * px + py * py);
+        if (dist > earthR) continue;
+        const nx = px / earthR;
+        const ny = py / earthR;
+        const noise = Math.sin(px * 0.025 + 1) * Math.cos(py * 0.03 + 2) + Math.sin(px * 0.06) * 0.5;
+
+        let col;
+        if (noise > 0.3) col = '#2a6a2a';
+        else if (noise > 0) col = '#3a8a3a';
+        else if (noise > -0.3) col = '#1a4a8a';
+        else col = '#1a3a6a';
+        if (Math.abs(ny) > 0.75) col = '#c0d0e0';
+
+        // Right half becomes cross-section
+        if (crossVisible > 0 && px > -earthR * 0.1) {
+          const depth = (ny + 1) / 2; // 0 at top, 1 at bottom
+          // Find which layer this depth belongs to
+          let layerCol = '#2a1a0a';
+          for (const layer of EARTH_LAYERS) {
+            if (depth >= layer.y && depth < layer.y + layer.h) {
+              layerCol = layer.color;
+              // Highlight environments with glow
+              if (layer.env !== undefined) {
+                const ep = ENV_PAL[layer.env];
+                const pulse = 0.7 + Math.sin(t * 2 + layer.env) * 0.3;
+                layerCol = ep.grain;
+                // Add detail variation
+                const detailNoise = Math.sin(px * 0.08 + py * 0.05) * 0.5;
+                if (detailNoise > 0.2) layerCol = ep.grain_l;
+                if (detailNoise < -0.2) layerCol = ep.grain_d;
+              }
+              break;
+            }
+          }
+          // Blend between surface and cross-section
+          const blendFactor = Math.min(1, crossVisible * (1 + px / earthR));
+          if (blendFactor > 0.5) col = layerCol;
+        }
+
+        ctx.fillStyle = col;
+        ctx.fillRect(earthCenterX + px, earthCenterY + py, pixSize, pixSize);
+      }
+    }
+
+    // Earth atmosphere glow
+    ctx.globalAlpha = 0.3;
+    const atmosGrad = ctx.createRadialGradient(earthCenterX, earthCenterY, earthR * 0.95, earthCenterX, earthCenterY, earthR * 1.15);
+    atmosGrad.addColorStop(0, 'rgba(100,180,255,0.3)');
+    atmosGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = atmosGrad;
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+    ctx.restore();
+
+    // Cross-section labels and environment pointers
+    if (crossVisible > 0.5) {
+      const labelAlpha = (crossVisible - 0.5) * 2;
+
+      // Determine which environment to highlight based on timing
+      // 6-25s of cross-section time, 5 environments
+      const envPhaseStart = 6;
+      const envPhaseDur = (sceneDur - envPhaseStart) / 5;
+      const currentEnvIdx = Math.min(4, Math.floor((sceneT - envPhaseStart) / envPhaseDur));
+      const envLocalT = sceneT - envPhaseStart - currentEnvIdx * envPhaseDur;
+
+      // Draw layer labels on the right side
+      for (let i = 0; i < EARTH_LAYERS.length; i++) {
+        const layer = EARTH_LAYERS[i];
+        const ly = earthCenterY - earthR + layer.y * earthR * 2 + layer.h * earthR;
+        const isActive = layer.env === currentEnvIdx;
+
+        ctx.save();
+        ctx.globalAlpha = labelAlpha * (isActive ? 1.0 : 0.25);
+
+        // Label line from Earth to text
+        const lineStartX = earthCenterX + earthR * 0.5;
+        const lineEndX = CFG.W * 0.65;
+
+        if (layer.env !== undefined) {
+          ctx.strokeStyle = isActive ? ENV_PAL[layer.env].grain_l : '#444444';
+          ctx.lineWidth = isActive ? 2 : 1;
+          if (isActive) {
+            ctx.shadowColor = ENV_PAL[layer.env].grain_l;
+            ctx.shadowBlur = 10;
+          }
+          ctx.beginPath();
+          ctx.moveTo(lineStartX, ly);
+          ctx.lineTo(lineEndX - 10, ly);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Dot at end
+          ctx.fillStyle = isActive ? ENV_PAL[layer.env].grain_l : '#444444';
+          ctx.fillRect(lineStartX - 3, ly - 3, 6, 6);
+
+          // Environment name
+          ctx.font = isActive ? 'bold 26px "Courier New", monospace' : '20px "Courier New", monospace';
+          ctx.fillStyle = isActive ? '#ffffff' : '#666666';
+          ctx.textAlign = 'left';
+          if (isActive) {
+            ctx.shadowColor = ENV_PAL[layer.env].grain_l;
+            ctx.shadowBlur = 8;
+          }
+          ctx.fillText(ENV_PAL[layer.env].name, lineEndX, ly - 6);
+
+          // Depth info
+          ctx.font = isActive ? '20px "Courier New", monospace' : '16px "Courier New", monospace';
+          ctx.fillStyle = isActive ? '#aabbcc' : '#555555';
+          ctx.shadowBlur = 0;
+          ctx.fillText(ENV_PAL[layer.env].depth || '', lineEndX, ly + 18);
+
+          // Active environment highlight zone on the Earth
+          if (isActive) {
+            const envY1 = earthCenterY - earthR + layer.y * earthR * 2;
+            const envH = layer.h * earthR * 2;
+            const pulse = 0.3 + Math.sin(t * 3) * 0.15;
+            ctx.globalAlpha = pulse;
+            ctx.strokeStyle = ENV_PAL[layer.env].grain_l;
+            ctx.lineWidth = 3;
+            ctx.shadowColor = ENV_PAL[layer.env].grain_l;
+            ctx.shadowBlur = 15;
+            ctx.strokeRect(earthCenterX - earthR * 0.1, envY1, earthR * 1.1, envH);
+          }
+        }
+        ctx.restore();
+      }
+
+      // Small ARKE sprite near the active environment
+      if (sceneT > 8) {
+        const activeLayer = EARTH_LAYERS.find(l => l.env === currentEnvIdx);
+        if (activeLayer) {
+          const arkeY = earthCenterY - earthR + (activeLayer.y + activeLayer.h * 0.5) * earthR * 2;
+          const arkeX = earthCenterX + earthR * 0.3;
+          const arkeBob = Math.sin(t * 3) * 5;
+          const arkeAlpha = Math.min(1, (sceneT - 8) * 2);
+          SpriteRenderer.drawGlow(ctx, 'methi_down', arkeX, arkeY + arkeBob, 4, '#2acfaf', 15, arkeAlpha);
+        }
+      }
+    }
+
+    TextRenderer.drawVignette(ctx, 0.4);
   }
 
   /* ═══════════════════════════════════════════════════════════
-     SCENE 5: RIVALS THREAT (38-50s) - Red rivals chase ARKE
+     SCENE 8: RIVAL CLOSE-UP (63-69s) — Menacing rival intro
+     ═══════════════════════════════════════════════════════════ */
+  function renderRivalCloseup(ctx, t, dt) {
+    const sceneT = t - TIMELINE.RIVAL_CLOSEUP.start;
+    const ch = CHARACTERS.RIVAL;
+    ctx.fillStyle = '#0a0000';
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+
+    const cx = CFG.W / 2;
+    const cy = CFG.H * 0.40;
+
+    // Red danger aura — pulsing
+    const dangerPulse = 0.15 + Math.sin(t * 4) * 0.08;
+    const grad = ctx.createRadialGradient(cx, cy, 30, cx, cy, 500);
+    grad.addColorStop(0, `rgba(224,96,96,${dangerPulse})`);
+    grad.addColorStop(0.6, `rgba(180,0,0,${dangerPulse * 0.4})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+
+    // Red particle storm
+    ctx.save();
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2 + sceneT * 1.5;
+      const dist = 100 + i * 10 + Math.sin(sceneT * 3 + i * 0.6) * 40;
+      const px = cx + Math.cos(angle) * dist;
+      const py = cy + Math.sin(angle) * dist * 0.5;
+      const pAlpha = 0.2 + Math.sin(sceneT * 5 + i) * 0.15;
+      ctx.globalAlpha = Math.min(pAlpha, sceneT * 0.12);
+      ctx.fillStyle = i % 2 === 0 ? '#ff4444' : '#e06060';
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 5;
+      ctx.fillRect(px - 2, py - 2, 3, 3);
+    }
+    ctx.restore();
+
+    // Main rival — BIG
+    const spriteScale = Math.min(30, 8 + sceneT * 6);
+    const spriteAlpha = Math.min(1, sceneT / 1.0);
+    SpriteRenderer.drawGlow(ctx, ch.sprite, cx, cy, Math.floor(spriteScale), ch.glow, 40 * spriteAlpha, spriteAlpha);
+
+    // Flanking smaller rivals
+    if (sceneT > 1.5) {
+      const flankAlpha = Math.min(0.8, (sceneT - 1.5) * 0.6);
+      const flankScale = Math.floor(spriteScale * 0.5);
+      SpriteRenderer.drawGlow(ctx, ch.sprite, cx - 320, cy + 60, flankScale, '#ff4444', 20, flankAlpha);
+      SpriteRenderer.drawGlow(ctx, ch.sprite, cx + 320, cy + 60, flankScale, '#ff4444', 20, flankAlpha);
+    }
+
+    // Exclamation marks
+    if (sceneT > 2) {
+      const warnAlpha = 0.5 + Math.sin(t * 6) * 0.5;
+      ctx.save();
+      ctx.globalAlpha = warnAlpha;
+      ctx.font = 'bold 60px "Courier New", monospace';
+      ctx.fillStyle = '#ff4444';
+      ctx.shadowColor = '#ff0000';
+      ctx.shadowBlur = 20;
+      ctx.textAlign = 'center';
+      ctx.fillText('!', cx - 180, cy - 200);
+      ctx.fillText('!', cx + 180, cy - 200);
+      ctx.restore();
+    }
+
+    // Screen shake effect via slight jitter
+    if (sceneT > 0.5 && sceneT < 1.0) {
+      Camera.shake(6, 0.5);
+    }
+
+    // Red vignette
+    const redVig = 0.35 + Math.sin(t * 3) * 0.1;
+    ctx.save();
+    const dGrad = ctx.createRadialGradient(cx, cy, CFG.W * 0.3, cx, cy, CFG.W * 0.7);
+    dGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    dGrad.addColorStop(1, `rgba(120,0,0,${redVig})`);
+    ctx.fillStyle = dGrad;
+    ctx.fillRect(0, 0, CFG.W, CFG.H);
+    ctx.restore();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     SCENE 9: RIVALS THREAT (69-81s) - Red rivals chase ARKE
      ═══════════════════════════════════════════════════════════ */
   function renderRivalsThreat(ctx, t, dt) {
     const sceneT = t - TIMELINE.RIVALS_THREAT.start;
@@ -851,11 +1203,14 @@ const Scenes = (() => {
      MAIN SCENE DISPATCHER
      ═══════════════════════════════════════════════════════════ */
   function render(ctx, t, dt) {
-    // Determine current scene
-    if (t < TIMELINE.PIXEL_AWAKEN.start)       renderBlackOpen(ctx, t, dt);
-    else if (t < TIMELINE.ELDER_CALLS.start)    renderPixelAwaken(ctx, t, dt);
-    else if (t < TIMELINE.WORLD_REVEAL.start)   renderElderCalls(ctx, t, dt);
-    else if (t < TIMELINE.RIVALS_THREAT.start)   renderWorldReveal(ctx, t, dt);
+    // Determine current scene from timeline
+    if (t < TIMELINE.PIXEL_AWAKEN.start)        renderBlackOpen(ctx, t, dt);
+    else if (t < TIMELINE.ARKE_CLOSEUP.start)   renderPixelAwaken(ctx, t, dt);
+    else if (t < TIMELINE.ELDER_CLOSEUP.start)   renderArkeCloseup(ctx, t, dt);
+    else if (t < TIMELINE.ELDER_CALLS.start)     renderElderCloseup(ctx, t, dt);
+    else if (t < TIMELINE.EARTH_CROSS.start)     renderElderCalls(ctx, t, dt);
+    else if (t < TIMELINE.RIVAL_CLOSEUP.start)   renderEarthCross(ctx, t, dt);
+    else if (t < TIMELINE.RIVALS_THREAT.start)   renderRivalCloseup(ctx, t, dt);
     else if (t < TIMELINE.POWER_GROW.start)      renderRivalsThreat(ctx, t, dt);
     else if (t < TIMELINE.JOURNEY_MONTAGE.start) renderPowerGrow(ctx, t, dt);
     else if (t < TIMELINE.EARTH_STAKES.start)    renderJourneyMontage(ctx, t, dt);
