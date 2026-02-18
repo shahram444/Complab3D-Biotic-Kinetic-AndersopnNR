@@ -5,6 +5,7 @@ Supports:
   - MPI parallel execution via mpirun/mpiexec
   - Real-time stdout/stderr parsing
   - Progress tracking from iteration output
+  - Auto-save all output to timestamped .out log file
   - Cancellation support
   - Crash diagnostics: analyses XML + kinetics headers on failure
 """
@@ -13,6 +14,7 @@ import os
 import re
 import struct
 import time
+import datetime
 import subprocess
 from pathlib import Path
 
@@ -92,6 +94,20 @@ class SimulationRunner(QThread):
             self.output_line.emit(f"Starting: {self._exe}")
 
         self.output_line.emit(f"Working directory: {self._cwd}")
+
+        # Open log file in the output directory (or working dir)
+        log_file = None
+        self._log_path = ""
+        try:
+            output_dir = os.path.join(self._cwd, "output")
+            os.makedirs(output_dir, exist_ok=True)
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            self._log_path = os.path.join(output_dir, f"simulation_{ts}.out")
+            log_file = open(self._log_path, "w", buffering=1)
+            self.output_line.emit(f"Log file: {self._log_path}")
+        except Exception as e:
+            self.output_line.emit(f"WARNING: Could not create log file: {e}")
+
         self.output_line.emit("=" * 60)
 
         t0 = time.time()
@@ -113,6 +129,8 @@ class SimulationRunner(QThread):
                     break
                 line = line.rstrip("\n")
                 self.output_line.emit(line)
+                if log_file:
+                    log_file.write(line + "\n")
                 # Parse iteration progress
                 m = re.search(r"iT\s*=\s*(\d+)", line)
                 if m:
@@ -164,6 +182,13 @@ class SimulationRunner(QThread):
             msg = f"Exited with code {rc} after {hrs}h {mins}m {secs}s"
 
         self.output_line.emit(msg)
+
+        # Close log file
+        if log_file:
+            log_file.write("=" * 60 + "\n")
+            log_file.write(msg + "\n")
+            log_file.close()
+            self.output_line.emit(f"Log saved: {self._log_path}")
 
         # Convert unsigned 32-bit Windows exit codes to signed to avoid
         # OverflowError in Qt Signal(int, str) which expects a C signed int.
