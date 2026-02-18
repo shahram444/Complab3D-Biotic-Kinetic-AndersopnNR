@@ -42,7 +42,7 @@ class PreferencesDialog(QDialog):
 
         exe_row = QHBoxLayout()
         self._exe_path = QLineEdit(self._config.get("complab_executable", ""))
-        self._exe_path.setPlaceholderText("Path to complab3d executable")
+        self._exe_path.setPlaceholderText("Path to complab executable (or leave blank for auto-detect)")
         exe_browse = QPushButton("Browse")
         exe_browse.setFixedWidth(80)
         exe_browse.clicked.connect(self._browse_exe)
