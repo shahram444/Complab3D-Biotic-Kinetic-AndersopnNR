@@ -191,8 +191,8 @@ class DomainPanel(BasePanel):
     def _analyze_dat_file(filepath):
         """Count integer values and detect line structure in a .dat file.
 
-        Handles both binary format (1 byte per voxel, used by the solver)
-        and text format (one integer per line or space-separated).
+        Handles both binary format (1 byte per voxel, from external tools)
+        and text format (one integer per line, used by the C++ solver).
 
         Returns (total_values, nz_hint) where nz_hint is the consistent
         tokens-per-line if > 1, or 0 if one-value-per-line / binary.
