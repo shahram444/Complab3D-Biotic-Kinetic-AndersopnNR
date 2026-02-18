@@ -160,6 +160,10 @@ class CompLaBProject:
     microbiology: MicrobiologySettings = field(default_factory=MicrobiologySettings)
     equilibrium: EquilibriumSettings = field(default_factory=EquilibriumSettings)
     io_settings: IOSettings = field(default_factory=IOSettings)
+    # Kinetics .hh source code (deployed alongside CompLaB.xml on export)
+    template_key: str = ""
+    kinetics_source: str = ""
+    abiotic_kinetics_source: str = ""
 
     def deep_copy(self) -> "CompLaBProject":
         return copy.deepcopy(self)
@@ -185,16 +189,19 @@ class CompLaBProject:
             errors.append("[Path] output_path is empty.")
 
         # ── 2. Simulation mode consistency ──────────────────────────
+        # The C++ solver auto-disables biotic kinetics and skips microbes
+        # in abiotic mode (with a warning, not a hard fail).  Match that
+        # permissive behavior here: warn instead of block.
         sm = self.simulation_mode
         if not sm.biotic_mode and sm.enable_kinetics:
             errors.append(
-                "[Mode] enable_kinetics=true but biotic_mode=false. "
-                "Kinetics requires biotic_mode=true (for Monod kinetics). "
-                "Use enable_abiotic_kinetics for abiotic reactions.")
+                "[Mode] Warning: enable_kinetics=true but biotic_mode=false. "
+                "The solver will ignore biotic kinetics in abiotic mode. "
+                "Consider using enable_abiotic_kinetics instead.")
         if not sm.biotic_mode and len(self.microbiology.microbes) > 0:
             errors.append(
-                "[Mode] biotic_mode=false but microbes are defined. "
-                "Set biotic_mode=true or remove microbes.")
+                "[Mode] Warning: biotic_mode=false but microbes are defined. "
+                "The solver will skip microbe processing in abiotic mode.")
 
         # Flow-only: no substrates is fine (solver only runs NS)
         # Diffusion-only: Pe=0 is fine (pure diffusion, no advection)
@@ -546,5 +553,201 @@ class CompLaBProject:
                     "[Cross-check] All substrates have Neumann BCs and zero initial "
                     "concentration. No substrate source exists - simulation will have "
                     "zero concentrations everywhere.")
+
+        # ── 12. Kinetics .hh cross-validation ─────────────────────────
+        from .kinetics_templates import validate_kinetics_vs_project
+        num_mic = len(self.microbiology.microbes)
+        kin_errors = validate_kinetics_vs_project(
+            biotic_source=self.kinetics_source,
+            abiotic_source=self.abiotic_kinetics_source,
+            num_substrates=num_subs,
+            num_microbes=num_mic,
+            biotic_mode=sm.biotic_mode,
+            enable_kinetics=sm.enable_kinetics,
+            enable_abiotic=sm.enable_abiotic_kinetics,
+        )
+        errors.extend(kin_errors)
+
+        # ── 13. Template key vs current mode consistency ──────────────
+        from .kinetics_templates import get_kinetics_info
+        if self.template_key:
+            tinfo = get_kinetics_info(self.template_key)
+            if tinfo:
+                if tinfo.needs_biotic and not sm.biotic_mode:
+                    errors.append(
+                        f"[Template] Template '{self.template_key}' requires "
+                        f"biotic_mode=true but it is currently false. "
+                        f"The defineKinetics.hh code expects microbes.")
+                if tinfo.needs_biotic and not sm.enable_kinetics:
+                    errors.append(
+                        f"[Template] Template '{self.template_key}' requires "
+                        f"enable_kinetics=true but it is currently false.")
+                if tinfo.needs_abiotic and not sm.enable_abiotic_kinetics:
+                    errors.append(
+                        f"[Template] Template '{self.template_key}' requires "
+                        f"enable_abiotic_kinetics=true but it is currently false.")
+                # Check substrate count vs template expectations
+                if tinfo.biotic_substrate_indices:
+                    needed = max(tinfo.biotic_substrate_indices) + 1
+                    if num_subs < needed:
+                        errors.append(
+                            f"[Template] Template '{self.template_key}' "
+                            f"needs at least {needed} substrate(s) "
+                            f"(uses C[{max(tinfo.biotic_substrate_indices)}]) "
+                            f"but only {num_subs} defined.")
+                if tinfo.abiotic_substrate_indices:
+                    needed = max(tinfo.abiotic_substrate_indices) + 1
+                    if num_subs < needed:
+                        errors.append(
+                            f"[Template] Template '{self.template_key}' "
+                            f"needs at least {needed} substrate(s) "
+                            f"(uses C[{max(tinfo.abiotic_substrate_indices)}]) "
+                            f"but only {num_subs} defined.")
+                if tinfo.biotic_microbe_indices:
+                    needed = max(tinfo.biotic_microbe_indices) + 1
+                    if num_mic < needed:
+                        errors.append(
+                            f"[Template] Template '{self.template_key}' "
+                            f"needs at least {needed} microbe(s) "
+                            f"(uses B[{max(tinfo.biotic_microbe_indices)}]) "
+                            f"but only {num_mic} defined.")
+
+        return errors
+
+    def validate_files(self, work_dir: str) -> List[str]:
+        """File-system validation: geometry file, on-disk .hh files.
+
+        *work_dir* is the project directory (where CompLaB.xml lives).
+        This checks that actual files on disk match the project config.
+        """
+        import os
+        errors: List[str] = []
+        if not work_dir or not os.path.isdir(work_dir):
+            return errors
+
+        sm = self.simulation_mode
+        d = self.domain
+        num_subs = len(self.substrates)
+        num_mic = len(self.microbiology.microbes)
+
+        # ── Geometry file ─────────────────────────────────────────────
+        input_dir = os.path.join(work_dir, self.path_settings.input_path)
+        geom_path = os.path.join(input_dir, d.geometry_filename)
+        # Also check directly in work_dir
+        geom_alt = os.path.join(work_dir, d.geometry_filename)
+
+        found_geom = None
+        if os.path.isfile(geom_path):
+            found_geom = geom_path
+        elif os.path.isfile(geom_alt):
+            found_geom = geom_alt
+
+        if found_geom is None:
+            # Only warn if this is not a flow-only run (flow-only doesn't need geometry)
+            if num_subs > 0 or sm.biotic_mode:
+                errors.append(
+                    f"[Geometry] File not found: '{d.geometry_filename}'\n"
+                    f"  Searched: {geom_path}\n"
+                    f"           {geom_alt}\n"
+                    f"  The solver needs this file. Generate it with "
+                    f"Tools > Geometry Generator.")
+        else:
+            # Check file size vs nx*ny*nz
+            # geometry.dat can be binary (1 byte/voxel) or text (one digit
+            # per line, so 2 bytes/voxel on Unix "\n" or 3 bytes on
+            # Windows "\r\n").
+            try:
+                file_size = os.path.getsize(found_geom)
+                expected = d.nx * d.ny * d.nz
+                valid_sizes = {
+                    expected,          # binary: 1 byte per voxel
+                    expected * 2,      # text Unix: digit + \n
+                    expected * 3,      # text Windows: digit + \r\n
+                }
+                if file_size not in valid_sizes:
+                    ratio = file_size / expected if expected > 0 else 0
+                    errors.append(
+                        f"[Geometry] SIZE MISMATCH: {d.geometry_filename} has "
+                        f"{file_size:,} bytes but nx*ny*nz = "
+                        f"{d.nx}*{d.ny}*{d.nz} = {expected:,}.\n"
+                        f"  Ratio: {ratio:.2f}x (file is "
+                        f"{'too large' if file_size > expected else 'too small'}).\n"
+                        f"  This is the #1 cause of heap corruption crashes!\n"
+                        f"  Fix: change nx/ny/nz to match the file, or "
+                        f"regenerate geometry.dat with correct dimensions.")
+            except OSError as e:
+                errors.append(
+                    f"[Geometry] Cannot read '{found_geom}': {e}")
+
+        # ── On-disk .hh files ─────────────────────────────────────────
+        if sm.enable_kinetics and sm.biotic_mode:
+            biotic_path = os.path.join(work_dir, "defineKinetics.hh")
+            if not os.path.isfile(biotic_path):
+                errors.append(
+                    f"[Kinetics] defineKinetics.hh not found in {work_dir}.\n"
+                    f"  Biotic kinetics is enabled - the solver needs this file.\n"
+                    f"  Export CompLaB.xml to deploy it, or use "
+                    f"Tools > Kinetics Editor to create one.")
+
+        if sm.enable_abiotic_kinetics:
+            abiotic_path = os.path.join(work_dir, "defineAbioticKinetics.hh")
+            if not os.path.isfile(abiotic_path):
+                errors.append(
+                    f"[Kinetics] defineAbioticKinetics.hh not found in "
+                    f"{work_dir}.\n"
+                    f"  Abiotic kinetics is enabled - the solver needs this "
+                    f"file.\n  Export CompLaB.xml to deploy it, or use "
+                    f"Tools > Kinetics Editor to create one.")
+
+        # ── On-disk XML consistency check ────────────────────────────
+        xml_path = os.path.join(work_dir, "CompLaB.xml")
+        if os.path.isfile(xml_path):
+            try:
+                import xml.etree.ElementTree as ET
+                tree = ET.parse(xml_path)
+                root = tree.getroot()
+
+                # Check substrate count
+                chem = root.find("chemistry")
+                if chem is not None:
+                    xml_nsubs_el = chem.find("number_of_substrates")
+                    if xml_nsubs_el is not None and xml_nsubs_el.text:
+                        xml_nsubs = int(xml_nsubs_el.text.strip())
+                        if xml_nsubs != num_subs:
+                            errors.append(
+                                f"[XML Sync] On-disk CompLaB.xml has "
+                                f"number_of_substrates={xml_nsubs} but GUI "
+                                f"has {num_subs}. Re-export XML before running.")
+
+                # Check microbe count
+                mb = root.find("microbiology")
+                if mb is not None:
+                    xml_nmic_el = mb.find("number_of_microbes")
+                    if xml_nmic_el is not None and xml_nmic_el.text:
+                        xml_nmic = int(xml_nmic_el.text.strip())
+                        if xml_nmic != num_mic:
+                            errors.append(
+                                f"[XML Sync] On-disk CompLaB.xml has "
+                                f"number_of_microbes={xml_nmic} but GUI "
+                                f"has {num_mic}. Re-export XML before running.")
+
+                # Check domain dimensions
+                lb = root.find("LB_numerics")
+                if lb is not None:
+                    dom = lb.find("domain")
+                    if dom is not None:
+                        for dim_name in ("nx", "ny", "nz"):
+                            dim_el = dom.find(dim_name)
+                            if dim_el is not None and dim_el.text:
+                                xml_val = int(dim_el.text.strip())
+                                gui_val = getattr(d, dim_name)
+                                if xml_val != gui_val:
+                                    errors.append(
+                                        f"[XML Sync] On-disk CompLaB.xml has "
+                                        f"{dim_name}={xml_val} but GUI has "
+                                        f"{gui_val}. Re-export XML before "
+                                        f"running.")
+            except Exception:
+                pass  # XML parsing failed - not critical for validation
 
         return errors

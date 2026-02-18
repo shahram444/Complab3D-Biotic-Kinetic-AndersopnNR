@@ -1,5 +1,6 @@
 """Geometry 2D slice preview widget using matplotlib."""
 
+import os
 import numpy as np
 from pathlib import Path
 
@@ -109,9 +110,14 @@ class GeometryPreviewWidget(QWidget):
     def load_geometry(self, filepath: str, nx: int, ny: int, nz: int):
         """Load a .dat geometry file and display the middle slice."""
         try:
-            raw = np.loadtxt(filepath, dtype=int)
-            flat = raw.flatten()
             expected = nx * ny * nz
+            file_size = os.path.getsize(filepath)
+            if file_size == expected:
+                # Binary format: 1 byte per voxel
+                flat = np.fromfile(filepath, dtype=np.uint8)
+            else:
+                # Text format: one digit per line
+                flat = np.loadtxt(filepath, dtype=int).flatten()
             if flat.size != expected:
                 self._info_lbl.setText(
                     f"Size mismatch: file has {flat.size} values, "

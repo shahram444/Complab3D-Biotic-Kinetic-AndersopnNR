@@ -9,6 +9,7 @@ from .project import (
     MicrobiologySettings, EquilibriumSettings, DomainSettings,
     FluidSettings, IterationSettings, IOSettings, PathSettings,
 )
+from .kinetics_templates import get_kinetics_info
 
 # Template registry: {key: (display_name, description, factory_function)}
 TEMPLATES = {}
@@ -27,9 +28,17 @@ def get_template_list():
 
 
 def create_from_template(key: str) -> CompLaBProject:
+    """Create a project from template, including matching kinetics .hh code."""
     if key not in TEMPLATES:
         return CompLaBProject()
-    return TEMPLATES[key][2]()
+    project = TEMPLATES[key][2]()
+    # Attach matching kinetics source code
+    project.template_key = key
+    info = get_kinetics_info(key)
+    if info:
+        project.kinetics_source = info.biotic_hh or ""
+        project.abiotic_kinetics_source = info.abiotic_hh or ""
+    return project
 
 
 def _default_substrates_5():
@@ -177,12 +186,18 @@ def _abiotic_reversible():
 
 
 @_register("biofilm_sessile", "Biofilm - Sessile (CA)",
-           "Biotic simulation with CA sessile biofilm and Monod kinetics.")
+           "Simple biofilm: 1 substrate (DOC), 1 microbe (CA). "
+           "Matches kinetics/05_biofilm_single_substrate/.")
 def _biofilm_sessile():
     p = CompLaBProject(name="Biofilm Sessile")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True)
-    p.substrates = _default_substrates_5()
+    p.substrates = [
+        Substrate(name="DOC", initial_concentration=0.1,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=0.1, right_boundary_condition=0.0),
+    ]
     p.domain.pore = "2"
     p.domain.solid = "0"
     p.domain.bounce_back = "1"
@@ -196,10 +211,10 @@ def _biofilm_sessile():
                 reaction_type="kinetics",
                 material_number="3 6",
                 initial_densities="99.0 99.0",
-                decay_coefficient=1e-9,
+                decay_coefficient=1e-7,
                 viscosity_ratio_in_biofilm=10.0,
-                half_saturation_constants="1e-5 0.0 0.0 0.0 0.0",
-                maximum_uptake_flux="2.5 0.0 0.0 0.0 0.0",
+                half_saturation_constants="1e-5",
+                maximum_uptake_flux="2.5",
                 left_boundary_type="Neumann",
                 right_boundary_type="Neumann",
             ),
@@ -209,16 +224,19 @@ def _biofilm_sessile():
 
 
 @_register("planktonic", "Planktonic Bacteria (LBM)",
-           "Biotic simulation with planktonic bacteria solved via LBM.")
+           "Simple planktonic: 1 substrate (DOC), 1 microbe (LBM). "
+           "Matches kinetics/06_planktonic_single_substrate/.")
 def _planktonic():
     p = CompLaBProject(name="Planktonic")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True)
     p.path_settings.output_path = "output_planktonic"
-    p.substrates = _default_substrates_5()
-    # Planktonic: same diffusion in pore and biofilm
-    for s in p.substrates:
-        s.diffusion_in_biofilm = s.diffusion_in_pore
+    p.substrates = [
+        Substrate(name="DOC", initial_concentration=0.1,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=0.1, right_boundary_condition=0.0),
+    ]
     p.microbiology = MicrobiologySettings(
         maximum_biomass_density=100.0,
         thrd_biofilm_fraction=0.1,
@@ -229,10 +247,10 @@ def _planktonic():
                 reaction_type="kinetics",
                 material_number="",
                 initial_densities="10.0",
-                decay_coefficient=1e-9,
+                decay_coefficient=1e-7,
                 viscosity_ratio_in_biofilm=1.0,
-                half_saturation_constants="1e-5 0.0 0.0 0.0 0.0",
-                maximum_uptake_flux="2.5 0.0 0.0 0.0 0.0",
+                half_saturation_constants="1e-5",
+                maximum_uptake_flux="2.5",
                 left_boundary_type="Dirichlet",
                 right_boundary_type="Neumann",
                 left_boundary_condition=10.0,
@@ -378,4 +396,21 @@ def _full_coupled():
         ],
         log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
     )
+    return p
+
+
+@_register("scratch", "Start from Scratch",
+           "Blank project with empty kinetics templates. "
+           "Configure everything yourself from the ground up.")
+def _scratch():
+    p = CompLaBProject(name="Custom Project")
+    p.simulation_mode = SimulationMode(
+        biotic_mode=False, enable_kinetics=False,
+        enable_abiotic_kinetics=False)
+    p.substrates = [
+        Substrate(name="substrate_0", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=1.0, right_boundary_condition=0.0),
+    ]
     return p
