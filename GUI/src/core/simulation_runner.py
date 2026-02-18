@@ -47,10 +47,20 @@ class SimulationRunner(QThread):
         self._mpi_command = mpi_command
 
     def run(self):
-        if not os.path.isfile(self._exe):
-            self.output_line.emit(f"ERROR: Executable not found: {self._exe}")
-            self.finished_signal.emit(-1, "Executable not found")
-            return
+        import shutil as _shutil
+
+        # Resolve the executable: accept both file paths and command names
+        exe = self._exe
+        if not os.path.isfile(exe):
+            resolved = _shutil.which(exe)
+            if resolved:
+                exe = resolved
+            else:
+                self.output_line.emit(
+                    f"ERROR: Executable not found: {self._exe}")
+                self.finished_signal.emit(-1, "Executable not found")
+                return
+        self._exe = exe
 
         # Ensure executable permission on Unix
         if os.name != "nt" and not os.access(self._exe, os.X_OK):
