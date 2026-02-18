@@ -6,3 +6,9 @@ __pycache__/
 build/
 complab
 complab.exe
+
+# Solver output artifacts
+*.vti
+*.chk
+*.out
+GUI/output/

@@ -545,42 +545,40 @@ class CompLaBMainWindow(QMainWindow):
 
     # ── Simulation ──────────────────────────────────────────────────
 
-    def _ensure_binary_geometry(self, work_dir: str):
-        """Convert text-format geometry.dat to binary if needed.
+    def _ensure_text_geometry(self, work_dir: str):
+        """Ensure geometry.dat is in TEXT format (one integer per line).
 
-        The C++ solver expects raw bytes (1 byte per voxel).  Geometry
-        files created by older versions or external tools may be in text
-        format (one ASCII digit per line).  Detect and convert in-place.
+        The C++ solver reads geometry via Palabos ``>>`` operator which
+        expects whitespace-separated integers (text), NOT raw bytes.
+        If a binary file is detected, convert it to text in-place.
         """
         import numpy as np
 
         d = self._project.domain
         geom_name = d.geometry_filename or "geometry.dat"
         for candidate in [
-            os.path.join(work_dir, geom_name),
             os.path.join(work_dir, "input", geom_name),
+            os.path.join(work_dir, geom_name),
         ]:
-            if os.path.isfile(candidate):
-                expected = d.nx * d.ny * d.nz
-                file_size = os.path.getsize(candidate)
-                if file_size == expected:
-                    return  # already binary
-                # Text format: try to convert
+            if not os.path.isfile(candidate):
+                continue
+            expected = d.nx * d.ny * d.nz
+            file_size = os.path.getsize(candidate)
+
+            # If file size == expected, it is likely raw binary (1 byte/voxel).
+            # Text format would be larger (at least 2 bytes per value: digit + newline).
+            if file_size == expected:
                 try:
-                    raw = np.loadtxt(candidate, dtype=np.uint8).flatten()
-                    if raw.size == expected:
-                        raw.tofile(candidate)
+                    raw = np.fromfile(candidate, dtype=np.uint8)
+                    if raw.max() <= 10 and raw.size == expected:
+                        np.savetxt(candidate, raw, fmt="%d")
                         self._console.log_info(
-                            f"Converted {geom_name} from text to binary "
-                            f"({file_size} -> {expected} bytes)")
-                    else:
-                        self._console.log_warning(
-                            f"Geometry has {raw.size} values but expected "
-                            f"{expected} (nx*ny*nz). Cannot auto-convert.")
+                            f"Converted {geom_name} from binary to text "
+                            f"({file_size} -> {os.path.getsize(candidate)} bytes)")
                 except Exception as e:
                     self._console.log_warning(
                         f"Could not auto-convert geometry: {e}")
-                return
+            return
 
     def _deploy_geometry(self, work_dir: str):
         """Ensure geometry file exists in the input/ subdirectory.
@@ -703,8 +701,8 @@ class CompLaBMainWindow(QMainWindow):
         # Ensure geometry file is in the input/ subdirectory where C++ expects it
         self._deploy_geometry(work_dir)
 
-        # Auto-convert text-format geometry.dat to binary if needed
-        self._ensure_binary_geometry(work_dir)
+        # Ensure geometry is in text format (the C++ solver reads text, not binary)
+        self._ensure_text_geometry(work_dir)
 
         # Pre-run validation gate: data-model + file-system checks
         self._load_kinetics_from_disk_if_empty()
