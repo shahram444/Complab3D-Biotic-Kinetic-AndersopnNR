@@ -560,24 +560,21 @@ BIOFILM_FUNCS = {
 # ── File I/O ──────────────────────────────────────────────────────────
 
 def save_dat(geometry, filepath):
-    """Save geometry in CompLaB3D binary .dat format (1 byte per voxel).
+    """Save geometry in CompLaB3D text .dat format (one integer per line).
 
-    The C++ solver reads raw bytes: each byte is a material number
-    (0=solid, 1=bounce-back, 2=pore).  Loop order is x→z→y
-    (y varies fastest) to match the solver's read order.
+    The C++ solver reads geometry via Palabos ``>>`` operator which expects
+    whitespace-separated integers in text format.  Loop order is x→y→z
+    (z varies fastest) to match the Palabos natural iteration order.
+
+    All nx*ny*nz values are written; the solver reads (nx-2) interior
+    x-slices and mirrors the first/last to the boundaries.
     """
     nx, ny, nz = geometry.shape
     os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
     import numpy as np
-    # Build flat array in x→z→y order (y fastest)
-    flat = np.empty(nx * ny * nz, dtype=np.uint8)
-    idx = 0
-    for x in range(nx):
-        for z in range(nz):
-            for y in range(ny):
-                flat[idx] = geometry[x, y, z]
-                idx += 1
-    flat.tofile(filepath)
+    # Flatten in x→y→z order (Palabos natural order)
+    flat = geometry.reshape(-1)  # numpy default: C-order = x→y→z
+    np.savetxt(filepath, flat, fmt="%d")
     return nx * ny * nz
 
 

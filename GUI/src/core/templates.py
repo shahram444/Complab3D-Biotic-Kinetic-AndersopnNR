@@ -73,9 +73,16 @@ def _default_substrates_5():
            "Navier-Stokes flow simulation only (no substrates defined).")
 def _flow_only():
     p = CompLaBProject(name="Flow Only")
-    p.fluid.delta_P = 2e-3
-    p.fluid.peclet = 0.0
-    # No substrates → solver only runs NS flow
+    p.simulation_mode = SimulationMode(
+        biotic_mode=False, enable_kinetics=False,
+        enable_abiotic_kinetics=False)
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
+    p.iteration = IterationSettings(
+        ns_max_iT1=100000, ns_max_iT2=100000,
+        ns_converge_iT1=1e-8, ns_converge_iT2=1e-6,
+        ade_max_iT=0)  # No ADE (no substrates)
+    # No substrates, no microbes → solver runs NS then exits (pure flow mode)
     return p
 
 
@@ -110,8 +117,11 @@ def _diffusion_only():
            "Flow + advection-diffusion transport, no reactions.")
 def _transport_only():
     p = CompLaBProject(name="Transport")
-    p.fluid.delta_P = 2e-3
-    p.fluid.peclet = 1.0
+    p.simulation_mode = SimulationMode(
+        biotic_mode=False, enable_kinetics=False,
+        enable_abiotic_kinetics=False)
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
         Substrate(name="Tracer", initial_concentration=0.0,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
