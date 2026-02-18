@@ -186,12 +186,18 @@ def _abiotic_reversible():
 
 
 @_register("biofilm_sessile", "Biofilm - Sessile (CA)",
-           "Biotic simulation with CA sessile biofilm and Monod kinetics.")
+           "Simple biofilm: 1 substrate (DOC), 1 microbe (CA). "
+           "Matches kinetics/05_biofilm_single_substrate/.")
 def _biofilm_sessile():
     p = CompLaBProject(name="Biofilm Sessile")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True)
-    p.substrates = _default_substrates_5()
+    p.substrates = [
+        Substrate(name="DOC", initial_concentration=0.1,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=0.1, right_boundary_condition=0.0),
+    ]
     p.domain.pore = "2"
     p.domain.solid = "0"
     p.domain.bounce_back = "1"
@@ -205,10 +211,10 @@ def _biofilm_sessile():
                 reaction_type="kinetics",
                 material_number="3 6",
                 initial_densities="99.0 99.0",
-                decay_coefficient=1e-9,
+                decay_coefficient=1e-7,
                 viscosity_ratio_in_biofilm=10.0,
-                half_saturation_constants="1e-5 0.0 0.0 0.0 0.0",
-                maximum_uptake_flux="2.5 0.0 0.0 0.0 0.0",
+                half_saturation_constants="1e-5",
+                maximum_uptake_flux="2.5",
                 left_boundary_type="Neumann",
                 right_boundary_type="Neumann",
             ),
@@ -218,16 +224,19 @@ def _biofilm_sessile():
 
 
 @_register("planktonic", "Planktonic Bacteria (LBM)",
-           "Biotic simulation with planktonic bacteria solved via LBM.")
+           "Simple planktonic: 1 substrate (DOC), 1 microbe (LBM). "
+           "Matches kinetics/06_planktonic_single_substrate/.")
 def _planktonic():
     p = CompLaBProject(name="Planktonic")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True)
     p.path_settings.output_path = "output_planktonic"
-    p.substrates = _default_substrates_5()
-    # Planktonic: same diffusion in pore and biofilm
-    for s in p.substrates:
-        s.diffusion_in_biofilm = s.diffusion_in_pore
+    p.substrates = [
+        Substrate(name="DOC", initial_concentration=0.1,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=0.1, right_boundary_condition=0.0),
+    ]
     p.microbiology = MicrobiologySettings(
         maximum_biomass_density=100.0,
         thrd_biofilm_fraction=0.1,
@@ -238,10 +247,10 @@ def _planktonic():
                 reaction_type="kinetics",
                 material_number="",
                 initial_densities="10.0",
-                decay_coefficient=1e-9,
+                decay_coefficient=1e-7,
                 viscosity_ratio_in_biofilm=1.0,
-                half_saturation_constants="1e-5 0.0 0.0 0.0 0.0",
-                maximum_uptake_flux="2.5 0.0 0.0 0.0 0.0",
+                half_saturation_constants="1e-5",
+                maximum_uptake_flux="2.5",
                 left_boundary_type="Dirichlet",
                 right_boundary_type="Neumann",
                 left_boundary_condition=10.0,
