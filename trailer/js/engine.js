@@ -123,7 +123,11 @@ const Engine = (() => {
     // Brief fade-to-black between major sections
     const transitions = [
       { t: TIMELINE.PIXEL_AWAKEN.end - 0.3, dur: 0.6 },
+      { t: TIMELINE.ARKE_CLOSEUP.end - 0.3, dur: 0.6 },
+      { t: TIMELINE.ELDER_CLOSEUP.end - 0.3, dur: 0.6 },
       { t: TIMELINE.ELDER_CALLS.end - 0.3, dur: 0.6 },
+      { t: TIMELINE.EARTH_CROSS.end - 0.3, dur: 0.6 },
+      { t: TIMELINE.RIVAL_CLOSEUP.end - 0.2, dur: 0.4 },
       { t: TIMELINE.RIVALS_THREAT.end - 0.2, dur: 0.4 },
       { t: TIMELINE.POWER_GROW.end - 0.3, dur: 0.6 },
       { t: TIMELINE.JOURNEY_MONTAGE.end - 0.2, dur: 0.4 },
