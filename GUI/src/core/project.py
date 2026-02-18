@@ -653,9 +653,10 @@ class CompLaBProject:
                     f"Tools > Geometry Generator.")
         else:
             # Check file size vs nx*ny*nz
-            # geometry.dat can be binary (1 byte/voxel) or text (one digit
-            # per line, so 2 bytes/voxel on Unix "\n" or 3 bytes on
-            # Windows "\r\n").
+            # geometry.dat is text (one integer per line).  For single-digit
+            # material numbers: 2 bytes/voxel on Unix ("\n") or 3 bytes
+            # on Windows ("\r\n").  Also accept binary (1 byte/voxel)
+            # from external tools; the GUI auto-converts to text at runtime.
             try:
                 file_size = os.path.getsize(found_geom)
                 expected = d.nx * d.ny * d.nz
