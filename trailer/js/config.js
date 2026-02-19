@@ -89,23 +89,23 @@ const SPRITES = {
 
 /* ── ENVIRONMENT PALETTES (exact from game) ── */
 const ENV_PAL = [
-  { name: 'The Soil Frontier', sub: 'Where Life Begins', depth: '0 - 2 meters',
+  { name: 'The Soil Frontier', sub: 'Where Life Begins', desc: 'Near the surface, among roots and minerals',
     grain: '#7a5a2a', grain_l: '#a48a5a', grain_d: '#4a3a1a', grain_a: '#c4a060',
     pore: '#0c1420', pore_l: '#142030', water: '#1a3a60', water_l: '#3060a0',
     bg: '#060c18', toxic: '#8a3a8a', toxic_g: '#c060c0' },
-  { name: 'The Deep Sediment', sub: 'Darkness Below', depth: '100 - 500 meters',
+  { name: 'The Deep Sediment', sub: 'Darkness Below', desc: 'Deep underground, in compressed ancient rock',
     grain: '#4a3a2a', grain_l: '#6a5a4a', grain_d: '#2a1a0a', grain_a: '#5a4a3a',
     pore: '#060608', pore_l: '#0c0c14', water: '#0a1428', water_l: '#142038',
     bg: '#030306', toxic: '#6a2a2a', toxic_g: '#a04040' },
-  { name: 'The Methane Seeps', sub: 'Rivers of Fire', depth: '200 - 1000 meters',
+  { name: 'The Methane Seeps', sub: 'Rivers of Fire', desc: 'Where methane escapes through fractured rock',
     grain: '#3a3040', grain_l: '#5a5060', grain_d: '#2a2030', grain_a: '#4a4050',
     pore: '#0a0610', pore_l: '#140c1c', water: '#1a1438', water_l: '#2a1a48',
     bg: '#06040a', toxic: '#7a1a6a', toxic_g: '#b040a0' },
-  { name: 'The Permafrost Edge', sub: 'The Melting World', depth: '1 - 50 meters (Arctic)',
+  { name: 'The Permafrost Edge', sub: 'The Melting World', desc: 'Frozen ground in polar and subpolar regions',
     grain: '#5a6a7a', grain_l: '#8a9aaa', grain_d: '#3a4a5a', grain_a: '#aabaca',
     pore: '#080c14', pore_l: '#0c1420', water: '#1a3050', water_l: '#3a5a8a',
     bg: '#040810', toxic: '#4a7a3a', toxic_g: '#70b050' },
-  { name: 'The Hydrothermal Realm', sub: 'Earth\'s Furnace', depth: '2000 - 4000 meters',
+  { name: 'The Hydrothermal Realm', sub: 'Earth\'s Furnace', desc: 'Near volcanic vents on the ocean floor',
     grain: '#2a2a3a', grain_l: '#4a4a5a', grain_d: '#1a1a2a', grain_a: '#3a3a4a',
     pore: '#0a0608', pore_l: '#14080c', water: '#281418', water_l: '#3a1a20',
     bg: '#060304', toxic: '#8a4a1a', toxic_g: '#c07030' }
@@ -196,11 +196,11 @@ const NARRATION = [
 
   // EARTH CROSS-SECTION — each world intro
   { t: 39.0, dur: 5.0, text: 'A WORLD INVISIBLE\nTO THE NAKED EYE', style: 'title' },
-  { t: 44.0, dur: 4.5, text: 'THE SOIL FRONTIER\nDepth: 0 - 2 meters', style: 'chapter' },
-  { t: 48.5, dur: 4.5, text: 'THE DEEP SEDIMENT\nDepth: 100 - 500 meters', style: 'chapter' },
-  { t: 53.0, dur: 4.0, text: 'THE METHANE SEEPS\nDepth: 200 - 1000 meters', style: 'chapter' },
-  { t: 57.0, dur: 3.5, text: 'THE PERMAFROST EDGE\nArctic: 1 - 50 meters', style: 'chapter' },
-  { t: 60.5, dur: 3.5, text: 'THE HYDROTHERMAL REALM\nDepth: 2000 - 4000 meters', style: 'chapter' },
+  { t: 44.0, dur: 4.5, text: 'THE SOIL FRONTIER\nJust beneath our feet, where life begins', style: 'chapter' },
+  { t: 48.5, dur: 4.5, text: 'THE DEEP SEDIMENT\nBuried in silence far below the surface', style: 'chapter' },
+  { t: 53.0, dur: 4.0, text: 'THE METHANE SEEPS\nWhere ancient gases escape from within', style: 'chapter' },
+  { t: 57.0, dur: 3.5, text: 'THE PERMAFROST EDGE\nFrozen ground at the edge of the Arctic', style: 'chapter' },
+  { t: 60.5, dur: 3.5, text: 'THE HYDROTHERMAL REALM\nNear volcanic vents deep in the ocean', style: 'chapter' },
 
   // RIVAL CLOSEUP
   { t: 64.0, dur: 5.0, text: 'THE RIVALS', style: 'impact' },
