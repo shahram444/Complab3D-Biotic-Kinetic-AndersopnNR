@@ -419,8 +419,9 @@ const Scenes = (() => {
     const earthCenterX = CFG.W * 0.5;
     const earthCenterY = CFG.H * 0.5;
 
-    // Earth fills almost the entire screen height (with small margin)
-    const maxR = CFG.H * 0.46;
+    // Earth fills the visible area (letterbox bars cover top/bottom 12%)
+    // Visible height ~820px so max radius ~370 to keep Earth fully visible
+    const maxR = CFG.H * 0.34;
     let earthR, crossPhase;
     if (sceneT < 5) {
       earthR = maxR * 0.94 + sceneT * (maxR * 0.012);
