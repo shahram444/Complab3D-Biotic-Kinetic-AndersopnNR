@@ -1,0 +1,65 @@
+<h2>ARKE: Guardians of Earth</h2>
+
+<p><strong>Play as a microbe. Save the planet.</strong></p>
+
+<p>
+I built a 3D biogeochemical reactive transport simulator (<a href="https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR">CompLaB3D</a>) for my research at the University of Georgia. It models how microorganisms grow inside soil pores, consume substrates, form biofilms, and alter fluid flow &mdash; all at scales smaller than a grain of sand.
+</p>
+
+<p>
+The problem? Explaining pore-scale biogeochemistry to non-scientists &mdash; or even to scientists in different fields &mdash; has always been surprisingly difficult. These processes are invisible to the naked eye and deeply abstract.
+</p>
+
+<p>
+<strong>So I turned my research into a game.</strong>
+</p>
+
+<h3>What is ARKE?</h3>
+
+<p>
+You play as <strong>ARKE</strong> (from Greek <em>arkh&#275;</em> = beginning/origin, the root of "Archaea"), a tiny methanotrophic archaeon living inside the pore spaces between soil and rock grains deep underground. Your mission: <strong>eat substrates, grow biomass, place colonies, and prevent greenhouse gases (methane CH<sub>4</sub> and nitrous oxide N<sub>2</sub>O) from reaching the atmosphere.</strong>
+</p>
+
+<h3>Real Science, Real Gameplay</h3>
+
+<p>Everything in ARKE is based on real computational models from the CompLaB3D research framework:</p>
+
+<ul>
+<li><strong>Fluid flow</strong> &mdash; Water flows through pore channels driven by pressure gradients, simulated using the Lattice Boltzmann Method (LBM)</li>
+<li><strong>Microbial growth</strong> &mdash; Your growth follows Monod kinetics: &mu; = &mu;<sub>max</sub> &times; C / (K<sub>s</sub> + C)</li>
+<li><strong>Biofilm expansion</strong> &mdash; Colonies spread using cellular automata, just like in the real simulator</li>
+<li><strong>Equilibrium chemistry</strong> &mdash; Chemical reactions (acid-base, carbonate speciation) solved with Newton-Raphson methods</li>
+<li><strong>Pore geometry</strong> &mdash; The game world is a real pore network extracted from simulated subsurface environments</li>
+</ul>
+
+<h3>How to Play</h3>
+
+<table>
+<tr><td><strong>Arrow Keys / WASD</strong></td><td>Move through pore spaces</td></tr>
+<tr><td><strong>SPACE</strong></td><td>Divide &mdash; place a colony when your Growth bar is full</td></tr>
+<tr><td><strong>SHIFT (hold)</strong></td><td>Ride the flow &mdash; travel along water currents at 2x speed</td></tr>
+<tr><td><strong>Q</strong></td><td>Toggle Science Mode overlay (flow arrows &amp; directions)</td></tr>
+<tr><td><strong>ESC</strong></td><td>Pause</td></tr>
+<tr><td><strong>M</strong></td><td>Mute/Unmute</td></tr>
+</table>
+
+<h3>Educational Use</h3>
+
+<p>
+ARKE was designed to also serve as an <strong>educational tool</strong> for:
+</p>
+
+<ul>
+<li>High school &amp; undergraduate courses in environmental science, hydrogeology, microbiology, and chemical engineering</li>
+<li>Classroom demonstrations of subsurface biogeochemical processes</li>
+<li>Science outreach &mdash; making the invisible visible and the abstract tangible</li>
+</ul>
+
+<p><em>If you're an educator, feel free to use ARKE in your teaching. No permission needed.</em></p>
+
+<hr>
+
+<p>
+<strong>Developed at the Meile Lab, University of Georgia</strong><br>
+Based on the CompLaB3D reactive transport research framework
+</p>

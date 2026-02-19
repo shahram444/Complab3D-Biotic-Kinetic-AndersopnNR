@@ -1,0 +1,72 @@
+========================================
+  ARKE: Guardians of Earth — itch.io Page Setup Guide
+========================================
+
+TITLE:
+  ARKE: Guardians of Earth
+
+SHORT DESCRIPTION / TAGLINE (max 180 chars):
+  Play as a microbe inside soil pores. Eat substrates, grow biofilms, and stop greenhouse gases. Based on real biogeochemical research.
+
+URL SLUG:
+  arke-guardians-of-earth
+
+---------- CLASSIFICATION ----------
+
+KIND OF PROJECT:    Game
+RELEASE STATUS:     Released
+PRICING:            Free / Name your own price
+GENRE:              Educational, Simulation, Strategy
+PLATFORM:           Web (HTML5)
+
+---------- TAGS (up to 10) ----------
+
+1.  science
+2.  educational
+3.  microbiology
+4.  simulation
+5.  environment
+6.  biofilm
+7.  pore-scale
+8.  climate
+9.  puzzle
+10. research
+
+---------- COMMUNITY ----------
+
+COMMUNITY:          Comments enabled
+VISIBILITY:         Public
+
+---------- ACCESSIBILITY ----------
+
+INPUT METHODS:      Keyboard
+LANGUAGES:          English
+ACCESSIBILITY:      Subtitles / Captions (dialogue text)
+
+---------- PAGE DESCRIPTION ----------
+
+(Copy/paste from page_description.html — use the HTML version for itch.io's rich text editor)
+
+---------- COVER IMAGE ----------
+
+Use: docs/ARKE_cover_art.png (already in the repository)
+Recommended itch.io cover size: 630 x 500 px
+
+---------- SCREENSHOTS ----------
+
+Recommended 3-5 screenshots showing:
+  1. The pore world with ARKE moving through channels
+  2. Science Mode overlay with flow arrows
+  3. Colony placement / biofilm growth
+  4. HUD showing HP, Energy, Growth bars
+  5. A boss encounter or greenhouse gas event
+
+---------- TRAILER VIDEO ----------
+
+Upload: ARKE_Trailer_720p.mp4 (already in the repository)
+Or embed from YouTube if uploaded there.
+
+---------- DEVLOG / ABOUT ----------
+
+Title:  "From Research Simulator to Game"
+Body:   (see devlog_post.md)
