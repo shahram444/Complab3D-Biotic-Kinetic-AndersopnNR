@@ -384,9 +384,10 @@ const Scenes = (() => {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     SCENE 7: EARTH CROSS-SECTION (38-63s) — High-res Earth
-     with scientifically accurate cross-section showing
-     where each of the 5 environments exists
+     SCENE 7: EARTH CROSS-SECTION (38-63s)
+     Science-paper grade Earth cross-section diagram.
+     Earth is BIG and fully visible — high resolution with
+     realistic geological layers, textures, and annotations.
      ═══════════════════════════════════════════════════════════ */
   function renderEarthCross(ctx, t, dt) {
     const sceneT = t - TIMELINE.EARTH_CROSS.start;
@@ -400,181 +401,339 @@ const Scenes = (() => {
     let seed = 5555;
     const rng = () => { seed = (seed * 16807) % 2147483647; return (seed & 0x7fffffff) / 0x7fffffff; };
     ctx.save();
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 200; i++) {
       const sx = rng() * CFG.W;
       const sy = rng() * CFG.H;
-      const brightness = 0.15 + Math.sin(t * 1.5 + i * 0.4) * 0.1;
+      const brightness = 0.12 + Math.sin(t * 1.2 + i * 0.3) * 0.08;
       ctx.globalAlpha = brightness;
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(sx, sy, 1 + (rng() > 0.85 ? 1 : 0), 1);
+      ctx.fillStyle = i % 15 === 0 ? '#aaccff' : '#ffffff';
+      ctx.fillRect(sx, sy, 1 + (rng() > 0.9 ? 1 : 0), 1);
     }
     ctx.restore();
 
-    // Phase 1 (0-6s): Show full Earth from space, then start zoom
-    // Phase 2 (6-sceneDur): Earth cross-section with environment layers
+    /* ── Phase 1 (0-5s): Full Earth from space — big, beautiful, fully visible
+         Phase 2 (5-8s): Right half peels open to reveal cross-section layers
+         Phase 3 (8+): Full cross-section with labeled environment layers ── */
 
-    const earthCenterX = CFG.W * 0.35;
-    const earthCenterY = CFG.H * 0.5;
+    // Earth is centered-left so labels fit on the right
+    const earthCenterX = CFG.W * 0.32;
+    const earthCenterY = CFG.H * 0.50;
 
-    // Earth radius grows as we "zoom in"
-    const baseR = 220;
-    let earthR, crossVisible;
-    if (sceneT < 6) {
-      // Full Earth view, gentle zoom
-      earthR = baseR + sceneT * 8;
-      crossVisible = 0;
+    // Earth radius — as big as possible while still fully visible
+    const maxR = Math.min(CFG.H * 0.44, CFG.W * 0.28);
+    let earthR, crossPhase;
+    if (sceneT < 5) {
+      // Full Earth, gentle pulse
+      earthR = maxR * 0.92 + sceneT * (maxR * 0.016);
+      crossPhase = 0;
+    } else if (sceneT < 8) {
+      const zoomT = (sceneT - 5) / 3;
+      earthR = maxR;
+      crossPhase = Camera.easeInOut(zoomT);
     } else {
-      // Cross-section view — Earth much bigger
-      const zoomT = Math.min(1, (sceneT - 6) / 3);
-      earthR = baseR + 48 + Camera.easeInOut(zoomT) * 300;
-      crossVisible = Camera.easeInOut(Math.min(1, (sceneT - 6) / 2));
+      earthR = maxR;
+      crossPhase = 1;
     }
 
-    // Draw Earth body (pixelated)
-    const pixSize = Math.max(4, Math.floor(earthR / 50));
+    // Pixel size for Earth rendering
+    const pixSize = 4;
+
+    // Draw the full Earth sphere
     ctx.save();
-    for (let py = -earthR; py < earthR; py += pixSize) {
-      for (let px = -earthR; px < earthR; px += pixSize) {
+    for (let py = -earthR - pixSize; py <= earthR + pixSize; py += pixSize) {
+      for (let px = -earthR - pixSize; px <= earthR + pixSize; px += pixSize) {
         const dist = Math.sqrt(px * px + py * py);
         if (dist > earthR) continue;
-        const nx = px / earthR;
-        const ny = py / earthR;
-        const noise = Math.sin(px * 0.025 + 1) * Math.cos(py * 0.03 + 2) + Math.sin(px * 0.06) * 0.5;
+
+        const nx = px / earthR;  // -1 to 1
+        const ny = py / earthR;  // -1 to 1
+        const nr = dist / earthR; // 0 = center, 1 = surface
+
+        // Is this pixel on the cross-section half (right side)?
+        const isCrossHalf = px > 0 && crossPhase > 0;
+        const crossBlend = isCrossHalf ? Math.min(1, crossPhase * (1 + nx * 2)) : 0;
 
         let col;
-        if (noise > 0.3) col = '#2a6a2a';
-        else if (noise > 0) col = '#3a8a3a';
-        else if (noise > -0.3) col = '#1a4a8a';
-        else col = '#1a3a6a';
-        if (Math.abs(ny) > 0.75) col = '#c0d0e0';
 
-        // Right half becomes cross-section
-        if (crossVisible > 0 && px > -earthR * 0.1) {
-          const depth = (ny + 1) / 2; // 0 at top, 1 at bottom
-          // Find which layer this depth belongs to
-          let layerCol = '#2a1a0a';
-          for (const layer of EARTH_LAYERS) {
-            if (depth >= layer.y && depth < layer.y + layer.h) {
-              layerCol = layer.color;
-              // Highlight environments with glow
-              if (layer.env !== undefined) {
-                const ep = ENV_PAL[layer.env];
-                const pulse = 0.7 + Math.sin(t * 2 + layer.env) * 0.3;
-                layerCol = ep.grain;
-                // Add detail variation
-                const detailNoise = Math.sin(px * 0.08 + py * 0.05) * 0.5;
-                if (detailNoise > 0.2) layerCol = ep.grain_l;
-                if (detailNoise < -0.2) layerCol = ep.grain_d;
-              }
-              break;
+        if (crossBlend < 0.5) {
+          // SURFACE rendering — continents, oceans, ice caps
+          // Use angle around sphere for continent generation
+          const angle = Math.atan2(ny, nx);
+
+          // Multi-octave noise for realistic continent shapes
+          const n1 = Math.sin(angle * 6.3 + 1.2) * Math.cos(ny * 4.7 + 0.8);
+          const n2 = Math.sin(angle * 11.1 + ny * 3.2) * 0.35;
+          const n3 = Math.sin(angle * 2.8 - 0.5) * Math.cos(ny * 7.3) * 0.25;
+          const surfNoise = n1 + n2 + n3;
+
+          // Lighting — gentle 3D shading (light from upper-left)
+          const lightX = -0.3, lightY = -0.4;
+          const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
+          const lightDot = Math.max(0.15, nx * lightX + ny * lightY + nz * 0.7);
+          const shade = 0.5 + lightDot * 0.5;
+
+          // Ice caps at poles
+          if (Math.abs(ny) > 0.78) {
+            const iceShade = Math.floor(190 * shade + 40);
+            col = `rgb(${iceShade},${Math.floor(iceShade * 1.05)},${Math.floor(iceShade * 1.1)})`;
+          }
+          // Atmosphere rim glow at edge
+          else if (nr > 0.94) {
+            const rimFade = (nr - 0.94) / 0.06;
+            const r = Math.floor((30 + rimFade * 50) * shade);
+            const g = Math.floor((80 + rimFade * 60) * shade);
+            const b = Math.floor((160 + rimFade * 40) * shade);
+            col = `rgb(${r},${g},${b})`;
+          }
+          // Land
+          else if (surfNoise > 0.15) {
+            const landDetail = Math.sin(px * 0.06 + py * 0.04) * 0.3;
+            if (surfNoise > 0.5 + landDetail) {
+              // Mountains / highlands
+              const v = Math.floor(60 * shade);
+              col = `rgb(${v + 40},${v + 60},${v + 25})`;
+            } else if (surfNoise > 0.3) {
+              // Forest / green land
+              const v = Math.floor(shade * 50);
+              col = `rgb(${v + 30},${v + 95},${v + 25})`;
+            } else {
+              // Plains
+              const v = Math.floor(shade * 45);
+              col = `rgb(${v + 50},${v + 80},${v + 20})`;
             }
           }
-          // Blend between surface and cross-section
-          const blendFactor = Math.min(1, crossVisible * (1 + px / earthR));
-          if (blendFactor > 0.5) col = layerCol;
+          // Shallow water
+          else if (surfNoise > -0.1) {
+            const v = Math.floor(shade * 50);
+            col = `rgb(${v + 10},${v + 55},${v + 110})`;
+          }
+          // Deep ocean
+          else {
+            const v = Math.floor(shade * 40);
+            col = `rgb(${v + 10},${v + 30},${v + 80})`;
+          }
+        }
+
+        if (crossBlend >= 0.5) {
+          // CROSS-SECTION rendering — geological layers based on radial depth
+          const depthFrac = 1.0 - nr; // 0 at surface, 1 at center
+          col = getLayerColor(depthFrac, px, py, t, nr);
         }
 
         ctx.fillStyle = col;
         ctx.fillRect(earthCenterX + px, earthCenterY + py, pixSize, pixSize);
       }
     }
+    ctx.restore();
 
-    // Earth atmosphere glow
-    ctx.globalAlpha = 0.3;
-    const atmosGrad = ctx.createRadialGradient(earthCenterX, earthCenterY, earthR * 0.95, earthCenterX, earthCenterY, earthR * 1.15);
-    atmosGrad.addColorStop(0, 'rgba(100,180,255,0.3)');
+    // Atmosphere glow ring around the whole Earth
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    const atmosGrad = ctx.createRadialGradient(
+      earthCenterX, earthCenterY, earthR * 0.97,
+      earthCenterX, earthCenterY, earthR * 1.08
+    );
+    atmosGrad.addColorStop(0, 'rgba(100,180,255,0.4)');
+    atmosGrad.addColorStop(0.5, 'rgba(60,120,200,0.12)');
     atmosGrad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = atmosGrad;
     ctx.fillRect(0, 0, CFG.W, CFG.H);
     ctx.restore();
 
-    // Cross-section labels and environment pointers
-    if (crossVisible > 0.5) {
-      const labelAlpha = (crossVisible - 0.5) * 2;
+    // Cross-section cut line (vertical line down the middle of the Earth)
+    if (crossPhase > 0.3) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.5, (crossPhase - 0.3) * 1.5);
+      ctx.strokeStyle = '#aaccdd';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([6, 8]);
+      ctx.beginPath();
+      ctx.moveTo(earthCenterX, earthCenterY - earthR - 15);
+      ctx.lineTo(earthCenterX, earthCenterY + earthR + 15);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
 
-      // Determine which environment to highlight based on timing
-      // 6-25s of cross-section time, 5 environments
+    // Layer boundary arcs (dashed lines at each geological boundary — science paper style)
+    if (crossPhase > 0.5) {
+      const lineAlpha = (crossPhase - 0.5) * 2;
+      ctx.save();
+      ctx.globalAlpha = lineAlpha * 0.25;
+      ctx.strokeStyle = '#889999';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 10]);
+
+      for (const layer of EARTH_LAYERS) {
+        const layerR = earthR * (1.0 - layer.y);
+        if (layerR < 10) continue;
+        ctx.beginPath();
+        // Right half arc only (cross-section side)
+        ctx.arc(earthCenterX, earthCenterY, layerR, -Math.PI * 0.5, Math.PI * 0.5);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    // Environment labels — science paper annotation style (to the right)
+    if (crossPhase > 0.6) {
+      const labelAlpha = Math.min(1, (crossPhase - 0.6) * 2.5);
+
+      // Which environment is active based on timing
       const envPhaseStart = 6;
       const envPhaseDur = (sceneDur - envPhaseStart) / 5;
       const currentEnvIdx = Math.min(4, Math.floor((sceneT - envPhaseStart) / envPhaseDur));
-      const envLocalT = sceneT - envPhaseStart - currentEnvIdx * envPhaseDur;
 
-      // Draw layer labels on the right side
       for (let i = 0; i < EARTH_LAYERS.length; i++) {
         const layer = EARTH_LAYERS[i];
-        const ly = earthCenterY - earthR + layer.y * earthR * 2 + layer.h * earthR;
+        if (layer.env === undefined) continue;
+
+        const ep = ENV_PAL[layer.env];
         const isActive = layer.env === currentEnvIdx;
 
+        // Point on the right side of the Earth at this layer's depth
+        const layerMidR = earthR * (1.0 - layer.y - layer.h * 0.5);
+        const dotX = earthCenterX + layerMidR * 0.85; // slightly inside the right edge
+        const dotAngle = -0.2 + layer.env * 0.22;
+        const dotY = earthCenterY + Math.sin(dotAngle) * layerMidR * 0.6;
+
+        // Label position stacked vertically on the right
+        const labelX = CFG.W * 0.60;
+        const labelY = 90 + layer.env * 175;
+
         ctx.save();
-        ctx.globalAlpha = labelAlpha * (isActive ? 1.0 : 0.25);
+        ctx.globalAlpha = labelAlpha * (isActive ? 1.0 : 0.2);
 
-        // Label line from Earth to text
-        const lineStartX = earthCenterX + earthR * 0.5;
-        const lineEndX = CFG.W * 0.65;
-
-        if (layer.env !== undefined) {
-          ctx.strokeStyle = isActive ? ENV_PAL[layer.env].grain_l : '#444444';
-          ctx.lineWidth = isActive ? 2 : 1;
-          if (isActive) {
-            ctx.shadowColor = ENV_PAL[layer.env].grain_l;
-            ctx.shadowBlur = 10;
-          }
-          ctx.beginPath();
-          ctx.moveTo(lineStartX, ly);
-          ctx.lineTo(lineEndX - 10, ly);
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-
-          // Dot at end
-          ctx.fillStyle = isActive ? ENV_PAL[layer.env].grain_l : '#444444';
-          ctx.fillRect(lineStartX - 3, ly - 3, 6, 6);
-
-          // Environment name
-          ctx.font = isActive ? 'bold 26px "Courier New", monospace' : '20px "Courier New", monospace';
-          ctx.fillStyle = isActive ? '#ffffff' : '#666666';
-          ctx.textAlign = 'left';
-          if (isActive) {
-            ctx.shadowColor = ENV_PAL[layer.env].grain_l;
-            ctx.shadowBlur = 8;
-          }
-          ctx.fillText(ENV_PAL[layer.env].name, lineEndX, ly - 6);
-
-          // Depth info
-          ctx.font = isActive ? '20px "Courier New", monospace' : '16px "Courier New", monospace';
-          ctx.fillStyle = isActive ? '#aabbcc' : '#555555';
-          ctx.shadowBlur = 0;
-          ctx.fillText(ENV_PAL[layer.env].depth || '', lineEndX, ly + 18);
-
-          // Active environment highlight zone on the Earth
-          if (isActive) {
-            const envY1 = earthCenterY - earthR + layer.y * earthR * 2;
-            const envH = layer.h * earthR * 2;
-            const pulse = 0.3 + Math.sin(t * 3) * 0.15;
-            ctx.globalAlpha = pulse;
-            ctx.strokeStyle = ENV_PAL[layer.env].grain_l;
-            ctx.lineWidth = 3;
-            ctx.shadowColor = ENV_PAL[layer.env].grain_l;
-            ctx.shadowBlur = 15;
-            ctx.strokeRect(earthCenterX - earthR * 0.1, envY1, earthR * 1.1, envH);
-          }
+        // Annotation line from dot on Earth to label
+        ctx.strokeStyle = isActive ? ep.grain_l : '#444444';
+        ctx.lineWidth = isActive ? 2 : 1;
+        if (isActive) {
+          ctx.shadowColor = ep.grain_l;
+          ctx.shadowBlur = 8;
         }
+
+        // Dot on the Earth
+        ctx.fillStyle = isActive ? ep.grain_l : '#555555';
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, isActive ? 5 : 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Line with elbow joint
+        ctx.beginPath();
+        ctx.moveTo(dotX, dotY);
+        const elbowX = labelX - 20;
+        ctx.lineTo(elbowX, labelY + 6);
+        ctx.lineTo(labelX - 5, labelY + 6);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Environment name
+        ctx.font = isActive ? 'bold 24px "Courier New", monospace' : '18px "Courier New", monospace';
+        ctx.fillStyle = isActive ? '#ffffff' : '#666666';
+        ctx.textAlign = 'left';
+        if (isActive) {
+          ctx.shadowColor = ep.grain_l;
+          ctx.shadowBlur = 10;
+        }
+        ctx.fillText(ep.name, labelX, labelY);
+        ctx.shadowBlur = 0;
+
+        // Description (safe text)
+        ctx.font = isActive ? '17px "Courier New", monospace' : '14px "Courier New", monospace';
+        ctx.fillStyle = isActive ? '#99aabb' : '#444444';
+        ctx.fillText(ep.desc || '', labelX, labelY + 24);
+
+        // Active band indicator
+        if (isActive) {
+          ctx.fillStyle = ep.grain_l;
+          ctx.globalAlpha = 0.5 + Math.sin(t * 3) * 0.3;
+          ctx.fillRect(labelX - 6, labelY - 14, 3, 42);
+
+          // Highlight ring on the Earth for this layer
+          ctx.globalAlpha = 0.25 + Math.sin(t * 3) * 0.15;
+          ctx.strokeStyle = ep.grain_l;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = ep.grain_l;
+          ctx.shadowBlur = 15;
+          const innerR = earthR * (1.0 - layer.y - layer.h);
+          const outerR = earthR * (1.0 - layer.y);
+          ctx.beginPath();
+          ctx.arc(earthCenterX, earthCenterY, outerR, -Math.PI * 0.48, Math.PI * 0.48);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(earthCenterX, earthCenterY, innerR, -Math.PI * 0.48, Math.PI * 0.48);
+          ctx.stroke();
+        }
+
         ctx.restore();
       }
 
-      // Small ARKE sprite near the active environment
-      if (sceneT > 8) {
-        const activeLayer = EARTH_LAYERS.find(l => l.env === currentEnvIdx);
-        if (activeLayer) {
-          const arkeY = earthCenterY - earthR + (activeLayer.y + activeLayer.h * 0.5) * earthR * 2;
-          const arkeX = earthCenterX + earthR * 0.3;
-          const arkeBob = Math.sin(t * 3) * 5;
-          const arkeAlpha = Math.min(1, (sceneT - 8) * 2);
-          SpriteRenderer.drawGlow(ctx, 'methi_down', arkeX, arkeY + arkeBob, 4, '#2acfaf', 15, arkeAlpha);
-        }
+      // Small ARKE sprite near the active environment label
+      if (sceneT > 9) {
+        const arkeAlpha = Math.min(1, (sceneT - 9) * 1.5);
+        const labelY = 90 + currentEnvIdx * 175;
+        const labelX = CFG.W * 0.60;
+        const arkeBob = Math.sin(t * 3) * 4;
+        SpriteRenderer.drawGlow(ctx, 'methi_down', labelX - 35, labelY + 5 + arkeBob, 3, '#2acfaf', 12, arkeAlpha);
       }
     }
 
-    TextRenderer.drawVignette(ctx, 0.4);
+    // Scientific annotations in bottom corner
+    if (crossPhase > 0.5) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(0.4, (crossPhase - 0.5) * 1.2);
+      ctx.font = '14px "Courier New", monospace';
+      ctx.fillStyle = '#556677';
+      ctx.textAlign = 'left';
+      ctx.fillText('SUBSURFACE CROSS-SECTION', 40, CFG.H - 50);
+      ctx.fillText('SCHEMATIC — NOT TO SCALE', 40, CFG.H - 30);
+      ctx.restore();
+    }
+
+    TextRenderer.drawVignette(ctx, 0.35);
+  }
+
+  /* Helper: get geological layer color from radial depth fraction */
+  function getLayerColor(depthFrac, px, py, t, nr) {
+    // depthFrac: 0 at surface, ~1 at core
+    // nr: 0 at center, 1 at surface
+    // Multi-octave noise for geological texture
+    const n1 = Math.sin(px * 0.04 + py * 0.03) * 0.5;
+    const n2 = Math.sin(px * 0.12 + py * 0.08 + 3.7) * 0.3;
+    const n3 = Math.sin(px * 0.007 + py * 0.005) * 0.5;
+    const detail = n1 + n2;
+
+    // Find which EARTH_LAYER this depth falls in
+    for (const layer of EARTH_LAYERS) {
+      if (depthFrac >= layer.y && depthFrac < layer.y + layer.h) {
+        if (layer.env !== undefined) {
+          // Game environment — rich texture using ENV_PAL
+          const ep = ENV_PAL[layer.env];
+          // Granular texture with multiple detail levels
+          const grain = Math.sin(px * 0.2 + py * 0.15) * 0.3 + Math.sin(px * 0.07 - py * 0.04) * 0.4;
+          if (grain > 0.3) return ep.grain_l;
+          if (grain > 0) return ep.grain;
+          if (grain > -0.25) return ep.grain_d;
+          return ep.grain_a || ep.grain_d;
+        }
+        // Non-environment geological layer
+        const c = layer.color;
+        const r = parseInt(c.slice(1, 3), 16);
+        const g = parseInt(c.slice(3, 5), 16);
+        const b = parseInt(c.slice(5, 7), 16);
+        const v = Math.floor(n3 * 12);
+        return `rgb(${Math.max(0, Math.min(255, r + v))},${Math.max(0, Math.min(255, g + v))},${Math.max(0, Math.min(255, b + v))})`;
+      }
+    }
+
+    // Deep mantle / core (below defined layers)
+    if (depthFrac > 0.85) {
+      const heat = Math.floor(80 + detail * 25 + (depthFrac - 0.85) * 350);
+      return `rgb(${Math.min(200, heat)},${Math.floor(heat * 0.3)},${Math.floor(heat * 0.15)})`;
+    }
+
+    return '#1a1010';
   }
 
   /* ═══════════════════════════════════════════════════════════
