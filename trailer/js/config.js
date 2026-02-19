@@ -194,13 +194,13 @@ const NARRATION = [
   { t: 28.0, dur: 5.0, speaker: 'ELDER', text: 'Awaken, young one.\nThe Earth calls for you.' },
   { t: 33.5, dur: 4.5, speaker: 'ARKE',  text: 'What... is this place?' },
 
-  // EARTH CROSS-SECTION — each world intro
-  { t: 39.0, dur: 5.0, text: 'A WORLD INVISIBLE\nTO THE NAKED EYE', style: 'title' },
-  { t: 44.0, dur: 4.5, text: 'THE SOIL FRONTIER\nJust beneath our feet, where life begins', style: 'chapter' },
-  { t: 48.5, dur: 4.5, text: 'THE DEEP SEDIMENT\nBuried in silence far below the surface', style: 'chapter' },
-  { t: 53.0, dur: 4.0, text: 'THE METHANE SEEPS\nWhere ancient gases escape from within', style: 'chapter' },
-  { t: 57.0, dur: 3.5, text: 'THE PERMAFROST EDGE\nFrozen ground at the edge of the Arctic', style: 'chapter' },
-  { t: 60.5, dur: 3.5, text: 'THE HYDROTHERMAL REALM\nNear volcanic vents deep in the ocean', style: 'chapter' },
+  // EARTH CROSS-SECTION — each world intro (text at top/bottom, not center)
+  { t: 39.0, dur: 5.0, text: 'A WORLD INVISIBLE TO THE NAKED EYE', style: 'earth_title' },
+  { t: 44.0, dur: 4.5, text: 'THE SOIL FRONTIER\nJust beneath our feet, where life begins', style: 'earth_env' },
+  { t: 48.5, dur: 4.5, text: 'THE DEEP SEDIMENT\nBuried in silence far below the surface', style: 'earth_env' },
+  { t: 53.0, dur: 4.0, text: 'THE METHANE SEEPS\nWhere ancient gases escape from within', style: 'earth_env' },
+  { t: 57.0, dur: 3.5, text: 'THE PERMAFROST EDGE\nFrozen ground at the edge of the Arctic', style: 'earth_env' },
+  { t: 60.5, dur: 3.5, text: 'THE HYDROTHERMAL REALM\nNear volcanic vents deep in the ocean', style: 'earth_env' },
 
   // RIVAL CLOSEUP
   { t: 64.0, dur: 5.0, text: 'THE RIVALS', style: 'impact' },

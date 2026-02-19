@@ -13,6 +13,8 @@ const TextRenderer = (() => {
     title:     { size: 52, family: 'Courier New, monospace', color: '#ffffff', shadow: '#2acfaf', align: 'center', baseline: 0.5, glow: true, glowColor: '#2acfaf', glowSize: 30 },
     impact:    { size: 72, family: 'Courier New, monospace', color: '#ff4f4f', shadow: '#000000', align: 'center', baseline: 0.5, glow: true, glowColor: '#ff4f4f', glowSize: 25 },
     chapter:   { size: 56, family: 'Courier New, monospace', color: '#2acfaf', shadow: '#000000', align: 'center', baseline: 0.5, glow: true, glowColor: '#2acfaf', glowSize: 20 },
+    earth_title: { size: 48, family: 'Courier New, monospace', color: '#ffffff', shadow: '#000000', align: 'center', baseline: 0.08, glow: true, glowColor: '#2acfaf', glowSize: 25 },
+    earth_env: { size: 40, family: 'Courier New, monospace', color: '#2acfaf', shadow: '#000000', align: 'center', baseline: 0.90, glow: true, glowColor: '#2acfaf', glowSize: 18 },
     logo:      { size: 140, family: 'Courier New, monospace', color: '#2acfaf', shadow: '#000000', align: 'center', baseline: 0.45, glow: true, glowColor: '#5fffdf', glowSize: 50, letterSpacing: 30 },
     logo_sub:  { size: 48, family: 'Courier New, monospace', color: '#ffffff', shadow: '#2acfaf', align: 'center', baseline: 0.58, glow: true, glowColor: '#2acfaf', glowSize: 15 },
     tagline:   { size: 32, family: 'Courier New, monospace', color: '#c0c0c0', shadow: '#000000', align: 'center', baseline: 0.68 },
