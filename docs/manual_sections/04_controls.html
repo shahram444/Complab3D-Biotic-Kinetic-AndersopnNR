@@ -1,79 +1,138 @@
 <!-- Section 04: Controls & Movement -->
-<div class="page" id="controls">
+<div class="page" id="controls" style="page-break-after:always;">
   <h1 class="section-number">SECTION 3</h1>
   <h1 class="section-title">Controls & Movement</h1>
 
-  <!-- Keyboard layout diagram -->
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:20px; margin:12px 0; text-align:center;">
+  <!-- Keyboard layout diagram - polished key illustrations -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:20px; margin:12px 0; text-align:center;">
     <h3 style="font-size:9pt; margin-bottom:16px;">Keyboard Controls</h3>
 
     <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:20px;">
       <!-- WASD Group -->
       <div>
         <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#888;margin-bottom:10px;">MOVEMENT (Option A)</div>
-        <svg width="140" height="100" viewBox="0 0 140 100">
+        <svg width="160" height="110" viewBox="0 0 160 110">
+          <defs>
+            <linearGradient id="keyFace04" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f8f4ec"/>
+              <stop offset="100%" stop-color="#e8e0d0"/>
+            </linearGradient>
+            <linearGradient id="keySide04" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d8d0c0"/>
+              <stop offset="100%" stop-color="#b8b0a0"/>
+            </linearGradient>
+            <filter id="keyShadow04" x="-10%" y="-10%" width="130%" height="150%">
+              <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#00000033"/>
+            </filter>
+          </defs>
           <!-- W key -->
-          <rect x="45" y="5" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <text x="60" y="24" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">W</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="52" y="8" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="52" y="5" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <text x="70" y="26" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="700" fill="#444">W</text>
+          </g>
           <!-- A key -->
-          <rect x="5" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <text x="20" y="57" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">A</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="8" y="48" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="8" y="45" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <text x="26" y="66" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="700" fill="#444">A</text>
+          </g>
           <!-- S key -->
-          <rect x="45" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <text x="60" y="57" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">S</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="52" y="48" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="52" y="45" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <text x="70" y="66" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="700" fill="#444">S</text>
+          </g>
           <!-- D key -->
-          <rect x="85" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <text x="100" y="57" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">D</text>
-          <!-- Direction arrows -->
-          <text x="60" y="82" text-anchor="middle" font-size="7" fill="#888">Up/Left/Down/Right</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="96" y="48" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="96" y="45" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <text x="114" y="66" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="700" fill="#444">D</text>
+          </g>
+          <text x="70" y="100" text-anchor="middle" font-size="8" fill="#888" font-family="'Inter',sans-serif">Up / Left / Down / Right</text>
         </svg>
       </div>
 
       <!-- Arrow Keys Group -->
       <div>
         <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#888;margin-bottom:10px;">MOVEMENT (Option B)</div>
-        <svg width="140" height="100" viewBox="0 0 140 100">
-          <!-- Up -->
-          <rect x="45" y="5" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <polygon points="60,12 54,24 66,24" fill="#333"/>
-          <!-- Left -->
-          <rect x="5" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <polygon points="13,52 25,46 25,58" fill="#333"/>
-          <!-- Down -->
-          <rect x="45" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <polygon points="60,58 54,46 66,46" fill="#333"/>
-          <!-- Right -->
-          <rect x="85" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
-          <polygon points="107,52 95,46 95,58" fill="#333"/>
-          <text x="60" y="82" text-anchor="middle" font-size="7" fill="#888">Arrow Keys</text>
+        <svg width="160" height="110" viewBox="0 0 160 110">
+          <!-- Up arrow key -->
+          <g filter="url(#keyShadow04)">
+            <rect x="52" y="8" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="52" y="5" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <path d="M70,13 L62,27 L78,27 Z" fill="#555"/>
+          </g>
+          <!-- Left arrow key -->
+          <g filter="url(#keyShadow04)">
+            <rect x="8" y="48" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="8" y="45" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <path d="M16,61 L32,53 L32,69 Z" fill="#555"/>
+          </g>
+          <!-- Down arrow key -->
+          <g filter="url(#keyShadow04)">
+            <rect x="52" y="48" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="52" y="45" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <path d="M70,73 L62,57 L78,57 Z" fill="#555"/>
+          </g>
+          <!-- Right arrow key -->
+          <g filter="url(#keyShadow04)">
+            <rect x="96" y="48" width="36" height="34" rx="6" fill="url(#keySide04)"/>
+            <rect x="96" y="45" width="36" height="32" rx="6" fill="url(#keyFace04)" stroke="#aaa8a0" stroke-width="1"/>
+            <path d="M124,61 L108,53 L108,69 Z" fill="#555"/>
+          </g>
+          <text x="70" y="100" text-anchor="middle" font-size="8" fill="#888" font-family="'Inter',sans-serif">Arrow Keys</text>
         </svg>
       </div>
 
       <!-- Action Keys -->
       <div>
         <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#888;margin-bottom:10px;">ACTION KEYS</div>
-        <svg width="160" height="100" viewBox="0 0 160 100">
+        <svg width="200" height="110" viewBox="0 0 200 110">
+          <defs>
+            <linearGradient id="keyGreen04" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d8f0e0"/>
+              <stop offset="100%" stop-color="#b8d8c0"/>
+            </linearGradient>
+            <linearGradient id="keyBlue04" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d0e0f8"/>
+              <stop offset="100%" stop-color="#b0c8e8"/>
+            </linearGradient>
+            <linearGradient id="keyYellow04" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f8f0d0"/>
+              <stop offset="100%" stop-color="#e8e0b0"/>
+            </linearGradient>
+          </defs>
           <!-- SPACE bar -->
-          <rect x="5" y="5" width="100" height="28" rx="4" fill="#d0e8d8" stroke="#3a7a5a" stroke-width="1.5"/>
-          <text x="55" y="23" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a7a5a">SPACE</text>
-          <text x="130" y="23" font-size="7" fill="#666">Divide!</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="5" y="8" width="120" height="30" rx="6" fill="#b8d0b8"/>
+            <rect x="5" y="5" width="120" height="28" rx="6" fill="url(#keyGreen04)" stroke="#6a9a6a" stroke-width="1"/>
+            <text x="65" y="24" text-anchor="middle" font-family="'Inter',sans-serif" font-size="10" font-weight="700" fill="#3a7a4a">SPACE</text>
+          </g>
+          <text x="140" y="23" font-size="8" fill="#3a7a4a" font-family="'Inter',sans-serif" font-weight="600">Divide!</text>
 
           <!-- SHIFT -->
-          <rect x="5" y="38" width="60" height="28" rx="4" fill="#d0d8f0" stroke="#4fa4ff" stroke-width="1.5"/>
-          <text x="35" y="56" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3060a0">SHIFT</text>
-          <text x="75" y="56" font-size="7" fill="#666">Ride Flow</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="5" y="45" width="80" height="30" rx="6" fill="#a0b8d8"/>
+            <rect x="5" y="42" width="80" height="28" rx="6" fill="url(#keyBlue04)" stroke="#5a7aaa" stroke-width="1"/>
+            <text x="45" y="61" text-anchor="middle" font-family="'Inter',sans-serif" font-size="10" font-weight="700" fill="#3060a0">SHIFT</text>
+          </g>
+          <text x="100" y="60" font-size="8" fill="#3060a0" font-family="'Inter',sans-serif" font-weight="600">Ride Flow</text>
 
           <!-- Q -->
-          <rect x="5" y="71" width="30" height="24" rx="4" fill="#f0f0d0" stroke="#aa9a30" stroke-width="1.5"/>
-          <text x="20" y="87" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#666">Q</text>
-          <text x="45" y="87" font-size="7" fill="#666">Science Mode</text>
+          <g filter="url(#keyShadow04)">
+            <rect x="5" y="82" width="36" height="30" rx="6" fill="#d0d0a0"/>
+            <rect x="5" y="79" width="36" height="28" rx="6" fill="url(#keyYellow04)" stroke="#aa9a50" stroke-width="1"/>
+            <text x="23" y="98" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="700" fill="#6a6020">Q</text>
+          </g>
+          <text x="55" y="97" font-size="8" fill="#6a6020" font-family="'Inter',sans-serif" font-weight="600">Science Mode</text>
         </svg>
       </div>
     </div>
   </div>
 
   <!-- System Keys -->
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px 16px; margin:12px 0;">
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:12px 16px; margin:12px 0;">
     <h3 style="font-size:9pt; margin-bottom:8px;">System Keys</h3>
     <table style="font-size:10pt;">
       <tr>
@@ -100,152 +159,327 @@
   <div class="two-col">
     <div>
       <h3>Normal Movement</h3>
-      <ul style="font-size:10pt; margin-left:16px;">
-        <li><strong>Speed:</strong> 2.5 tiles per second</li>
-        <li><strong>Direction:</strong> 4-directional (no diagonals)</li>
-        <li>Move through <strong>pore space</strong> (dark blue tiles)</li>
-        <li>Cannot pass through <strong>grains</strong> (brown tiles)</li>
-        <li>Can walk through your own <strong>colonies</strong></li>
-        <li>Smooth animation between tiles</li>
+      <p style="font-size:10pt;">
+        ARKE moves tile-by-tile at <strong>2.5 tiles per second</strong> in 4 directions (up, down, left, right).
+        No diagonal movement is possible. Movement is smooth &mdash; ARKE animates between tiles over 0.4 seconds.
+        You can queue the next direction while moving, so skilled players can navigate winding pore channels without pause.
+      </p>
+      <ul style="font-size:10pt; margin-left:16px; margin-top:6px;">
+        <li>ARKE <strong>cannot</strong> pass through <strong>GRAIN</strong> tiles (solid rock) or <strong>VOID</strong> tiles (map boundary).</li>
+        <li>ARKE <strong>can</strong> walk through <strong>BIOFILM</strong> tiles (your own colonies) freely.</li>
+        <li>ARKE <strong>can</strong> walk through <strong>TOXIC</strong> tiles, but you will take <strong>-20 HP/sec</strong> damage while on them. Move through quickly!</li>
+        <li>ARKE <strong>can</strong> walk through <strong>PORE</strong>, <strong>FAST_FLOW</strong>, <strong>INLET</strong>, and <strong>OUTLET</strong> tiles normally.</li>
       </ul>
     </div>
     <div>
       <h3>Planktonic Mode (SHIFT)</h3>
-      <ul style="font-size:10pt; margin-left:16px;">
-        <li><strong>Speed:</strong> 5.0 tiles per second (2&times;!)</li>
-        <li>Hold SHIFT on tiles with <strong>water flow</strong></li>
-        <li>Automatically follow flow direction</li>
-        <li><strong>Costs:</strong> 0.5 Energy per move</li>
-        <li>Blue glow shows when active</li>
-        <li>Essential for fast-flow levels!</li>
+      <p style="font-size:10pt;">
+        Hold <strong>SHIFT</strong> while pressing a direction key to enter planktonic mode. This doubles your speed to
+        <strong>5.0 tiles/sec</strong> but <strong>ONLY works on tiles that have water flow</strong>. The flow direction
+        is shown in Science Mode (Q). Each planktonic move costs <strong>0.5 Energy</strong> points.
+      </p>
+      <ul style="font-size:10pt; margin-left:16px; margin-top:6px;">
+        <li>When Energy reaches 0, planktonic mode is disabled and you are stuck at normal speed until you eat more substrates.</li>
+        <li>Planktonic mode shows a <strong>blue glow</strong> around ARKE, making it easy to tell when you are flow-riding.</li>
+        <li>You can only ride in the direction of the local flow vector &mdash; you cannot flow-ride upstream.</li>
+        <li>Essential for intercepting fast-moving substrates in later levels!</li>
       </ul>
     </div>
   </div>
 
-  <!-- Movement diagram -->
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:14px 0; text-align:center;">
+  <!-- Movement Through Pore Space - Beautiful Scientific Illustration -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:16px; margin:14px 0; text-align:center;">
     <h3 style="font-size:9pt; margin-bottom:10px;">Movement Through Pore Space</h3>
-    <svg width="420" height="160" viewBox="0 0 420 160" class="pixel-art">
-      <!-- Grid background -->
-      <rect x="10" y="10" width="400" height="140" fill="#0c1420"/>
-
-      <!-- Grain particles -->
-      <circle cx="50" cy="30" r="22" fill="#7a5a2a"/>
-      <circle cx="130" cy="140" r="25" fill="#8a6a3a"/>
-      <circle cx="220" cy="25" r="20" fill="#7a5a2a"/>
-      <circle cx="310" cy="140" r="22" fill="#6a4a1a"/>
-      <circle cx="380" cy="35" r="18" fill="#7a5a2a"/>
-
-      <!-- Walkable path highlight -->
-      <rect x="80" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="112" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="144" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="176" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="176" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="208" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="240" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-      <rect x="272" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
-
-      <!-- ARKE on the path -->
-      <g transform="translate(96,66)">
-        <rect x="-6" y="-8" width="12" height="16" fill="#2a8a8a"/>
-        <rect x="-4" y="-6" width="8" height="4" fill="#1a1a3a"/>
-        <rect x="-3" y="-5" width="2" height="2" fill="#4aeaff"/>
-        <rect x="2" y="-5" width="2" height="2" fill="#4aeaff"/>
-      </g>
-
-      <!-- Movement arrow -->
-      <line x1="110" y1="66" x2="168" y2="66" stroke="#4aeaff" stroke-width="2" marker-end="url(#arrowCyan)"/>
-      <line x1="192" y1="82" x2="192" y2="100" stroke="#4aeaff" stroke-width="2"/>
-      <line x1="192" y1="100" x2="260" y2="100" stroke="#4aeaff" stroke-width="2" marker-end="url(#arrowCyan)"/>
-
-      <!-- Arrow marker -->
+    <svg width="460" height="200" viewBox="0 0 460 200">
       <defs>
-        <marker id="arrowCyan" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
-          <polygon points="0,0 6,2 0,4" fill="#4aeaff"/>
+        <!-- Grain gradient -->
+        <radialGradient id="grainGrad04a" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#c4a46a"/>
+          <stop offset="50%" stop-color="#8a6a3a"/>
+          <stop offset="100%" stop-color="#5a3a1a"/>
+        </radialGradient>
+        <radialGradient id="grainGrad04b" cx="45%" cy="30%" r="55%">
+          <stop offset="0%" stop-color="#b8984a"/>
+          <stop offset="50%" stop-color="#7a5a2a"/>
+          <stop offset="100%" stop-color="#4a2a0a"/>
+        </radialGradient>
+        <radialGradient id="grainGrad04c" cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stop-color="#d0b060"/>
+          <stop offset="50%" stop-color="#9a7a4a"/>
+          <stop offset="100%" stop-color="#6a4a2a"/>
+        </radialGradient>
+        <!-- Water gradient -->
+        <linearGradient id="waterBg04" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#081828"/>
+          <stop offset="100%" stop-color="#0c2040"/>
+        </linearGradient>
+        <!-- ARKE body gradient -->
+        <radialGradient id="arkeBody04" cx="40%" cy="35%" r="55%">
+          <stop offset="0%" stop-color="#5aeaea"/>
+          <stop offset="60%" stop-color="#2a9a9a"/>
+          <stop offset="100%" stop-color="#1a6a6a"/>
+        </radialGradient>
+        <!-- ARKE glow -->
+        <filter id="arkeGlow04" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Substrate glow -->
+        <filter id="subGlow04" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Flow arrow marker -->
+        <marker id="flowArrow04" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#3060a0" opacity="0.6"/>
         </marker>
-        <marker id="arrowBlue" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
-          <polygon points="0,0 6,2 0,4" fill="#3060a0"/>
+        <marker id="cyanArrow04" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L8,3 L0,6" fill="#4aeaff"/>
         </marker>
+        <!-- Blocked X marker -->
       </defs>
 
+      <!-- Background water -->
+      <rect x="5" y="5" width="450" height="190" rx="8" fill="url(#waterBg04)"/>
+
+      <!-- Subtle flow lines in water -->
+      <g opacity="0.15" stroke="#3060a0" stroke-width="0.8" fill="none">
+        <path d="M20,60 Q60,58 100,62 Q140,66 180,60"/>
+        <path d="M20,80 Q70,76 130,82 Q180,86 240,78"/>
+        <path d="M20,100 Q80,96 150,104 Q220,110 300,98"/>
+        <path d="M20,120 Q90,116 170,124 Q250,130 340,118"/>
+        <path d="M20,140 Q100,136 190,144 Q280,150 380,138"/>
+        <path d="M200,60 Q250,56 300,64 Q350,68 400,60"/>
+        <path d="M240,80 Q290,76 340,82 Q390,86 440,78"/>
+      </g>
+
+      <!-- Grain particles (smooth elliptical with brown gradients) -->
+      <ellipse cx="55" cy="30" rx="38" ry="30" fill="url(#grainGrad04a)"/>
+      <ellipse cx="55" cy="30" rx="28" ry="20" fill="#a4844a" opacity="0.15"/>
+
+      <ellipse cx="160" cy="175" rx="42" ry="32" fill="url(#grainGrad04b)"/>
+      <ellipse cx="160" cy="175" rx="30" ry="20" fill="#a4844a" opacity="0.12"/>
+
+      <ellipse cx="260" cy="20" rx="35" ry="24" fill="url(#grainGrad04c)"/>
+      <ellipse cx="260" cy="20" rx="24" ry="16" fill="#a4844a" opacity="0.15"/>
+
+      <ellipse cx="370" cy="175" rx="40" ry="28" fill="url(#grainGrad04a)"/>
+      <ellipse cx="370" cy="175" rx="28" ry="18" fill="#a4844a" opacity="0.12"/>
+
+      <ellipse cx="430" cy="40" rx="30" ry="26" fill="url(#grainGrad04b)"/>
+      <ellipse cx="430" cy="40" rx="20" ry="16" fill="#a4844a" opacity="0.15"/>
+
+      <ellipse cx="15" cy="170" rx="20" ry="30" fill="url(#grainGrad04c)"/>
+
+      <!-- Flow direction arrows (smooth, curved) -->
+      <g opacity="0.5">
+        <path d="M40,80 Q80,76 120,82" fill="none" stroke="#3060a0" stroke-width="1.2" marker-end="url(#flowArrow04)"/>
+        <path d="M130,95 Q180,90 230,98" fill="none" stroke="#3060a0" stroke-width="1.2" marker-end="url(#flowArrow04)"/>
+        <path d="M250,108 Q300,102 350,110" fill="none" stroke="#3060a0" stroke-width="1.2" marker-end="url(#flowArrow04)"/>
+        <path d="M355,95 Q385,90 420,96" fill="none" stroke="#3060a0" stroke-width="1.2" marker-end="url(#flowArrow04)"/>
+      </g>
+
+      <!-- ARKE navigating through (organic amoeba shape) -->
+      <g transform="translate(120, 88)" filter="url(#arkeGlow04)">
+        <ellipse cx="0" cy="0" rx="12" ry="10" fill="url(#arkeBody04)"/>
+        <!-- Pseudopods -->
+        <path d="M8,-4 Q16,-6 14,-2" fill="#3ababa" opacity="0.7"/>
+        <path d="M-8,4 Q-16,6 -14,2" fill="#3ababa" opacity="0.7"/>
+        <!-- Eyes -->
+        <ellipse cx="-3" cy="-3" rx="2.5" ry="2" fill="#1a2a4a"/>
+        <ellipse cx="4" cy="-3" rx="2.5" ry="2" fill="#1a2a4a"/>
+        <circle cx="-2.5" cy="-3.5" r="1" fill="#4aeaff"/>
+        <circle cx="4.5" cy="-3.5" r="1" fill="#4aeaff"/>
+      </g>
+
+      <!-- Movement path (smooth cyan bezier) -->
+      <path d="M140,88 Q170,86 200,90 Q220,94 230,110 Q240,120 270,118 Q310,114 350,118" fill="none" stroke="#4aeaff" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#cyanArrow04)" opacity="0.8"/>
+
+      <!-- Substrate particles (glowing orbs) -->
+      <g filter="url(#subGlow04)">
+        <!-- O2 orb -->
+        <circle cx="270" cy="118" r="6" fill="#4fa4ff" opacity="0.9"/>
+        <circle cx="268" cy="116" r="2" fill="white" opacity="0.5"/>
+      </g>
+      <g filter="url(#subGlow04)">
+        <!-- NO3 orb -->
+        <circle cx="350" cy="95" r="5" fill="#4fdf6f" opacity="0.9"/>
+        <circle cx="348" cy="93" r="1.8" fill="white" opacity="0.5"/>
+      </g>
+      <g filter="url(#subGlow04)">
+        <!-- CH4 orb -->
+        <circle cx="400" cy="110" r="5.5" fill="#ff4f4f" opacity="0.85"/>
+        <circle cx="398" cy="108" r="2" fill="#ffaa44" opacity="0.5"/>
+      </g>
+
+      <!-- Blocked indicator near grain -->
+      <g transform="translate(78, 50)">
+        <line x1="-5" y1="-5" x2="5" y2="5" stroke="#ff5555" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="5" y1="-5" x2="-5" y2="5" stroke="#ff5555" stroke-width="2.5" stroke-linecap="round"/>
+      </g>
+      <text x="78" y="38" text-anchor="middle" font-size="6" fill="#ff5555" font-family="'Inter',sans-serif" font-weight="600">BLOCKED</text>
+
       <!-- Labels -->
-      <text x="50" y="30" text-anchor="middle" font-size="6" fill="#a08040" font-weight="bold">GRAIN</text>
-      <text x="100" y="46" text-anchor="middle" font-size="5" fill="#4aeaff">ARKE</text>
-      <text x="150" y="46" text-anchor="middle" font-size="5" fill="#3060a0">walkable pore</text>
-
-      <!-- Blocked path indicator -->
-      <line x1="80" y1="66" x2="65" y2="66" stroke="#ff4444" stroke-width="2"/>
-      <text x="60" y="62" text-anchor="middle" font-size="5" fill="#ff4444">BLOCKED</text>
-
-      <!-- Substrate on path -->
-      <circle cx="256" cy="98" r="4" fill="#4fdf6f"/>
-      <text x="256" y="80" text-anchor="middle" font-size="5" fill="#4fdf6f">NO3</text>
+      <text x="55" y="32" text-anchor="middle" font-size="7" fill="#d0b060" font-weight="bold" font-family="'Inter',sans-serif">GRAIN</text>
+      <text x="120" y="72" text-anchor="middle" font-size="7" fill="#4aeaff" font-weight="bold" font-family="'Inter',sans-serif">ARKE</text>
+      <text x="270" y="108" text-anchor="middle" font-size="6" fill="#4fa4ff" font-family="'Inter',sans-serif">O2</text>
+      <text x="350" y="86" text-anchor="middle" font-size="6" fill="#4fdf6f" font-family="'Inter',sans-serif">NO3</text>
+      <text x="400" y="100" text-anchor="middle" font-size="6" fill="#ff4f4f" font-family="'Inter',sans-serif">CH4</text>
+      <text x="200" y="75" text-anchor="middle" font-size="6" fill="#4aeaff" font-family="'Inter',sans-serif" opacity="0.7">movement path</text>
+      <text x="300" y="155" text-anchor="middle" font-size="6" fill="#3060a0" font-family="'Inter',sans-serif" opacity="0.6">water flow direction &rarr;</text>
     </svg>
     <p style="font-size:8pt; color:#888; margin-top:6px;">
-      ARKE navigates tile-by-tile through pore space. Grains block movement. Substrates are consumed on contact.
+      ARKE navigates tile-by-tile through pore space between grain particles. Brown grains block movement. Glowing orbs are substrate particles consumed on contact.
+    </p>
+  </div>
+
+  <!-- Flow mechanics explanation -->
+  <div class="info-box science">
+    <div class="info-box-title" style="color:#4060a0;">FLOW MECHANICS</div>
+    <p style="font-size:10pt;">
+      Water flows from <strong>INLET</strong> (left side, blue) to <strong>OUTLET</strong> (right side, green). The flow field is
+      computed by the game's physics engine based on the pore geometry of each level. <strong>Narrow channels</strong> have faster
+      flow speeds, while <strong>wide-open areas</strong> have slower flow. <strong>FAST_FLOW</strong> tiles provide a 2.5x speed
+      bonus when flow-riding. The flow carries substrates from the inlet toward the outlet, so food is freshest near the inlet
+      and becomes sparser near the outlet.
     </p>
   </div>
 
   <p class="page-number left">5</p>
 </div>
 
-<!-- Controls page 2: Flow Riding -->
-<div class="page" id="controls2">
+<!-- Controls page 2: Flow Riding & Tile Types -->
+<div class="page" id="controls2" style="page-break-after:always;">
   <h2>Planktonic Flow-Riding</h2>
 
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+  <p style="font-size:10pt; margin-bottom:10px;">
+    Planktonic mode is ARKE's fastest traversal method. By releasing from surfaces and floating freely in the water column,
+    ARKE can ride the current at double speed. This is essential for intercepting fast-moving substrates and escaping danger zones.
+  </p>
+
+  <!-- Flow Riding Illustration -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:16px; margin:12px 0; text-align:center;">
     <h3 style="font-size:9pt; margin-bottom:10px;">How Flow Riding Works</h3>
-    <svg width="440" height="130" viewBox="0 0 440 130">
-      <!-- Flow channel -->
-      <rect x="20" y="30" width="400" height="50" fill="#0c1420" rx="4"/>
+    <svg width="460" height="150" viewBox="0 0 460 150">
+      <defs>
+        <!-- Flow channel gradient -->
+        <linearGradient id="channelGrad04" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#061830"/>
+          <stop offset="30%" stop-color="#0a2040"/>
+          <stop offset="70%" stop-color="#0a2040"/>
+          <stop offset="100%" stop-color="#061830"/>
+        </linearGradient>
+        <!-- Inlet gradient -->
+        <linearGradient id="inletGrad04" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#2060c0"/>
+          <stop offset="100%" stop-color="#1040a0"/>
+        </linearGradient>
+        <!-- Outlet gradient -->
+        <linearGradient id="outletGrad04" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#208040"/>
+          <stop offset="100%" stop-color="#30a050"/>
+        </linearGradient>
+        <!-- Blue glow for ARKE in planktonic mode -->
+        <filter id="plankGlow04" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="softGlow04" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Speed lines marker -->
+        <marker id="speedArrow04" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+          <path d="M0,0 L6,2 L0,4" fill="#4fa4ff" opacity="0.5"/>
+        </marker>
+      </defs>
 
-      <!-- Flow arrows background -->
-      <g fill="none" stroke="#3060a0" stroke-width="1" opacity="0.4">
-        <path d="M40,55 L65,55 M60,50 L65,55 L60,60"/>
-        <path d="M90,55 L115,55 M110,50 L115,55 L110,60"/>
-        <path d="M140,55 L165,55 M160,50 L165,55 L160,60"/>
-        <path d="M190,55 L215,55 M210,50 L215,55 L210,60"/>
-        <path d="M240,55 L265,55 M260,50 L265,55 L260,60"/>
-        <path d="M290,55 L315,55 M310,50 L315,55 L310,60"/>
-        <path d="M340,55 L365,55 M360,50 L365,55 L360,60"/>
+      <!-- Channel walls (grain surfaces, curved) -->
+      <path d="M25,20 Q100,18 200,22 Q300,26 400,20 L440,20 L440,10 L0,10 Z" fill="#6a4a2a"/>
+      <path d="M25,110 Q100,112 200,108 Q300,104 400,110 L440,110 L440,140 L0,140 Z" fill="#6a4a2a"/>
+      <!-- Grain highlights -->
+      <path d="M25,20 Q100,18 200,22 Q300,26 400,20" fill="none" stroke="#9a7a4a" stroke-width="1" opacity="0.4"/>
+      <path d="M25,110 Q100,112 200,108 Q300,104 400,110" fill="none" stroke="#9a7a4a" stroke-width="1" opacity="0.4"/>
+
+      <!-- Flow channel water -->
+      <rect x="0" y="20" width="460" height="90" fill="url(#channelGrad04)"/>
+
+      <!-- Animated flow lines (smooth curves) -->
+      <g opacity="0.35" stroke="#3a6aaa" stroke-width="1" fill="none">
+        <path d="M30,45 Q90,42 150,46 Q210,50 270,44 Q330,40 390,46 Q420,48 450,44" marker-end="url(#speedArrow04)"/>
+        <path d="M30,58 Q100,55 170,60 Q240,65 310,58 Q370,53 440,60" marker-end="url(#speedArrow04)"/>
+        <path d="M30,72 Q110,68 190,74 Q260,78 340,72 Q400,68 450,74" marker-end="url(#speedArrow04)"/>
+        <path d="M30,85 Q95,82 160,86 Q230,90 300,84 Q365,80 440,88" marker-end="url(#speedArrow04)"/>
+      </g>
+      <!-- Faster flow lines (brighter, center) -->
+      <g opacity="0.25" stroke="#4fa4ff" stroke-width="1.5" fill="none">
+        <path d="M30,65 Q120,60 230,68 Q340,74 450,66"/>
       </g>
 
-      <!-- ARKE riding flow (with blue glow) -->
-      <circle cx="200" cy="55" r="18" fill="#3060a0" opacity="0.2"/>
-      <circle cx="200" cy="55" r="14" fill="#3060a0" opacity="0.15"/>
-      <g transform="translate(200,55)">
-        <rect x="-6" y="-8" width="12" height="16" fill="#2a8a8a"/>
-        <rect x="-4" y="-6" width="8" height="4" fill="#1a1a3a"/>
-        <rect x="-3" y="-5" width="2" height="2" fill="#4aeaff"/>
-        <rect x="2" y="-5" width="2" height="2" fill="#4aeaff"/>
+      <!-- ARKE riding flow (with bright blue planktonic glow) -->
+      <g transform="translate(220, 65)">
+        <!-- Outer glow rings -->
+        <circle cx="0" cy="0" r="22" fill="#3060c0" opacity="0.08"/>
+        <circle cx="0" cy="0" r="17" fill="#4080e0" opacity="0.12"/>
+        <circle cx="0" cy="0" r="13" fill="#50a0ff" opacity="0.15"/>
+        <!-- ARKE body -->
+        <g filter="url(#plankGlow04)">
+          <ellipse cx="0" cy="0" rx="11" ry="9" fill="url(#arkeBody04)"/>
+          <!-- Pseudopods (streaming behind in flow) -->
+          <path d="M-8,3 Q-16,5 -20,2" fill="none" stroke="#3ababa" stroke-width="1.5" opacity="0.6"/>
+          <path d="M-7,-3 Q-14,-5 -18,-1" fill="none" stroke="#3ababa" stroke-width="1.2" opacity="0.5"/>
+          <!-- Eyes -->
+          <ellipse cx="-2" cy="-2.5" rx="2.2" ry="1.8" fill="#1a2a4a"/>
+          <ellipse cx="4" cy="-2.5" rx="2.2" ry="1.8" fill="#1a2a4a"/>
+          <circle cx="-1.5" cy="-3" r="0.9" fill="#4aeaff"/>
+          <circle cx="4.5" cy="-3" r="0.9" fill="#4aeaff"/>
+        </g>
       </g>
 
-      <!-- Speed comparison -->
-      <text x="200" y="20" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">[RIDING FLOW] 5.0 tiles/sec</text>
+      <!-- Speed indicator -->
+      <g filter="url(#softGlow04)">
+        <text x="220" y="22" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#4fa4ff">RIDING FLOW: 5.0 tiles/sec</text>
+      </g>
 
-      <!-- Inlet label -->
-      <rect x="5" y="40" width="15" height="30" fill="#3060a0" rx="2"/>
-      <text x="12" y="58" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">IN</text>
+      <!-- Inlet -->
+      <rect x="0" y="25" width="18" height="80" rx="4" fill="url(#inletGrad04)"/>
+      <text x="9" y="70" text-anchor="middle" font-family="'Inter',sans-serif" font-size="7" fill="white" font-weight="bold">IN</text>
+      <!-- Inlet flow swoosh -->
+      <path d="M18,55 Q28,52 38,55" fill="none" stroke="#4fa4ff" stroke-width="1.5" opacity="0.5"/>
+      <path d="M18,65 Q30,62 42,65" fill="none" stroke="#4fa4ff" stroke-width="1.5" opacity="0.4"/>
+      <path d="M18,75 Q26,72 36,75" fill="none" stroke="#4fa4ff" stroke-width="1.5" opacity="0.3"/>
 
-      <!-- Outlet label -->
-      <rect x="420" y="40" width="15" height="30" fill="#4fdf6f" rx="2"/>
-      <text x="427" y="58" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">OUT</text>
+      <!-- Outlet -->
+      <rect x="442" y="25" width="18" height="80" rx="4" fill="url(#outletGrad04)"/>
+      <text x="451" y="70" text-anchor="middle" font-family="'Inter',sans-serif" font-size="6" fill="white" font-weight="bold">OUT</text>
 
-      <!-- Energy cost -->
-      <text x="200" y="100" text-anchor="middle" font-size="8" fill="#5fa0f0">Energy Cost: -0.5 EN per move</text>
-      <text x="200" y="115" text-anchor="middle" font-size="7" fill="#888">Hold SHIFT to activate on flow tiles</text>
+      <!-- Energy cost label -->
+      <text x="220" y="130" text-anchor="middle" font-size="9" fill="#5fa0f0" font-family="'Inter',sans-serif" font-weight="600">Energy Cost: &minus;0.5 EN per move</text>
+      <text x="220" y="143" text-anchor="middle" font-size="7.5" fill="#888" font-family="'Inter',sans-serif">Hold SHIFT + direction key to activate on tiles with water flow</text>
     </svg>
   </div>
 
   <div class="info-box tip">
     <div class="info-box-title" style="color:#3a8a4a;">FLOW RIDING TIPS</div>
     <ul style="font-size:10pt; margin-left:16px;">
-      <li>Flow moves from <strong>INLET</strong> (left, blue) to <strong>OUTLET</strong> (right, green)</li>
-      <li>Not all tiles have flow&mdash;check the <strong>Science Mode (Q)</strong> overlay to see flow directions</li>
-      <li>Flow speed varies: some channels are <strong>FAST FLOW</strong> (2.5&times; speed bonus)</li>
-      <li>Essential in Chapters 4-5 where substrates move very quickly</li>
-      <li>Watch your Energy bar! Running out strands you at normal speed</li>
+      <li>Flow moves from <strong>INLET</strong> (left, blue) to <strong>OUTLET</strong> (right, green).</li>
+      <li>Not all tiles have flow &mdash; check the <strong>Science Mode (Q)</strong> overlay to see flow directions and speeds.</li>
+      <li>Flow speed varies: some channels are <strong>FAST FLOW</strong> (2.5&times; speed bonus). These are the express lanes!</li>
+      <li>Essential in Chapters 4-5 where substrates move very quickly through narrow channels.</li>
+      <li>Watch your Energy bar! Running out strands you at normal speed &mdash; eat O<sub>2</sub> (+10 EN) or NO<sub>3</sub> (+7.5 EN) to refuel.</li>
+      <li>Narrow channels concentrate flow &mdash; use them as highways to cross the map fast.</li>
     </ul>
   </div>
 
@@ -253,91 +487,228 @@
 
   <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin:10px 0;">
     <!-- PORE -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#0c1420"/>
-        <rect x="2" y="2" width="1" height="1" fill="#142038" opacity="0.5"/>
-        <rect x="5" y="5" width="1" height="1" fill="#142038" opacity="0.5"/>
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="poreBg04" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stop-color="#142848"/>
+            <stop offset="100%" stop-color="#0a1828"/>
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#poreBg04)"/>
+        <!-- Subtle flow lines -->
+        <path d="M10,35 Q30,32 50,36 Q70,40 90,34" fill="none" stroke="#2a4a7a" stroke-width="1.5" opacity="0.5"/>
+        <path d="M10,55 Q35,52 60,56 Q80,60 90,54" fill="none" stroke="#2a4a7a" stroke-width="1.2" opacity="0.4"/>
+        <path d="M10,75 Q40,72 70,76 Q85,78 90,74" fill="none" stroke="#2a4a7a" stroke-width="1" opacity="0.3"/>
+        <!-- Tiny particles -->
+        <circle cx="30" cy="45" r="1.5" fill="#3a5a8a" opacity="0.4"/>
+        <circle cx="65" cy="60" r="1" fill="#3a5a8a" opacity="0.3"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#3060a0;">PORE</div>
-      <div style="font-size:7pt;color:#888;">Walkable water</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#3060a0;">PORE</div>
+      <div style="font-size:7.5pt;color:#666;">Dark blue water<br/>with subtle flow</div>
     </div>
-    <!-- SOLID -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#7a5a2a"/>
-        <rect x="1" y="1" width="2" height="2" fill="#a48a5a" opacity="0.4"/>
-        <rect x="5" y="4" width="2" height="2" fill="#6a4a1a" opacity="0.4"/>
+
+    <!-- GRAIN -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="grainTile04" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#c4a46a"/>
+            <stop offset="40%" stop-color="#8a6a3a"/>
+            <stop offset="100%" stop-color="#5a3a1a"/>
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#grainTile04)"/>
+        <!-- Mineral texture highlights -->
+        <ellipse cx="35" cy="30" rx="18" ry="12" fill="#d0b060" opacity="0.15"/>
+        <ellipse cx="65" cy="65" rx="15" ry="10" fill="#4a2a0a" opacity="0.2"/>
+        <path d="M20,70 Q35,65 50,72 Q65,78 80,70" fill="none" stroke="#9a7a4a" stroke-width="1" opacity="0.3"/>
+        <path d="M15,40 Q30,35 45,42" fill="none" stroke="#d0b060" stroke-width="0.8" opacity="0.25"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#7a5a2a;">GRAIN</div>
-      <div style="font-size:7pt;color:#888;">Impassable rock</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#7a5a2a;">GRAIN</div>
+      <div style="font-size:7.5pt;color:#666;">Solid rock with<br/>mineral texture</div>
     </div>
+
     <!-- BIOFILM -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#3a7a5a"/>
-        <rect x="2" y="2" width="2" height="2" fill="#5aaa7a" opacity="0.5"/>
-        <rect x="4" y="4" width="2" height="2" fill="#5aaa7a" opacity="0.3"/>
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="biofilmTile04" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#5aaa7a"/>
+            <stop offset="100%" stop-color="#2a6a4a"/>
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#biofilmTile04)"/>
+        <!-- Cell clusters -->
+        <circle cx="30" cy="35" r="8" fill="#6aba8a" opacity="0.5"/>
+        <circle cx="42" cy="40" r="6" fill="#7aca9a" opacity="0.4"/>
+        <circle cx="60" cy="55" r="9" fill="#6aba8a" opacity="0.45"/>
+        <circle cx="72" cy="50" r="5" fill="#7aca9a" opacity="0.35"/>
+        <circle cx="45" cy="70" r="7" fill="#6aba8a" opacity="0.4"/>
+        <!-- EPS matrix strands -->
+        <path d="M25,40 Q38,38 48,45 Q58,52 68,48" fill="none" stroke="#90dab0" stroke-width="1" opacity="0.3"/>
+        <path d="M35,55 Q50,50 62,58 Q72,64 80,60" fill="none" stroke="#90dab0" stroke-width="0.8" opacity="0.25"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#3a7a5a;">BIOFILM</div>
-      <div style="font-size:7pt;color:#888;">Your colonies</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#3a7a5a;">BIOFILM</div>
+      <div style="font-size:7.5pt;color:#666;">Green organic<br/>cell clusters</div>
     </div>
+
     <!-- TOXIC -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#2a0a2a"/>
-        <rect x="1" y="1" width="2" height="2" fill="#c060c0" opacity="0.5"/>
-        <rect x="4" y="4" width="2" height="2" fill="#c060c0" opacity="0.3"/>
-        <rect x="3" y="2" width="1" height="1" fill="#ff80ff" opacity="0.6"/>
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <radialGradient id="toxicTile04" cx="50%" cy="60%" r="60%">
+            <stop offset="0%" stop-color="#d070d0"/>
+            <stop offset="100%" stop-color="#3a0a3a"/>
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#toxicTile04)"/>
+        <!-- Rising gas bubbles (smooth) -->
+        <circle cx="25" cy="70" r="5" fill="#e090e0" opacity="0.35"/>
+        <circle cx="40" cy="50" r="4" fill="#e090e0" opacity="0.3"/>
+        <circle cx="55" cy="30" r="3" fill="#e090e0" opacity="0.25"/>
+        <circle cx="70" cy="55" r="4.5" fill="#e090e0" opacity="0.3"/>
+        <circle cx="60" cy="75" r="3.5" fill="#e090e0" opacity="0.28"/>
+        <circle cx="35" cy="25" r="2.5" fill="#ff90ff" opacity="0.2"/>
+        <circle cx="78" cy="35" r="2" fill="#ff90ff" opacity="0.18"/>
+        <!-- Shimmer -->
+        <circle cx="25" cy="68" r="1.5" fill="white" opacity="0.15"/>
+        <circle cx="55" cy="28" r="1" fill="white" opacity="0.12"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#c060c0;">TOXIC</div>
-      <div style="font-size:7pt;color:#ff4444;">-20 HP/sec!</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#c060c0;">TOXIC</div>
+      <div style="font-size:7.5pt;color:#ff4444;">&minus;20 HP/sec!</div>
     </div>
-    <!-- FLOW_FAST -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#0c1830"/>
-        <rect x="1" y="3" width="2" height="1" fill="#4fa4ff" opacity="0.5"/>
-        <rect x="4" y="4" width="2" height="1" fill="#4fa4ff" opacity="0.5"/>
-        <rect x="6" y="3" width="1" height="1" fill="#4fa4ff" opacity="0.3"/>
+
+    <!-- FAST_FLOW -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="fastFlowTile04" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0a1830"/>
+            <stop offset="50%" stop-color="#102848"/>
+            <stop offset="100%" stop-color="#0a1830"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#fastFlowTile04)"/>
+        <!-- Strong directional current lines -->
+        <path d="M5,25 Q25,22 50,26 Q75,30 95,24" fill="none" stroke="#4fa4ff" stroke-width="2" opacity="0.5"/>
+        <path d="M5,42 Q30,38 55,43 Q80,48 95,41" fill="none" stroke="#4fa4ff" stroke-width="2.5" opacity="0.6"/>
+        <path d="M5,58 Q30,54 60,60 Q82,64 95,57" fill="none" stroke="#4fa4ff" stroke-width="2.5" opacity="0.6"/>
+        <path d="M5,75 Q25,72 50,76 Q75,80 95,74" fill="none" stroke="#4fa4ff" stroke-width="2" opacity="0.5"/>
+        <!-- Arrow tips -->
+        <polygon points="90,22 95,25 90,28" fill="#4fa4ff" opacity="0.5"/>
+        <polygon points="90,39 95,42 90,45" fill="#4fa4ff" opacity="0.6"/>
+        <polygon points="90,55 95,58 90,61" fill="#4fa4ff" opacity="0.6"/>
+        <polygon points="90,72 95,75 90,78" fill="#4fa4ff" opacity="0.5"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#4fa4ff;">FAST FLOW</div>
-      <div style="font-size:7pt;color:#888;">2.5&times; speed</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#4fa4ff;">FAST FLOW</div>
+      <div style="font-size:7.5pt;color:#666;">2.5&times; speed<br/>current</div>
     </div>
+
     <!-- INLET -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#1a3060"/>
-        <polygon points="2,2 6,4 2,6" fill="#4fa4ff" opacity="0.6"/>
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="inletTile04" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#2060c0"/>
+            <stop offset="100%" stop-color="#0a2060"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#inletTile04)"/>
+        <!-- Incoming flow arrows -->
+        <path d="M10,35 Q30,32 55,36" fill="none" stroke="#70b4ff" stroke-width="2" opacity="0.6"/>
+        <polygon points="52,32 58,36 52,40" fill="#70b4ff" opacity="0.6"/>
+        <path d="M10,50 Q35,47 60,51" fill="none" stroke="#80c4ff" stroke-width="2.5" opacity="0.7"/>
+        <polygon points="57,47 63,51 57,55" fill="#80c4ff" opacity="0.7"/>
+        <path d="M10,65 Q30,62 55,66" fill="none" stroke="#70b4ff" stroke-width="2" opacity="0.6"/>
+        <polygon points="52,62 58,66 52,70" fill="#70b4ff" opacity="0.6"/>
+        <!-- Sparkle -->
+        <circle cx="20" cy="30" r="2" fill="white" opacity="0.25"/>
+        <circle cx="15" cy="72" r="1.5" fill="white" opacity="0.2"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#3060a0;">INLET</div>
-      <div style="font-size:7pt;color:#888;">Water enters</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#3060a0;">INLET</div>
+      <div style="font-size:7.5pt;color:#666;">Water &amp; food<br/>enters here</div>
     </div>
+
     <!-- OUTLET -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#1a3020"/>
-        <polygon points="2,2 6,4 2,6" fill="#4fdf6f" opacity="0.6"/>
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="outletTile04" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#105030"/>
+            <stop offset="100%" stop-color="#20a050"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="12" fill="url(#outletTile04)"/>
+        <!-- Outgoing flow arrows -->
+        <path d="M40,35 Q60,32 85,36" fill="none" stroke="#70df8f" stroke-width="2" opacity="0.6"/>
+        <polygon points="82,32 88,36 82,40" fill="#70df8f" opacity="0.6"/>
+        <path d="M35,50 Q58,47 88,51" fill="none" stroke="#80ef9f" stroke-width="2.5" opacity="0.7"/>
+        <polygon points="85,47 91,51 85,55" fill="#80ef9f" opacity="0.7"/>
+        <path d="M40,65 Q60,62 85,66" fill="none" stroke="#70df8f" stroke-width="2" opacity="0.6"/>
+        <polygon points="82,62 88,66 82,70" fill="#70df8f" opacity="0.6"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#4fdf6f;">OUTLET</div>
-      <div style="font-size:7pt;color:#888;">Water exits</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#4fdf6f;">OUTLET</div>
+      <div style="font-size:7.5pt;color:#666;">Water exits<br/>the level</div>
     </div>
+
     <!-- VOID -->
-    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
-      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
-        <rect width="8" height="8" fill="#000000"/>
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:6px; padding:10px;">
+      <svg width="56" height="56" viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="12" fill="#050508"/>
+        <!-- Subtle border glow -->
+        <rect x="3" y="3" width="94" height="94" rx="10" fill="none" stroke="#222230" stroke-width="1.5"/>
+        <rect x="8" y="8" width="84" height="84" rx="8" fill="none" stroke="#1a1a28" stroke-width="0.8"/>
       </svg>
-      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#444;">VOID</div>
-      <div style="font-size:7pt;color:#888;">Map boundary</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:6px;color:#444;">VOID</div>
+      <div style="font-size:7.5pt;color:#666;">Map boundary<br/>(impassable)</div>
     </div>
   </div>
 
+  <!-- Eating Mechanics Section -->
+  <h2>Eating Mechanics</h2>
+
   <div class="info-box">
-    <div class="info-box-title">EATING IS AUTOMATIC</div>
+    <div class="info-box-title">AUTOMATIC CONSUMPTION</div>
+    <p style="font-size:10pt; margin-bottom:6px;">
+      Eating is <strong>automatic</strong> &mdash; simply move ARKE onto a tile containing a substrate particle and it
+      will be consumed instantly. There is no "eat" button. On contact, the substrate disappears and your
+      <strong>HP</strong>, <strong>EN</strong>, and <strong>GR</strong> bars update immediately. A chiptune sound effect
+      plays and ARKE briefly flashes green to confirm the consumption.
+    </p>
+  </div>
+
+  <div class="two-col" style="margin-top:8px;">
+    <div>
+      <h3 style="font-size:10pt;">Eating Rules</h3>
+      <ul style="font-size:9.5pt; margin-left:16px;">
+        <li><strong>Multiple substrates</strong> can exist on the same tile. Moving onto it eats <strong>only one per step</strong> &mdash; you must step off and back on (or pause briefly) to eat the next one.</li>
+        <li>Substrates have a <strong>limited lifetime</strong> of approximately 30 seconds. If nobody eats them, they despawn and are lost.</li>
+        <li><strong>Rival organisms</strong> also eat on contact with the same instant mechanics. They will compete for the same food!</li>
+        <li>Eating does <strong>not slow you down</strong> &mdash; you maintain full movement speed while consuming substrates.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-size:10pt;">Substrate Values Quick Reference</h3>
+      <table style="font-size:8.5pt;">
+        <tr><th>Substrate</th><th>HP</th><th>EN</th><th>GR</th></tr>
+        <tr><td style="color:#4fa4ff;font-weight:bold;">O2</td><td>+20</td><td>+10</td><td>+15</td></tr>
+        <tr><td style="color:#4fdf6f;font-weight:bold;">NO3</td><td>+15</td><td>+7.5</td><td>+18</td></tr>
+        <tr><td style="color:#cf6fff;font-weight:bold;">Mn(IV)</td><td>+12</td><td>+6</td><td>+12</td></tr>
+        <tr><td style="color:#ef8f3f;font-weight:bold;">Fe(III)</td><td>+10</td><td>+5</td><td>+10</td></tr>
+        <tr><td style="color:#c0c020;font-weight:bold;">SO4</td><td>+6</td><td>+3</td><td>+8</td></tr>
+        <tr><td style="color:#ff4f4f;font-weight:bold;">CH4</td><td>+5</td><td>+2.5</td><td>+25</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="info-box tip" style="margin-top:10px;">
+    <div class="info-box-title" style="color:#3a8a4a;">PRO TIP: SUBSTRATE INTERCEPTION</div>
     <p style="font-size:10pt;">
-      You don't need to press a button to eat! Simply <strong>move over a substrate particle</strong>
-      and ARKE will consume it automatically. You'll hear a chiptune sound effect and see
-      your HP, EN, and GR bars update instantly.
+      Since substrates drift with the water flow from INLET to OUTLET, the best strategy is to position ARKE
+      <strong>in the path of incoming substrates</strong> rather than chasing after them. Use Science Mode (Q) to see flow
+      lines, then park in a high-flow channel and let the food come to you. In fast-flow levels, use planktonic mode to
+      ride alongside drifting substrates and scoop them up.
     </p>
   </div>
 
