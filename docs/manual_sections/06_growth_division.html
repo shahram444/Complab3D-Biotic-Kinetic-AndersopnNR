@@ -1,5 +1,5 @@
 <!-- Section 06: Growth & Division -->
-<div class="page" id="growth">
+<div class="page" id="growth" style="page-break-after:always;">
   <h1 class="section-number">SECTION 5</h1>
   <h1 class="section-title">Growth & Division</h1>
 
@@ -9,114 +9,193 @@
     biofilm colony on the map. This is how you win each level!
   </p>
 
-  <!-- Power-up progression diagram -->
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
-    <h3 style="font-size:9pt; margin-bottom:14px;">The Growth Cycle</h3>
-    <svg width="460" height="170" viewBox="0 0 460 170">
-      <!-- Step 1: Eat -->
-      <g transform="translate(20,20)">
-        <rect x="0" y="0" width="90" height="70" rx="6" fill="#f0ece0" stroke="#3a3a4a" stroke-width="1.5"/>
-        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#333">1. EAT</text>
-        <!-- ARKE + substrate -->
-        <g transform="translate(25,30)">
-          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
-          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
-          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
-        </g>
-        <text x="45" y="42" text-anchor="middle" font-size="8" fill="#666">+</text>
-        <circle cx="60" cy="40" r="6" fill="#ff4f4f"/>
-        <text x="60" y="43" text-anchor="middle" font-size="4" fill="white">CH4</text>
-        <text x="45" y="62" text-anchor="middle" font-size="6" fill="#888">Move over food</text>
+  <!-- ============================================================
+       THE GROWTH CYCLE - Beautiful 4-Step SVG Illustration
+       ============================================================ -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:16px; margin:12px 0; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <h3 style="font-size:10pt; margin-bottom:14px; color:#1a1a2a; letter-spacing:1px;">The Growth Cycle</h3>
+    <svg width="480" height="260" viewBox="0 0 480 260" class="organism-art">
+      <defs>
+        <!-- Glow filters -->
+        <filter id="gc-glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="gc-glow-gold" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="gc-glow-green" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="gc-soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.15)"/>
+        </filter>
+        <!-- ARKE body gradient -->
+        <radialGradient id="gc-arke-body" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
+          <stop offset="40%" stop-color="#2a8a8a"/>
+          <stop offset="100%" stop-color="#1a5a5a"/>
+        </radialGradient>
+        <!-- ARKE golden glow for READY state -->
+        <radialGradient id="gc-arke-gold" cx="50%" cy="50%">
+          <stop offset="0%" stop-color="#ffee44" stop-opacity="0.6"/>
+          <stop offset="50%" stop-color="#ffd700" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#ffd700" stop-opacity="0"/>
+        </radialGradient>
+        <!-- GR bar gradient -->
+        <linearGradient id="gc-gr-bar" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#2aaa3a"/>
+          <stop offset="100%" stop-color="#7fff5f"/>
+        </linearGradient>
+        <!-- Full GR bar (golden) -->
+        <linearGradient id="gc-gr-full" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#ffa500"/>
+          <stop offset="50%" stop-color="#ffdd00"/>
+          <stop offset="100%" stop-color="#ffff44"/>
+        </linearGradient>
+        <!-- Substrate orb gradient -->
+        <radialGradient id="gc-substrate-orb" cx="35%" cy="30%">
+          <stop offset="0%" stop-color="#ff9f7f"/>
+          <stop offset="50%" stop-color="#ff4f4f"/>
+          <stop offset="100%" stop-color="#aa1a1a"/>
+        </radialGradient>
+        <!-- Colony gradient -->
+        <radialGradient id="gc-colony-body" cx="45%" cy="40%">
+          <stop offset="0%" stop-color="#7fff7f"/>
+          <stop offset="40%" stop-color="#3a9a5a"/>
+          <stop offset="100%" stop-color="#1a5a3a"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Step boxes background band -->
+      <rect x="5" y="8" width="470" height="245" rx="10" fill="#f8f6f0" stroke="none"/>
+
+      <!-- ===== STEP 1: EAT ===== -->
+      <g transform="translate(18,18)">
+        <rect x="0" y="0" width="100" height="100" rx="12" fill="white" stroke="#ddd8c8" stroke-width="1.5" filter="url(#gc-soft-shadow)"/>
+        <text x="50" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#cc4444" letter-spacing="1">1. EAT</text>
+        <!-- ARKE body approaching substrate -->
+        <ellipse cx="32" cy="55" rx="12" ry="15" fill="url(#gc-arke-body)" filter="url(#gc-glow-cyan)"/>
+        <!-- ARKE visor -->
+        <ellipse cx="32" cy="50" rx="7" ry="4" fill="#1a1a3a"/>
+        <ellipse cx="34" cy="49" rx="3" ry="2" fill="#4aeaff" opacity="0.9"/>
+        <!-- Substrate orb (glowing) -->
+        <circle cx="70" cy="55" r="10" fill="url(#gc-substrate-orb)" filter="url(#gc-glow-cyan)"/>
+        <circle cx="67" cy="52" r="3" fill="white" opacity="0.3"/>
+        <text x="70" y="58" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="white" font-weight="bold">CH4</text>
+        <!-- Motion lines -->
+        <path d="M44,55 Q52,53 58,55" fill="none" stroke="#4aeaff" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.6"/>
+        <path d="M44,58 Q52,57 58,58" fill="none" stroke="#4aeaff" stroke-width="0.6" stroke-dasharray="2,2" opacity="0.4"/>
+        <text x="50" y="90" text-anchor="middle" font-size="7" fill="#888">Move over food</text>
       </g>
 
-      <!-- Arrow 1 -->
-      <g transform="translate(115, 45)">
-        <line x1="0" y1="10" x2="25" y2="10" stroke="#4aeaff" stroke-width="2"/>
-        <polygon points="22,5 30,10 22,15" fill="#4aeaff"/>
+      <!-- Smooth arrow 1->2 -->
+      <g transform="translate(122,55)">
+        <path d="M0,12 C10,12 18,12 28,12" fill="none" stroke="#4aeaff" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="26,7 35,12 26,17" fill="#4aeaff"/>
       </g>
 
-      <!-- Step 2: Grow -->
-      <g transform="translate(150,20)">
-        <rect x="0" y="0" width="90" height="70" rx="6" fill="#d0e8d8" stroke="#3a7a5a" stroke-width="1.5"/>
-        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#3a7a5a">2. GROW</text>
-        <!-- GR bar filling -->
-        <rect x="10" y="28" width="70" height="12" fill="#1a1a2b" rx="2"/>
-        <rect x="10" y="28" width="50" height="12" fill="#5ff050" rx="2"/>
-        <text x="45" y="36" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="white">GR: 75/100</text>
-        <text x="45" y="55" text-anchor="middle" font-size="6" fill="#3a7a5a">GR bar fills up</text>
-        <text x="45" y="64" text-anchor="middle" font-size="6" fill="#888">Does NOT decay!</text>
+      <!-- ===== STEP 2: GROW ===== -->
+      <g transform="translate(130,18)">
+        <rect x="0" y="0" width="100" height="100" rx="12" fill="white" stroke="#60a070" stroke-width="1.5" filter="url(#gc-soft-shadow)"/>
+        <text x="50" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a8a4a" letter-spacing="1">2. GROW</text>
+        <!-- ARKE slightly larger -->
+        <ellipse cx="50" cy="48" rx="14" ry="17" fill="url(#gc-arke-body)" filter="url(#gc-glow-cyan)"/>
+        <ellipse cx="50" cy="43" rx="8" ry="4.5" fill="#1a1a3a"/>
+        <ellipse cx="52" cy="42" rx="3.5" ry="2.2" fill="#4aeaff" opacity="0.9"/>
+        <!-- GR bar -->
+        <rect x="12" y="72" width="76" height="10" rx="5" fill="#1a1a2b"/>
+        <rect x="12" y="72" width="53" height="10" rx="5" fill="url(#gc-gr-bar)" filter="url(#gc-glow-green)"/>
+        <text x="50" y="80" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5.5" fill="white" font-weight="bold">GR: 70/100</text>
+        <text x="50" y="95" text-anchor="middle" font-size="7" fill="#3a8a4a">GR bar fills up</text>
       </g>
 
-      <!-- Arrow 2 -->
-      <g transform="translate(245, 45)">
-        <line x1="0" y1="10" x2="25" y2="10" stroke="#5ff050" stroke-width="2"/>
-        <polygon points="22,5 30,10 22,15" fill="#5ff050"/>
+      <!-- Smooth arrow 2->3 -->
+      <g transform="translate(234,55)">
+        <path d="M0,12 C10,12 18,12 28,12" fill="none" stroke="#5ff050" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="26,7 35,12 26,17" fill="#5ff050"/>
       </g>
 
-      <!-- Step 3: GR = 100 -->
-      <g transform="translate(280,20)">
-        <rect x="0" y="0" width="90" height="70" rx="6" fill="#ffffd0" stroke="#c0c020" stroke-width="2" stroke-dasharray="4,2"/>
-        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#8a8a00">3. READY!</text>
-        <!-- Full GR bar flashing -->
-        <rect x="10" y="28" width="70" height="12" fill="#1a1a2b" rx="2"/>
-        <rect x="10" y="28" width="70" height="12" fill="#ffff00" rx="2" opacity="0.8"/>
-        <text x="45" y="36" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#333">SPACE!</text>
-        <text x="45" y="55" text-anchor="middle" font-size="6" fill="#8a8a00">GR hits 100!</text>
-        <text x="45" y="64" text-anchor="middle" font-size="6" fill="#888">Press SPACE</text>
+      <!-- ===== STEP 3: READY ===== -->
+      <g transform="translate(242,18)">
+        <rect x="0" y="0" width="100" height="100" rx="12" fill="#fffde8" stroke="#c0a020" stroke-width="2" stroke-dasharray="6,3" filter="url(#gc-soft-shadow)"/>
+        <text x="50" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#aa8800" letter-spacing="1">3. READY!</text>
+        <!-- Golden pulsing aura -->
+        <circle cx="50" cy="48" r="24" fill="url(#gc-arke-gold)" filter="url(#gc-glow-gold)"/>
+        <!-- ARKE glowing golden -->
+        <ellipse cx="50" cy="48" rx="14" ry="17" fill="url(#gc-arke-body)" filter="url(#gc-glow-gold)"/>
+        <ellipse cx="50" cy="43" rx="8" ry="4.5" fill="#1a1a3a"/>
+        <ellipse cx="52" cy="42" rx="3.5" ry="2.2" fill="#ffee44" opacity="0.9"/>
+        <!-- Full GR bar (golden flash) -->
+        <rect x="12" y="72" width="76" height="10" rx="5" fill="#1a1a2b"/>
+        <rect x="12" y="72" width="76" height="10" rx="5" fill="url(#gc-gr-full)" filter="url(#gc-glow-gold)"/>
+        <text x="50" y="80" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#332200" font-weight="bold">SPACE!</text>
+        <text x="50" y="95" text-anchor="middle" font-size="7" fill="#aa8800">Press SPACE</text>
       </g>
 
-      <!-- Arrow 3 -->
-      <g transform="translate(375, 45)">
-        <line x1="0" y1="10" x2="25" y2="10" stroke="#ffff00" stroke-width="2"/>
-        <polygon points="22,5 30,10 22,15" fill="#ffff00"/>
+      <!-- Smooth arrow 3->4 -->
+      <g transform="translate(346,55)">
+        <path d="M0,12 C10,12 18,12 28,12" fill="none" stroke="#ffd700" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="26,7 35,12 26,17" fill="#ffd700"/>
       </g>
 
-      <!-- Step 4: Divide -->
-      <g transform="translate(20,100)">
-        <rect x="0" y="0" width="420" height="60" rx="6" fill="#f0ece0" stroke="#3a3a4a" stroke-width="1.5"/>
-        <text x="210" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a7a5a">4. DIVIDE &mdash; COLONY PLACED!</text>
-
-        <!-- Division diagram -->
-        <!-- ARKE -->
-        <g transform="translate(60,30)">
-          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
-          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
-          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
-        </g>
-
-        <!-- Arrow -->
-        <line x1="80" y1="37" x2="120" y2="37" stroke="#4aeaff" stroke-width="1.5" stroke-dasharray="3,2"/>
-
-        <!-- ARKE stays -->
-        <g transform="translate(130,30)">
-          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
-          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
-          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
-        </g>
-        <text x="135" y="55" text-anchor="middle" font-size="6" fill="#2a8a8a">ARKE (GR=0)</text>
-
-        <text x="165" y="38" text-anchor="middle" font-size="14" fill="#888">+</text>
-
-        <!-- Colony placed -->
-        <g transform="translate(185,30)">
-          <rect x="0" y="0" width="14" height="14" fill="#3a7a5a" rx="2"/>
-          <rect x="2" y="2" width="4" height="4" fill="#5aaa7a" opacity="0.5"/>
-          <rect x="6" y="6" width="4" height="4" fill="#5aaa7a" opacity="0.3"/>
-          <!-- Glow -->
-          <circle cx="7" cy="7" r="10" fill="#4fdf6f" opacity="0.1"/>
-        </g>
-        <text x="192" y="55" text-anchor="middle" font-size="6" fill="#3a7a5a">NEW COLONY</text>
-
-        <!-- Score -->
-        <text x="290" y="34" font-family="'Press Start 2P',monospace" font-size="6" fill="#ffd700">+100 POINTS</text>
-        <text x="290" y="48" font-size="7" fill="#666">Colony counts toward level goal</text>
+      <!-- ===== STEP 4: DIVIDE ===== -->
+      <g transform="translate(354,18)">
+        <rect x="0" y="0" width="116" height="100" rx="12" fill="white" stroke="#3a7a5a" stroke-width="1.5" filter="url(#gc-soft-shadow)"/>
+        <text x="58" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#3a7a5a" letter-spacing="0.5">4. DIVIDE!</text>
+        <!-- Elongating ARKE pinching into two -->
+        <!-- Left half: original ARKE -->
+        <ellipse cx="30" cy="48" rx="11" ry="14" fill="url(#gc-arke-body)" filter="url(#gc-glow-cyan)"/>
+        <ellipse cx="30" cy="44" rx="6" ry="3.5" fill="#1a1a3a"/>
+        <ellipse cx="31" cy="43.5" rx="2.5" ry="1.8" fill="#4aeaff" opacity="0.9"/>
+        <!-- Pinch connection -->
+        <path d="M40,42 Q46,48 40,54" fill="none" stroke="#2a8a8a" stroke-width="2" opacity="0.5"/>
+        <!-- Right half: new colony cluster -->
+        <ellipse cx="60" cy="46" rx="8" ry="9" fill="url(#gc-colony-body)" filter="url(#gc-glow-green)"/>
+        <ellipse cx="63" cy="43" rx="5" ry="6" fill="url(#gc-colony-body)" opacity="0.7"/>
+        <ellipse cx="57" cy="50" rx="5" ry="5" fill="url(#gc-colony-body)" opacity="0.6"/>
+        <!-- Colony glow -->
+        <circle cx="60" cy="46" r="14" fill="#4fdf6f" opacity="0.08"/>
+        <!-- Labels -->
+        <text x="30" y="70" text-anchor="middle" font-size="5.5" fill="#2a8a8a" font-weight="bold">ARKE</text>
+        <text x="30" y="78" text-anchor="middle" font-size="5" fill="#888">(GR=0)</text>
+        <text x="60" y="70" text-anchor="middle" font-size="5.5" fill="#3a7a5a" font-weight="bold">COLONY</text>
+        <text x="58" y="90" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#ffd700">+100 PTS</text>
       </g>
+
+      <!-- Bottom annotation -->
+      <text x="240" y="135" text-anchor="middle" font-size="7.5" fill="#666" font-style="italic">Repeat this cycle to place enough colonies and complete each level!</text>
+
+      <!-- ===== DIVISION MECHANICS - Expanded detail section below ===== -->
+      <rect x="10" y="145" width="460" height="108" rx="8" fill="#f0f8f4" stroke="#60a070" stroke-width="1"/>
+      <text x="240" y="162" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#2a6a3a" letter-spacing="1">DIVISION MECHANICS</text>
+
+      <text x="20" y="178" font-size="7" fill="#333">
+        <tspan font-weight="bold" fill="#2a6a3a">Trigger:</tspan> When GR reaches exactly 100, ARKE glows bright yellow. The GR bar flashes to alert you.
+      </text>
+      <text x="20" y="192" font-size="7" fill="#333">
+        <tspan font-weight="bold" fill="#2a6a3a">Action:</tspan> Press SPACE to trigger binary fission (division). ARKE's body stretches and splits.
+      </text>
+      <text x="20" y="206" font-size="7" fill="#333">
+        <tspan font-weight="bold" fill="#2a6a3a">Animation:</tspan> The division animation takes approximately 0.5 seconds to complete.
+      </text>
+      <text x="20" y="220" font-size="7" fill="#333">
+        <tspan font-weight="bold" fill="#2a6a3a">After Split:</tspan> Your GR resets to 0, but HP and EN remain unchanged. You immediately continue.
+      </text>
+      <text x="20" y="234" font-size="7" fill="#333">
+        <tspan font-weight="bold" fill="#2a6a3a">Colony:</tspan> A biofilm colony is automatically placed on the best available adjacent tile.
+      </text>
+      <text x="20" y="248" font-size="7" fill="#333">
+        <tspan font-weight="bold" fill="#2a6a3a">Score:</tspan> +100 points per colony placed. Colony counts toward the level's completion goal.
+      </text>
     </svg>
   </div>
 
   <!-- Growth per substrate table -->
   <h2>Substrates Needed to Divide</h2>
-  <table>
+  <table style="border-radius:4px; overflow:hidden;">
     <tr>
       <th>Substrate</th>
       <th>Growth/Eat</th>
@@ -174,105 +253,247 @@
 </div>
 
 <!-- Growth page 2: Colony placement mechanics -->
-<div class="page" id="growth2">
+<div class="page" id="growth2" style="page-break-after:always;">
 
   <h2>Colony Placement Mechanics</h2>
 
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
-    <h3 style="font-size:9pt; margin-bottom:10px;">Where Does the Colony Go?</h3>
-    <svg width="360" height="200" viewBox="0 0 360 200">
-      <!-- Grid -->
-      <rect x="80" y="10" width="200" height="180" fill="#0c1420"/>
+  <p style="font-size:10pt; margin-bottom:6px;">
+    When you press SPACE to divide, the game must decide <em>where</em> to place the new biofilm colony.
+    The placement algorithm follows a precise set of rules to find the optimal location:
+  </p>
 
-      <!-- Grid lines -->
-      <g stroke="#1a2a3a" stroke-width="0.5">
-        <line x1="120" y1="10" x2="120" y2="190"/>
-        <line x1="160" y1="10" x2="160" y2="190"/>
-        <line x1="200" y1="10" x2="200" y2="190"/>
-        <line x1="240" y1="10" x2="240" y2="190"/>
-        <line x1="80" y1="50" x2="280" y2="50"/>
-        <line x1="80" y1="90" x2="280" y2="90"/>
-        <line x1="80" y1="130" x2="280" y2="130"/>
-        <line x1="80" y1="170" x2="280" y2="170"/>
+  <!-- Expanded placement algorithm -->
+  <div style="background:#f0f8f4; border:1px solid #a0d0b0; border-radius:6px; padding:10px 14px; margin:6px 0; font-size:9.5pt; line-height:1.55;">
+    <p style="margin-bottom:5px;">
+      <strong style="color:#2a6a3a;">Step 1 &mdash; Scan Adjacent Tiles:</strong>
+      The game scans all 4 adjacent tiles (up, down, left, right) from ARKE's current position.
+    </p>
+    <p style="margin-bottom:5px;">
+      <strong style="color:#2a6a3a;">Step 2 &mdash; Filter Candidates:</strong>
+      Only PORE tiles (walkable water tiles) are candidates for colony placement. Tiles occupied by grains,
+      existing colonies, rivals, or toxic zones are excluded.
+    </p>
+    <p style="margin-bottom:5px;">
+      <strong style="color:#2a6a3a;">Step 3 &mdash; Rank by Openness:</strong>
+      If multiple PORE tiles are available, the game picks the one that is furthest from any GRAIN tile walls,
+      preferring open space. This maximizes the colony's feeding radius coverage.
+    </p>
+    <p style="margin-bottom:5px;">
+      <strong style="color:#2a6a3a;">Step 4 &mdash; Diagonal Fallback:</strong>
+      If no adjacent PORE tile is available (all blocked by grains or existing colonies), the search extends
+      to diagonal neighbors (up-left, up-right, down-left, down-right).
+    </p>
+    <p style="margin-bottom:0;">
+      <strong style="color:#2a6a3a;">Step 5 &mdash; Edge Case:</strong>
+      If absolutely no valid tile exists within 2 tiles, division still happens but no colony is placed (rare edge case).
+      Your GR still resets to 0 and you still score points.
+    </p>
+  </div>
+
+  <!-- Colony Placement SVG Illustration -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:14px; margin:10px 0; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <h3 style="font-size:9pt; margin-bottom:8px; color:#1a1a2a;">Where Does the Colony Go?</h3>
+    <svg width="400" height="200" viewBox="0 0 400 200" class="organism-art">
+      <defs>
+        <filter id="cp-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="1" dy="1.5" stdDeviation="1.5" flood-color="rgba(0,0,0,0.12)"/>
+        </filter>
+        <filter id="cp-glow-green" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="cp-glow-gold" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="cp-grain-grad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#b89a6a"/>
+          <stop offset="60%" stop-color="#7a5a2a"/>
+          <stop offset="100%" stop-color="#5a3a1a"/>
+        </radialGradient>
+        <radialGradient id="cp-arke-grad" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
+          <stop offset="40%" stop-color="#2a8a8a"/>
+          <stop offset="100%" stop-color="#1a5a5a"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Background grid area -->
+      <rect x="60" y="5" width="240" height="190" rx="8" fill="#0c1828"/>
+
+      <!-- Grid lines (subtle) -->
+      <g stroke="#1a2a40" stroke-width="0.5" opacity="0.5">
+        <line x1="108" y1="5" x2="108" y2="195"/>
+        <line x1="156" y1="5" x2="156" y2="195"/>
+        <line x1="204" y1="5" x2="204" y2="195"/>
+        <line x1="252" y1="5" x2="252" y2="195"/>
+        <line x1="60" y1="43" x2="300" y2="43"/>
+        <line x1="60" y1="81" x2="300" y2="81"/>
+        <line x1="60" y1="119" x2="300" y2="119"/>
+        <line x1="60" y1="157" x2="300" y2="157"/>
       </g>
 
-      <!-- Grain tiles -->
-      <rect x="80" y="10" width="40" height="40" fill="#7a5a2a"/>
-      <rect x="240" y="10" width="40" height="40" fill="#7a5a2a"/>
-      <rect x="80" y="90" width="40" height="40" fill="#7a5a2a"/>
-      <rect x="80" y="130" width="40" height="40" fill="#7a5a2a"/>
-      <rect x="240" y="130" width="40" height="40" fill="#7a5a2a"/>
-      <rect x="240" y="90" width="40" height="40" fill="#7a5a2a"/>
+      <!-- Grain tiles (smooth ellipses with gradient) -->
+      <ellipse cx="84" cy="24" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
+      <ellipse cx="84" cy="24" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
 
-      <!-- ARKE in center -->
-      <g transform="translate(180,110)">
-        <rect x="-8" y="-10" width="16" height="20" fill="#2a8a8a" rx="1"/>
-        <rect x="-6" y="-8" width="12" height="6" fill="#1a1a3a"/>
-        <rect x="-4" y="-6" width="3" height="2" fill="#4aeaff"/>
-        <rect x="2" y="-6" width="3" height="2" fill="#4aeaff"/>
-        <!-- Glow (ready) -->
-        <circle cx="0" cy="0" r="16" fill="#ffff00" opacity="0.1"/>
-      </g>
+      <ellipse cx="276" cy="24" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
+      <ellipse cx="276" cy="24" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+
+      <ellipse cx="84" cy="100" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
+      <ellipse cx="84" cy="100" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+
+      <ellipse cx="84" cy="138" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
+      <ellipse cx="84" cy="138" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+
+      <ellipse cx="276" cy="138" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
+      <ellipse cx="276" cy="138" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+
+      <ellipse cx="276" cy="100" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
+      <ellipse cx="276" cy="100" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+
+      <!-- ARKE in center (golden ready glow) -->
+      <circle cx="180" cy="100" r="22" fill="#ffd700" opacity="0.08" filter="url(#cp-glow-gold)"/>
+      <ellipse cx="180" cy="100" rx="14" ry="17" fill="url(#cp-arke-grad)" filter="url(#cp-glow-gold)"/>
+      <ellipse cx="180" cy="95" rx="8" ry="4.5" fill="#1a1a3a"/>
+      <ellipse cx="182" cy="94" rx="3.5" ry="2.2" fill="#ffee44" opacity="0.9"/>
       <text x="180" y="128" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4aeaff">ARKE</text>
 
-      <!-- Candidate tiles (highlighted) -->
-      <!-- Up -->
-      <rect x="160" y="50" width="40" height="40" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="3,2"/>
-      <text x="180" y="75" text-anchor="middle" font-size="6" fill="#4fdf6f">?</text>
+      <!-- Candidate tile: UP (dashed green border) -->
+      <rect x="157" y="44" width="46" height="36" rx="6" fill="#3a7a5a" opacity="0.12" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="180" y="67" text-anchor="middle" font-size="7" fill="#4fdf6f" opacity="0.8">?</text>
 
-      <!-- Right (best - furthest from walls) -->
-      <rect x="200" y="90" width="40" height="40" fill="#3a7a5a" opacity="0.4" stroke="#4fdf6f" stroke-width="2"/>
-      <text x="220" y="115" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4fdf6f">BEST</text>
+      <!-- Candidate tile: RIGHT (BEST - solid green, brighter) -->
+      <rect x="205" y="82" width="46" height="36" rx="6" fill="#3a7a5a" opacity="0.25" stroke="#4fdf6f" stroke-width="2.5" filter="url(#cp-glow-green)"/>
+      <text x="228" y="104" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f" filter="url(#cp-glow-green)">BEST</text>
+      <!-- Arrow pointing to BEST -->
+      <path d="M315,100 Q305,100 298,100" fill="none" stroke="#4fdf6f" stroke-width="1.5" marker-end="none"/>
+      <text x="330" y="96" font-size="7" fill="#4fdf6f" font-weight="bold">Furthest</text>
+      <text x="330" y="107" font-size="7" fill="#4fdf6f" font-weight="bold">from walls</text>
 
-      <!-- Down -->
-      <rect x="160" y="130" width="40" height="40" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="3,2"/>
-      <text x="180" y="155" text-anchor="middle" font-size="6" fill="#4fdf6f">?</text>
+      <!-- Candidate tile: DOWN (dashed green border) -->
+      <rect x="157" y="120" width="46" height="36" rx="6" fill="#3a7a5a" opacity="0.12" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="180" y="143" text-anchor="middle" font-size="7" fill="#4fdf6f" opacity="0.8">?</text>
 
-      <!-- Left blocked by grain -->
-      <rect x="120" y="90" width="40" height="40" fill="#0c1420"/>
-      <text x="140" y="115" text-anchor="middle" font-size="6" fill="#3060a0">open</text>
+      <!-- Left tile: open pore -->
+      <rect x="109" y="82" width="46" height="36" rx="6" fill="#0c1828" stroke="#3060a0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="132" y="104" text-anchor="middle" font-size="6.5" fill="#3060a0" opacity="0.7">open</text>
 
-      <!-- Labels -->
-      <text x="40" y="30" text-anchor="middle" font-size="7" fill="#7a5a2a" font-weight="bold">GRAIN</text>
-      <text x="320" y="115" font-size="7" fill="#4fdf6f">Colony goes to tile</text>
-      <text x="320" y="127" font-size="7" fill="#4fdf6f">furthest from walls</text>
+      <!-- Legend -->
+      <ellipse cx="25" cy="20" rx="14" ry="11" fill="url(#cp-grain-grad)"/>
+      <text x="25" y="40" text-anchor="middle" font-size="6.5" fill="#7a5a2a" font-weight="bold">GRAIN</text>
+      <rect x="10" y="50" width="28" height="14" rx="4" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="25" y="78" text-anchor="middle" font-size="5.5" fill="#4fdf6f">Candidate</text>
+      <rect x="10" y="88" width="28" height="14" rx="4" fill="#0c1828"/>
+      <text x="25" y="115" text-anchor="middle" font-size="5.5" fill="#3060a0">Pore</text>
     </svg>
-    <p style="font-size:8pt; color:#888; margin-top:6px;">
-      The game automatically selects the best adjacent pore tile &mdash; preferring open space far from grain walls.
-    </p>
   </div>
 
   <h2>Colony Passive Feeding</h2>
 
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
-    <svg width="280" height="140" viewBox="0 0 280 140">
-      <rect x="10" y="10" width="260" height="120" fill="#0c1420" rx="4"/>
+  <p style="font-size:10pt; margin-bottom:4px;">
+    Once placed, each colony becomes a permanent structure that passively feeds on nearby substrates.
+    Understanding colony feeding mechanics is essential for strategic placement:
+  </p>
 
-      <!-- Colony in center -->
-      <g transform="translate(140,70)">
-        <rect x="-8" y="-8" width="16" height="16" fill="#3a7a5a" rx="2"/>
-        <rect x="-5" y="-5" width="5" height="5" fill="#5aaa7a" opacity="0.5"/>
+  <!-- Expanded colony feeding mechanics -->
+  <div style="background:#f0f8f4; border:1px solid #a0d0b0; border-radius:6px; padding:10px 14px; margin:6px 0; font-size:9.5pt; line-height:1.55;">
+    <p style="margin-bottom:4px;">
+      <strong style="color:#2a6a3a;">Detection Radius:</strong>
+      Each colony has a circular detection radius of <strong>1.5 tiles</strong> around it.
+    </p>
+    <p style="margin-bottom:4px;">
+      <strong style="color:#2a6a3a;">Consumption Chance:</strong>
+      Every game frame, for each substrate particle within range, there is a <strong>2% probability</strong>
+      the colony will consume it.
+    </p>
+    <p style="margin-bottom:4px;">
+      <strong style="color:#2a6a3a;">Average Time:</strong>
+      A substrate sitting next to a colony will be eaten within about 50 frames (~0.8 seconds at 60 FPS).
+    </p>
+    <p style="margin-bottom:4px;">
+      <strong style="color:#2a6a3a;">No Personal Benefit:</strong>
+      Colony feeding does NOT restore your HP/EN/GR &mdash; it simply removes substrates from the map.
+    </p>
+    <p style="margin-bottom:4px;">
+      <strong style="color:#2a6a3a;">Area Denial:</strong>
+      Strategic colony placement near food-rich areas denies food to rivals (area denial strategy).
+    </p>
+    <p style="margin-bottom:0;">
+      <strong style="color:#2a6a3a;">Inlet Control:</strong>
+      Colonies placed near the INLET intercept substrates before they spread across the map.
+    </p>
+  </div>
+
+  <!-- Colony Feeding SVG Illustration -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:10px; margin:8px 0; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <svg width="320" height="155" viewBox="0 0 320 155" class="organism-art">
+      <defs>
+        <filter id="cf-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="cf-colony-grad" cx="45%" cy="40%">
+          <stop offset="0%" stop-color="#7fff7f"/>
+          <stop offset="40%" stop-color="#3a9a5a"/>
+          <stop offset="100%" stop-color="#1a5a3a"/>
+        </radialGradient>
+        <radialGradient id="cf-o2-grad" cx="35%" cy="30%">
+          <stop offset="0%" stop-color="#8fcfff"/>
+          <stop offset="100%" stop-color="#2060cc"/>
+        </radialGradient>
+        <radialGradient id="cf-ch4-grad" cx="35%" cy="30%">
+          <stop offset="0%" stop-color="#ff9f7f"/>
+          <stop offset="100%" stop-color="#cc2020"/>
+        </radialGradient>
+        <radialGradient id="cf-so4-grad" cx="35%" cy="30%">
+          <stop offset="0%" stop-color="#ffff8f"/>
+          <stop offset="100%" stop-color="#aa9a20"/>
+        </radialGradient>
+      </defs>
+
+      <rect x="10" y="10" width="300" height="135" rx="8" fill="#0c1828"/>
+
+      <!-- Colony in center (cluster of cells) -->
+      <g transform="translate(160,77)">
+        <ellipse cx="0" cy="0" rx="12" ry="11" fill="url(#cf-colony-grad)" filter="url(#cf-glow)"/>
+        <ellipse cx="8" cy="-6" rx="8" ry="7" fill="url(#cf-colony-grad)" opacity="0.8" filter="url(#cf-glow)"/>
+        <ellipse cx="-7" cy="6" rx="7" ry="7" fill="url(#cf-colony-grad)" opacity="0.7" filter="url(#cf-glow)"/>
+        <ellipse cx="5" cy="8" rx="6" ry="5" fill="url(#cf-colony-grad)" opacity="0.6"/>
         <!-- Feed radius circle -->
-        <circle cx="0" cy="0" r="45" fill="none" stroke="#4fdf6f" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+        <circle cx="0" cy="0" r="52" fill="none" stroke="#4fdf6f" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.5"/>
       </g>
 
-      <!-- Substrates being pulled in -->
-      <circle cx="100" cy="50" r="4" fill="#ff4f4f"/>
-      <line x1="104" y1="52" x2="130" y2="65" stroke="#ff4f4f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+      <!-- Substrate 1: CH4 being pulled in (with curved attraction line) -->
+      <circle cx="90" cy="45" r="7" fill="url(#cf-ch4-grad)" filter="url(#cf-glow)"/>
+      <circle cx="88" cy="43" r="2" fill="white" opacity="0.25"/>
+      <text x="90" y="48" text-anchor="middle" font-size="4.5" fill="white" font-weight="bold">CH4</text>
+      <path d="M98,48 C115,55 135,65 150,72" fill="none" stroke="#ff4f4f" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
+      <!-- Arrow tip -->
+      <circle cx="148" cy="71" r="1.5" fill="#ff4f4f" opacity="0.6"/>
 
-      <circle cx="180" cy="45" r="4" fill="#4fdf6f"/>
-      <line x1="177" y1="48" x2="148" y2="64" stroke="#4fdf6f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+      <!-- Substrate 2: NO3 being pulled in -->
+      <circle cx="225" cy="38" r="7" fill="#4fdf6f" filter="url(#cf-glow)"/>
+      <circle cx="223" cy="36" r="2" fill="white" opacity="0.25"/>
+      <text x="225" y="41" text-anchor="middle" font-size="4.5" fill="white" font-weight="bold">NO3</text>
+      <path d="M220,45 C205,55 185,65 172,72" fill="none" stroke="#4fdf6f" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
+      <circle cx="174" cy="71" r="1.5" fill="#4fdf6f" opacity="0.6"/>
 
-      <circle cx="160" cy="105" r="4" fill="#dfdf3f"/>
-      <line x1="157" y1="102" x2="145" y2="78" stroke="#dfdf3f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+      <!-- Substrate 3: SO4 being pulled in from below -->
+      <circle cx="185" cy="120" r="7" fill="url(#cf-so4-grad)" filter="url(#cf-glow)"/>
+      <circle cx="183" cy="118" r="2" fill="white" opacity="0.25"/>
+      <text x="185" y="123" text-anchor="middle" font-size="4.5" fill="#443300" font-weight="bold">SO4</text>
+      <path d="M178,114 C172,105 167,95 163,87" fill="none" stroke="#dfdf3f" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
+      <circle cx="164" cy="89" r="1.5" fill="#dfdf3f" opacity="0.6"/>
 
       <!-- Out of range substrate -->
-      <circle cx="50" cy="110" r="4" fill="#4fa4ff" opacity="0.4"/>
-      <text x="50" y="125" text-anchor="middle" font-size="5" fill="#888">out of range</text>
+      <circle cx="50" cy="120" r="6" fill="url(#cf-o2-grad)" opacity="0.35"/>
+      <text x="50" y="123" text-anchor="middle" font-size="4" fill="white" opacity="0.4">O2</text>
+      <text x="50" y="140" text-anchor="middle" font-size="5.5" fill="#556677">out of range</text>
 
       <!-- Labels -->
-      <text x="140" y="25" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#4fdf6f">Feed Radius: 1.5 tiles</text>
-      <text x="140" y="36" text-anchor="middle" font-size="6" fill="#888">2% chance per frame to consume</text>
+      <text x="160" y="24" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6.5" fill="#4fdf6f">Feed Radius: 1.5 tiles</text>
+      <text x="160" y="34" text-anchor="middle" font-size="6" fill="#667788">2% chance per frame to consume</text>
     </svg>
   </div>
 
@@ -290,12 +511,12 @@
     <div class="flow-step" style="border-color:#ffd700; background:#ffd700; color:white;">REPEAT &times;N</div>
   </div>
 
-  <table style="margin-top:12px;">
+  <table style="margin-top:10px; border-radius:4px; overflow:hidden;">
     <tr>
-      <th>Level</th>
-      <th>Goal</th>
-      <th>Level</th>
-      <th>Goal</th>
+      <th style="background:#2a5a3a;">Level</th>
+      <th style="background:#2a5a3a;">Goal</th>
+      <th style="background:#2a5a3a;">Level</th>
+      <th style="background:#2a5a3a;">Goal</th>
     </tr>
     <tr>
       <td>1. First Breath</td><td><strong>3</strong> colonies</td>
@@ -319,7 +540,7 @@
     </tr>
   </table>
 
-  <div class="info-box" style="margin-top: 10px;">
+  <div class="info-box" style="margin-top: 8px;">
     <div class="info-box-title">SCORING</div>
     <p style="font-size:10pt;">
       <strong>+10 pts</strong> per substrate eaten &bull;
