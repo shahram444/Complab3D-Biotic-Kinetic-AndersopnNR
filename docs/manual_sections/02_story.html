@@ -1,50 +1,177 @@
 <!-- Section 02: Story & Introduction -->
-<div class="page" id="story">
+<div class="page" id="story" style="page-break-after: always;">
   <h1 class="section-number">SECTION 1</h1>
   <h1 class="section-title">The Story</h1>
 
   <div class="deco-border" style="background:white;">
-    <!-- Scene illustration: underground pore space -->
-    <svg width="100%" height="140" viewBox="0 0 500 140" class="pixel-art">
-      <!-- Background pore space -->
-      <rect x="0" y="0" width="500" height="140" fill="#0c1420"/>
+    <!-- Scene illustration: underground pore space - organic scientific illustration -->
+    <svg width="100%" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Grain gradients for 3D depth -->
+        <radialGradient id="grain-grad-1" cx="40%" cy="35%" r="55%">
+          <stop offset="0%" stop-color="#c9a66b"/>
+          <stop offset="50%" stop-color="#8a6a3a"/>
+          <stop offset="100%" stop-color="#4a3518"/>
+        </radialGradient>
+        <radialGradient id="grain-grad-2" cx="35%" cy="30%" r="55%">
+          <stop offset="0%" stop-color="#bfa060"/>
+          <stop offset="50%" stop-color="#7a5a2a"/>
+          <stop offset="100%" stop-color="#3d2a10"/>
+        </radialGradient>
+        <radialGradient id="grain-grad-3" cx="45%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#d4b078"/>
+          <stop offset="50%" stop-color="#9a7a4a"/>
+          <stop offset="100%" stop-color="#5a4020"/>
+        </radialGradient>
+        <!-- Water gradient -->
+        <linearGradient id="water-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0a1828"/>
+          <stop offset="50%" stop-color="#102040"/>
+          <stop offset="100%" stop-color="#081420"/>
+        </linearGradient>
+        <!-- Substrate glow gradients -->
+        <radialGradient id="sub-o2-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#4fa4ff" stop-opacity="1"/>
+          <stop offset="60%" stop-color="#4fa4ff" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#4fa4ff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="sub-no3-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#4fdf6f" stop-opacity="1"/>
+          <stop offset="60%" stop-color="#4fdf6f" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#4fdf6f" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="sub-ch4-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff4f4f" stop-opacity="1"/>
+          <stop offset="60%" stop-color="#ff4f4f" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ff4f4f" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="sub-so4-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#dfdf3f" stop-opacity="1"/>
+          <stop offset="60%" stop-color="#dfdf3f" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#dfdf3f" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="sub-fe-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ef8f3f" stop-opacity="1"/>
+          <stop offset="60%" stop-color="#ef8f3f" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ef8f3f" stop-opacity="0"/>
+        </radialGradient>
+        <!-- ARKE body gradient -->
+        <radialGradient id="story-arke-grad" cx="40%" cy="35%" r="55%">
+          <stop offset="0%" stop-color="#5cdcdc"/>
+          <stop offset="50%" stop-color="#2a8a8a"/>
+          <stop offset="100%" stop-color="#1a5a5a"/>
+        </radialGradient>
+        <!-- Glow filters -->
+        <filter id="story-glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="story-glow-sub" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="story-soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="shadow"/>
+          <feOffset dx="2" dy="3" result="offsetShadow"/>
+          <feMerge><feMergeNode in="offsetShadow"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Flow pattern -->
+        <linearGradient id="flow-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#3060a0" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#5090d0" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#3060a0" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
 
-      <!-- Grain particles (brown circles) -->
-      <circle cx="30" cy="20" r="25" fill="#7a5a2a"/>
-      <circle cx="100" cy="130" r="30" fill="#8a6a3a"/>
-      <circle cx="180" cy="10" r="20" fill="#6a4a1a"/>
-      <circle cx="250" cy="130" r="25" fill="#7a5a2a"/>
-      <circle cx="330" cy="15" r="22" fill="#8a6a3a"/>
-      <circle cx="400" cy="125" r="28" fill="#6a4a1a"/>
-      <circle cx="470" cy="20" r="25" fill="#7a5a2a"/>
-      <circle cx="60" cy="85" r="15" fill="#6a4a1a"/>
-      <circle cx="440" cy="80" r="18" fill="#8a6a3a"/>
+      <!-- Background: dark pore water -->
+      <rect x="0" y="0" width="600" height="200" fill="url(#water-grad)"/>
 
-      <!-- Flow arrows -->
-      <g fill="none" stroke="#3060a0" stroke-width="1" opacity="0.5">
-        <path d="M80,60 L120,60 L115,55 M120,60 L115,65"/>
-        <path d="M200,70 L240,70 L235,65 M240,70 L235,75"/>
-        <path d="M320,55 L360,55 L355,50 M360,55 L355,60"/>
+      <!-- Subtle flow streamlines (bezier curves suggesting water movement) -->
+      <g opacity="0.35">
+        <path d="M0,60 C80,55 120,75 200,65 C280,55 320,80 400,70 C450,65 520,58 600,62" fill="none" stroke="url(#flow-line-grad)" stroke-width="1.5"/>
+        <path d="M0,90 C60,85 140,100 220,92 C300,84 360,105 440,95 C500,88 550,92 600,88" fill="none" stroke="url(#flow-line-grad)" stroke-width="1.2"/>
+        <path d="M0,120 C100,115 150,130 240,122 C320,114 380,128 460,118 C520,112 560,120 600,116" fill="none" stroke="url(#flow-line-grad)" stroke-width="1"/>
+        <path d="M0,145 C70,140 160,155 250,147 C340,139 400,152 480,143 C540,138 570,144 600,141" fill="none" stroke="url(#flow-line-grad)" stroke-width="0.8"/>
+        <!-- Small flow arrows along streamlines -->
+        <polygon points="180,64 188,61 188,67" fill="#5090d0" opacity="0.5"/>
+        <polygon points="350,72 358,69 358,75" fill="#5090d0" opacity="0.4"/>
+        <polygon points="500,60 508,57 508,63" fill="#5090d0" opacity="0.4"/>
+        <polygon points="150,92 158,89 158,95" fill="#5090d0" opacity="0.3"/>
+        <polygon points="380,96 388,93 388,99" fill="#5090d0" opacity="0.3"/>
       </g>
 
-      <!-- Substrate particles floating -->
-      <circle cx="140" cy="70" r="4" fill="#4fa4ff" opacity="0.8"/> <!-- O2 -->
-      <circle cx="220" cy="50" r="4" fill="#4fdf6f" opacity="0.8"/> <!-- NO3 -->
-      <circle cx="300" cy="80" r="4" fill="#ff4f4f" opacity="0.8"/> <!-- CH4 -->
-      <circle cx="380" cy="60" r="4" fill="#dfdf3f" opacity="0.8"/> <!-- SO4 -->
-
-      <!-- ARKE character (center) -->
-      <g transform="translate(255,55)">
-        <rect x="-8" y="-10" width="16" height="20" fill="#2a8a8a" rx="2"/>
-        <rect x="-6" y="-8" width="12" height="6" fill="#1a1a3a"/>
-        <rect x="-4" y="-7" width="3" height="2" fill="#4aeaff"/>
-        <rect x="2" y="-7" width="3" height="2" fill="#4aeaff"/>
-        <!-- Glow -->
-        <circle cx="0" cy="0" r="14" fill="none" stroke="#4aeaff" stroke-width="0.5" opacity="0.4"/>
+      <!-- Grain particles (3D ellipses with gradients and soft shadows) -->
+      <g filter="url(#story-soft-shadow)">
+        <!-- Top-left large grain -->
+        <ellipse cx="45" cy="20" rx="50" ry="38" fill="url(#grain-grad-1)"/>
+        <!-- Top-center grain -->
+        <ellipse cx="210" cy="8" rx="38" ry="30" fill="url(#grain-grad-2)"/>
+        <!-- Top-right grain -->
+        <ellipse cx="380" cy="15" rx="42" ry="32" fill="url(#grain-grad-3)"/>
+        <!-- Top far-right grain -->
+        <ellipse cx="540" cy="12" rx="48" ry="35" fill="url(#grain-grad-1)"/>
+        <!-- Bottom-left grain -->
+        <ellipse cx="100" cy="185" rx="55" ry="40" fill="url(#grain-grad-2)"/>
+        <!-- Bottom-center grain -->
+        <ellipse cx="300" cy="192" rx="46" ry="34" fill="url(#grain-grad-3)"/>
+        <!-- Bottom-right grain -->
+        <ellipse cx="480" cy="188" rx="52" ry="38" fill="url(#grain-grad-1)"/>
+        <!-- Small mid-left grain -->
+        <ellipse cx="15" cy="110" rx="22" ry="18" fill="url(#grain-grad-3)"/>
+        <!-- Small mid-right grain -->
+        <ellipse cx="585" cy="105" rx="24" ry="20" fill="url(#grain-grad-2)"/>
       </g>
 
-      <!-- Labels -->
-      <text x="250" y="135" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#4aeaff" opacity="0.6">THE PORE SPACE</text>
+      <!-- Floating substrate particles with glow -->
+      <g filter="url(#story-glow-sub)">
+        <!-- O2 particles -->
+        <circle cx="130" cy="78" r="5" fill="url(#sub-o2-glow)"/>
+        <circle cx="420" cy="62" r="4" fill="url(#sub-o2-glow)"/>
+        <!-- NO3 particles -->
+        <circle cx="240" cy="56" r="5" fill="url(#sub-no3-glow)"/>
+        <circle cx="510" cy="92" r="3.5" fill="url(#sub-no3-glow)"/>
+        <!-- CH4 particles -->
+        <circle cx="350" cy="105" r="5.5" fill="url(#sub-ch4-glow)"/>
+        <circle cx="85" cy="140" r="4" fill="url(#sub-ch4-glow)"/>
+        <!-- SO4 particles -->
+        <circle cx="450" cy="130" r="4.5" fill="url(#sub-so4-glow)"/>
+        <!-- Fe particle -->
+        <circle cx="175" cy="125" r="4" fill="url(#sub-fe-glow)"/>
+        <!-- Extra tiny drifting particles -->
+        <circle cx="200" cy="100" r="2" fill="#4fa4ff" opacity="0.4"/>
+        <circle cx="320" cy="75" r="2" fill="#4fdf6f" opacity="0.4"/>
+        <circle cx="550" cy="130" r="2" fill="#dfdf3f" opacity="0.3"/>
+        <circle cx="70" cy="70" r="1.5" fill="#ff4f4f" opacity="0.3"/>
+      </g>
+
+      <!-- ARKE character (center of pore space) -->
+      <g transform="translate(300,100)" filter="url(#story-glow-cyan)">
+        <!-- Soft halo -->
+        <ellipse cx="0" cy="0" rx="28" ry="22" fill="none" stroke="#4aeaff" stroke-width="1" opacity="0.25"/>
+        <ellipse cx="0" cy="0" rx="22" ry="17" fill="none" stroke="#4aeaff" stroke-width="0.5" opacity="0.15"/>
+        <!-- Outer membrane (translucent) -->
+        <ellipse cx="0" cy="0" rx="16" ry="12" fill="none" stroke="#5cdcdc" stroke-width="1.2" opacity="0.4" stroke-dasharray="3,2"/>
+        <!-- Body -->
+        <ellipse cx="0" cy="0" rx="13" ry="10" fill="url(#story-arke-grad)" stroke="#1a5a5a" stroke-width="0.5"/>
+        <!-- Internal structures -->
+        <ellipse cx="-2" cy="2" rx="5" ry="3" fill="#1a6a6a" opacity="0.3"/> <!-- nucleoid -->
+        <circle cx="4" cy="-3" r="1.2" fill="#3aa0a0" opacity="0.5"/> <!-- ribosome -->
+        <circle cx="-5" cy="-2" r="1" fill="#3aa0a0" opacity="0.4"/> <!-- ribosome -->
+        <circle cx="2" cy="4" r="0.8" fill="#3aa0a0" opacity="0.4"/> <!-- ribosome -->
+        <!-- Sensor spots (eyes) -->
+        <circle cx="-4" cy="-2" r="2" fill="#4aeaff" opacity="0.9"/>
+        <circle cx="4" cy="-2" r="2" fill="#4aeaff" opacity="0.9"/>
+        <circle cx="-4" cy="-2" r="1" fill="#ffffff" opacity="0.6"/>
+        <circle cx="4" cy="-2" r="1" fill="#ffffff" opacity="0.6"/>
+        <!-- Flagella (smooth bezier curves) -->
+        <path d="M-13,2 C-20,0 -24,8 -28,5" fill="none" stroke="#2a8a8a" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M-12,-4 C-18,-8 -22,-2 -26,-6" fill="none" stroke="#2a8a8a" stroke-width="1" stroke-linecap="round"/>
+        <path d="M13,2 C20,0 24,8 28,5" fill="none" stroke="#2a8a8a" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M12,-4 C18,-8 22,-2 26,-6" fill="none" stroke="#2a8a8a" stroke-width="1" stroke-linecap="round"/>
+      </g>
+
+      <!-- Scene label -->
+      <text x="300" y="190" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#4aeaff" opacity="0.5">THE PORE SPACE</text>
     </svg>
   </div>
 
@@ -90,48 +217,87 @@
 </div>
 
 <!-- Story continued: The Opening -->
-<div class="page" id="story2">
+<div class="page" id="story2" style="page-break-after: always;">
   <h2>The Awakening</h2>
 
   <div style="background: #1a1a2a; color: #c0c0d0; padding: 16px; border-radius: 4px; margin: 12px 0; font-size: 10pt; line-height: 1.8;">
 
-    <!-- Dialogue scene -->
+    <!-- Dialogue scene with organic microbe portraits -->
     <div style="margin-bottom: 12px;">
-      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
-        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
-        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
-        <rect x="4" y="6" width="1" height="4" fill="#6a4a1a"/>
-        <rect x="11" y="6" width="1" height="4" fill="#6a4a1a"/>
+      <!-- Elder portrait: golden archaeon face -->
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
+        <defs>
+          <radialGradient id="dlg-elder-grad" cx="40%" cy="35%" r="55%">
+            <stop offset="0%" stop-color="#d4aa50"/>
+            <stop offset="50%" stop-color="#8a6a2a"/>
+            <stop offset="100%" stop-color="#4a3a15"/>
+          </radialGradient>
+          <filter id="dlg-glow-gold" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
+        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
+        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
+        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <path d="M20,28 Q24,31 28,28" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.5"/>
+        <!-- Ancient markings -->
+        <path d="M17,30 L19,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
+        <path d="M29,30 L31,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
       </svg>
       <strong style="color:#ffd700;">Elder Archaeon Prime:</strong>
-      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+      <p style="margin-left:60px; margin-top:4px; font-style:italic;">
         "Wake up, young one. You're deep in the subsurface now, between the grains.
         This is your home&mdash;the pore space."
       </p>
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
-        <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
-        <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+      <!-- ARKE portrait: teal archaeon face -->
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
+        <defs>
+          <radialGradient id="dlg-arke-grad" cx="40%" cy="35%" r="55%">
+            <stop offset="0%" stop-color="#5cdcdc"/>
+            <stop offset="50%" stop-color="#2a8a8a"/>
+            <stop offset="100%" stop-color="#1a4a4a"/>
+          </radialGradient>
+          <filter id="dlg-glow-cyan" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#2a8a8a" stroke-width="1"/>
+        <ellipse cx="24" cy="25" rx="12" ry="14" fill="url(#dlg-arke-grad)" filter="url(#dlg-glow-cyan)"/>
+        <ellipse cx="24" cy="25" rx="13.5" ry="15.5" fill="none" stroke="#5cdcdc" stroke-width="0.5" opacity="0.3" stroke-dasharray="2,1.5"/>
+        <circle cx="20" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
+        <circle cx="28" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
+        <circle cx="20" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
+        <circle cx="28" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
       </svg>
       <strong style="color:#4aeaff;">ARKE:</strong>
-      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+      <p style="margin-left:60px; margin-top:4px; font-style:italic;">
         "Where... where am I? Everything is so dark..."
       </p>
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
-        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
-        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
+        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
+        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
+        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
+        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <path d="M17,30 L19,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
+        <path d="M29,30 L31,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
       </svg>
       <strong style="color:#ffd700;">Elder:</strong>
-      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+      <p style="margin-left:60px; margin-top:4px; font-style:italic;">
         "Look around you. See those brown walls? Those are rock grains. The dark blue
         space between them is water&mdash;your world. And those glowing particles?
         That's your food."
@@ -139,13 +305,17 @@
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
-        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
-        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
+        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
+        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
+        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
+        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
       </svg>
       <strong style="color:#ffd700;">Elder:</strong>
-      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+      <p style="margin-left:60px; margin-top:4px; font-style:italic;">
         "There's methane rising from below&mdash;CH<sub>4</sub>. It's a greenhouse gas, 80 times
         more potent than CO<sub>2</sub>. And nitrous oxide seeping from thawing soil above&mdash;300 times
         more potent! If these gases reach the atmosphere... the planet warms."
@@ -153,26 +323,34 @@
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
-        <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
-        <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
+        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#2a8a8a" stroke-width="1"/>
+        <ellipse cx="24" cy="25" rx="12" ry="14" fill="url(#dlg-arke-grad)" filter="url(#dlg-glow-cyan)"/>
+        <ellipse cx="24" cy="25" rx="13.5" ry="15.5" fill="none" stroke="#5cdcdc" stroke-width="0.5" opacity="0.3" stroke-dasharray="2,1.5"/>
+        <circle cx="20" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
+        <circle cx="28" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
+        <circle cx="20" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
+        <circle cx="28" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
       </svg>
       <strong style="color:#4aeaff;">ARKE:</strong>
-      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+      <p style="margin-left:60px; margin-top:4px; font-style:italic;">
         "What can I do? I'm just one microbe..."
       </p>
     </div>
 
     <div>
-      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
-        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
-        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
+        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
+        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
+        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
+        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
+        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
+        <path d="M20,28 Q24,31 28,28" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.5"/>
       </svg>
       <strong style="color:#ffd700;">Elder:</strong>
-      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+      <p style="margin-left:60px; margin-top:4px; font-style:italic;">
         "One microbe can become billions. Eat substrates, grow your biomass, and
         when you're ready&mdash;divide! Place biofilm colonies across the pore space.
         Each colony is a sentinel, consuming greenhouse gases. You are Earth's
@@ -181,6 +359,11 @@
     </div>
   </div>
 
+  <p class="page-number right">2</p>
+</div>
+
+<!-- Story continued: Object of the Game (expanded) -->
+<div class="page" id="story3" style="page-break-after: always;">
   <h2>Object of the Game</h2>
 
   <p>
@@ -211,7 +394,53 @@
     </div>
   </div>
 
-  <div class="info-box tip" style="margin-top: 16px;">
+  <!-- Expanded starvation mechanics -->
+  <div class="info-box warning" style="margin-top: 16px;">
+    <div class="info-box-title" style="color:#cc6030;">HOW STARVATION WORKS</div>
+    <p style="font-size: 10pt; line-height: 1.6;">
+      Your Health (HP) drains constantly at <strong>1.5 points per second</strong> due to basal
+      metabolic costs&mdash;the energy your cell needs just to stay alive. Starting from full
+      health (100 HP), you have approximately <strong>67 seconds</strong> before death if you eat
+      absolutely nothing. This timer is unforgiving: even a few seconds of not finding food will
+      noticeably chip away at your HP.
+    </p>
+    <p style="font-size: 10pt; line-height: 1.6; margin-top: 6px;">
+      <strong>Warning indicators:</strong> When HP drops below <strong>30</strong>, the screen edges
+      begin flashing red and the text <strong>"STARVING!"</strong> appears on screen as an urgent
+      warning. This gives you roughly 20 seconds to find food before death.
+    </p>
+  </div>
+
+  <!-- Expanded substrate spawning mechanics -->
+  <div class="info-box science" style="margin-top: 12px;">
+    <div class="info-box-title" style="color:#5070b0;">HOW SUBSTRATES SPAWN</div>
+    <p style="font-size: 10pt; line-height: 1.6;">
+      New substrate particles appear every <strong>1.2 seconds</strong> near the <strong>INLET</strong>
+      edge of the map (typically the top or left side, depending on the level's flow direction).
+      Once spawned, substrates <strong>drift with the water flow</strong> across the pore space,
+      following the flow field at a speed determined by the local velocity.
+    </p>
+    <p style="font-size: 10pt; line-height: 1.6; margin-top: 6px;">
+      Substrates do not appear uniformly across the map. They concentrate along flow paths and
+      accumulate in low-velocity zones where water slows down. Understanding flow patterns is
+      key to finding reliable food sources. In later levels, the spawn rate may feel slower
+      because rivals consume substrates before they reach you.
+    </p>
+  </div>
+
+  <!-- Expanded death/retry mechanics -->
+  <div class="info-box" style="margin-top: 12px;">
+    <div class="info-box-title" style="color: var(--accent-cyan);">WHAT HAPPENS WHEN YOU DIE</div>
+    <p style="font-size: 10pt; line-height: 1.6;">
+      When your HP reaches 0, ARKE's body fades and a <strong>"GAME OVER"</strong> screen appears.
+      After a <strong>2-second delay</strong>, you are prompted to press <strong>ENTER</strong>
+      to retry the current level from the beginning. All progress within that level (colonies placed,
+      growth accumulated) is reset, but your overall game progress (completed levels) is preserved.
+      You can retry any level as many times as needed.
+    </p>
+  </div>
+
+  <div class="info-box tip" style="margin-top: 14px;">
     <div class="info-box-title" style="color:#3a8a4a;">REMEMBER</div>
     <p style="font-size: 10pt;">
       Every molecule of methane (CH<sub>4</sub>) you eat prevents greenhouse warming.
@@ -220,5 +449,5 @@
     </p>
   </div>
 
-  <p class="page-number right">2</p>
+  <p class="page-number left">3</p>
 </div>
