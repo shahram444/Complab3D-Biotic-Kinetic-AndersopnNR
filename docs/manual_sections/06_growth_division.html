@@ -14,76 +14,37 @@
        ============================================================ -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:16px; margin:12px 0; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
     <h3 style="font-size:10pt; margin-bottom:14px; color:#1a1a2a; letter-spacing:1px;">The Growth Cycle</h3>
-    <svg width="480" height="260" viewBox="0 0 480 260" class="organism-art">
+    <svg width="480" height="260" viewBox="0 0 480 260" class="organism-art" style="image-rendering:pixelated;">
       <defs>
-        <!-- Glow filters -->
-        <filter id="gc-glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="gc-glow-gold" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="gc-glow-green" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="gc-soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.15)"/>
-        </filter>
-        <!-- ARKE body gradient -->
-        <radialGradient id="gc-arke-body" cx="40%" cy="35%">
-          <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
-          <stop offset="40%" stop-color="#2a8a8a"/>
-          <stop offset="100%" stop-color="#1a5a5a"/>
-        </radialGradient>
-        <!-- ARKE golden glow for READY state -->
-        <radialGradient id="gc-arke-gold" cx="50%" cy="50%">
-          <stop offset="0%" stop-color="#ffee44" stop-opacity="0.6"/>
-          <stop offset="50%" stop-color="#ffd700" stop-opacity="0.3"/>
-          <stop offset="100%" stop-color="#ffd700" stop-opacity="0"/>
-        </radialGradient>
-        <!-- GR bar gradient -->
+        <!-- Linear gradients retained (not radial) -->
         <linearGradient id="gc-gr-bar" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#2aaa3a"/>
           <stop offset="100%" stop-color="#7fff5f"/>
         </linearGradient>
-        <!-- Full GR bar (golden) -->
         <linearGradient id="gc-gr-full" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#ffa500"/>
           <stop offset="50%" stop-color="#ffdd00"/>
           <stop offset="100%" stop-color="#ffff44"/>
         </linearGradient>
-        <!-- Substrate orb gradient -->
-        <radialGradient id="gc-substrate-orb" cx="35%" cy="30%">
-          <stop offset="0%" stop-color="#ff9f7f"/>
-          <stop offset="50%" stop-color="#ff4f4f"/>
-          <stop offset="100%" stop-color="#aa1a1a"/>
-        </radialGradient>
-        <!-- Colony gradient -->
-        <radialGradient id="gc-colony-body" cx="45%" cy="40%">
-          <stop offset="0%" stop-color="#7fff7f"/>
-          <stop offset="40%" stop-color="#3a9a5a"/>
-          <stop offset="100%" stop-color="#1a5a3a"/>
-        </radialGradient>
       </defs>
 
       <!-- Step boxes background band -->
-      <rect x="5" y="8" width="470" height="245" rx="10" fill="#f8f6f0" stroke="none"/>
+      <rect x="5" y="8" width="470" height="245" fill="#f8f6f0" stroke="none"/>
 
       <!-- ===== STEP 1: EAT ===== -->
       <g transform="translate(18,18)">
-        <rect x="0" y="0" width="100" height="100" rx="12" fill="white" stroke="#ddd8c8" stroke-width="1.5" filter="url(#gc-soft-shadow)"/>
+        <rect x="0" y="0" width="100" height="100" fill="white" stroke="#ddd8c8" stroke-width="1.5"/>
         <text x="50" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#cc4444" letter-spacing="1">1. EAT</text>
-        <!-- ARKE body approaching substrate -->
-        <ellipse cx="32" cy="55" rx="12" ry="15" fill="url(#gc-arke-body)" filter="url(#gc-glow-cyan)"/>
-        <!-- ARKE visor -->
-        <ellipse cx="32" cy="50" rx="7" ry="4" fill="#1a1a3a"/>
-        <ellipse cx="34" cy="49" rx="3" ry="2" fill="#4aeaff" opacity="0.9"/>
-        <!-- Substrate orb (glowing) -->
-        <circle cx="70" cy="55" r="10" fill="url(#gc-substrate-orb)" filter="url(#gc-glow-cyan)"/>
-        <circle cx="67" cy="52" r="3" fill="white" opacity="0.3"/>
+        <!-- ARKE body approaching substrate (ellipse cx=32 cy=55 rx=12 ry=15 -> rect x=20 y=40 w=24 h=30) -->
+        <rect x="20" y="40" width="24" height="30" fill="#2a8a8a" style="image-rendering:pixelated;"/>
+        <!-- ARKE visor (ellipse cx=32 cy=50 rx=7 ry=4 -> rect x=25 y=46 w=14 h=8) -->
+        <rect x="25" y="46" width="14" height="8" fill="#1a1a3a" style="image-rendering:pixelated;"/>
+        <!-- ARKE eye (ellipse cx=34 cy=49 rx=3 ry=2 -> rect x=31 y=47 w=6 h=4) -->
+        <rect x="31" y="47" width="6" height="4" fill="#4aeaff" opacity="0.9" style="image-rendering:pixelated;"/>
+        <!-- Substrate orb (circle cx=70 cy=55 r=10 -> rect x=60 y=45 w=20 h=20) -->
+        <rect x="60" y="45" width="20" height="20" fill="#ff4f4f" style="image-rendering:pixelated;"/>
+        <!-- Substrate highlight (circle cx=67 cy=52 r=3 -> rect x=64 y=49 w=6 h=6) -->
+        <rect x="64" y="49" width="6" height="6" fill="white" opacity="0.3" style="image-rendering:pixelated;"/>
         <text x="70" y="58" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="white" font-weight="bold">CH4</text>
         <!-- Motion lines -->
         <path d="M44,55 Q52,53 58,55" fill="none" stroke="#4aeaff" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.6"/>
@@ -99,15 +60,17 @@
 
       <!-- ===== STEP 2: GROW ===== -->
       <g transform="translate(130,18)">
-        <rect x="0" y="0" width="100" height="100" rx="12" fill="white" stroke="#60a070" stroke-width="1.5" filter="url(#gc-soft-shadow)"/>
+        <rect x="0" y="0" width="100" height="100" fill="white" stroke="#60a070" stroke-width="1.5"/>
         <text x="50" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a8a4a" letter-spacing="1">2. GROW</text>
-        <!-- ARKE slightly larger -->
-        <ellipse cx="50" cy="48" rx="14" ry="17" fill="url(#gc-arke-body)" filter="url(#gc-glow-cyan)"/>
-        <ellipse cx="50" cy="43" rx="8" ry="4.5" fill="#1a1a3a"/>
-        <ellipse cx="52" cy="42" rx="3.5" ry="2.2" fill="#4aeaff" opacity="0.9"/>
+        <!-- ARKE slightly larger (ellipse cx=50 cy=48 rx=14 ry=17 -> rect x=36 y=31 w=28 h=34) -->
+        <rect x="36" y="31" width="28" height="34" fill="#2a8a8a" style="image-rendering:pixelated;"/>
+        <!-- ARKE visor (ellipse cx=50 cy=43 rx=8 ry=4.5 -> rect x=42 y=38.5 w=16 h=9) -->
+        <rect x="42" y="38" width="16" height="9" fill="#1a1a3a" style="image-rendering:pixelated;"/>
+        <!-- ARKE eye (ellipse cx=52 cy=42 rx=3.5 ry=2.2 -> rect x=48.5 y=39.8 w=7 h=4.4) -->
+        <rect x="48" y="40" width="7" height="4" fill="#4aeaff" opacity="0.9" style="image-rendering:pixelated;"/>
         <!-- GR bar -->
-        <rect x="12" y="72" width="76" height="10" rx="5" fill="#1a1a2b"/>
-        <rect x="12" y="72" width="53" height="10" rx="5" fill="url(#gc-gr-bar)" filter="url(#gc-glow-green)"/>
+        <rect x="12" y="72" width="76" height="10" fill="#1a1a2b"/>
+        <rect x="12" y="72" width="53" height="10" fill="#888888"/>
         <text x="50" y="80" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5.5" fill="white" font-weight="bold">GR: 70/100</text>
         <text x="50" y="95" text-anchor="middle" font-size="7" fill="#3a8a4a">GR bar fills up</text>
       </g>
@@ -120,17 +83,19 @@
 
       <!-- ===== STEP 3: READY ===== -->
       <g transform="translate(242,18)">
-        <rect x="0" y="0" width="100" height="100" rx="12" fill="#fffde8" stroke="#c0a020" stroke-width="2" stroke-dasharray="6,3" filter="url(#gc-soft-shadow)"/>
+        <rect x="0" y="0" width="100" height="100" fill="#fffde8" stroke="#c0a020" stroke-width="2" stroke-dasharray="6,3"/>
         <text x="50" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#aa8800" letter-spacing="1">3. READY!</text>
-        <!-- Golden pulsing aura -->
-        <circle cx="50" cy="48" r="24" fill="url(#gc-arke-gold)" filter="url(#gc-glow-gold)"/>
-        <!-- ARKE glowing golden -->
-        <ellipse cx="50" cy="48" rx="14" ry="17" fill="url(#gc-arke-body)" filter="url(#gc-glow-gold)"/>
-        <ellipse cx="50" cy="43" rx="8" ry="4.5" fill="#1a1a3a"/>
-        <ellipse cx="52" cy="42" rx="3.5" ry="2.2" fill="#ffee44" opacity="0.9"/>
+        <!-- Golden pulsing aura (circle cx=50 cy=48 r=24 -> rect x=26 y=24 w=48 h=48) -->
+        <rect x="26" y="24" width="48" height="48" fill="#c0a030" opacity="0.15" style="image-rendering:pixelated;"/>
+        <!-- ARKE glowing golden (ellipse cx=50 cy=48 rx=14 ry=17 -> rect x=36 y=31 w=28 h=34) -->
+        <rect x="36" y="31" width="28" height="34" fill="#2a8a8a" style="image-rendering:pixelated;"/>
+        <!-- ARKE visor (ellipse cx=50 cy=43 rx=8 ry=4.5 -> rect x=42 y=38.5 w=16 h=9) -->
+        <rect x="42" y="38" width="16" height="9" fill="#1a1a3a" style="image-rendering:pixelated;"/>
+        <!-- ARKE eye golden (ellipse cx=52 cy=42 rx=3.5 ry=2.2 -> rect x=48.5 y=39.8 w=7 h=4.4) -->
+        <rect x="48" y="40" width="7" height="4" fill="#ffee44" opacity="0.9" style="image-rendering:pixelated;"/>
         <!-- Full GR bar (golden flash) -->
-        <rect x="12" y="72" width="76" height="10" rx="5" fill="#1a1a2b"/>
-        <rect x="12" y="72" width="76" height="10" rx="5" fill="url(#gc-gr-full)" filter="url(#gc-glow-gold)"/>
+        <rect x="12" y="72" width="76" height="10" fill="#1a1a2b"/>
+        <rect x="12" y="72" width="76" height="10" fill="#888888"/>
         <text x="50" y="80" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#332200" font-weight="bold">SPACE!</text>
         <text x="50" y="95" text-anchor="middle" font-size="7" fill="#aa8800">Press SPACE</text>
       </g>
@@ -143,21 +108,25 @@
 
       <!-- ===== STEP 4: DIVIDE ===== -->
       <g transform="translate(354,18)">
-        <rect x="0" y="0" width="116" height="100" rx="12" fill="white" stroke="#3a7a5a" stroke-width="1.5" filter="url(#gc-soft-shadow)"/>
+        <rect x="0" y="0" width="116" height="100" fill="white" stroke="#3a7a5a" stroke-width="1.5"/>
         <text x="58" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#3a7a5a" letter-spacing="0.5">4. DIVIDE!</text>
         <!-- Elongating ARKE pinching into two -->
-        <!-- Left half: original ARKE -->
-        <ellipse cx="30" cy="48" rx="11" ry="14" fill="url(#gc-arke-body)" filter="url(#gc-glow-cyan)"/>
-        <ellipse cx="30" cy="44" rx="6" ry="3.5" fill="#1a1a3a"/>
-        <ellipse cx="31" cy="43.5" rx="2.5" ry="1.8" fill="#4aeaff" opacity="0.9"/>
+        <!-- Left half: original ARKE (ellipse cx=30 cy=48 rx=11 ry=14 -> rect x=19 y=34 w=22 h=28) -->
+        <rect x="19" y="34" width="22" height="28" fill="#2a8a8a" style="image-rendering:pixelated;"/>
+        <!-- ARKE visor (ellipse cx=30 cy=44 rx=6 ry=3.5 -> rect x=24 y=40.5 w=12 h=7) -->
+        <rect x="24" y="40" width="12" height="7" fill="#1a1a3a" style="image-rendering:pixelated;"/>
+        <!-- ARKE eye (ellipse cx=31 cy=43.5 rx=2.5 ry=1.8 -> rect x=28.5 y=41.7 w=5 h=3.6) -->
+        <rect x="28" y="42" width="5" height="4" fill="#4aeaff" opacity="0.9" style="image-rendering:pixelated;"/>
         <!-- Pinch connection -->
         <path d="M40,42 Q46,48 40,54" fill="none" stroke="#2a8a8a" stroke-width="2" opacity="0.5"/>
-        <!-- Right half: new colony cluster -->
-        <ellipse cx="60" cy="46" rx="8" ry="9" fill="url(#gc-colony-body)" filter="url(#gc-glow-green)"/>
-        <ellipse cx="63" cy="43" rx="5" ry="6" fill="url(#gc-colony-body)" opacity="0.7"/>
-        <ellipse cx="57" cy="50" rx="5" ry="5" fill="url(#gc-colony-body)" opacity="0.6"/>
-        <!-- Colony glow -->
-        <circle cx="60" cy="46" r="14" fill="#4fdf6f" opacity="0.08"/>
+        <!-- Right half: new colony cluster (ellipse cx=60 cy=46 rx=8 ry=9 -> rect x=52 y=37 w=16 h=18) -->
+        <rect x="52" y="37" width="16" height="18" fill="#3a7a5a" style="image-rendering:pixelated;"/>
+        <!-- Colony cell 2 (ellipse cx=63 cy=43 rx=5 ry=6 -> rect x=58 y=37 w=10 h=12) -->
+        <rect x="58" y="37" width="10" height="12" fill="#3a7a5a" opacity="0.7" style="image-rendering:pixelated;"/>
+        <!-- Colony cell 3 (ellipse cx=57 cy=50 rx=5 ry=5 -> rect x=52 y=45 w=10 h=10) -->
+        <rect x="52" y="45" width="10" height="10" fill="#3a7a5a" opacity="0.6" style="image-rendering:pixelated;"/>
+        <!-- Colony glow (circle cx=60 cy=46 r=14 -> rect x=46 y=32 w=28 h=28) -->
+        <rect x="46" y="32" width="28" height="28" fill="#4fdf6f" opacity="0.08" style="image-rendering:pixelated;"/>
         <!-- Labels -->
         <text x="30" y="70" text-anchor="middle" font-size="5.5" fill="#2a8a8a" font-weight="bold">ARKE</text>
         <text x="30" y="78" text-anchor="middle" font-size="5" fill="#888">(GR=0)</text>
@@ -169,7 +138,7 @@
       <text x="240" y="135" text-anchor="middle" font-size="7.5" fill="#666" font-style="italic">Repeat this cycle to place enough colonies and complete each level!</text>
 
       <!-- ===== DIVISION MECHANICS - Expanded detail section below ===== -->
-      <rect x="10" y="145" width="460" height="108" rx="8" fill="#f0f8f4" stroke="#60a070" stroke-width="1"/>
+      <rect x="10" y="145" width="460" height="108" fill="#f0f8f4" stroke="#60a070" stroke-width="1"/>
       <text x="240" y="162" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#2a6a3a" letter-spacing="1">DIVISION MECHANICS</text>
 
       <text x="20" y="178" font-size="7" fill="#333">
@@ -293,33 +262,11 @@
   <!-- Colony Placement SVG Illustration -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:14px; margin:10px 0; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
     <h3 style="font-size:9pt; margin-bottom:8px; color:#1a1a2a;">Where Does the Colony Go?</h3>
-    <svg width="400" height="200" viewBox="0 0 400 200" class="organism-art">
-      <defs>
-        <filter id="cp-shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="1" dy="1.5" stdDeviation="1.5" flood-color="rgba(0,0,0,0.12)"/>
-        </filter>
-        <filter id="cp-glow-green" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="cp-glow-gold" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <radialGradient id="cp-grain-grad" cx="40%" cy="35%">
-          <stop offset="0%" stop-color="#b89a6a"/>
-          <stop offset="60%" stop-color="#7a5a2a"/>
-          <stop offset="100%" stop-color="#5a3a1a"/>
-        </radialGradient>
-        <radialGradient id="cp-arke-grad" cx="40%" cy="35%">
-          <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
-          <stop offset="40%" stop-color="#2a8a8a"/>
-          <stop offset="100%" stop-color="#1a5a5a"/>
-        </radialGradient>
-      </defs>
+    <svg width="400" height="200" viewBox="0 0 400 200" class="organism-art" style="image-rendering:pixelated;">
+      <!-- defs removed: all filters and radial gradients eliminated -->
 
       <!-- Background grid area -->
-      <rect x="60" y="5" width="240" height="190" rx="8" fill="#0c1828"/>
+      <rect x="60" y="5" width="240" height="190" fill="#0c1828"/>
 
       <!-- Grid lines (subtle) -->
       <g stroke="#1a2a40" stroke-width="0.5" opacity="0.5">
@@ -333,58 +280,68 @@
         <line x1="60" y1="157" x2="300" y2="157"/>
       </g>
 
-      <!-- Grain tiles (smooth ellipses with gradient) -->
-      <ellipse cx="84" cy="24" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
-      <ellipse cx="84" cy="24" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+      <!-- Grain tiles (converted to rects, flat color) -->
+      <!-- Grain 1: ellipse cx=84 cy=24 rx=22 ry=17 -> rect x=62 y=7 w=44 h=34 -->
+      <rect x="62" y="7" width="44" height="34" fill="#7a5a2a" style="image-rendering:pixelated;"/>
+      <rect x="72" y="15" width="24" height="18" fill="#a48a5a" opacity="0.15" style="image-rendering:pixelated;"/>
 
-      <ellipse cx="276" cy="24" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
-      <ellipse cx="276" cy="24" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+      <!-- Grain 2: ellipse cx=276 cy=24 rx=22 ry=17 -> rect x=254 y=7 w=44 h=34 -->
+      <rect x="254" y="7" width="44" height="34" fill="#7a5a2a" style="image-rendering:pixelated;"/>
+      <rect x="264" y="15" width="24" height="18" fill="#a48a5a" opacity="0.15" style="image-rendering:pixelated;"/>
 
-      <ellipse cx="84" cy="100" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
-      <ellipse cx="84" cy="100" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+      <!-- Grain 3: ellipse cx=84 cy=100 rx=22 ry=17 -> rect x=62 y=83 w=44 h=34 -->
+      <rect x="62" y="83" width="44" height="34" fill="#7a5a2a" style="image-rendering:pixelated;"/>
+      <rect x="72" y="91" width="24" height="18" fill="#a48a5a" opacity="0.15" style="image-rendering:pixelated;"/>
 
-      <ellipse cx="84" cy="138" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
-      <ellipse cx="84" cy="138" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+      <!-- Grain 4: ellipse cx=84 cy=138 rx=22 ry=17 -> rect x=62 y=121 w=44 h=34 -->
+      <rect x="62" y="121" width="44" height="34" fill="#7a5a2a" style="image-rendering:pixelated;"/>
+      <rect x="72" y="129" width="24" height="18" fill="#a48a5a" opacity="0.15" style="image-rendering:pixelated;"/>
 
-      <ellipse cx="276" cy="138" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
-      <ellipse cx="276" cy="138" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+      <!-- Grain 5: ellipse cx=276 cy=138 rx=22 ry=17 -> rect x=254 y=121 w=44 h=34 -->
+      <rect x="254" y="121" width="44" height="34" fill="#7a5a2a" style="image-rendering:pixelated;"/>
+      <rect x="264" y="129" width="24" height="18" fill="#a48a5a" opacity="0.15" style="image-rendering:pixelated;"/>
 
-      <ellipse cx="276" cy="100" rx="22" ry="17" fill="url(#cp-grain-grad)" filter="url(#cp-shadow)"/>
-      <ellipse cx="276" cy="100" rx="12" ry="9" fill="#a48a5a" opacity="0.15"/>
+      <!-- Grain 6: ellipse cx=276 cy=100 rx=22 ry=17 -> rect x=254 y=83 w=44 h=34 -->
+      <rect x="254" y="83" width="44" height="34" fill="#7a5a2a" style="image-rendering:pixelated;"/>
+      <rect x="264" y="91" width="24" height="18" fill="#a48a5a" opacity="0.15" style="image-rendering:pixelated;"/>
 
       <!-- ARKE in center (golden ready glow) -->
-      <circle cx="180" cy="100" r="22" fill="#ffd700" opacity="0.08" filter="url(#cp-glow-gold)"/>
-      <ellipse cx="180" cy="100" rx="14" ry="17" fill="url(#cp-arke-grad)" filter="url(#cp-glow-gold)"/>
-      <ellipse cx="180" cy="95" rx="8" ry="4.5" fill="#1a1a3a"/>
-      <ellipse cx="182" cy="94" rx="3.5" ry="2.2" fill="#ffee44" opacity="0.9"/>
+      <!-- Aura: circle cx=180 cy=100 r=22 -> rect x=158 y=78 w=44 h=44 -->
+      <rect x="158" y="78" width="44" height="44" fill="#c0a030" opacity="0.08" style="image-rendering:pixelated;"/>
+      <!-- ARKE body: ellipse cx=180 cy=100 rx=14 ry=17 -> rect x=166 y=83 w=28 h=34 -->
+      <rect x="166" y="83" width="28" height="34" fill="#2a8a8a" style="image-rendering:pixelated;"/>
+      <!-- ARKE visor: ellipse cx=180 cy=95 rx=8 ry=4.5 -> rect x=172 y=90.5 w=16 h=9 -->
+      <rect x="172" y="90" width="16" height="9" fill="#1a1a3a" style="image-rendering:pixelated;"/>
+      <!-- ARKE eye: ellipse cx=182 cy=94 rx=3.5 ry=2.2 -> rect x=178.5 y=91.8 w=7 h=4.4 -->
+      <rect x="178" y="92" width="7" height="4" fill="#ffee44" opacity="0.9" style="image-rendering:pixelated;"/>
       <text x="180" y="128" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4aeaff">ARKE</text>
 
       <!-- Candidate tile: UP (dashed green border) -->
-      <rect x="157" y="44" width="46" height="36" rx="6" fill="#3a7a5a" opacity="0.12" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <rect x="157" y="44" width="46" height="36" fill="#3a7a5a" opacity="0.12" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="4,3"/>
       <text x="180" y="67" text-anchor="middle" font-size="7" fill="#4fdf6f" opacity="0.8">?</text>
 
       <!-- Candidate tile: RIGHT (BEST - solid green, brighter) -->
-      <rect x="205" y="82" width="46" height="36" rx="6" fill="#3a7a5a" opacity="0.25" stroke="#4fdf6f" stroke-width="2.5" filter="url(#cp-glow-green)"/>
-      <text x="228" y="104" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f" filter="url(#cp-glow-green)">BEST</text>
+      <rect x="205" y="82" width="46" height="36" fill="#3a7a5a" opacity="0.25" stroke="#4fdf6f" stroke-width="2.5"/>
+      <text x="228" y="104" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">BEST</text>
       <!-- Arrow pointing to BEST -->
       <path d="M315,100 Q305,100 298,100" fill="none" stroke="#4fdf6f" stroke-width="1.5" marker-end="none"/>
       <text x="330" y="96" font-size="7" fill="#4fdf6f" font-weight="bold">Furthest</text>
       <text x="330" y="107" font-size="7" fill="#4fdf6f" font-weight="bold">from walls</text>
 
       <!-- Candidate tile: DOWN (dashed green border) -->
-      <rect x="157" y="120" width="46" height="36" rx="6" fill="#3a7a5a" opacity="0.12" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <rect x="157" y="120" width="46" height="36" fill="#3a7a5a" opacity="0.12" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="4,3"/>
       <text x="180" y="143" text-anchor="middle" font-size="7" fill="#4fdf6f" opacity="0.8">?</text>
 
       <!-- Left tile: open pore -->
-      <rect x="109" y="82" width="46" height="36" rx="6" fill="#0c1828" stroke="#3060a0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
+      <rect x="109" y="82" width="46" height="36" fill="#0c1828" stroke="#3060a0" stroke-width="0.8" stroke-dasharray="4,3" opacity="0.5"/>
       <text x="132" y="104" text-anchor="middle" font-size="6.5" fill="#3060a0" opacity="0.7">open</text>
 
-      <!-- Legend -->
-      <ellipse cx="25" cy="20" rx="14" ry="11" fill="url(#cp-grain-grad)"/>
+      <!-- Legend: ellipse cx=25 cy=20 rx=14 ry=11 -> rect x=11 y=9 w=28 h=22 -->
+      <rect x="11" y="9" width="28" height="22" fill="#7a5a2a" style="image-rendering:pixelated;"/>
       <text x="25" y="40" text-anchor="middle" font-size="6.5" fill="#7a5a2a" font-weight="bold">GRAIN</text>
-      <rect x="10" y="50" width="28" height="14" rx="4" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="10" y="50" width="28" height="14" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1" stroke-dasharray="3,2"/>
       <text x="25" y="78" text-anchor="middle" font-size="5.5" fill="#4fdf6f">Candidate</text>
-      <rect x="10" y="88" width="28" height="14" rx="4" fill="#0c1828"/>
+      <rect x="10" y="88" width="28" height="14" fill="#0c1828"/>
       <text x="25" y="115" text-anchor="middle" font-size="5.5" fill="#3060a0">Pore</text>
     </svg>
   </div>
@@ -427,67 +384,57 @@
 
   <!-- Colony Feeding SVG Illustration -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:10px; margin:8px 0; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-    <svg width="320" height="155" viewBox="0 0 320 155" class="organism-art">
-      <defs>
-        <filter id="cf-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <radialGradient id="cf-colony-grad" cx="45%" cy="40%">
-          <stop offset="0%" stop-color="#7fff7f"/>
-          <stop offset="40%" stop-color="#3a9a5a"/>
-          <stop offset="100%" stop-color="#1a5a3a"/>
-        </radialGradient>
-        <radialGradient id="cf-o2-grad" cx="35%" cy="30%">
-          <stop offset="0%" stop-color="#8fcfff"/>
-          <stop offset="100%" stop-color="#2060cc"/>
-        </radialGradient>
-        <radialGradient id="cf-ch4-grad" cx="35%" cy="30%">
-          <stop offset="0%" stop-color="#ff9f7f"/>
-          <stop offset="100%" stop-color="#cc2020"/>
-        </radialGradient>
-        <radialGradient id="cf-so4-grad" cx="35%" cy="30%">
-          <stop offset="0%" stop-color="#ffff8f"/>
-          <stop offset="100%" stop-color="#aa9a20"/>
-        </radialGradient>
-      </defs>
+    <svg width="320" height="155" viewBox="0 0 320 155" class="organism-art" style="image-rendering:pixelated;">
+      <!-- defs removed: all filters and radial gradients eliminated -->
 
-      <rect x="10" y="10" width="300" height="135" rx="8" fill="#0c1828"/>
+      <rect x="10" y="10" width="300" height="135" fill="#0c1828"/>
 
-      <!-- Colony in center (cluster of cells) -->
+      <!-- Colony in center (cluster of cells, converted to rects) -->
       <g transform="translate(160,77)">
-        <ellipse cx="0" cy="0" rx="12" ry="11" fill="url(#cf-colony-grad)" filter="url(#cf-glow)"/>
-        <ellipse cx="8" cy="-6" rx="8" ry="7" fill="url(#cf-colony-grad)" opacity="0.8" filter="url(#cf-glow)"/>
-        <ellipse cx="-7" cy="6" rx="7" ry="7" fill="url(#cf-colony-grad)" opacity="0.7" filter="url(#cf-glow)"/>
-        <ellipse cx="5" cy="8" rx="6" ry="5" fill="url(#cf-colony-grad)" opacity="0.6"/>
-        <!-- Feed radius circle -->
-        <circle cx="0" cy="0" r="52" fill="none" stroke="#4fdf6f" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.5"/>
+        <!-- ellipse cx=0 cy=0 rx=12 ry=11 -> rect x=-12 y=-11 w=24 h=22 -->
+        <rect x="-12" y="-11" width="24" height="22" fill="#3a7a5a" style="image-rendering:pixelated;"/>
+        <!-- ellipse cx=8 cy=-6 rx=8 ry=7 -> rect x=0 y=-13 w=16 h=14 -->
+        <rect x="0" y="-13" width="16" height="14" fill="#3a7a5a" opacity="0.8" style="image-rendering:pixelated;"/>
+        <!-- ellipse cx=-7 cy=6 rx=7 ry=7 -> rect x=-14 y=-1 w=14 h=14 -->
+        <rect x="-14" y="-1" width="14" height="14" fill="#3a7a5a" opacity="0.7" style="image-rendering:pixelated;"/>
+        <!-- ellipse cx=5 cy=8 rx=6 ry=5 -> rect x=-1 y=3 w=12 h=10 -->
+        <rect x="-1" y="3" width="12" height="10" fill="#3a7a5a" opacity="0.6" style="image-rendering:pixelated;"/>
+        <!-- Feed radius: circle cx=0 cy=0 r=52 -> rect x=-52 y=-52 w=104 h=104 (stroke only, keep as visual indicator) -->
+        <rect x="-52" y="-52" width="104" height="104" fill="none" stroke="#4fdf6f" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.5" style="image-rendering:pixelated;"/>
       </g>
 
       <!-- Substrate 1: CH4 being pulled in (with curved attraction line) -->
-      <circle cx="90" cy="45" r="7" fill="url(#cf-ch4-grad)" filter="url(#cf-glow)"/>
-      <circle cx="88" cy="43" r="2" fill="white" opacity="0.25"/>
+      <!-- circle cx=90 cy=45 r=7 -> rect x=83 y=38 w=14 h=14 -->
+      <rect x="83" y="38" width="14" height="14" fill="#ff4f4f" style="image-rendering:pixelated;"/>
+      <!-- circle cx=88 cy=43 r=2 -> rect x=86 y=41 w=4 h=4 -->
+      <rect x="86" y="41" width="4" height="4" fill="white" opacity="0.25" style="image-rendering:pixelated;"/>
       <text x="90" y="48" text-anchor="middle" font-size="4.5" fill="white" font-weight="bold">CH4</text>
       <path d="M98,48 C115,55 135,65 150,72" fill="none" stroke="#ff4f4f" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
-      <!-- Arrow tip -->
-      <circle cx="148" cy="71" r="1.5" fill="#ff4f4f" opacity="0.6"/>
+      <!-- Arrow tip: circle cx=148 cy=71 r=1.5 -> rect x=146.5 y=69.5 w=3 h=3 -->
+      <rect x="146" y="69" width="3" height="3" fill="#ff4f4f" opacity="0.6" style="image-rendering:pixelated;"/>
 
       <!-- Substrate 2: NO3 being pulled in -->
-      <circle cx="225" cy="38" r="7" fill="#4fdf6f" filter="url(#cf-glow)"/>
-      <circle cx="223" cy="36" r="2" fill="white" opacity="0.25"/>
+      <!-- circle cx=225 cy=38 r=7 -> rect x=218 y=31 w=14 h=14 -->
+      <rect x="218" y="31" width="14" height="14" fill="#4fdf6f" style="image-rendering:pixelated;"/>
+      <!-- circle cx=223 cy=36 r=2 -> rect x=221 y=34 w=4 h=4 -->
+      <rect x="221" y="34" width="4" height="4" fill="white" opacity="0.25" style="image-rendering:pixelated;"/>
       <text x="225" y="41" text-anchor="middle" font-size="4.5" fill="white" font-weight="bold">NO3</text>
       <path d="M220,45 C205,55 185,65 172,72" fill="none" stroke="#4fdf6f" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
-      <circle cx="174" cy="71" r="1.5" fill="#4fdf6f" opacity="0.6"/>
+      <!-- circle cx=174 cy=71 r=1.5 -> rect x=172.5 y=69.5 w=3 h=3 -->
+      <rect x="172" y="69" width="3" height="3" fill="#4fdf6f" opacity="0.6" style="image-rendering:pixelated;"/>
 
       <!-- Substrate 3: SO4 being pulled in from below -->
-      <circle cx="185" cy="120" r="7" fill="url(#cf-so4-grad)" filter="url(#cf-glow)"/>
-      <circle cx="183" cy="118" r="2" fill="white" opacity="0.25"/>
+      <!-- circle cx=185 cy=120 r=7 -> rect x=178 y=113 w=14 h=14 -->
+      <rect x="178" y="113" width="14" height="14" fill="#c0c020" style="image-rendering:pixelated;"/>
+      <!-- circle cx=183 cy=118 r=2 -> rect x=181 y=116 w=4 h=4 -->
+      <rect x="181" y="116" width="4" height="4" fill="white" opacity="0.25" style="image-rendering:pixelated;"/>
       <text x="185" y="123" text-anchor="middle" font-size="4.5" fill="#443300" font-weight="bold">SO4</text>
       <path d="M178,114 C172,105 167,95 163,87" fill="none" stroke="#dfdf3f" stroke-width="0.8" stroke-dasharray="3,2" opacity="0.6"/>
-      <circle cx="164" cy="89" r="1.5" fill="#dfdf3f" opacity="0.6"/>
+      <!-- circle cx=164 cy=89 r=1.5 -> rect x=162.5 y=87.5 w=3 h=3 -->
+      <rect x="162" y="87" width="3" height="3" fill="#dfdf3f" opacity="0.6" style="image-rendering:pixelated;"/>
 
-      <!-- Out of range substrate -->
-      <circle cx="50" cy="120" r="6" fill="url(#cf-o2-grad)" opacity="0.35"/>
+      <!-- Out of range substrate: circle cx=50 cy=120 r=6 -> rect x=44 y=114 w=12 h=12 -->
+      <rect x="44" y="114" width="12" height="12" fill="#4fa4ff" opacity="0.35" style="image-rendering:pixelated;"/>
       <text x="50" y="123" text-anchor="middle" font-size="4" fill="white" opacity="0.4">O2</text>
       <text x="50" y="140" text-anchor="middle" font-size="5.5" fill="#556677">out of range</text>
 

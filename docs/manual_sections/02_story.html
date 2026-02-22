@@ -4,174 +4,84 @@
   <h1 class="section-title">The Story</h1>
 
   <div class="deco-border" style="background:white;">
-    <!-- Scene illustration: underground pore space - organic scientific illustration -->
-    <svg width="100%" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <!-- Grain gradients for 3D depth -->
-        <radialGradient id="grain-grad-1" cx="40%" cy="35%" r="55%">
-          <stop offset="0%" stop-color="#c9a66b"/>
-          <stop offset="50%" stop-color="#8a6a3a"/>
-          <stop offset="100%" stop-color="#4a3518"/>
-        </radialGradient>
-        <radialGradient id="grain-grad-2" cx="35%" cy="30%" r="55%">
-          <stop offset="0%" stop-color="#bfa060"/>
-          <stop offset="50%" stop-color="#7a5a2a"/>
-          <stop offset="100%" stop-color="#3d2a10"/>
-        </radialGradient>
-        <radialGradient id="grain-grad-3" cx="45%" cy="40%" r="55%">
-          <stop offset="0%" stop-color="#d4b078"/>
-          <stop offset="50%" stop-color="#9a7a4a"/>
-          <stop offset="100%" stop-color="#5a4020"/>
-        </radialGradient>
-        <!-- Water gradient -->
-        <linearGradient id="water-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0a1828"/>
-          <stop offset="50%" stop-color="#102040"/>
-          <stop offset="100%" stop-color="#081420"/>
-        </linearGradient>
-        <!-- Substrate glow gradients -->
-        <radialGradient id="sub-o2-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#4fa4ff" stop-opacity="1"/>
-          <stop offset="60%" stop-color="#4fa4ff" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#4fa4ff" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="sub-no3-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#4fdf6f" stop-opacity="1"/>
-          <stop offset="60%" stop-color="#4fdf6f" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#4fdf6f" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="sub-ch4-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ff4f4f" stop-opacity="1"/>
-          <stop offset="60%" stop-color="#ff4f4f" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#ff4f4f" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="sub-so4-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#dfdf3f" stop-opacity="1"/>
-          <stop offset="60%" stop-color="#dfdf3f" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#dfdf3f" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="sub-fe-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ef8f3f" stop-opacity="1"/>
-          <stop offset="60%" stop-color="#ef8f3f" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#ef8f3f" stop-opacity="0"/>
-        </radialGradient>
-        <!-- ARKE body gradient -->
-        <radialGradient id="story-arke-grad" cx="40%" cy="35%" r="55%">
-          <stop offset="0%" stop-color="#5cdcdc"/>
-          <stop offset="50%" stop-color="#2a8a8a"/>
-          <stop offset="100%" stop-color="#1a5a5a"/>
-        </radialGradient>
-        <!-- Glow filters -->
-        <filter id="story-glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="story-glow-sub" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="story-soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="shadow"/>
-          <feOffset dx="2" dy="3" result="offsetShadow"/>
-          <feMerge><feMergeNode in="offsetShadow"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <!-- Flow pattern -->
-        <linearGradient id="flow-line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#3060a0" stop-opacity="0"/>
-          <stop offset="50%" stop-color="#5090d0" stop-opacity="0.6"/>
-          <stop offset="100%" stop-color="#3060a0" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-
+    <!-- Scene illustration: underground pore space - pixel art -->
+    <svg width="100%" height="200" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
       <!-- Background: dark pore water -->
-      <rect x="0" y="0" width="600" height="200" fill="url(#water-grad)"/>
-
-      <!-- Subtle flow streamlines (bezier curves suggesting water movement) -->
-      <g opacity="0.35">
-        <path d="M0,60 C80,55 120,75 200,65 C280,55 320,80 400,70 C450,65 520,58 600,62" fill="none" stroke="url(#flow-line-grad)" stroke-width="1.5"/>
-        <path d="M0,90 C60,85 140,100 220,92 C300,84 360,105 440,95 C500,88 550,92 600,88" fill="none" stroke="url(#flow-line-grad)" stroke-width="1.2"/>
-        <path d="M0,120 C100,115 150,130 240,122 C320,114 380,128 460,118 C520,112 560,120 600,116" fill="none" stroke="url(#flow-line-grad)" stroke-width="1"/>
-        <path d="M0,145 C70,140 160,155 250,147 C340,139 400,152 480,143 C540,138 570,144 600,141" fill="none" stroke="url(#flow-line-grad)" stroke-width="0.8"/>
-        <!-- Small flow arrows along streamlines -->
-        <polygon points="180,64 188,61 188,67" fill="#5090d0" opacity="0.5"/>
-        <polygon points="350,72 358,69 358,75" fill="#5090d0" opacity="0.4"/>
-        <polygon points="500,60 508,57 508,63" fill="#5090d0" opacity="0.4"/>
-        <polygon points="150,92 158,89 158,95" fill="#5090d0" opacity="0.3"/>
-        <polygon points="380,96 388,93 388,99" fill="#5090d0" opacity="0.3"/>
+      <rect x="0" y="0" width="600" height="200" fill="#0c1420"/>
+      <!-- Top grain row -->
+      <rect x="0" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="10" y="0" width="10" height="10" fill="#a48a5a"/><rect x="20" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="30" y="0" width="10" height="10" fill="#c4a060"/><rect x="40" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="50" y="0" width="10" height="10" fill="#a48a5a"/><rect x="60" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="70" y="0" width="10" height="10" fill="#c4a060"/><rect x="80" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="90" y="0" width="10" height="10" fill="#a48a5a"/>
+      <rect x="100" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="110" y="0" width="10" height="10" fill="#c4a060"/><rect x="120" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="130" y="0" width="10" height="10" fill="#a48a5a"/><rect x="140" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="150" y="0" width="10" height="10" fill="#c4a060"/><rect x="160" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="170" y="0" width="10" height="10" fill="#a48a5a"/><rect x="180" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="190" y="0" width="10" height="10" fill="#c4a060"/>
+      <rect x="200" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="210" y="0" width="10" height="10" fill="#a48a5a"/><rect x="220" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="230" y="0" width="10" height="10" fill="#c4a060"/><rect x="240" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="250" y="0" width="10" height="10" fill="#a48a5a"/><rect x="260" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="270" y="0" width="10" height="10" fill="#c4a060"/><rect x="280" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="290" y="0" width="10" height="10" fill="#a48a5a"/>
+      <rect x="300" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="310" y="0" width="10" height="10" fill="#c4a060"/><rect x="320" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="330" y="0" width="10" height="10" fill="#a48a5a"/><rect x="340" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="350" y="0" width="10" height="10" fill="#c4a060"/><rect x="360" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="370" y="0" width="10" height="10" fill="#a48a5a"/><rect x="380" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="390" y="0" width="10" height="10" fill="#c4a060"/>
+      <rect x="400" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="410" y="0" width="10" height="10" fill="#a48a5a"/><rect x="420" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="430" y="0" width="10" height="10" fill="#c4a060"/><rect x="440" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="450" y="0" width="10" height="10" fill="#a48a5a"/><rect x="460" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="470" y="0" width="10" height="10" fill="#c4a060"/><rect x="480" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="490" y="0" width="10" height="10" fill="#a48a5a"/>
+      <rect x="500" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="510" y="0" width="10" height="10" fill="#c4a060"/><rect x="520" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="530" y="0" width="10" height="10" fill="#a48a5a"/><rect x="540" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="550" y="0" width="10" height="10" fill="#c4a060"/><rect x="560" y="0" width="10" height="10" fill="#7a5a2a"/><rect x="570" y="0" width="10" height="10" fill="#a48a5a"/><rect x="580" y="0" width="10" height="10" fill="#4a3a1a"/><rect x="590" y="0" width="10" height="10" fill="#c4a060"/>
+      <!-- Second grain row with some pores -->
+      <rect x="0" y="10" width="10" height="10" fill="#a48a5a"/><rect x="10" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="20" y="10" width="10" height="10" fill="#c4a060"/><rect x="30" y="10" width="10" height="10" fill="#4a3a1a"/><rect x="40" y="10" width="10" height="10" fill="#a48a5a"/><rect x="50" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="60" y="10" width="10" height="10" fill="#c4a060"/>
+      <rect x="70" y="10" width="10" height="10" fill="#142030"/><rect x="80" y="10" width="10" height="10" fill="#0c1420"/><rect x="90" y="10" width="10" height="10" fill="#142030"/><rect x="100" y="10" width="10" height="10" fill="#0c1420"/>
+      <rect x="110" y="10" width="10" height="10" fill="#a48a5a"/><rect x="120" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="130" y="10" width="10" height="10" fill="#c4a060"/>
+      <rect x="140" y="10" width="10" height="10" fill="#142030"/><rect x="150" y="10" width="10" height="10" fill="#0c1420"/>
+      <rect x="160" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="170" y="10" width="10" height="10" fill="#a48a5a"/>
+      <rect x="180" y="10" width="10" height="10" fill="#142030"/><rect x="190" y="10" width="10" height="10" fill="#0c1420"/><rect x="200" y="10" width="10" height="10" fill="#142030"/>
+      <rect x="210" y="10" width="10" height="10" fill="#4a3a1a"/><rect x="220" y="10" width="10" height="10" fill="#c4a060"/><rect x="230" y="10" width="10" height="10" fill="#7a5a2a"/>
+      <rect x="240" y="10" width="10" height="10" fill="#142030"/><rect x="250" y="10" width="10" height="10" fill="#0c1420"/><rect x="260" y="10" width="10" height="10" fill="#142030"/>
+      <rect x="270" y="10" width="10" height="10" fill="#a48a5a"/><rect x="280" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="290" y="10" width="10" height="10" fill="#c4a060"/>
+      <rect x="300" y="10" width="10" height="10" fill="#0c1420"/><rect x="310" y="10" width="10" height="10" fill="#142030"/>
+      <rect x="320" y="10" width="10" height="10" fill="#4a3a1a"/><rect x="330" y="10" width="10" height="10" fill="#a48a5a"/>
+      <rect x="340" y="10" width="10" height="10" fill="#0c1420"/><rect x="350" y="10" width="10" height="10" fill="#142030"/><rect x="360" y="10" width="10" height="10" fill="#0c1420"/>
+      <rect x="370" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="380" y="10" width="10" height="10" fill="#c4a060"/><rect x="390" y="10" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="400" y="10" width="10" height="10" fill="#142030"/><rect x="410" y="10" width="10" height="10" fill="#0c1420"/>
+      <rect x="420" y="10" width="10" height="10" fill="#a48a5a"/><rect x="430" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="440" y="10" width="10" height="10" fill="#c4a060"/><rect x="450" y="10" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="460" y="10" width="10" height="10" fill="#0c1420"/><rect x="470" y="10" width="10" height="10" fill="#142030"/>
+      <rect x="480" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="490" y="10" width="10" height="10" fill="#a48a5a"/><rect x="500" y="10" width="10" height="10" fill="#c4a060"/><rect x="510" y="10" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="520" y="10" width="10" height="10" fill="#142030"/><rect x="530" y="10" width="10" height="10" fill="#0c1420"/>
+      <rect x="540" y="10" width="10" height="10" fill="#a48a5a"/><rect x="550" y="10" width="10" height="10" fill="#7a5a2a"/><rect x="560" y="10" width="10" height="10" fill="#c4a060"/><rect x="570" y="10" width="10" height="10" fill="#4a3a1a"/><rect x="580" y="10" width="10" height="10" fill="#a48a5a"/><rect x="590" y="10" width="10" height="10" fill="#7a5a2a"/>
+      <!-- Pore space middle area (rows 20-160) -->
+      <rect x="0" y="20" width="10" height="10" fill="#4a3a1a"/><rect x="10" y="20" width="10" height="10" fill="#142030"/><rect x="20" y="20" width="10" height="10" fill="#0c1420"/><rect x="30" y="20" width="10" height="10" fill="#142030"/><rect x="40" y="20" width="10" height="10" fill="#7a5a2a"/><rect x="50" y="20" width="10" height="10" fill="#0c1420"/><rect x="60" y="20" width="10" height="10" fill="#142030"/><rect x="70" y="20" width="10" height="10" fill="#0c1420"/><rect x="80" y="20" width="10" height="10" fill="#142030"/><rect x="90" y="20" width="10" height="10" fill="#0c1420"/>
+      <rect x="100" y="20" width="10" height="10" fill="#142030"/><rect x="110" y="20" width="10" height="10" fill="#0c1420"/><rect x="120" y="20" width="10" height="10" fill="#142030"/><rect x="130" y="20" width="10" height="10" fill="#c4a060"/><rect x="140" y="20" width="10" height="10" fill="#0c1420"/><rect x="150" y="20" width="10" height="10" fill="#142030"/>
+      <rect x="590" y="20" width="10" height="10" fill="#4a3a1a"/>
+      <!-- Scattered grain blocks in middle -->
+      <rect x="0" y="50" width="10" height="10" fill="#7a5a2a"/><rect x="0" y="60" width="10" height="10" fill="#a48a5a"/><rect x="10" y="50" width="10" height="10" fill="#c4a060"/>
+      <rect x="160" y="40" width="10" height="10" fill="#4a3a1a"/><rect x="170" y="40" width="10" height="10" fill="#7a5a2a"/><rect x="160" y="50" width="10" height="10" fill="#a48a5a"/>
+      <rect x="400" y="30" width="10" height="10" fill="#c4a060"/><rect x="410" y="30" width="10" height="10" fill="#4a3a1a"/><rect x="400" y="40" width="10" height="10" fill="#7a5a2a"/>
+      <rect x="540" y="60" width="10" height="10" fill="#a48a5a"/><rect x="550" y="60" width="10" height="10" fill="#7a5a2a"/><rect x="560" y="60" width="10" height="10" fill="#4a3a1a"/><rect x="540" y="70" width="10" height="10" fill="#c4a060"/>
+      <rect x="580" y="90" width="10" height="10" fill="#7a5a2a"/><rect x="590" y="90" width="10" height="10" fill="#a48a5a"/><rect x="580" y="100" width="10" height="10" fill="#4a3a1a"/><rect x="590" y="100" width="10" height="10" fill="#c4a060"/>
+      <rect x="0" y="100" width="10" height="10" fill="#c4a060"/><rect x="0" y="110" width="10" height="10" fill="#7a5a2a"/><rect x="10" y="110" width="10" height="10" fill="#a48a5a"/>
+      <!-- Floating substrate particles (pixel rects) -->
+      <rect x="126" y="74" width="8" height="8" fill="#4fa4ff"/><!-- O2 -->
+      <rect x="416" y="58" width="8" height="8" fill="#4fa4ff"/><!-- O2 -->
+      <rect x="236" y="52" width="8" height="8" fill="#4fdf6f"/><!-- NO3 -->
+      <rect x="506" y="88" width="8" height="8" fill="#4fdf6f"/><!-- NO3 -->
+      <rect x="346" y="101" width="8" height="8" fill="#ff4f4f"/><!-- CH4 -->
+      <rect x="81" y="136" width="8" height="8" fill="#ff4f4f"/><!-- CH4 -->
+      <rect x="446" y="126" width="8" height="8" fill="#dfdf3f"/><!-- SO4 -->
+      <rect x="171" y="121" width="8" height="8" fill="#ef8f3f"/><!-- Fe -->
+      <!-- Mini ARKE pixel sprite (center, 5px per pixel, 8 key pixels) -->
+      <g transform="translate(275,80)">
+        <rect x="10" y="0" width="5" height="5" fill="#000"/><rect x="15" y="0" width="5" height="5" fill="#7888a0"/><rect x="20" y="0" width="5" height="5" fill="#7888a0"/><rect x="25" y="0" width="5" height="5" fill="#7888a0"/><rect x="30" y="0" width="5" height="5" fill="#7888a0"/><rect x="35" y="0" width="5" height="5" fill="#000"/>
+        <rect x="5" y="5" width="5" height="5" fill="#000"/><rect x="10" y="5" width="5" height="5" fill="#40c8d8"/><rect x="15" y="5" width="5" height="5" fill="#40c8d8"/><rect x="20" y="5" width="5" height="5" fill="#40c8d8"/><rect x="25" y="5" width="5" height="5" fill="#40c8d8"/><rect x="30" y="5" width="5" height="5" fill="#40c8d8"/><rect x="35" y="5" width="5" height="5" fill="#7888a0"/><rect x="40" y="5" width="5" height="5" fill="#000"/>
+        <rect x="5" y="10" width="5" height="5" fill="#000"/><rect x="10" y="10" width="5" height="5" fill="#40c8d8"/><rect x="15" y="10" width="5" height="5" fill="#fff"/><rect x="20" y="10" width="5" height="5" fill="#1a1a2e"/><rect x="25" y="10" width="5" height="5" fill="#40c8d8"/><rect x="30" y="10" width="5" height="5" fill="#fff"/><rect x="35" y="10" width="5" height="5" fill="#1a1a2e"/><rect x="40" y="10" width="5" height="5" fill="#000"/>
+        <rect x="5" y="15" width="5" height="5" fill="#000"/><rect x="10" y="15" width="5" height="5" fill="#000"/><rect x="15" y="15" width="5" height="5" fill="#7888a0"/><rect x="20" y="15" width="5" height="5" fill="#000"/><rect x="25" y="15" width="5" height="5" fill="#000"/><rect x="30" y="15" width="5" height="5" fill="#7888a0"/><rect x="35" y="15" width="5" height="5" fill="#000"/><rect x="40" y="15" width="5" height="5" fill="#000"/>
+        <rect x="5" y="20" width="5" height="5" fill="#000"/><rect x="10" y="20" width="5" height="5" fill="#2acfaf"/><rect x="15" y="20" width="5" height="5" fill="#2acfaf"/><rect x="20" y="20" width="5" height="5" fill="#2acfaf"/><rect x="25" y="20" width="5" height="5" fill="#2acfaf"/><rect x="30" y="20" width="5" height="5" fill="#2acfaf"/><rect x="35" y="20" width="5" height="5" fill="#2acfaf"/><rect x="40" y="20" width="5" height="5" fill="#000"/>
+        <rect x="10" y="25" width="5" height="5" fill="#000"/><rect x="15" y="25" width="5" height="5" fill="#1a8a7a"/><rect x="20" y="25" width="5" height="5" fill="#2acfaf"/><rect x="25" y="25" width="5" height="5" fill="#2acfaf"/><rect x="30" y="25" width="5" height="5" fill="#1a8a7a"/><rect x="35" y="25" width="5" height="5" fill="#000"/>
+        <rect x="15" y="30" width="5" height="5" fill="#000"/><rect x="20" y="30" width="5" height="5" fill="#000"/><rect x="25" y="30" width="5" height="5" fill="#000"/><rect x="30" y="30" width="5" height="5" fill="#000"/>
       </g>
-
-      <!-- Grain particles (3D ellipses with gradients and soft shadows) -->
-      <g filter="url(#story-soft-shadow)">
-        <!-- Top-left large grain -->
-        <ellipse cx="45" cy="20" rx="50" ry="38" fill="url(#grain-grad-1)"/>
-        <!-- Top-center grain -->
-        <ellipse cx="210" cy="8" rx="38" ry="30" fill="url(#grain-grad-2)"/>
-        <!-- Top-right grain -->
-        <ellipse cx="380" cy="15" rx="42" ry="32" fill="url(#grain-grad-3)"/>
-        <!-- Top far-right grain -->
-        <ellipse cx="540" cy="12" rx="48" ry="35" fill="url(#grain-grad-1)"/>
-        <!-- Bottom-left grain -->
-        <ellipse cx="100" cy="185" rx="55" ry="40" fill="url(#grain-grad-2)"/>
-        <!-- Bottom-center grain -->
-        <ellipse cx="300" cy="192" rx="46" ry="34" fill="url(#grain-grad-3)"/>
-        <!-- Bottom-right grain -->
-        <ellipse cx="480" cy="188" rx="52" ry="38" fill="url(#grain-grad-1)"/>
-        <!-- Small mid-left grain -->
-        <ellipse cx="15" cy="110" rx="22" ry="18" fill="url(#grain-grad-3)"/>
-        <!-- Small mid-right grain -->
-        <ellipse cx="585" cy="105" rx="24" ry="20" fill="url(#grain-grad-2)"/>
-      </g>
-
-      <!-- Floating substrate particles with glow -->
-      <g filter="url(#story-glow-sub)">
-        <!-- O2 particles -->
-        <circle cx="130" cy="78" r="5" fill="url(#sub-o2-glow)"/>
-        <circle cx="420" cy="62" r="4" fill="url(#sub-o2-glow)"/>
-        <!-- NO3 particles -->
-        <circle cx="240" cy="56" r="5" fill="url(#sub-no3-glow)"/>
-        <circle cx="510" cy="92" r="3.5" fill="url(#sub-no3-glow)"/>
-        <!-- CH4 particles -->
-        <circle cx="350" cy="105" r="5.5" fill="url(#sub-ch4-glow)"/>
-        <circle cx="85" cy="140" r="4" fill="url(#sub-ch4-glow)"/>
-        <!-- SO4 particles -->
-        <circle cx="450" cy="130" r="4.5" fill="url(#sub-so4-glow)"/>
-        <!-- Fe particle -->
-        <circle cx="175" cy="125" r="4" fill="url(#sub-fe-glow)"/>
-        <!-- Extra tiny drifting particles -->
-        <circle cx="200" cy="100" r="2" fill="#4fa4ff" opacity="0.4"/>
-        <circle cx="320" cy="75" r="2" fill="#4fdf6f" opacity="0.4"/>
-        <circle cx="550" cy="130" r="2" fill="#dfdf3f" opacity="0.3"/>
-        <circle cx="70" cy="70" r="1.5" fill="#ff4f4f" opacity="0.3"/>
-      </g>
-
-      <!-- ARKE character (center of pore space) -->
-      <g transform="translate(300,100)" filter="url(#story-glow-cyan)">
-        <!-- Soft halo -->
-        <ellipse cx="0" cy="0" rx="28" ry="22" fill="none" stroke="#4aeaff" stroke-width="1" opacity="0.25"/>
-        <ellipse cx="0" cy="0" rx="22" ry="17" fill="none" stroke="#4aeaff" stroke-width="0.5" opacity="0.15"/>
-        <!-- Outer membrane (translucent) -->
-        <ellipse cx="0" cy="0" rx="16" ry="12" fill="none" stroke="#5cdcdc" stroke-width="1.2" opacity="0.4" stroke-dasharray="3,2"/>
-        <!-- Body -->
-        <ellipse cx="0" cy="0" rx="13" ry="10" fill="url(#story-arke-grad)" stroke="#1a5a5a" stroke-width="0.5"/>
-        <!-- Internal structures -->
-        <ellipse cx="-2" cy="2" rx="5" ry="3" fill="#1a6a6a" opacity="0.3"/> <!-- nucleoid -->
-        <circle cx="4" cy="-3" r="1.2" fill="#3aa0a0" opacity="0.5"/> <!-- ribosome -->
-        <circle cx="-5" cy="-2" r="1" fill="#3aa0a0" opacity="0.4"/> <!-- ribosome -->
-        <circle cx="2" cy="4" r="0.8" fill="#3aa0a0" opacity="0.4"/> <!-- ribosome -->
-        <!-- Sensor spots (eyes) -->
-        <circle cx="-4" cy="-2" r="2" fill="#4aeaff" opacity="0.9"/>
-        <circle cx="4" cy="-2" r="2" fill="#4aeaff" opacity="0.9"/>
-        <circle cx="-4" cy="-2" r="1" fill="#ffffff" opacity="0.6"/>
-        <circle cx="4" cy="-2" r="1" fill="#ffffff" opacity="0.6"/>
-        <!-- Flagella (smooth bezier curves) -->
-        <path d="M-13,2 C-20,0 -24,8 -28,5" fill="none" stroke="#2a8a8a" stroke-width="1.2" stroke-linecap="round"/>
-        <path d="M-12,-4 C-18,-8 -22,-2 -26,-6" fill="none" stroke="#2a8a8a" stroke-width="1" stroke-linecap="round"/>
-        <path d="M13,2 C20,0 24,8 28,5" fill="none" stroke="#2a8a8a" stroke-width="1.2" stroke-linecap="round"/>
-        <path d="M12,-4 C18,-8 22,-2 26,-6" fill="none" stroke="#2a8a8a" stroke-width="1" stroke-linecap="round"/>
-      </g>
-
+      <!-- Bottom grain rows -->
+      <rect x="0" y="150" width="10" height="10" fill="#142030"/><rect x="10" y="150" width="10" height="10" fill="#4a3a1a"/><rect x="20" y="150" width="10" height="10" fill="#142030"/>
+      <rect x="50" y="150" width="10" height="10" fill="#7a5a2a"/><rect x="60" y="150" width="10" height="10" fill="#a48a5a"/><rect x="70" y="150" width="10" height="10" fill="#4a3a1a"/><rect x="80" y="150" width="10" height="10" fill="#c4a060"/>
+      <rect x="200" y="150" width="10" height="10" fill="#a48a5a"/><rect x="210" y="150" width="10" height="10" fill="#7a5a2a"/>
+      <rect x="350" y="150" width="10" height="10" fill="#c4a060"/><rect x="360" y="150" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="500" y="150" width="10" height="10" fill="#7a5a2a"/><rect x="510" y="150" width="10" height="10" fill="#a48a5a"/>
+      <!-- Full bottom grain rows -->
+      <rect x="0" y="160" width="10" height="10" fill="#c4a060"/><rect x="10" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="20" y="160" width="10" height="10" fill="#a48a5a"/><rect x="30" y="160" width="10" height="10" fill="#0c1420"/><rect x="40" y="160" width="10" height="10" fill="#142030"/><rect x="50" y="160" width="10" height="10" fill="#4a3a1a"/><rect x="60" y="160" width="10" height="10" fill="#c4a060"/><rect x="70" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="80" y="160" width="10" height="10" fill="#a48a5a"/><rect x="90" y="160" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="100" y="160" width="10" height="10" fill="#c4a060"/><rect x="110" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="120" y="160" width="10" height="10" fill="#142030"/><rect x="130" y="160" width="10" height="10" fill="#0c1420"/><rect x="140" y="160" width="10" height="10" fill="#a48a5a"/><rect x="150" y="160" width="10" height="10" fill="#4a3a1a"/><rect x="160" y="160" width="10" height="10" fill="#c4a060"/><rect x="170" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="180" y="160" width="10" height="10" fill="#a48a5a"/><rect x="190" y="160" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="200" y="160" width="10" height="10" fill="#c4a060"/><rect x="210" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="220" y="160" width="10" height="10" fill="#a48a5a"/><rect x="230" y="160" width="10" height="10" fill="#0c1420"/><rect x="240" y="160" width="10" height="10" fill="#142030"/><rect x="250" y="160" width="10" height="10" fill="#4a3a1a"/><rect x="260" y="160" width="10" height="10" fill="#c4a060"/><rect x="270" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="280" y="160" width="10" height="10" fill="#a48a5a"/><rect x="290" y="160" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="300" y="160" width="10" height="10" fill="#c4a060"/><rect x="310" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="320" y="160" width="10" height="10" fill="#a48a5a"/><rect x="330" y="160" width="10" height="10" fill="#142030"/><rect x="340" y="160" width="10" height="10" fill="#0c1420"/><rect x="350" y="160" width="10" height="10" fill="#4a3a1a"/><rect x="360" y="160" width="10" height="10" fill="#c4a060"/><rect x="370" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="380" y="160" width="10" height="10" fill="#a48a5a"/><rect x="390" y="160" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="400" y="160" width="10" height="10" fill="#c4a060"/><rect x="410" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="420" y="160" width="10" height="10" fill="#0c1420"/><rect x="430" y="160" width="10" height="10" fill="#142030"/><rect x="440" y="160" width="10" height="10" fill="#a48a5a"/><rect x="450" y="160" width="10" height="10" fill="#4a3a1a"/><rect x="460" y="160" width="10" height="10" fill="#c4a060"/><rect x="470" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="480" y="160" width="10" height="10" fill="#a48a5a"/><rect x="490" y="160" width="10" height="10" fill="#4a3a1a"/>
+      <rect x="500" y="160" width="10" height="10" fill="#c4a060"/><rect x="510" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="520" y="160" width="10" height="10" fill="#a48a5a"/><rect x="530" y="160" width="10" height="10" fill="#4a3a1a"/><rect x="540" y="160" width="10" height="10" fill="#0c1420"/><rect x="550" y="160" width="10" height="10" fill="#142030"/><rect x="560" y="160" width="10" height="10" fill="#c4a060"/><rect x="570" y="160" width="10" height="10" fill="#7a5a2a"/><rect x="580" y="160" width="10" height="10" fill="#a48a5a"/><rect x="590" y="160" width="10" height="10" fill="#4a3a1a"/>
+      <!-- Solid bottom rows -->
+      <rect x="0" y="170" width="600" height="10" fill="#7a5a2a"/><rect x="0" y="180" width="600" height="10" fill="#4a3a1a"/>
       <!-- Scene label -->
-      <text x="300" y="190" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#4aeaff" opacity="0.5">THE PORE SPACE</text>
+      <text x="300" y="196" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#4aeaff" opacity="0.5">THE PORE SPACE</text>
     </svg>
   </div>
 
@@ -224,30 +134,18 @@
 
     <!-- Dialogue scene with organic microbe portraits -->
     <div style="margin-bottom: 12px;">
-      <!-- Elder portrait: golden archaeon face -->
-      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
-        <defs>
-          <radialGradient id="dlg-elder-grad" cx="40%" cy="35%" r="55%">
-            <stop offset="0%" stop-color="#d4aa50"/>
-            <stop offset="50%" stop-color="#8a6a2a"/>
-            <stop offset="100%" stop-color="#4a3a15"/>
-          </radialGradient>
-          <filter id="dlg-glow-gold" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
-        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
-        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
-        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <path d="M20,28 Q24,31 28,28" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.5"/>
-        <!-- Ancient markings -->
-        <path d="M17,30 L19,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
-        <path d="M29,30 L31,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
+      <!-- Elder portrait: pixel-art -->
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px; image-rendering:pixelated;">
+        <rect width="48" height="48" fill="#1a1a2a"/>
+        <rect x="12" y="4" width="4" height="4" fill="#000"/><rect x="16" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="4" width="4" height="4" fill="#000"/>
+        <rect x="8" y="8" width="4" height="4" fill="#000"/><rect x="12" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="8" width="4" height="4" fill="#4848d0"/><rect x="20" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="8" width="4" height="4" fill="#4848d0"/><rect x="32" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="8" width="4" height="4" fill="#000"/>
+        <rect x="8" y="12" width="4" height="4" fill="#000"/><rect x="12" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="12" width="4" height="4" fill="#fff"/><rect x="20" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="12" width="4" height="4" fill="#fff"/><rect x="32" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="12" width="4" height="4" fill="#000"/>
+        <rect x="8" y="16" width="4" height="4" fill="#000"/><rect x="12" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="16" width="4" height="4" fill="#1a1a2e"/><rect x="20" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="16" width="4" height="4" fill="#1a1a2e"/><rect x="32" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="16" width="4" height="4" fill="#000"/>
+        <rect x="8" y="20" width="4" height="4" fill="#000"/><rect x="12" y="20" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="20" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="20" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="20" width="4" height="4" fill="#0a6a5a"/><rect x="28" y="20" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="20" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="20" width="4" height="4" fill="#000"/>
+        <rect x="12" y="24" width="4" height="4" fill="#000"/><rect x="16" y="24" width="4" height="4" fill="#5030a0"/><rect x="20" y="24" width="4" height="4" fill="#5030a0"/><rect x="24" y="24" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="24" width="4" height="4" fill="#5030a0"/><rect x="32" y="24" width="4" height="4" fill="#000"/>
+        <rect x="12" y="28" width="4" height="4" fill="#000"/><rect x="16" y="28" width="4" height="4" fill="#5030a0"/><rect x="20" y="28" width="4" height="4" fill="#5030a0"/><rect x="24" y="28" width="4" height="4" fill="#5030a0"/><rect x="28" y="28" width="4" height="4" fill="#5030a0"/><rect x="32" y="28" width="4" height="4" fill="#000"/>
+        <rect x="16" y="32" width="4" height="4" fill="#000"/><rect x="20" y="32" width="4" height="4" fill="#5030a0"/><rect x="24" y="32" width="4" height="4" fill="#5030a0"/><rect x="28" y="32" width="4" height="4" fill="#000"/>
+        <rect x="20" y="36" width="4" height="4" fill="#000"/><rect x="28" y="36" width="4" height="4" fill="#000"/>
       </svg>
       <strong style="color:#ffd700;">Elder Archaeon Prime:</strong>
       <p style="margin-left:60px; margin-top:4px; font-style:italic;">
@@ -257,26 +155,18 @@
     </div>
 
     <div style="margin-bottom: 12px;">
-      <!-- ARKE portrait: teal archaeon face -->
-      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
-        <defs>
-          <radialGradient id="dlg-arke-grad" cx="40%" cy="35%" r="55%">
-            <stop offset="0%" stop-color="#5cdcdc"/>
-            <stop offset="50%" stop-color="#2a8a8a"/>
-            <stop offset="100%" stop-color="#1a4a4a"/>
-          </radialGradient>
-          <filter id="dlg-glow-cyan" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
-            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#2a8a8a" stroke-width="1"/>
-        <ellipse cx="24" cy="25" rx="12" ry="14" fill="url(#dlg-arke-grad)" filter="url(#dlg-glow-cyan)"/>
-        <ellipse cx="24" cy="25" rx="13.5" ry="15.5" fill="none" stroke="#5cdcdc" stroke-width="0.5" opacity="0.3" stroke-dasharray="2,1.5"/>
-        <circle cx="20" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
-        <circle cx="28" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
-        <circle cx="20" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
-        <circle cx="28" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
+      <!-- ARKE portrait: pixel-art -->
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px; image-rendering:pixelated;">
+        <rect width="48" height="48" fill="#1a1a2a"/>
+        <rect x="12" y="4" width="4" height="4" fill="#000"/><rect x="16" y="4" width="4" height="4" fill="#7888a0"/><rect x="20" y="4" width="4" height="4" fill="#7888a0"/><rect x="24" y="4" width="4" height="4" fill="#7888a0"/><rect x="28" y="4" width="4" height="4" fill="#7888a0"/><rect x="32" y="4" width="4" height="4" fill="#000"/>
+        <rect x="8" y="8" width="4" height="4" fill="#000"/><rect x="12" y="8" width="4" height="4" fill="#7888a0"/><rect x="16" y="8" width="4" height="4" fill="#40c8d8"/><rect x="20" y="8" width="4" height="4" fill="#40c8d8"/><rect x="24" y="8" width="4" height="4" fill="#40c8d8"/><rect x="28" y="8" width="4" height="4" fill="#40c8d8"/><rect x="32" y="8" width="4" height="4" fill="#7888a0"/><rect x="36" y="8" width="4" height="4" fill="#000"/>
+        <rect x="8" y="12" width="4" height="4" fill="#000"/><rect x="12" y="12" width="4" height="4" fill="#40c8d8"/><rect x="16" y="12" width="4" height="4" fill="#90e8f0"/><rect x="20" y="12" width="4" height="4" fill="#40c8d8"/><rect x="24" y="12" width="4" height="4" fill="#40c8d8"/><rect x="28" y="12" width="4" height="4" fill="#90e8f0"/><rect x="32" y="12" width="4" height="4" fill="#40c8d8"/><rect x="36" y="12" width="4" height="4" fill="#000"/>
+        <rect x="8" y="16" width="4" height="4" fill="#000"/><rect x="12" y="16" width="4" height="4" fill="#40c8d8"/><rect x="16" y="16" width="4" height="4" fill="#fff"/><rect x="20" y="16" width="4" height="4" fill="#1a1a2e"/><rect x="24" y="16" width="4" height="4" fill="#40c8d8"/><rect x="28" y="16" width="4" height="4" fill="#fff"/><rect x="32" y="16" width="4" height="4" fill="#1a1a2e"/><rect x="36" y="16" width="4" height="4" fill="#000"/>
+        <rect x="8" y="20" width="4" height="4" fill="#000"/><rect x="12" y="20" width="4" height="4" fill="#7888a0"/><rect x="16" y="20" width="4" height="4" fill="#40c8d8"/><rect x="20" y="20" width="4" height="4" fill="#40c8d8"/><rect x="24" y="20" width="4" height="4" fill="#40c8d8"/><rect x="28" y="20" width="4" height="4" fill="#40c8d8"/><rect x="32" y="20" width="4" height="4" fill="#7888a0"/><rect x="36" y="20" width="4" height="4" fill="#000"/>
+        <rect x="8" y="24" width="4" height="4" fill="#000"/><rect x="12" y="24" width="4" height="4" fill="#2acfaf"/><rect x="16" y="24" width="4" height="4" fill="#2acfaf"/><rect x="20" y="24" width="4" height="4" fill="#2acfaf"/><rect x="24" y="24" width="4" height="4" fill="#2acfaf"/><rect x="28" y="24" width="4" height="4" fill="#2acfaf"/><rect x="32" y="24" width="4" height="4" fill="#2acfaf"/><rect x="36" y="24" width="4" height="4" fill="#000"/>
+        <rect x="12" y="28" width="4" height="4" fill="#000"/><rect x="16" y="28" width="4" height="4" fill="#1a8a7a"/><rect x="20" y="28" width="4" height="4" fill="#2acfaf"/><rect x="24" y="28" width="4" height="4" fill="#2acfaf"/><rect x="28" y="28" width="4" height="4" fill="#1a8a7a"/><rect x="32" y="28" width="4" height="4" fill="#000"/>
+        <rect x="16" y="32" width="4" height="4" fill="#000"/><rect x="20" y="32" width="4" height="4" fill="#1a8a7a"/><rect x="24" y="32" width="4" height="4" fill="#1a8a7a"/><rect x="28" y="32" width="4" height="4" fill="#000"/>
+        <rect x="20" y="36" width="4" height="4" fill="#000"/><rect x="28" y="36" width="4" height="4" fill="#000"/>
       </svg>
       <strong style="color:#4aeaff;">ARKE:</strong>
       <p style="margin-left:60px; margin-top:4px; font-style:italic;">
@@ -285,16 +175,15 @@
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
-        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
-        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
-        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
-        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <path d="M17,30 L19,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
-        <path d="M29,30 L31,33" stroke="#aa8a3a" stroke-width="0.5" opacity="0.4"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px; image-rendering:pixelated;">
+        <rect width="48" height="48" fill="#1a1a2a"/>
+        <rect x="12" y="4" width="4" height="4" fill="#000"/><rect x="16" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="4" width="4" height="4" fill="#000"/>
+        <rect x="8" y="8" width="4" height="4" fill="#000"/><rect x="12" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="8" width="4" height="4" fill="#fff"/><rect x="20" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="8" width="4" height="4" fill="#fff"/><rect x="32" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="8" width="4" height="4" fill="#000"/>
+        <rect x="8" y="12" width="4" height="4" fill="#000"/><rect x="12" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="20" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="32" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="12" width="4" height="4" fill="#000"/>
+        <rect x="8" y="16" width="4" height="4" fill="#000"/><rect x="12" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="16" width="4" height="4" fill="#0a6a5a"/><rect x="24" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="16" width="4" height="4" fill="#000"/>
+        <rect x="12" y="20" width="4" height="4" fill="#000"/><rect x="16" y="20" width="4" height="4" fill="#5030a0"/><rect x="20" y="20" width="4" height="4" fill="#5030a0"/><rect x="24" y="20" width="4" height="4" fill="#5030a0"/><rect x="28" y="20" width="4" height="4" fill="#5030a0"/><rect x="32" y="20" width="4" height="4" fill="#000"/>
+        <rect x="16" y="24" width="4" height="4" fill="#000"/><rect x="20" y="24" width="4" height="4" fill="#5030a0"/><rect x="24" y="24" width="4" height="4" fill="#5030a0"/><rect x="28" y="24" width="4" height="4" fill="#000"/>
+        <rect x="20" y="28" width="4" height="4" fill="#000"/><rect x="28" y="28" width="4" height="4" fill="#000"/>
       </svg>
       <strong style="color:#ffd700;">Elder:</strong>
       <p style="margin-left:60px; margin-top:4px; font-style:italic;">
@@ -305,14 +194,15 @@
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
-        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
-        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
-        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
-        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px; image-rendering:pixelated;">
+        <rect width="48" height="48" fill="#1a1a2a"/>
+        <rect x="12" y="4" width="4" height="4" fill="#000"/><rect x="16" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="4" width="4" height="4" fill="#000"/>
+        <rect x="8" y="8" width="4" height="4" fill="#000"/><rect x="12" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="8" width="4" height="4" fill="#fff"/><rect x="20" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="8" width="4" height="4" fill="#fff"/><rect x="32" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="8" width="4" height="4" fill="#000"/>
+        <rect x="8" y="12" width="4" height="4" fill="#000"/><rect x="12" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="20" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="32" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="12" width="4" height="4" fill="#000"/>
+        <rect x="8" y="16" width="4" height="4" fill="#000"/><rect x="12" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="16" width="4" height="4" fill="#0a6a5a"/><rect x="24" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="16" width="4" height="4" fill="#000"/>
+        <rect x="12" y="20" width="4" height="4" fill="#000"/><rect x="16" y="20" width="4" height="4" fill="#5030a0"/><rect x="20" y="20" width="4" height="4" fill="#5030a0"/><rect x="24" y="20" width="4" height="4" fill="#5030a0"/><rect x="28" y="20" width="4" height="4" fill="#5030a0"/><rect x="32" y="20" width="4" height="4" fill="#000"/>
+        <rect x="16" y="24" width="4" height="4" fill="#000"/><rect x="20" y="24" width="4" height="4" fill="#5030a0"/><rect x="24" y="24" width="4" height="4" fill="#5030a0"/><rect x="28" y="24" width="4" height="4" fill="#000"/>
+        <rect x="20" y="28" width="4" height="4" fill="#000"/><rect x="28" y="28" width="4" height="4" fill="#000"/>
       </svg>
       <strong style="color:#ffd700;">Elder:</strong>
       <p style="margin-left:60px; margin-top:4px; font-style:italic;">
@@ -323,14 +213,15 @@
     </div>
 
     <div style="margin-bottom: 12px;">
-      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
-        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#2a8a8a" stroke-width="1"/>
-        <ellipse cx="24" cy="25" rx="12" ry="14" fill="url(#dlg-arke-grad)" filter="url(#dlg-glow-cyan)"/>
-        <ellipse cx="24" cy="25" rx="13.5" ry="15.5" fill="none" stroke="#5cdcdc" stroke-width="0.5" opacity="0.3" stroke-dasharray="2,1.5"/>
-        <circle cx="20" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
-        <circle cx="28" cy="22" r="2" fill="#4aeaff" opacity="0.9"/>
-        <circle cx="20" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
-        <circle cx="28" cy="22" r="0.9" fill="#fff" opacity="0.5"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px; image-rendering:pixelated;">
+        <rect width="48" height="48" fill="#1a1a2a"/>
+        <rect x="12" y="4" width="4" height="4" fill="#000"/><rect x="16" y="4" width="4" height="4" fill="#7888a0"/><rect x="20" y="4" width="4" height="4" fill="#7888a0"/><rect x="24" y="4" width="4" height="4" fill="#7888a0"/><rect x="28" y="4" width="4" height="4" fill="#7888a0"/><rect x="32" y="4" width="4" height="4" fill="#000"/>
+        <rect x="8" y="8" width="4" height="4" fill="#000"/><rect x="12" y="8" width="4" height="4" fill="#40c8d8"/><rect x="16" y="8" width="4" height="4" fill="#90e8f0"/><rect x="20" y="8" width="4" height="4" fill="#40c8d8"/><rect x="24" y="8" width="4" height="4" fill="#40c8d8"/><rect x="28" y="8" width="4" height="4" fill="#90e8f0"/><rect x="32" y="8" width="4" height="4" fill="#40c8d8"/><rect x="36" y="8" width="4" height="4" fill="#000"/>
+        <rect x="8" y="12" width="4" height="4" fill="#000"/><rect x="12" y="12" width="4" height="4" fill="#40c8d8"/><rect x="16" y="12" width="4" height="4" fill="#fff"/><rect x="20" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="24" y="12" width="4" height="4" fill="#40c8d8"/><rect x="28" y="12" width="4" height="4" fill="#fff"/><rect x="32" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="36" y="12" width="4" height="4" fill="#000"/>
+        <rect x="8" y="16" width="4" height="4" fill="#000"/><rect x="12" y="16" width="4" height="4" fill="#7888a0"/><rect x="16" y="16" width="4" height="4" fill="#40c8d8"/><rect x="20" y="16" width="4" height="4" fill="#40c8d8"/><rect x="24" y="16" width="4" height="4" fill="#40c8d8"/><rect x="28" y="16" width="4" height="4" fill="#40c8d8"/><rect x="32" y="16" width="4" height="4" fill="#7888a0"/><rect x="36" y="16" width="4" height="4" fill="#000"/>
+        <rect x="8" y="20" width="4" height="4" fill="#000"/><rect x="12" y="20" width="4" height="4" fill="#2acfaf"/><rect x="16" y="20" width="4" height="4" fill="#2acfaf"/><rect x="20" y="20" width="4" height="4" fill="#2acfaf"/><rect x="24" y="20" width="4" height="4" fill="#2acfaf"/><rect x="28" y="20" width="4" height="4" fill="#2acfaf"/><rect x="32" y="20" width="4" height="4" fill="#2acfaf"/><rect x="36" y="20" width="4" height="4" fill="#000"/>
+        <rect x="12" y="24" width="4" height="4" fill="#000"/><rect x="16" y="24" width="4" height="4" fill="#1a8a7a"/><rect x="20" y="24" width="4" height="4" fill="#2acfaf"/><rect x="24" y="24" width="4" height="4" fill="#2acfaf"/><rect x="28" y="24" width="4" height="4" fill="#1a8a7a"/><rect x="32" y="24" width="4" height="4" fill="#000"/>
+        <rect x="16" y="28" width="4" height="4" fill="#000"/><rect x="20" y="28" width="4" height="4" fill="#1a8a7a"/><rect x="24" y="28" width="4" height="4" fill="#1a8a7a"/><rect x="28" y="28" width="4" height="4" fill="#000"/>
       </svg>
       <strong style="color:#4aeaff;">ARKE:</strong>
       <p style="margin-left:60px; margin-top:4px; font-style:italic;">
@@ -339,15 +230,15 @@
     </div>
 
     <div>
-      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px;">
-        <circle cx="24" cy="24" r="22" fill="#1a1a2a" stroke="#8a6a2a" stroke-width="1"/>
-        <ellipse cx="24" cy="24" rx="14" ry="16" fill="url(#dlg-elder-grad)" filter="url(#dlg-glow-gold)"/>
-        <ellipse cx="24" cy="24" rx="15.5" ry="17.5" fill="none" stroke="#d4aa50" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,1.5"/>
-        <circle cx="20" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="28" cy="21" r="2.2" fill="#ffd700" opacity="0.9"/>
-        <circle cx="20" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <circle cx="28" cy="21" r="1" fill="#fff" opacity="0.5"/>
-        <path d="M20,28 Q24,31 28,28" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.5"/>
+      <svg width="48" height="48" viewBox="0 0 48 48" style="vertical-align:middle; margin-right:8px; image-rendering:pixelated;">
+        <rect width="48" height="48" fill="#1a1a2a"/>
+        <rect x="12" y="4" width="4" height="4" fill="#000"/><rect x="16" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="4" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="4" width="4" height="4" fill="#000"/>
+        <rect x="8" y="8" width="4" height="4" fill="#000"/><rect x="12" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="8" width="4" height="4" fill="#fff"/><rect x="20" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="8" width="4" height="4" fill="#fff"/><rect x="32" y="8" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="8" width="4" height="4" fill="#000"/>
+        <rect x="8" y="12" width="4" height="4" fill="#000"/><rect x="12" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="20" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="24" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="12" width="4" height="4" fill="#1a1a2e"/><rect x="32" y="12" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="12" width="4" height="4" fill="#000"/>
+        <rect x="8" y="16" width="4" height="4" fill="#000"/><rect x="12" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="16" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="20" y="16" width="4" height="4" fill="#0a6a5a"/><rect x="24" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="28" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="32" y="16" width="4" height="4" fill="#1a1aa0"/><rect x="36" y="16" width="4" height="4" fill="#000"/>
+        <rect x="12" y="20" width="4" height="4" fill="#000"/><rect x="16" y="20" width="4" height="4" fill="#5030a0"/><rect x="20" y="20" width="4" height="4" fill="#5030a0"/><rect x="24" y="20" width="4" height="4" fill="#5030a0"/><rect x="28" y="20" width="4" height="4" fill="#5030a0"/><rect x="32" y="20" width="4" height="4" fill="#000"/>
+        <rect x="16" y="24" width="4" height="4" fill="#000"/><rect x="20" y="24" width="4" height="4" fill="#5030a0"/><rect x="24" y="24" width="4" height="4" fill="#5030a0"/><rect x="28" y="24" width="4" height="4" fill="#000"/>
+        <rect x="20" y="28" width="4" height="4" fill="#000"/><rect x="28" y="28" width="4" height="4" fill="#000"/>
       </svg>
       <strong style="color:#ffd700;">Elder:</strong>
       <p style="margin-left:60px; margin-top:4px; font-style:italic;">

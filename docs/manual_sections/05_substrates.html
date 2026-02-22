@@ -17,8 +17,8 @@
     <div class="info-box-title" style="color:#4060a0;">THE REDOX LADDER (Real Science!)</div>
     <p style="font-size:10pt;">
       In real microbiology, organisms use chemicals in a specific thermodynamic order called the
-      <strong>Redox Ladder</strong>. Oxygen provides the most energy per reaction
-      (&Delta;G&deg;&prime; = &minus;818 kJ/mol); methane provides the least (&minus;31 kJ/mol).
+      <strong>Redox Ladder</strong>. Oxygen provides the most energy per reaction;
+      methane provides the least.
       However, nature has a twist: <strong>low-energy substrates often support the highest growth rates</strong>
       because organisms that use them face less competition and have evolved efficient metabolisms.
       The game faithfully represents this hierarchy &mdash; energy and growth are inversely related!
@@ -27,314 +27,523 @@
     </p>
   </div>
 
-  <!-- The Redox Ladder Visual - Beautiful Organic Scientific Illustration -->
+  <!-- The Redox Ladder Visual - Pixel Art 8-bit Style -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:16px; margin:12px 0; text-align:center;">
     <h3 style="font-size:9pt; margin-bottom:12px;">The Redox Ladder &mdash; Energy &amp; Growth Hierarchy</h3>
-    <svg width="460" height="370" viewBox="0 0 460 370" class="organism-art">
-      <defs>
-        <!-- Vertical gradient background (blue top to red bottom) -->
-        <linearGradient id="ladderBg05" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#e8f0ff"/>
-          <stop offset="25%" stop-color="#e8ffe8"/>
-          <stop offset="45%" stop-color="#f0e8ff"/>
-          <stop offset="60%" stop-color="#fff0e0"/>
-          <stop offset="80%" stop-color="#fff8d0"/>
-          <stop offset="100%" stop-color="#ffe8e0"/>
-        </linearGradient>
-        <!-- Energy gradient bar -->
-        <linearGradient id="energyBar05" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4fa4ff"/>
-          <stop offset="20%" stop-color="#4fdf6f"/>
-          <stop offset="40%" stop-color="#cf6fff"/>
-          <stop offset="60%" stop-color="#ef8f3f"/>
-          <stop offset="80%" stop-color="#dfdf3f"/>
-          <stop offset="100%" stop-color="#ff4f4f"/>
-        </linearGradient>
-        <!-- Growth gradient bar (inverse) -->
-        <linearGradient id="growthBar05" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#88cc88"/>
-          <stop offset="100%" stop-color="#22ff44"/>
-        </linearGradient>
-
-        <!-- ====== ORB GLOW FILTERS ====== -->
-        <filter id="orbGlow05" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-        <filter id="orbGlowStrong05" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-
-        <!-- ====== ORB RADIAL GRADIENTS ====== -->
-        <!-- O2 orb gradient - luminous blue sphere -->
-        <radialGradient id="o2Grad05" cx="35%" cy="28%" r="65%">
-          <stop offset="0%" stop-color="#d0eaff"/>
-          <stop offset="30%" stop-color="#8dc8ff"/>
-          <stop offset="60%" stop-color="#4fa4ff"/>
-          <stop offset="85%" stop-color="#2060c0"/>
-          <stop offset="100%" stop-color="#102860"/>
-        </radialGradient>
-        <radialGradient id="o2Glow05" cx="50%" cy="50%" r="50%">
-          <stop offset="60%" stop-color="#4fa4ff" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#4fa4ff" stop-opacity="0.25"/>
-        </radialGradient>
-        <!-- NO3 orb gradient - verdant green sphere -->
-        <radialGradient id="no3Grad05" cx="35%" cy="28%" r="65%">
-          <stop offset="0%" stop-color="#c0ffd0"/>
-          <stop offset="30%" stop-color="#80df90"/>
-          <stop offset="60%" stop-color="#4fdf6f"/>
-          <stop offset="85%" stop-color="#208a40"/>
-          <stop offset="100%" stop-color="#104820"/>
-        </radialGradient>
-        <radialGradient id="no3Glow05" cx="50%" cy="50%" r="50%">
-          <stop offset="60%" stop-color="#4fdf6f" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#4fdf6f" stop-opacity="0.25"/>
-        </radialGradient>
-        <!-- Mn orb gradient - amethyst crystal -->
-        <radialGradient id="mnGrad05" cx="38%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#f0c8ff"/>
-          <stop offset="30%" stop-color="#d88eff"/>
-          <stop offset="60%" stop-color="#cf6fff"/>
-          <stop offset="85%" stop-color="#7030a0"/>
-          <stop offset="100%" stop-color="#381060"/>
-        </radialGradient>
-        <radialGradient id="mnGlow05" cx="50%" cy="50%" r="50%">
-          <stop offset="60%" stop-color="#cf6fff" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#cf6fff" stop-opacity="0.25"/>
-        </radialGradient>
-        <!-- Fe orb gradient - molten orange sphere -->
-        <radialGradient id="feGrad05" cx="35%" cy="28%" r="65%">
-          <stop offset="0%" stop-color="#ffe0b0"/>
-          <stop offset="30%" stop-color="#ffb870"/>
-          <stop offset="60%" stop-color="#ef8f3f"/>
-          <stop offset="85%" stop-color="#a05010"/>
-          <stop offset="100%" stop-color="#502808"/>
-        </radialGradient>
-        <radialGradient id="feGlow05" cx="50%" cy="50%" r="50%">
-          <stop offset="60%" stop-color="#ef8f3f" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#ef8f3f" stop-opacity="0.25"/>
-        </radialGradient>
-        <!-- SO4 orb gradient - sulfur crystal -->
-        <radialGradient id="so4Grad05" cx="38%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#ffffc0"/>
-          <stop offset="30%" stop-color="#f0f060"/>
-          <stop offset="60%" stop-color="#dfdf3f"/>
-          <stop offset="85%" stop-color="#8a8a10"/>
-          <stop offset="100%" stop-color="#484808"/>
-        </radialGradient>
-        <radialGradient id="so4Glow05" cx="50%" cy="50%" r="50%">
-          <stop offset="60%" stop-color="#dfdf3f" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#dfdf3f" stop-opacity="0.25"/>
-        </radialGradient>
-        <!-- CH4 orb gradient - fiery red sphere -->
-        <radialGradient id="ch4Grad05" cx="35%" cy="28%" r="65%">
-          <stop offset="0%" stop-color="#ffc080"/>
-          <stop offset="25%" stop-color="#ff8040"/>
-          <stop offset="50%" stop-color="#ff4f4f"/>
-          <stop offset="80%" stop-color="#cc1818"/>
-          <stop offset="100%" stop-color="#601010"/>
-        </radialGradient>
-        <radialGradient id="ch4Inner05" cx="42%" cy="42%" r="48%">
-          <stop offset="0%" stop-color="#ffee66"/>
-          <stop offset="50%" stop-color="#ff8020" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#ff4020" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="ch4Glow05" cx="50%" cy="50%" r="50%">
-          <stop offset="60%" stop-color="#ff4f4f" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#ff4f4f" stop-opacity="0.3"/>
-        </radialGradient>
-
-        <!-- Energy/Growth fill bar gradients -->
-        <linearGradient id="enBarFill05" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#4fa4ff"/>
-          <stop offset="100%" stop-color="#70c4ff"/>
-        </linearGradient>
-        <linearGradient id="grBarFill05" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#40c040"/>
-          <stop offset="100%" stop-color="#70ef70"/>
-        </linearGradient>
-        <!-- Arrow markers -->
-        <marker id="arrowDown05" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto">
-          <path d="M1,0 L4,7 L7,0" fill="#666" stroke="none"/>
-        </marker>
-        <marker id="arrowUp05" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto">
-          <path d="M1,8 L4,1 L7,8" fill="#4a8a4a" stroke="none"/>
-        </marker>
-      </defs>
+    <svg width="460" height="370" viewBox="0 0 460 370" style="image-rendering:pixelated;">
 
       <!-- Background -->
-      <rect x="55" y="8" width="350" height="340" rx="8" fill="url(#ladderBg05)" stroke="#ccc" stroke-width="1"/>
+      <rect x="55" y="8" width="350" height="340" fill="#f0f0f0" stroke="#ccc" stroke-width="1"/>
 
-      <!-- Energy gradient bar (left side) -->
-      <rect x="62" y="18" width="14" height="320" rx="4" fill="url(#energyBar05)"/>
+      <!-- Energy gradient strip (left side) - flat colored segments -->
+      <rect x="62" y="18" width="14" height="53" fill="#4fa4ff"/>
+      <rect x="62" y="71" width="14" height="54" fill="#4fdf6f"/>
+      <rect x="62" y="125" width="14" height="53" fill="#cf6fff"/>
+      <rect x="62" y="178" width="14" height="54" fill="#ef8f3f"/>
+      <rect x="62" y="232" width="14" height="53" fill="#dfdf3f"/>
+      <rect x="62" y="285" width="14" height="53" fill="#ff4f4f"/>
       <text x="69" y="14" text-anchor="middle" font-size="6" fill="#4fa4ff" font-weight="bold" font-family="'Inter',sans-serif">HIGH</text>
       <text x="69" y="348" text-anchor="middle" font-size="6" fill="#ff4f4f" font-weight="bold" font-family="'Inter',sans-serif">LOW</text>
 
       <!-- Energy label (rotated, left) -->
       <text x="30" y="178" text-anchor="middle" font-size="7" fill="#666" transform="rotate(-90,30,178)" font-family="'Inter',sans-serif" font-weight="600">ENERGY YIELD</text>
-      <line x1="44" y1="30" x2="44" y2="338" stroke="#666" stroke-width="1.5" marker-end="url(#arrowDown05)"/>
+      <rect x="43" y="30" width="2" height="308" fill="#666"/>
+      <rect x="40" y="334" width="8" height="4" fill="#666"/>
 
       <!-- Growth label (rotated, right) -->
       <text x="438" y="178" text-anchor="middle" font-size="7" fill="#4a8a4a" transform="rotate(90,438,178)" font-family="'Inter',sans-serif" font-weight="600">GROWTH YIELD</text>
-      <line x1="422" y1="338" x2="422" y2="30" stroke="#4a8a4a" stroke-width="1.5" marker-end="url(#arrowUp05)"/>
+      <rect x="421" y="30" width="2" height="308" fill="#4a8a4a"/>
+      <rect x="418" y="30" width="8" height="4" fill="#4a8a4a"/>
 
       <!-- =================== O2 - OXYGEN (top) =================== -->
       <g transform="translate(88, 22)">
-        <!-- Outer soft glow ring -->
-        <circle cx="16" cy="18" r="20" fill="url(#o2Glow05)"/>
-        <!-- Main orb with glow filter -->
-        <g filter="url(#orbGlow05)">
-          <circle cx="16" cy="18" r="14" fill="url(#o2Grad05)"/>
-          <!-- Specular highlight -->
-          <ellipse cx="11" cy="12" rx="5" ry="3.5" fill="white" opacity="0.4" transform="rotate(-15,11,12)"/>
-          <circle cx="9" cy="10" r="1.5" fill="white" opacity="0.6"/>
-          <!-- Inner detail - dissolved gas bubbles -->
-          <circle cx="20" cy="22" r="1.5" fill="#a0d4ff" opacity="0.3"/>
-          <circle cx="18" cy="14" r="1" fill="#c0e0ff" opacity="0.25"/>
+        <!-- Pixel art O2 sprite (3px per pixel, 30x30) -->
+        <g transform="translate(1, 3)">
+          <rect x="6" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="18" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="21" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="3" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="9" y="3" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="12" y="3" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="15" y="3" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="18" y="3" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="21" y="3" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="24" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="6" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="6" y="6" width="3" height="3" fill="#70c4ff"/>
+          <rect x="9" y="6" width="3" height="3" fill="#70c4ff"/>
+          <rect x="12" y="6" width="3" height="3" fill="#70c4ff"/>
+          <rect x="15" y="6" width="3" height="3" fill="#70c4ff"/>
+          <rect x="18" y="6" width="3" height="3" fill="#70c4ff"/>
+          <rect x="21" y="6" width="3" height="3" fill="#70c4ff"/>
+          <rect x="24" y="6" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="27" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="9" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="6" y="9" width="3" height="3" fill="#70c4ff"/>
+          <rect x="9" y="9" width="3" height="3" fill="#70c4ff"/>
+          <rect x="12" y="9" width="3" height="3" fill="#70c4ff"/>
+          <rect x="15" y="9" width="3" height="3" fill="#70c4ff"/>
+          <rect x="18" y="9" width="3" height="3" fill="#70c4ff"/>
+          <rect x="21" y="9" width="3" height="3" fill="#70c4ff"/>
+          <rect x="24" y="9" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="27" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="12" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="6" y="12" width="3" height="3" fill="#70c4ff"/>
+          <rect x="9" y="12" width="3" height="3" fill="#70c4ff"/>
+          <rect x="12" y="12" width="3" height="3" fill="#70c4ff"/>
+          <rect x="15" y="12" width="3" height="3" fill="#70c4ff"/>
+          <rect x="18" y="12" width="3" height="3" fill="#70c4ff"/>
+          <rect x="21" y="12" width="3" height="3" fill="#70c4ff"/>
+          <rect x="24" y="12" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="27" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="15" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="6" y="15" width="3" height="3" fill="#70c4ff"/>
+          <rect x="9" y="15" width="3" height="3" fill="#70c4ff"/>
+          <rect x="12" y="15" width="3" height="3" fill="#70c4ff"/>
+          <rect x="15" y="15" width="3" height="3" fill="#70c4ff"/>
+          <rect x="18" y="15" width="3" height="3" fill="#70c4ff"/>
+          <rect x="21" y="15" width="3" height="3" fill="#70c4ff"/>
+          <rect x="24" y="15" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="27" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="18" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="6" y="18" width="3" height="3" fill="#70c4ff"/>
+          <rect x="9" y="18" width="3" height="3" fill="#70c4ff"/>
+          <rect x="12" y="18" width="3" height="3" fill="#70c4ff"/>
+          <rect x="15" y="18" width="3" height="3" fill="#70c4ff"/>
+          <rect x="18" y="18" width="3" height="3" fill="#70c4ff"/>
+          <rect x="21" y="18" width="3" height="3" fill="#70c4ff"/>
+          <rect x="24" y="18" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="27" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="6" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="9" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="12" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="15" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="18" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="21" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="24" y="21" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="27" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="24" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="9" y="24" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="12" y="24" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="15" y="24" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="18" y="24" width="3" height="3" fill="#4fa4ff"/>
+          <rect x="21" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="18" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="21" y="27" width="3" height="3" fill="#000000"/>
         </g>
         <!-- Label & formula -->
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">OXYGEN</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">O<tspan font-size="5" dy="2">2</tspan><tspan dy="-2"> &mdash; Aerobic Respiration</tspan></text>
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +20 | EN +10 | GR +15</text>
         <!-- Energy bar -->
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="url(#enBarFill05)"/>
-        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-818 kJ/mol</text>
+        <rect x="220" y="8" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="80" height="7" fill="#4fa4ff"/>
         <!-- Growth bar -->
-        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="20" width="36" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <rect x="220" y="20" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="36" height="7" fill="#40c040"/>
         <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 15</text>
       </g>
 
       <!-- =================== NO3 - NITRATE =================== -->
       <g transform="translate(88, 74)">
-        <circle cx="16" cy="18" r="20" fill="url(#no3Glow05)"/>
-        <g filter="url(#orbGlow05)">
-          <circle cx="16" cy="18" r="14" fill="url(#no3Grad05)"/>
-          <ellipse cx="11" cy="12" rx="5" ry="3.5" fill="white" opacity="0.35" transform="rotate(-15,11,12)"/>
-          <circle cx="9" cy="10" r="1.5" fill="white" opacity="0.5"/>
-          <!-- Inner detail - nitrogen molecule hints -->
-          <circle cx="14" cy="20" r="2" fill="#a0ffc0" opacity="0.2"/>
-          <circle cx="20" cy="16" r="1.5" fill="#c0ffd0" opacity="0.2"/>
+        <g transform="translate(1, 3)">
+          <rect x="12" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="3" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="3" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="6" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="12" y="6" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="6" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="6" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="21" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="9" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="9" y="9" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="12" y="9" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="9" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="9" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="21" y="9" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="24" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="6" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="9" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="12" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="21" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="24" y="12" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="0" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="6" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="9" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="12" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="21" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="24" y="15" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="3" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="18" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="9" y="18" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="12" y="18" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="18" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="18" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="21" y="18" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="24" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="21" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="12" y="21" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="21" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="21" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="21" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="24" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="15" y="24" width="3" height="3" fill="#4fdf6f"/>
+          <rect x="18" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="27" width="3" height="3" fill="#000000"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">NITRATE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">NO<tspan font-size="5" dy="2">3</tspan><tspan font-size="5" dy="-2">&minus;</tspan><tspan dy="0"> &mdash; Denitrification</tspan></text>
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +15 | EN +7.5 | GR +18</text>
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="8" width="63" height="7" rx="3" fill="url(#enBarFill05)"/>
-        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-649 kJ/mol</text>
-        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="20" width="43" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <rect x="220" y="8" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="63" height="7" fill="#4fa4ff"/>
+        <rect x="220" y="20" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="43" height="7" fill="#40c040"/>
         <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 18</text>
       </g>
 
       <!-- =================== Mn(IV) - MANGANESE =================== -->
       <g transform="translate(88, 126)">
-        <circle cx="16" cy="18" r="20" fill="url(#mnGlow05)"/>
-        <g filter="url(#orbGlow05)">
-          <!-- Octahedral/crystalline shape with organic rounding -->
-          <polygon points="16,4 28,12 28,24 16,32 4,24 4,12" fill="url(#mnGrad05)"/>
-          <!-- Facet highlights -->
-          <polygon points="16,7 25,13 25,22 16,29 7,22 7,13" fill="#e8c0ff" opacity="0.12"/>
-          <polygon points="16,11 21,15 21,21 16,25 11,21 11,15" fill="white" opacity="0.1"/>
-          <!-- Specular highlight -->
-          <ellipse cx="12" cy="11" rx="4" ry="2.5" fill="white" opacity="0.3" transform="rotate(-20,12,11)"/>
-          <circle cx="10" cy="9" r="1" fill="white" opacity="0.45"/>
+        <g transform="translate(1, 3)">
+          <rect x="12" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="3" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="3" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="6" width="3" height="3" fill="#cf6fff"/>
+          <rect x="12" y="6" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="6" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="6" width="3" height="3" fill="#cf6fff"/>
+          <rect x="21" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="9" width="3" height="3" fill="#cf6fff"/>
+          <rect x="9" y="9" width="3" height="3" fill="#cf6fff"/>
+          <rect x="12" y="9" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="9" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="9" width="3" height="3" fill="#cf6fff"/>
+          <rect x="21" y="9" width="3" height="3" fill="#cf6fff"/>
+          <rect x="24" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="27" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="6" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="9" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="12" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="21" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="24" y="12" width="3" height="3" fill="#cf6fff"/>
+          <rect x="0" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="6" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="9" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="12" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="21" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="24" y="15" width="3" height="3" fill="#cf6fff"/>
+          <rect x="0" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="18" width="3" height="3" fill="#cf6fff"/>
+          <rect x="9" y="18" width="3" height="3" fill="#cf6fff"/>
+          <rect x="12" y="18" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="18" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="18" width="3" height="3" fill="#cf6fff"/>
+          <rect x="21" y="18" width="3" height="3" fill="#cf6fff"/>
+          <rect x="24" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="27" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="21" width="3" height="3" fill="#cf6fff"/>
+          <rect x="12" y="21" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="21" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="21" width="3" height="3" fill="#cf6fff"/>
+          <rect x="21" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="24" width="3" height="3" fill="#cf6fff"/>
+          <rect x="15" y="24" width="3" height="3" fill="#cf6fff"/>
+          <rect x="18" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="27" width="3" height="3" fill="#000000"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#cf6fff">MANGANESE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">Mn(IV) &mdash; Mn Reduction</text>
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +12 | EN +6  | GR +12</text>
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="8" width="54" height="7" rx="3" fill="url(#enBarFill05)"/>
-        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-558 kJ/mol</text>
-        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="20" width="29" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <rect x="220" y="8" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="54" height="7" fill="#4fa4ff"/>
+        <rect x="220" y="20" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="29" height="7" fill="#40c040"/>
         <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 12</text>
       </g>
 
       <!-- =================== Fe(III) - IRON =================== -->
       <g transform="translate(88, 178)">
-        <circle cx="16" cy="18" r="20" fill="url(#feGlow05)"/>
-        <g filter="url(#orbGlow05)">
-          <circle cx="16" cy="18" r="14" fill="url(#feGrad05)"/>
-          <!-- Metallic sheen bands -->
-          <ellipse cx="12" cy="12" rx="7" ry="4" fill="white" opacity="0.15" transform="rotate(-30,12,12)"/>
-          <ellipse cx="14" cy="14" rx="4" ry="2" fill="white" opacity="0.1" transform="rotate(-30,14,14)"/>
-          <!-- Specular highlight -->
-          <circle cx="10" cy="10" r="2.5" fill="white" opacity="0.3"/>
-          <circle cx="9" cy="9" r="1" fill="white" opacity="0.45"/>
-          <!-- Rust texture details -->
-          <circle cx="20" cy="22" r="1.5" fill="#ffd0a0" opacity="0.2"/>
-          <circle cx="22" cy="18" r="1" fill="#ffe0b0" opacity="0.15"/>
+        <g transform="translate(1, 3)">
+          <rect x="12" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="3" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="15" y="3" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="18" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="6" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="12" y="6" width="3" height="3" fill="#ffb870"/>
+          <rect x="15" y="6" width="3" height="3" fill="#ffb870"/>
+          <rect x="18" y="6" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="21" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="9" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="9" y="9" width="3" height="3" fill="#ffb870"/>
+          <rect x="12" y="9" width="3" height="3" fill="#ffb870"/>
+          <rect x="15" y="9" width="3" height="3" fill="#ffb870"/>
+          <rect x="18" y="9" width="3" height="3" fill="#ffb870"/>
+          <rect x="21" y="9" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="24" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="12" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="6" y="12" width="3" height="3" fill="#ffb870"/>
+          <rect x="9" y="12" width="3" height="3" fill="#ffb870"/>
+          <rect x="12" y="12" width="3" height="3" fill="#ffb870"/>
+          <rect x="15" y="12" width="3" height="3" fill="#ffb870"/>
+          <rect x="18" y="12" width="3" height="3" fill="#ffb870"/>
+          <rect x="21" y="12" width="3" height="3" fill="#ffb870"/>
+          <rect x="24" y="12" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="27" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="15" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="6" y="15" width="3" height="3" fill="#ffb870"/>
+          <rect x="9" y="15" width="3" height="3" fill="#ffb870"/>
+          <rect x="12" y="15" width="3" height="3" fill="#ffb870"/>
+          <rect x="15" y="15" width="3" height="3" fill="#ffb870"/>
+          <rect x="18" y="15" width="3" height="3" fill="#ffb870"/>
+          <rect x="21" y="15" width="3" height="3" fill="#ffb870"/>
+          <rect x="24" y="15" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="27" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="18" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="9" y="18" width="3" height="3" fill="#ffb870"/>
+          <rect x="12" y="18" width="3" height="3" fill="#ffb870"/>
+          <rect x="15" y="18" width="3" height="3" fill="#ffb870"/>
+          <rect x="18" y="18" width="3" height="3" fill="#ffb870"/>
+          <rect x="21" y="18" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="24" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="21" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="12" y="21" width="3" height="3" fill="#ffb870"/>
+          <rect x="15" y="21" width="3" height="3" fill="#ffb870"/>
+          <rect x="18" y="21" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="21" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="24" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="15" y="24" width="3" height="3" fill="#ef8f3f"/>
+          <rect x="18" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="27" width="3" height="3" fill="#000000"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#ef8f3f">IRON</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">Fe(III) &mdash; Iron Reduction</text>
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +10 | EN +5  | GR +10</text>
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="8" width="33" height="7" rx="3" fill="url(#enBarFill05)"/>
-        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-334 kJ/mol</text>
-        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="20" width="24" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <rect x="220" y="8" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="33" height="7" fill="#4fa4ff"/>
+        <rect x="220" y="20" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="24" height="7" fill="#40c040"/>
         <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 10</text>
       </g>
 
       <!-- =================== SO4 - SULFATE =================== -->
       <g transform="translate(88, 230)">
-        <circle cx="16" cy="18" r="20" fill="url(#so4Glow05)"/>
-        <g filter="url(#orbGlow05)">
-          <!-- Angular crystal shape with softer edges -->
-          <polygon points="16,4 30,10 28,28 8,30 2,14" fill="url(#so4Grad05)"/>
-          <!-- Facet glow layers -->
-          <polygon points="16,7 27,12 25,26 10,28 5,16" fill="#ffff90" opacity="0.12"/>
-          <polygon points="16,11 23,15 21,24 12,25 7,17" fill="white" opacity="0.08"/>
-          <!-- Specular highlight -->
-          <ellipse cx="13" cy="12" rx="4" ry="2.5" fill="white" opacity="0.3" transform="rotate(-10,13,12)"/>
-          <circle cx="11" cy="10" r="1" fill="white" opacity="0.4"/>
+        <g transform="translate(1, 3)">
+          <rect x="9" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="18" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="3" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="3" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="3" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="3" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="6" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="9" y="6" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="6" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="6" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="6" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="6" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="24" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="6" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="9" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="24" y="9" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="0" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="6" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="9" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="24" y="12" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="0" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="6" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="9" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="24" y="15" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="0" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="6" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="9" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="24" y="18" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="3" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="21" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="9" y="21" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="21" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="21" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="21" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="21" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="24" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="24" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="12" y="24" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="15" y="24" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="18" y="24" width="3" height="3" fill="#dfdf3f"/>
+          <rect x="21" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="18" y="27" width="3" height="3" fill="#000000"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#c0c020">SULFATE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">SO<tspan font-size="5" dy="2">4</tspan><tspan font-size="5" dy="-2">&sup2;&minus;</tspan><tspan dy="0"> &mdash; Sulfate Reduction</tspan></text>
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +6  | EN +3  | GR +8</text>
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="8" width="15" height="7" rx="3" fill="url(#enBarFill05)"/>
-        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-152 kJ/mol</text>
-        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="20" width="19" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <rect x="220" y="8" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="15" height="7" fill="#4fa4ff"/>
+        <rect x="220" y="20" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="19" height="7" fill="#40c040"/>
         <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 8</text>
       </g>
 
       <!-- =================== CH4 - METHANE (bottom) =================== -->
       <g transform="translate(88, 282)">
-        <circle cx="16" cy="18" r="22" fill="url(#ch4Glow05)"/>
-        <g filter="url(#orbGlowStrong05)">
-          <circle cx="16" cy="18" r="14" fill="url(#ch4Grad05)"/>
-          <!-- Fire-like inner glow -->
-          <circle cx="16" cy="18" r="9" fill="url(#ch4Inner05)" opacity="0.7"/>
-          <!-- Flame wisps -->
-          <ellipse cx="14" cy="12" rx="3" ry="5" fill="#ffcc44" opacity="0.2" transform="rotate(-10,14,12)"/>
-          <ellipse cx="19" cy="14" rx="2" ry="4" fill="#ff9944" opacity="0.15" transform="rotate(15,19,14)"/>
-          <!-- Gas bubble effect -->
-          <circle cx="10" cy="8" r="2.5" fill="#ff8040" opacity="0.25"/>
-          <circle cx="23" cy="10" r="1.5" fill="#ffa060" opacity="0.2"/>
-          <circle cx="7" cy="16" r="1.5" fill="#ff6030" opacity="0.15"/>
-          <!-- Specular highlight -->
-          <circle cx="10" cy="10" r="2" fill="white" opacity="0.25"/>
-          <circle cx="9" cy="9" r="0.8" fill="white" opacity="0.4"/>
+        <g transform="translate(1, 3)">
+          <rect x="12" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="0" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="3" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="15" y="3" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="18" y="3" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="6" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="12" y="6" width="3" height="3" fill="#cc2020"/>
+          <rect x="15" y="6" width="3" height="3" fill="#cc2020"/>
+          <rect x="18" y="6" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="21" y="6" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="9" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="9" y="9" width="3" height="3" fill="#cc2020"/>
+          <rect x="12" y="9" width="3" height="3" fill="#cc2020"/>
+          <rect x="15" y="9" width="3" height="3" fill="#cc2020"/>
+          <rect x="18" y="9" width="3" height="3" fill="#cc2020"/>
+          <rect x="21" y="9" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="24" y="9" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="12" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="9" y="12" width="3" height="3" fill="#cc2020"/>
+          <rect x="12" y="12" width="3" height="3" fill="#cc2020"/>
+          <rect x="15" y="12" width="3" height="3" fill="#cc2020"/>
+          <rect x="18" y="12" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="21" y="12" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="24" y="12" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="15" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="6" y="15" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="9" y="15" width="3" height="3" fill="#cc2020"/>
+          <rect x="12" y="15" width="3" height="3" fill="#cc2020"/>
+          <rect x="15" y="15" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="18" y="15" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="21" y="15" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="24" y="15" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="27" y="15" width="3" height="3" fill="#000000"/>
+          <rect x="0" y="18" width="3" height="3" fill="#000000"/>
+          <rect x="3" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="6" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="9" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="12" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="15" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="18" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="21" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="24" y="18" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="3" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="21" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="9" y="21" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="12" y="21" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="15" y="21" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="18" y="21" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="21" y="21" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="24" y="21" width="3" height="3" fill="#000000"/>
+          <rect x="6" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="24" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="12" y="24" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="15" y="24" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="18" y="24" width="3" height="3" fill="#ff4f4f"/>
+          <rect x="21" y="24" width="3" height="3" fill="#000000"/>
+          <rect x="9" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="12" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="15" y="27" width="3" height="3" fill="#000000"/>
+          <rect x="18" y="27" width="3" height="3" fill="#000000"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">METHANE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">CH<tspan font-size="5" dy="2">4</tspan><tspan dy="-2"> &mdash; Methanotrophy</tspan></text>
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +5  | EN +2.5 | GR +25</text>
-        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="8" width="3" height="7" rx="3" fill="url(#enBarFill05)"/>
-        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-31 kJ/mol</text>
-        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
-        <rect x="220" y="20" width="60" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <rect x="220" y="8" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="3" height="7" fill="#4fa4ff"/>
+        <rect x="220" y="20" width="80" height="7" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="60" height="7" fill="#40c040"/>
         <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 25</text>
       </g>
 
@@ -358,7 +567,7 @@
   <p class="page-number left">7</p>
 </div>
 
-<!-- Substrates page 2: Detailed cards with organic orb illustrations -->
+<!-- Substrates page 2: Detailed cards with pixel-art 8-bit illustrations -->
 <div class="page" id="substrates2" style="page-break-after: always;">
   <h2>Substrate Details</h2>
 
@@ -366,45 +575,95 @@
     <!-- ============ O2 - OXYGEN ============ -->
     <div class="sub-card" style="border-left: 4px solid #4fa4ff;">
       <div class="sub-icon">
-        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
-          <defs>
-            <radialGradient id="o2Card05" cx="32%" cy="28%" r="68%">
-              <stop offset="0%" stop-color="#e0f0ff"/>
-              <stop offset="25%" stop-color="#a0d4ff"/>
-              <stop offset="55%" stop-color="#4fa4ff"/>
-              <stop offset="80%" stop-color="#2060c0"/>
-              <stop offset="100%" stop-color="#102050"/>
-            </radialGradient>
-            <radialGradient id="o2CardOuter05" cx="50%" cy="50%" r="50%">
-              <stop offset="50%" stop-color="#4fa4ff" stop-opacity="0"/>
-              <stop offset="85%" stop-color="#4fa4ff" stop-opacity="0.15"/>
-              <stop offset="100%" stop-color="#4fa4ff" stop-opacity="0.3"/>
-            </radialGradient>
-            <filter id="o2CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <!-- Outer soft glow ring -->
-          <circle cx="50" cy="50" r="46" fill="url(#o2CardOuter05)"/>
-          <g filter="url(#o2CardGlow05)">
-            <!-- Main sphere -->
-            <circle cx="50" cy="50" r="35" fill="url(#o2Card05)"/>
-            <!-- Specular highlight -->
-            <ellipse cx="38" cy="35" rx="12" ry="7" fill="white" opacity="0.4" transform="rotate(-15,38,35)"/>
-            <circle cx="34" cy="31" r="4" fill="white" opacity="0.55"/>
-            <circle cx="32" cy="29" r="1.5" fill="white" opacity="0.7"/>
-            <!-- Inner molecular detail - dissolved O2 bubbles -->
-            <circle cx="55" cy="58" r="3" fill="#a0d4ff" opacity="0.25"/>
-            <circle cx="60" cy="45" r="2" fill="#c0e0ff" opacity="0.2"/>
-            <circle cx="45" cy="62" r="2.5" fill="#90c8ff" opacity="0.18"/>
-          </g>
-          <!-- Ambient sparkles -->
-          <circle cx="22" cy="22" r="1.5" fill="white" opacity="0.5"/>
-          <circle cx="78" cy="28" r="1.2" fill="white" opacity="0.4"/>
-          <circle cx="75" cy="72" r="1.4" fill="white" opacity="0.35"/>
-          <circle cx="26" cy="76" r="1" fill="white" opacity="0.3"/>
-          <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="15" font-weight="bold" fill="white">O<tspan font-size="11" dy="3">2</tspan></text>
+        <svg width="64" height="64" viewBox="0 0 60 60" style="image-rendering:pixelated;">
+            <rect x="12" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="36" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="42" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="6" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="18" y="6" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="24" y="6" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="30" y="6" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="36" y="6" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="42" y="6" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="48" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="12" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="12" y="12" width="6" height="6" fill="#70c4ff"/>
+            <rect x="18" y="12" width="6" height="6" fill="#70c4ff"/>
+            <rect x="24" y="12" width="6" height="6" fill="#70c4ff"/>
+            <rect x="30" y="12" width="6" height="6" fill="#70c4ff"/>
+            <rect x="36" y="12" width="6" height="6" fill="#70c4ff"/>
+            <rect x="42" y="12" width="6" height="6" fill="#70c4ff"/>
+            <rect x="48" y="12" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="54" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="18" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="12" y="18" width="6" height="6" fill="#70c4ff"/>
+            <rect x="18" y="18" width="6" height="6" fill="#70c4ff"/>
+            <rect x="24" y="18" width="6" height="6" fill="#70c4ff"/>
+            <rect x="30" y="18" width="6" height="6" fill="#70c4ff"/>
+            <rect x="36" y="18" width="6" height="6" fill="#70c4ff"/>
+            <rect x="42" y="18" width="6" height="6" fill="#70c4ff"/>
+            <rect x="48" y="18" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="54" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="24" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="12" y="24" width="6" height="6" fill="#70c4ff"/>
+            <rect x="18" y="24" width="6" height="6" fill="#70c4ff"/>
+            <rect x="24" y="24" width="6" height="6" fill="#70c4ff"/>
+            <rect x="30" y="24" width="6" height="6" fill="#70c4ff"/>
+            <rect x="36" y="24" width="6" height="6" fill="#70c4ff"/>
+            <rect x="42" y="24" width="6" height="6" fill="#70c4ff"/>
+            <rect x="48" y="24" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="54" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="30" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="12" y="30" width="6" height="6" fill="#70c4ff"/>
+            <rect x="18" y="30" width="6" height="6" fill="#70c4ff"/>
+            <rect x="24" y="30" width="6" height="6" fill="#70c4ff"/>
+            <rect x="30" y="30" width="6" height="6" fill="#70c4ff"/>
+            <rect x="36" y="30" width="6" height="6" fill="#70c4ff"/>
+            <rect x="42" y="30" width="6" height="6" fill="#70c4ff"/>
+            <rect x="48" y="30" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="54" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="36" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="12" y="36" width="6" height="6" fill="#70c4ff"/>
+            <rect x="18" y="36" width="6" height="6" fill="#70c4ff"/>
+            <rect x="24" y="36" width="6" height="6" fill="#70c4ff"/>
+            <rect x="30" y="36" width="6" height="6" fill="#70c4ff"/>
+            <rect x="36" y="36" width="6" height="6" fill="#70c4ff"/>
+            <rect x="42" y="36" width="6" height="6" fill="#70c4ff"/>
+            <rect x="48" y="36" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="54" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="12" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="18" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="24" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="30" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="36" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="42" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="48" y="42" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="54" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="48" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="18" y="48" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="24" y="48" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="30" y="48" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="36" y="48" width="6" height="6" fill="#4fa4ff"/>
+            <rect x="42" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="36" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="42" y="54" width="6" height="6" fill="#000000"/>
+          <text x="30" y="38" text-anchor="middle" font-family="'Inter',sans-serif" font-size="10" font-weight="bold" fill="white">O<tspan font-size="7" dy="2">2</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
@@ -414,43 +673,73 @@
         diffuses from the atmosphere. Provides the highest HP recovery in the game, making it your
         best emergency food source. The luminous blue orb is easy to spot drifting near surface inlets.</p>
         <div class="sub-values">+20 HP | +10 EN | +15 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7 | &Delta;G&deg;&prime; = &minus;818 kJ/mol</div>
+        <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7</div>
       </div>
     </div>
 
     <!-- ============ NO3 - NITRATE ============ -->
     <div class="sub-card" style="border-left: 4px solid #4fdf6f;">
       <div class="sub-icon">
-        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
-          <defs>
-            <radialGradient id="no3Card05" cx="32%" cy="28%" r="68%">
-              <stop offset="0%" stop-color="#d8ffe0"/>
-              <stop offset="25%" stop-color="#90f0a0"/>
-              <stop offset="55%" stop-color="#4fdf6f"/>
-              <stop offset="80%" stop-color="#208a40"/>
-              <stop offset="100%" stop-color="#104020"/>
-            </radialGradient>
-            <radialGradient id="no3CardOuter05" cx="50%" cy="50%" r="50%">
-              <stop offset="50%" stop-color="#4fdf6f" stop-opacity="0"/>
-              <stop offset="85%" stop-color="#4fdf6f" stop-opacity="0.15"/>
-              <stop offset="100%" stop-color="#4fdf6f" stop-opacity="0.3"/>
-            </radialGradient>
-            <filter id="no3CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#no3CardOuter05)"/>
-          <g filter="url(#no3CardGlow05)">
-            <circle cx="50" cy="50" r="35" fill="url(#no3Card05)"/>
-            <ellipse cx="38" cy="35" rx="12" ry="7" fill="white" opacity="0.35" transform="rotate(-15,38,35)"/>
-            <circle cx="34" cy="31" r="4" fill="white" opacity="0.5"/>
-            <circle cx="32" cy="29" r="1.5" fill="white" opacity="0.65"/>
-            <!-- Nitrogen atom hints -->
-            <circle cx="55" cy="55" r="3" fill="#a0ffc0" opacity="0.2"/>
-            <circle cx="48" cy="63" r="2" fill="#b0ffd0" opacity="0.15"/>
-          </g>
-          <text x="50" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="13" font-weight="bold" fill="white">NO<tspan font-size="9" dy="3">3</tspan><tspan font-size="8" dy="-3">&minus;</tspan></text>
+        <svg width="64" height="64" viewBox="0 0 60 60" style="image-rendering:pixelated;">
+            <rect x="24" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="6" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="6" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="12" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="24" y="12" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="12" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="12" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="42" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="18" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="18" y="18" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="24" y="18" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="18" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="18" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="42" y="18" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="48" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="12" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="18" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="24" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="42" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="48" y="24" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="0" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="12" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="18" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="24" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="42" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="48" y="30" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="6" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="36" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="18" y="36" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="24" y="36" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="36" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="36" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="42" y="36" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="48" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="42" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="24" y="42" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="42" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="42" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="42" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="48" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="30" y="48" width="6" height="6" fill="#4fdf6f"/>
+            <rect x="36" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="54" width="6" height="6" fill="#000000"/>
+          <text x="30" y="36" text-anchor="middle" font-family="'Inter',sans-serif" font-size="9" font-weight="bold" fill="white">NO<tspan font-size="6" dy="2">3</tspan><tspan font-size="6" dy="-2">&minus;</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
@@ -460,46 +749,77 @@
         with 300&times; the warming potential of CO<sub>2</sub>. The best all-around substrate in the
         game: strong HP recovery, solid energy, and excellent growth. Always eat nitrate when you see it.</p>
         <div class="sub-values">+15 HP | +7.5 EN | +18 GR | +25 PTS</div>
-        <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS! | &Delta;G&deg;&prime; = &minus;649 kJ/mol</div>
+        <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS!</div>
       </div>
     </div>
 
     <!-- ============ Mn(IV) - MANGANESE ============ -->
     <div class="sub-card" style="border-left: 4px solid #cf6fff;">
       <div class="sub-icon">
-        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
-          <defs>
-            <radialGradient id="mnCard05" cx="38%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#f0d0ff"/>
-              <stop offset="25%" stop-color="#d898ff"/>
-              <stop offset="55%" stop-color="#cf6fff"/>
-              <stop offset="80%" stop-color="#7030a0"/>
-              <stop offset="100%" stop-color="#301050"/>
-            </radialGradient>
-            <radialGradient id="mnCardOuter05" cx="50%" cy="50%" r="50%">
-              <stop offset="50%" stop-color="#cf6fff" stop-opacity="0"/>
-              <stop offset="85%" stop-color="#cf6fff" stop-opacity="0.12"/>
-              <stop offset="100%" stop-color="#cf6fff" stop-opacity="0.25"/>
-            </radialGradient>
-            <filter id="mnCardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#mnCardOuter05)"/>
-          <g filter="url(#mnCardGlow05)">
-            <!-- Octahedral crystal form -->
-            <polygon points="50,10 85,30 85,65 50,85 15,65 15,30" fill="url(#mnCard05)"/>
-            <!-- Facet highlight layers -->
-            <polygon points="50,16 79,33 79,62 50,79 21,62 21,33" fill="#e0b0ff" opacity="0.1"/>
-            <polygon points="50,24 70,37 70,58 50,71 30,58 30,37" fill="#f0d0ff" opacity="0.08"/>
-            <polygon points="50,32 62,40 62,55 50,63 38,55 38,40" fill="white" opacity="0.06"/>
-            <!-- Specular highlight -->
-            <ellipse cx="38" cy="30" rx="10" ry="6" fill="white" opacity="0.3" transform="rotate(-20,38,30)"/>
-            <circle cx="34" cy="27" r="3" fill="white" opacity="0.4"/>
-            <circle cx="33" cy="26" r="1.2" fill="white" opacity="0.55"/>
-          </g>
-          <text x="50" y="54" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="bold" fill="white">Mn</text>
+        <svg width="64" height="64" viewBox="0 0 60 60" style="image-rendering:pixelated;">
+            <rect x="24" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="6" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="6" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="12" width="6" height="6" fill="#cf6fff"/>
+            <rect x="24" y="12" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="12" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="12" width="6" height="6" fill="#cf6fff"/>
+            <rect x="42" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="18" width="6" height="6" fill="#cf6fff"/>
+            <rect x="18" y="18" width="6" height="6" fill="#cf6fff"/>
+            <rect x="24" y="18" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="18" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="18" width="6" height="6" fill="#cf6fff"/>
+            <rect x="42" y="18" width="6" height="6" fill="#cf6fff"/>
+            <rect x="48" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="54" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="12" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="18" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="24" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="42" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="48" y="24" width="6" height="6" fill="#cf6fff"/>
+            <rect x="0" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="12" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="18" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="24" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="42" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="48" y="30" width="6" height="6" fill="#cf6fff"/>
+            <rect x="0" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="36" width="6" height="6" fill="#cf6fff"/>
+            <rect x="18" y="36" width="6" height="6" fill="#cf6fff"/>
+            <rect x="24" y="36" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="36" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="36" width="6" height="6" fill="#cf6fff"/>
+            <rect x="42" y="36" width="6" height="6" fill="#cf6fff"/>
+            <rect x="48" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="54" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="42" width="6" height="6" fill="#cf6fff"/>
+            <rect x="24" y="42" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="42" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="42" width="6" height="6" fill="#cf6fff"/>
+            <rect x="42" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="48" width="6" height="6" fill="#cf6fff"/>
+            <rect x="30" y="48" width="6" height="6" fill="#cf6fff"/>
+            <rect x="36" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="54" width="6" height="6" fill="#000000"/>
+          <text x="30" y="38" text-anchor="middle" font-family="'Inter',sans-serif" font-size="10" font-weight="bold" fill="white">Mn</text>
         </svg>
       </div>
       <div class="sub-info">
@@ -509,48 +829,75 @@
         where crystalline MnO<sub>2</sub> particles accumulate. Mid-range energy and growth make this
         a balanced but unremarkable substrate. Its angular purple form reflects its crystalline origin.</p>
         <div class="sub-values">+12 HP | +6 EN | +12 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10 | &Delta;G&deg;&prime; = &minus;558 kJ/mol</div>
+        <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10</div>
       </div>
     </div>
 
     <!-- ============ Fe(III) - IRON ============ -->
     <div class="sub-card" style="border-left: 4px solid #ef8f3f;">
       <div class="sub-icon">
-        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
-          <defs>
-            <radialGradient id="feCard05" cx="32%" cy="28%" r="68%">
-              <stop offset="0%" stop-color="#ffe8c0"/>
-              <stop offset="20%" stop-color="#ffc080"/>
-              <stop offset="50%" stop-color="#ef8f3f"/>
-              <stop offset="80%" stop-color="#a05010"/>
-              <stop offset="100%" stop-color="#402008"/>
-            </radialGradient>
-            <radialGradient id="feCardOuter05" cx="50%" cy="50%" r="50%">
-              <stop offset="50%" stop-color="#ef8f3f" stop-opacity="0"/>
-              <stop offset="85%" stop-color="#ef8f3f" stop-opacity="0.15"/>
-              <stop offset="100%" stop-color="#ef8f3f" stop-opacity="0.28"/>
-            </radialGradient>
-            <filter id="feCardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#feCardOuter05)"/>
-          <g filter="url(#feCardGlow05)">
-            <circle cx="50" cy="50" r="35" fill="url(#feCard05)"/>
-            <!-- Metallic sheen bands -->
-            <ellipse cx="40" cy="38" rx="14" ry="7" fill="white" opacity="0.18" transform="rotate(-25,40,38)"/>
-            <ellipse cx="42" cy="40" rx="8" ry="4" fill="white" opacity="0.1" transform="rotate(-25,42,40)"/>
-            <!-- Specular highlight -->
-            <circle cx="36" cy="34" r="5" fill="white" opacity="0.3"/>
-            <circle cx="34" cy="32" r="2" fill="white" opacity="0.45"/>
-            <circle cx="33" cy="31" r="0.8" fill="white" opacity="0.6"/>
-            <!-- Rusty surface detail -->
-            <circle cx="58" cy="58" r="3" fill="#ffd0a0" opacity="0.15"/>
-            <circle cx="55" cy="50" r="2" fill="#ffe0b0" opacity="0.12"/>
-            <circle cx="50" cy="65" r="2.5" fill="#ffc880" opacity="0.1"/>
-          </g>
-          <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="16" font-weight="bold" fill="white">Fe</text>
+        <svg width="64" height="64" viewBox="0 0 60 60" style="image-rendering:pixelated;">
+            <rect x="24" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="6" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="30" y="6" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="36" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="12" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="24" y="12" width="6" height="6" fill="#ffb870"/>
+            <rect x="30" y="12" width="6" height="6" fill="#ffb870"/>
+            <rect x="36" y="12" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="42" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="18" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="18" y="18" width="6" height="6" fill="#ffb870"/>
+            <rect x="24" y="18" width="6" height="6" fill="#ffb870"/>
+            <rect x="30" y="18" width="6" height="6" fill="#ffb870"/>
+            <rect x="36" y="18" width="6" height="6" fill="#ffb870"/>
+            <rect x="42" y="18" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="48" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="24" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="12" y="24" width="6" height="6" fill="#ffb870"/>
+            <rect x="18" y="24" width="6" height="6" fill="#ffb870"/>
+            <rect x="24" y="24" width="6" height="6" fill="#ffb870"/>
+            <rect x="30" y="24" width="6" height="6" fill="#ffb870"/>
+            <rect x="36" y="24" width="6" height="6" fill="#ffb870"/>
+            <rect x="42" y="24" width="6" height="6" fill="#ffb870"/>
+            <rect x="48" y="24" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="54" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="30" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="12" y="30" width="6" height="6" fill="#ffb870"/>
+            <rect x="18" y="30" width="6" height="6" fill="#ffb870"/>
+            <rect x="24" y="30" width="6" height="6" fill="#ffb870"/>
+            <rect x="30" y="30" width="6" height="6" fill="#ffb870"/>
+            <rect x="36" y="30" width="6" height="6" fill="#ffb870"/>
+            <rect x="42" y="30" width="6" height="6" fill="#ffb870"/>
+            <rect x="48" y="30" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="54" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="36" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="18" y="36" width="6" height="6" fill="#ffb870"/>
+            <rect x="24" y="36" width="6" height="6" fill="#ffb870"/>
+            <rect x="30" y="36" width="6" height="6" fill="#ffb870"/>
+            <rect x="36" y="36" width="6" height="6" fill="#ffb870"/>
+            <rect x="42" y="36" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="48" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="42" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="24" y="42" width="6" height="6" fill="#ffb870"/>
+            <rect x="30" y="42" width="6" height="6" fill="#ffb870"/>
+            <rect x="36" y="42" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="42" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="48" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="30" y="48" width="6" height="6" fill="#ef8f3f"/>
+            <rect x="36" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="54" width="6" height="6" fill="#000000"/>
+          <text x="30" y="38" text-anchor="middle" font-family="'Inter',sans-serif" font-size="11" font-weight="bold" fill="white">Fe</text>
         </svg>
       </div>
       <div class="sub-info">
@@ -560,46 +907,87 @@
         deep sediments, wetlands, and hydrothermal vents. Moderate energy and growth with a warm metallic
         sheen. Reliable but unspectacular &mdash; a solid workhorse substrate.</p>
         <div class="sub-values">+10 HP | +5 EN | +10 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10 | &Delta;G&deg;&prime; = &minus;334 kJ/mol</div>
+        <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10</div>
       </div>
     </div>
 
     <!-- ============ SO4 - SULFATE ============ -->
     <div class="sub-card" style="border-left: 4px solid #dfdf3f;">
       <div class="sub-icon">
-        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
-          <defs>
-            <radialGradient id="so4Card05" cx="38%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#ffffd0"/>
-              <stop offset="25%" stop-color="#f8f870"/>
-              <stop offset="55%" stop-color="#dfdf3f"/>
-              <stop offset="80%" stop-color="#8a8a10"/>
-              <stop offset="100%" stop-color="#3a3a08"/>
-            </radialGradient>
-            <radialGradient id="so4CardOuter05" cx="50%" cy="50%" r="50%">
-              <stop offset="50%" stop-color="#dfdf3f" stop-opacity="0"/>
-              <stop offset="85%" stop-color="#dfdf3f" stop-opacity="0.12"/>
-              <stop offset="100%" stop-color="#dfdf3f" stop-opacity="0.25"/>
-            </radialGradient>
-            <filter id="so4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#so4CardOuter05)"/>
-          <g filter="url(#so4CardGlow05)">
-            <!-- Angular crystal with sulfur glow -->
-            <polygon points="50,12 82,28 78,72 30,78 14,42" fill="url(#so4Card05)"/>
-            <!-- Facet layers -->
-            <polygon points="50,18 76,32 73,67 33,72 19,44" fill="#ffff90" opacity="0.1"/>
-            <polygon points="50,24 70,36 68,62 36,66 24,46" fill="#ffffc0" opacity="0.08"/>
-            <polygon points="50,32 62,40 60,56 40,58 30,46" fill="white" opacity="0.06"/>
-            <!-- Specular highlight -->
-            <ellipse cx="40" cy="32" rx="10" ry="5" fill="white" opacity="0.3" transform="rotate(-10,40,32)"/>
-            <circle cx="36" cy="29" r="3" fill="white" opacity="0.4"/>
-            <circle cx="35" cy="28" r="1.2" fill="white" opacity="0.5"/>
-          </g>
-          <text x="48" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="#333">SO<tspan font-size="8" dy="3">4</tspan></text>
+        <svg width="64" height="64" viewBox="0 0 60 60" style="image-rendering:pixelated;">
+            <rect x="18" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="36" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="6" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="6" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="6" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="6" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="12" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="18" y="12" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="12" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="12" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="12" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="12" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="48" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="12" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="18" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="48" y="18" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="0" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="12" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="18" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="48" y="24" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="0" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="12" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="18" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="48" y="30" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="0" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="12" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="18" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="48" y="36" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="6" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="42" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="18" y="42" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="42" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="42" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="42" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="42" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="48" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="48" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="24" y="48" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="30" y="48" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="36" y="48" width="6" height="6" fill="#dfdf3f"/>
+            <rect x="42" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="36" y="54" width="6" height="6" fill="#000000"/>
+          <text x="28" y="36" text-anchor="middle" font-family="'Inter',sans-serif" font-size="9" font-weight="bold" fill="#333">SO<tspan font-size="6" dy="2">4</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
@@ -609,58 +997,80 @@
         the game environment. In real marine sediments, sulfate-reducing bacteria dominate below the
         iron reduction zone. Low energy but necessary when deeper, more anaerobic levels limit your options.</p>
         <div class="sub-values">+6 HP | +3 EN | +8 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#c0c020;">Levels: 5-10 | &Delta;G&deg;&prime; = &minus;152 kJ/mol</div>
+        <div class="sub-values" style="color:#c0c020;">Levels: 5-10</div>
       </div>
     </div>
 
     <!-- ============ CH4 - METHANE ============ -->
     <div class="sub-card" style="border-left: 4px solid #ff4f4f;">
       <div class="sub-icon">
-        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
-          <defs>
-            <radialGradient id="ch4Card05" cx="32%" cy="28%" r="68%">
-              <stop offset="0%" stop-color="#ffd090"/>
-              <stop offset="20%" stop-color="#ffa050"/>
-              <stop offset="45%" stop-color="#ff4f4f"/>
-              <stop offset="75%" stop-color="#cc1818"/>
-              <stop offset="100%" stop-color="#501010"/>
-            </radialGradient>
-            <radialGradient id="ch4CardInner05" cx="42%" cy="42%" r="50%">
-              <stop offset="0%" stop-color="#ffee66"/>
-              <stop offset="40%" stop-color="#ff9930" stop-opacity="0.6"/>
-              <stop offset="100%" stop-color="#ff4020" stop-opacity="0"/>
-            </radialGradient>
-            <radialGradient id="ch4CardOuter05" cx="50%" cy="50%" r="50%">
-              <stop offset="50%" stop-color="#ff4f4f" stop-opacity="0"/>
-              <stop offset="80%" stop-color="#ff4f4f" stop-opacity="0.18"/>
-              <stop offset="100%" stop-color="#ff2020" stop-opacity="0.35"/>
-            </radialGradient>
-            <filter id="ch4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <!-- Outer fiery glow ring -->
-          <circle cx="50" cy="50" r="48" fill="url(#ch4CardOuter05)"/>
-          <g filter="url(#ch4CardGlow05)">
-            <circle cx="50" cy="50" r="35" fill="url(#ch4Card05)"/>
-            <!-- Inner flame core -->
-            <circle cx="50" cy="50" r="22" fill="url(#ch4CardInner05)" opacity="0.7"/>
-            <!-- Flame wisps -->
-            <ellipse cx="45" cy="38" rx="6" ry="10" fill="#ffcc44" opacity="0.2" transform="rotate(-8,45,38)"/>
-            <ellipse cx="56" cy="40" rx="4" ry="8" fill="#ff9944" opacity="0.15" transform="rotate(12,56,40)"/>
-            <ellipse cx="50" cy="35" rx="3" ry="7" fill="#ffdd66" opacity="0.12" transform="rotate(3,50,35)"/>
-            <!-- Specular highlight -->
-            <circle cx="38" cy="36" r="4" fill="white" opacity="0.25"/>
-            <circle cx="36" cy="34" r="1.5" fill="white" opacity="0.4"/>
-          </g>
-          <!-- Gas bubble effect -->
-          <circle cx="28" cy="24" r="4" fill="#ff8040" opacity="0.25"/>
-          <circle cx="70" cy="22" r="3" fill="#ffa060" opacity="0.2"/>
-          <circle cx="22" cy="44" r="2.5" fill="#ff6030" opacity="0.18"/>
-          <circle cx="76" cy="62" r="3.5" fill="#ff6030" opacity="0.14"/>
-          <circle cx="30" cy="70" r="2" fill="#ff5020" opacity="0.12"/>
-          <text x="50" y="55" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="white">CH<tspan font-size="8" dy="3">4</tspan></text>
+        <svg width="64" height="64" viewBox="0 0 60 60" style="image-rendering:pixelated;">
+            <rect x="24" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="0" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="6" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="30" y="6" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="36" y="6" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="12" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="24" y="12" width="6" height="6" fill="#cc2020"/>
+            <rect x="30" y="12" width="6" height="6" fill="#cc2020"/>
+            <rect x="36" y="12" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="42" y="12" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="18" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="18" y="18" width="6" height="6" fill="#cc2020"/>
+            <rect x="24" y="18" width="6" height="6" fill="#cc2020"/>
+            <rect x="30" y="18" width="6" height="6" fill="#cc2020"/>
+            <rect x="36" y="18" width="6" height="6" fill="#cc2020"/>
+            <rect x="42" y="18" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="48" y="18" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="24" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="18" y="24" width="6" height="6" fill="#cc2020"/>
+            <rect x="24" y="24" width="6" height="6" fill="#cc2020"/>
+            <rect x="30" y="24" width="6" height="6" fill="#cc2020"/>
+            <rect x="36" y="24" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="42" y="24" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="48" y="24" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="30" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="12" y="30" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="18" y="30" width="6" height="6" fill="#cc2020"/>
+            <rect x="24" y="30" width="6" height="6" fill="#cc2020"/>
+            <rect x="30" y="30" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="36" y="30" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="42" y="30" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="48" y="30" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="54" y="30" width="6" height="6" fill="#000000"/>
+            <rect x="0" y="36" width="6" height="6" fill="#000000"/>
+            <rect x="6" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="12" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="18" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="24" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="30" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="36" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="42" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="48" y="36" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="6" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="42" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="18" y="42" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="24" y="42" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="30" y="42" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="36" y="42" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="42" y="42" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="48" y="42" width="6" height="6" fill="#000000"/>
+            <rect x="12" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="48" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="24" y="48" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="30" y="48" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="36" y="48" width="6" height="6" fill="#ff4f4f"/>
+            <rect x="42" y="48" width="6" height="6" fill="#000000"/>
+            <rect x="18" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="24" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="30" y="54" width="6" height="6" fill="#000000"/>
+            <rect x="36" y="54" width="6" height="6" fill="#000000"/>
+          <text x="30" y="38" text-anchor="middle" font-family="'Inter',sans-serif" font-size="9" font-weight="bold" fill="white">CH<tspan font-size="6" dy="2">4</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
@@ -671,7 +1081,7 @@
         4 methane particles fill your entire Growth bar and trigger cell division. The fiery red orb with its
         roiling inner flame is unmistakable. Chase it relentlessly when your HP is safe.</p>
         <div class="sub-values">+5 HP | +2.5 EN | +25 GR | +35 PTS</div>
-        <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS! | &Delta;G&deg;&prime; = &minus;31 kJ/mol</div>
+        <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS!</div>
       </div>
     </div>
   </div>
