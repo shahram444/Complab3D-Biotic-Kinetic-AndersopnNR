@@ -1544,92 +1544,295 @@
 
   <!-- Decision Tree Diagram -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:8px 0;">
-    <svg width="100%" height="240" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="dt-root-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#cc4444"/><stop offset="100%" stop-color="#8a2222"/>
-        </linearGradient>
-        <linearGradient id="dt-food-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#5aa06a"/><stop offset="100%" stop-color="#3a7a4a"/>
-        </linearGradient>
-        <linearGradient id="dt-track-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#d09050"/><stop offset="100%" stop-color="#a06830"/>
-        </linearGradient>
-        <linearGradient id="dt-flow-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#5080c0"/><stop offset="100%" stop-color="#3860a0"/>
-        </linearGradient>
-        <linearGradient id="dt-wander-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#999"/><stop offset="100%" stop-color="#666"/>
-        </linearGradient>
-        <filter id="dt-shadow" x="-5%" y="-5%" width="110%" height="120%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="2"/><feOffset dx="1" dy="2"/>
-          <feComposite in2="SourceAlpha" operator="out"/>
-          <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <!-- Root node -->
-      <rect x="230" y="8" width="140" height="36" rx="18" fill="url(#dt-root-grad)" filter="url(#dt-shadow)"/>
-      <text x="300" y="30" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="11" fill="white">RIVAL DECISION</text>
-      <text x="300" y="40" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#ffcccc">every 0.4 sec</text>
-      <!-- Arrows -->
-      <path d="M260,44 C220,60 140,60 100,80" fill="none" stroke="#5aa06a" stroke-width="2"/>
-      <path d="M280,44 C265,65 240,70 235,80" fill="none" stroke="#d09050" stroke-width="2"/>
-      <path d="M320,44 C335,65 360,70 365,80" fill="none" stroke="#5080c0" stroke-width="2"/>
-      <path d="M340,44 C380,60 460,60 500,80" fill="none" stroke="#999" stroke-width="2"/>
-      <polygon points="100,80 96,74 104,74" fill="#5aa06a"/>
-      <polygon points="235,80 231,74 239,74" fill="#d09050"/>
-      <polygon points="365,80 361,74 369,74" fill="#5080c0"/>
-      <polygon points="500,80 496,74 504,74" fill="#999"/>
-      <!-- Seek Food -->
-      <rect x="20" y="82" width="160" height="34" rx="12" fill="url(#dt-food-grad)" filter="url(#dt-shadow)"/>
-      <text x="100" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">SEEK FOOD</text>
-      <text x="100" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#d0ffd0">45-75% priority</text>
-      <rect x="20" y="122" width="160" height="60" rx="6" fill="#f0f8f2" stroke="#5aa06a" stroke-width="1"/>
-      <text x="100" y="136" text-anchor="middle" font-size="8" fill="#333">Scans 12-tile radius.</text>
-      <text x="100" y="148" text-anchor="middle" font-size="8" fill="#333">Moves toward nearest</text>
-      <text x="100" y="160" text-anchor="middle" font-size="8" fill="#333">substrate. Prefers high</text>
-      <text x="100" y="172" text-anchor="middle" font-size="8" fill="#333">energy (O2 > NO3 > ...).</text>
-      <!-- Track Player -->
-      <rect x="190" y="82" width="130" height="34" rx="12" fill="url(#dt-track-grad)" filter="url(#dt-shadow)"/>
-      <text x="255" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">TRACK ARKE</text>
-      <text x="255" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#ffeedd">15% priority</text>
-      <rect x="190" y="122" width="130" height="60" rx="6" fill="#faf5f0" stroke="#d09050" stroke-width="1"/>
-      <text x="255" y="136" text-anchor="middle" font-size="8" fill="#333">Detects ARKE within</text>
-      <text x="255" y="148" text-anchor="middle" font-size="8" fill="#333">10 tiles. Moves to</text>
-      <text x="255" y="160" text-anchor="middle" font-size="8" fill="#333">player's area to</text>
-      <text x="255" y="172" text-anchor="middle" font-size="8" fill="#333">compete for food.</text>
-      <!-- Ride Flow -->
-      <rect x="330" y="82" width="130" height="34" rx="12" fill="url(#dt-flow-grad)" filter="url(#dt-shadow)"/>
-      <text x="395" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">RIDE FLOW</text>
-      <text x="395" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#d0e0ff">40% on flow tiles</text>
-      <rect x="330" y="122" width="130" height="60" rx="6" fill="#f0f2fa" stroke="#5080c0" stroke-width="1"/>
-      <text x="395" y="136" text-anchor="middle" font-size="8" fill="#333">On flow tiles, rides</text>
-      <text x="395" y="148" text-anchor="middle" font-size="8" fill="#333">current at 2x speed.</text>
-      <text x="395" y="160" text-anchor="middle" font-size="8" fill="#333">Reaches food-rich</text>
-      <text x="395" y="172" text-anchor="middle" font-size="8" fill="#333">areas downstream.</text>
-      <!-- Wander -->
-      <rect x="470" y="82" width="110" height="34" rx="12" fill="url(#dt-wander-grad)" filter="url(#dt-shadow)"/>
-      <text x="525" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">WANDER</text>
-      <text x="525" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#ddd">fallback</text>
-      <rect x="470" y="122" width="110" height="60" rx="6" fill="#f4f4f4" stroke="#999" stroke-width="1"/>
-      <text x="525" y="136" text-anchor="middle" font-size="8" fill="#333">Random walkable</text>
-      <text x="525" y="148" text-anchor="middle" font-size="8" fill="#333">tile. Prefers current</text>
-      <text x="525" y="160" text-anchor="middle" font-size="8" fill="#333">direction (momentum)</text>
-      <text x="525" y="172" text-anchor="middle" font-size="8" fill="#333">for patrol behavior.</text>
-      <!-- Legend -->
-      <rect x="20" y="200" width="560" height="30" rx="6" fill="#f8f4ea" stroke="#ccc" stroke-width="1"/>
-      <text x="30" y="220" font-family="'Space Mono',monospace" font-size="7" fill="#888">PRIORITY ORDER:</text>
-      <circle cx="140" cy="215" r="6" fill="url(#dt-food-grad)"/>
-      <text x="155" y="219" font-size="8" fill="#333">Highest (food)</text>
-      <text x="220" y="219" font-size="8" fill="#888">&#8594;</text>
-      <circle cx="250" cy="215" r="6" fill="url(#dt-flow-grad)"/>
-      <text x="265" y="219" font-size="8" fill="#333">Flow (if on tile)</text>
-      <text x="350" y="219" font-size="8" fill="#888">&#8594;</text>
-      <circle cx="380" cy="215" r="6" fill="url(#dt-track-grad)"/>
-      <text x="395" y="219" font-size="8" fill="#333">Track player</text>
-      <text x="470" y="219" font-size="8" fill="#888">&#8594;</text>
-      <circle cx="500" cy="215" r="6" fill="url(#dt-wander-grad)"/>
-      <text x="515" y="219" font-size="8" fill="#333">Wander (fallback)</text>
+    <svg width="100%" height="240" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg" style="image-rendering:pixelated;">
+
+      <!-- ============ PANEL 1: SEEK FOOD ============ -->
+      <g transform="translate(5,2)">
+        <!-- Panel border -->
+        <rect x="0" y="0" width="140" height="175" fill="#0a0e18" stroke="#5aa06a" stroke-width="2"/>
+        <!-- Tile grid background - 14 columns x 14 rows, 10px each -->
+        <!-- Row backgrounds (alternating dark pore tones) -->
+        <rect x="0" y="0" width="140" height="140" fill="#0c1420"/>
+        <!-- Scattered dark variation tiles -->
+        <rect x="20" y="10" width="10" height="10" fill="#142030"/>
+        <rect x="50" y="30" width="10" height="10" fill="#142030"/>
+        <rect x="80" y="50" width="10" height="10" fill="#142030"/>
+        <rect x="110" y="20" width="10" height="10" fill="#142030"/>
+        <rect x="30" y="70" width="10" height="10" fill="#142030"/>
+        <rect x="60" y="90" width="10" height="10" fill="#142030"/>
+        <rect x="100" y="100" width="10" height="10" fill="#142030"/>
+        <rect x="10" y="110" width="10" height="10" fill="#142030"/>
+        <rect x="120" y="70" width="10" height="10" fill="#142030"/>
+        <rect x="40" y="120" width="10" height="10" fill="#142030"/>
+        <!-- Brown grain tiles (sediment) -->
+        <rect x="0" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="30" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="70" y="130" width="10" height="10" fill="#6a4a1a"/>
+        <rect x="120" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="90" y="120" width="10" height="10" fill="#6a4a1a"/>
+        <!-- Green NO3 substrate (glowing target) -->
+        <rect x="100" y="50" width="10" height="10" fill="#4fdf6f"/>
+        <rect x="100" y="40" width="10" height="10" fill="#1a4a2a"/>
+        <rect x="110" y="50" width="10" height="10" fill="#1a4a2a"/>
+        <rect x="100" y="60" width="10" height="10" fill="#1a4a2a"/>
+        <rect x="90" y="50" width="10" height="10" fill="#1a4a2a"/>
+        <!-- Highlighted path tiles (yellow outline) from rival to substrate -->
+        <rect x="40" y="60" width="10" height="10" fill="none" stroke="#cccc44" stroke-width="1"/>
+        <rect x="50" y="60" width="10" height="10" fill="none" stroke="#cccc44" stroke-width="1"/>
+        <rect x="60" y="60" width="10" height="10" fill="none" stroke="#cccc44" stroke-width="1"/>
+        <rect x="70" y="60" width="10" height="10" fill="none" stroke="#cccc44" stroke-width="1"/>
+        <rect x="80" y="60" width="10" height="10" fill="none" stroke="#cccc44" stroke-width="1"/>
+        <rect x="90" y="60" width="10" height="10" fill="none" stroke="#cccc44" stroke-width="1"/>
+        <rect x="40" y="50" width="10" height="10" fill="#2a2a10" stroke="#cccc44" stroke-width="1"/>
+        <rect x="50" y="50" width="10" height="10" fill="#2a2a10" stroke="#cccc44" stroke-width="1"/>
+        <rect x="60" y="50" width="10" height="10" fill="#2a2a10" stroke="#cccc44" stroke-width="1"/>
+        <rect x="70" y="50" width="10" height="10" fill="#2a2a10" stroke="#cccc44" stroke-width="1"/>
+        <rect x="80" y="50" width="10" height="10" fill="#2a2a10" stroke="#cccc44" stroke-width="1"/>
+        <rect x="90" y="50" width="10" height="10" fill="#2a2a10" stroke="#cccc44" stroke-width="1"/>
+        <!-- Rival sprite at (30,50) -->
+        <rect x="28" y="48" width="14" height="14" fill="#b03030"/>
+        <rect x="30" y="50" width="10" height="10" fill="#e06060"/>
+        <rect x="31" y="52" width="3" height="2" fill="white"/>
+        <rect x="36" y="52" width="3" height="2" fill="white"/>
+        <rect x="32" y="53" width="2" height="1" fill="#220000"/>
+        <rect x="37" y="53" width="2" height="1" fill="#220000"/>
+        <!-- "NO3" label near substrate -->
+        <text x="105" y="48" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#4fdf6f">NO3</text>
+        <!-- Panel label -->
+        <rect x="0" y="142" width="140" height="33" fill="#0a1a10"/>
+        <text x="70" y="155" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="9" fill="#5aa06a">SEEK FOOD</text>
+        <text x="70" y="168" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#88aa88">45-75% priority</text>
+      </g>
+
+      <!-- ============ PANEL 2: TRACK ARKE ============ -->
+      <g transform="translate(152,2)">
+        <!-- Panel border -->
+        <rect x="0" y="0" width="140" height="175" fill="#0a0e18" stroke="#d09050" stroke-width="2"/>
+        <rect x="0" y="0" width="140" height="140" fill="#0c1420"/>
+        <!-- Dark variation tiles -->
+        <rect x="10" y="20" width="10" height="10" fill="#142030"/>
+        <rect x="40" y="40" width="10" height="10" fill="#142030"/>
+        <rect x="70" y="10" width="10" height="10" fill="#142030"/>
+        <rect x="100" y="30" width="10" height="10" fill="#142030"/>
+        <rect x="30" y="80" width="10" height="10" fill="#142030"/>
+        <rect x="120" y="90" width="10" height="10" fill="#142030"/>
+        <rect x="60" y="110" width="10" height="10" fill="#142030"/>
+        <rect x="90" y="120" width="10" height="10" fill="#142030"/>
+        <!-- Detection range highlight (10-tile radius hinted) -->
+        <rect x="20" y="40" width="100" height="80" fill="none" stroke="#d09050" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+        <!-- Substrates scattered near ARKE -->
+        <rect x="90" y="60" width="10" height="10" fill="#4fdf6f"/>
+        <rect x="110" y="80" width="10" height="10" fill="#4fdf6f"/>
+        <rect x="100" y="90" width="10" height="10" fill="#7ab8e0"/>
+        <!-- Highlighted tiles between rival and ARKE -->
+        <rect x="30" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <rect x="40" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <rect x="50" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <rect x="60" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <rect x="70" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <rect x="80" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <rect x="90" y="70" width="10" height="10" fill="#3a2a10" stroke="#d09050" stroke-width="1"/>
+        <!-- Rival sprite at (20,68) -->
+        <rect x="18" y="66" width="14" height="14" fill="#b03030"/>
+        <rect x="20" y="68" width="10" height="10" fill="#e06060"/>
+        <rect x="21" y="70" width="3" height="2" fill="white"/>
+        <rect x="26" y="70" width="3" height="2" fill="white"/>
+        <rect x="22" y="71" width="2" height="1" fill="#220000"/>
+        <rect x="27" y="71" width="2" height="1" fill="#220000"/>
+        <!-- ARKE sprite at (100,68) - teal pixel microbe -->
+        <rect x="98" y="66" width="14" height="14" fill="#1a7a7a"/>
+        <rect x="100" y="68" width="10" height="10" fill="#40c8c8"/>
+        <rect x="101" y="70" width="3" height="2" fill="white"/>
+        <rect x="106" y="70" width="3" height="2" fill="white"/>
+        <rect x="102" y="71" width="2" height="1" fill="#003030"/>
+        <rect x="107" y="71" width="2" height="1" fill="#003030"/>
+        <!-- Labels -->
+        <text x="24" y="63" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="#e06060">RIVAL</text>
+        <text x="106" y="63" text-anchor="middle" font-family="'Space Mono',monospace" font-size="5" fill="#40c8c8">ARKE</text>
+        <!-- Brown grain tiles -->
+        <rect x="0" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="50" y="130" width="10" height="10" fill="#6a4a1a"/>
+        <rect x="130" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <!-- Panel label -->
+        <rect x="0" y="142" width="140" height="33" fill="#1a140a"/>
+        <text x="70" y="155" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="9" fill="#d09050">TRACK ARKE</text>
+        <text x="70" y="168" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#aa8860">15% priority</text>
+      </g>
+
+      <!-- ============ PANEL 3: RIDE FLOW ============ -->
+      <g transform="translate(299,2)">
+        <!-- Panel border -->
+        <rect x="0" y="0" width="140" height="175" fill="#0a0e18" stroke="#5080c0" stroke-width="2"/>
+        <rect x="0" y="0" width="140" height="140" fill="#0c1420"/>
+        <!-- Dark variation tiles -->
+        <rect x="20" y="20" width="10" height="10" fill="#142030"/>
+        <rect x="60" y="10" width="10" height="10" fill="#142030"/>
+        <rect x="100" y="30" width="10" height="10" fill="#142030"/>
+        <rect x="30" y="100" width="10" height="10" fill="#142030"/>
+        <rect x="80" y="110" width="10" height="10" fill="#142030"/>
+        <rect x="110" y="120" width="10" height="10" fill="#142030"/>
+        <!-- Flow tiles - horizontal blue streak through middle -->
+        <rect x="0" y="60" width="10" height="10" fill="#2050a0"/>
+        <rect x="10" y="60" width="10" height="10" fill="#3060a0"/>
+        <rect x="20" y="60" width="10" height="10" fill="#2858a0"/>
+        <rect x="30" y="60" width="10" height="10" fill="#3060a0"/>
+        <rect x="40" y="60" width="10" height="10" fill="#2050a0"/>
+        <rect x="50" y="60" width="10" height="10" fill="#3060a0"/>
+        <rect x="60" y="60" width="10" height="10" fill="#2858a0"/>
+        <rect x="70" y="60" width="10" height="10" fill="#3060a0"/>
+        <rect x="80" y="60" width="10" height="10" fill="#2050a0"/>
+        <rect x="90" y="60" width="10" height="10" fill="#3060a0"/>
+        <rect x="100" y="60" width="10" height="10" fill="#2858a0"/>
+        <rect x="110" y="60" width="10" height="10" fill="#3060a0"/>
+        <rect x="120" y="60" width="10" height="10" fill="#2050a0"/>
+        <rect x="130" y="60" width="10" height="10" fill="#3060a0"/>
+        <!-- Second flow row -->
+        <rect x="0" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="10" y="70" width="10" height="10" fill="#1a4088"/>
+        <rect x="20" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="30" y="70" width="10" height="10" fill="#1a4088"/>
+        <rect x="40" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="50" y="70" width="10" height="10" fill="#1a4088"/>
+        <rect x="60" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="70" y="70" width="10" height="10" fill="#1a4088"/>
+        <rect x="80" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="90" y="70" width="10" height="10" fill="#1a4088"/>
+        <rect x="100" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="110" y="70" width="10" height="10" fill="#1a4088"/>
+        <rect x="120" y="70" width="10" height="10" fill="#284890"/>
+        <rect x="130" y="70" width="10" height="10" fill="#1a4088"/>
+        <!-- Flow direction arrows (small blue rects forming right-pointing arrows) -->
+        <!-- Arrow 1 at (15,64) -->
+        <rect x="14" y="63" width="6" height="1" fill="#80b0ff"/>
+        <rect x="18" y="62" width="1" height="1" fill="#80b0ff"/>
+        <rect x="19" y="63" width="1" height="1" fill="#80b0ff"/>
+        <rect x="18" y="64" width="1" height="1" fill="#80b0ff"/>
+        <!-- Arrow 2 at (55,64) -->
+        <rect x="84" y="63" width="6" height="1" fill="#80b0ff"/>
+        <rect x="88" y="62" width="1" height="1" fill="#80b0ff"/>
+        <rect x="89" y="63" width="1" height="1" fill="#80b0ff"/>
+        <rect x="88" y="64" width="1" height="1" fill="#80b0ff"/>
+        <!-- Arrow 3 at (115,64) -->
+        <rect x="114" y="63" width="6" height="1" fill="#80b0ff"/>
+        <rect x="118" y="62" width="1" height="1" fill="#80b0ff"/>
+        <rect x="119" y="63" width="1" height="1" fill="#80b0ff"/>
+        <rect x="118" y="64" width="1" height="1" fill="#80b0ff"/>
+        <!-- Rival sprite on flow tile at (40,58), stretched/moving right -->
+        <rect x="38" y="56" width="14" height="14" fill="#b03030"/>
+        <rect x="40" y="58" width="10" height="10" fill="#e06060"/>
+        <rect x="41" y="60" width="3" height="2" fill="white"/>
+        <rect x="46" y="60" width="3" height="2" fill="white"/>
+        <rect x="42" y="61" width="2" height="1" fill="#220000"/>
+        <rect x="47" y="61" width="2" height="1" fill="#220000"/>
+        <!-- Motion trail (fading rects behind rival) -->
+        <rect x="30" y="60" width="8" height="6" fill="#a04040" opacity="0.4"/>
+        <rect x="22" y="61" width="6" height="4" fill="#802020" opacity="0.2"/>
+        <!-- "2x" speed label -->
+        <text x="56" y="56" font-family="'Space Mono',monospace" font-size="6" fill="#80b0ff" font-weight="700">2x</text>
+        <!-- Brown grain tiles -->
+        <rect x="10" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="70" y="130" width="10" height="10" fill="#6a4a1a"/>
+        <rect x="120" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <!-- Panel label -->
+        <rect x="0" y="142" width="140" height="33" fill="#0a0e1a"/>
+        <text x="70" y="155" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="9" fill="#5080c0">RIDE FLOW</text>
+        <text x="70" y="168" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#6688aa">40% on flow tiles</text>
+      </g>
+
+      <!-- ============ PANEL 4: WANDER ============ -->
+      <g transform="translate(446,2)">
+        <!-- Panel border -->
+        <rect x="0" y="0" width="140" height="175" fill="#0a0e18" stroke="#888888" stroke-width="2"/>
+        <rect x="0" y="0" width="140" height="140" fill="#0c1420"/>
+        <!-- Dark variation tiles -->
+        <rect x="10" y="10" width="10" height="10" fill="#142030"/>
+        <rect x="50" y="20" width="10" height="10" fill="#142030"/>
+        <rect x="90" y="40" width="10" height="10" fill="#142030"/>
+        <rect x="30" y="60" width="10" height="10" fill="#142030"/>
+        <rect x="120" y="50" width="10" height="10" fill="#142030"/>
+        <rect x="70" y="100" width="10" height="10" fill="#142030"/>
+        <rect x="20" y="120" width="10" height="10" fill="#142030"/>
+        <rect x="110" y="110" width="10" height="10" fill="#142030"/>
+        <!-- Rival sprite in center at (60,60) -->
+        <rect x="58" y="58" width="14" height="14" fill="#b03030"/>
+        <rect x="60" y="60" width="10" height="10" fill="#e06060"/>
+        <rect x="61" y="62" width="3" height="2" fill="white"/>
+        <rect x="66" y="62" width="3" height="2" fill="white"/>
+        <rect x="62" y="63" width="2" height="1" fill="#220000"/>
+        <rect x="67" y="63" width="2" height="1" fill="#220000"/>
+        <!-- Random direction arrows around rival (pixel arrows using rects) -->
+        <!-- Up arrow at (64,45) -->
+        <rect x="64" y="44" width="2" height="8" fill="#999999"/>
+        <rect x="63" y="45" width="1" height="1" fill="#999999"/>
+        <rect x="66" y="45" width="1" height="1" fill="#999999"/>
+        <rect x="62" y="46" width="1" height="1" fill="#999999"/>
+        <rect x="67" y="46" width="1" height="1" fill="#999999"/>
+        <!-- Down arrow at (64,78) -->
+        <rect x="64" y="78" width="2" height="8" fill="#999999"/>
+        <rect x="63" y="84" width="1" height="1" fill="#999999"/>
+        <rect x="66" y="84" width="1" height="1" fill="#999999"/>
+        <rect x="62" y="83" width="1" height="1" fill="#999999"/>
+        <rect x="67" y="83" width="1" height="1" fill="#999999"/>
+        <!-- Left arrow at (42,64) -->
+        <rect x="42" y="64" width="8" height="2" fill="#999999"/>
+        <rect x="43" y="63" width="1" height="1" fill="#999999"/>
+        <rect x="43" y="66" width="1" height="1" fill="#999999"/>
+        <rect x="44" y="62" width="1" height="1" fill="#999999"/>
+        <rect x="44" y="67" width="1" height="1" fill="#999999"/>
+        <!-- Right arrow at (80,64) -->
+        <rect x="80" y="64" width="8" height="2" fill="#999999"/>
+        <rect x="86" y="63" width="1" height="1" fill="#999999"/>
+        <rect x="86" y="66" width="1" height="1" fill="#999999"/>
+        <rect x="85" y="62" width="1" height="1" fill="#999999"/>
+        <rect x="85" y="67" width="1" height="1" fill="#999999"/>
+        <!-- Diagonal arrow top-right -->
+        <rect x="76" y="48" width="2" height="2" fill="#777777"/>
+        <rect x="78" y="46" width="2" height="2" fill="#777777"/>
+        <rect x="80" y="44" width="2" height="2" fill="#777777"/>
+        <rect x="80" y="46" width="2" height="1" fill="#777777"/>
+        <rect x="79" y="44" width="1" height="2" fill="#777777"/>
+        <!-- Diagonal arrow bottom-left -->
+        <rect x="48" y="78" width="2" height="2" fill="#777777"/>
+        <rect x="46" y="80" width="2" height="2" fill="#777777"/>
+        <rect x="44" y="82" width="2" height="2" fill="#777777"/>
+        <rect x="44" y="80" width="2" height="1" fill="#777777"/>
+        <rect x="49" y="82" width="1" height="2" fill="#777777"/>
+        <!-- "?" question marks (pixel-art style using small rects) -->
+        <!-- ? top-right area -->
+        <rect x="96" y="30" width="4" height="1" fill="#666666"/>
+        <rect x="100" y="31" width="1" height="2" fill="#666666"/>
+        <rect x="98" y="33" width="2" height="1" fill="#666666"/>
+        <rect x="98" y="35" width="1" height="1" fill="#666666"/>
+        <!-- ? bottom-left area -->
+        <rect x="26" y="90" width="4" height="1" fill="#666666"/>
+        <rect x="30" y="91" width="1" height="2" fill="#666666"/>
+        <rect x="28" y="93" width="2" height="1" fill="#666666"/>
+        <rect x="28" y="95" width="1" height="1" fill="#666666"/>
+        <!-- Brown grain tiles -->
+        <rect x="0" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="40" y="130" width="10" height="10" fill="#6a4a1a"/>
+        <rect x="100" y="130" width="10" height="10" fill="#7a5a2a"/>
+        <rect x="130" y="130" width="10" height="10" fill="#6a4a1a"/>
+        <!-- Panel label -->
+        <rect x="0" y="142" width="140" height="33" fill="#121212"/>
+        <text x="70" y="155" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="9" fill="#999999">WANDER</text>
+        <text x="70" y="168" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#777777">fallback</text>
+      </g>
+
+      <!-- ============ LEGEND ============ -->
+      <rect x="5" y="182" width="586" height="26" fill="#f8f4ea" stroke="#ccc" stroke-width="1"/>
+      <text x="15" y="199" font-family="'Space Mono',monospace" font-size="7" fill="#888">PRIORITY ORDER:</text>
+      <rect x="134" y="191" width="12" height="12" fill="#4a9a5a"/>
+      <text x="155" y="200" font-size="8" fill="#333">Highest (food)</text>
+      <text x="225" y="200" font-size="8" fill="#888">&#8594;</text>
+      <rect x="244" y="191" width="12" height="12" fill="#4878b0"/>
+      <text x="265" y="200" font-size="8" fill="#333">Flow (if on tile)</text>
+      <text x="350" y="200" font-size="8" fill="#888">&#8594;</text>
+      <rect x="374" y="191" width="12" height="12" fill="#c08040"/>
+      <text x="395" y="200" font-size="8" fill="#333">Track player</text>
+      <text x="470" y="200" font-size="8" fill="#888">&#8594;</text>
+      <rect x="494" y="191" width="12" height="12" fill="#888888"/>
+      <text x="515" y="200" font-size="8" fill="#333">Wander (fallback)</text>
     </svg>
   </div>
 

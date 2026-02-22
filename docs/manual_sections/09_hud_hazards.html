@@ -10,51 +10,31 @@
 
   <!-- HUD Mockup SVG -->
   <div style="margin: 10px 0;">
-    <svg width="100%" height="140" viewBox="0 0 560 140" class="organism-art" style="border:2px solid #3a3a6a; border-radius:6px;">
-      <defs>
-        <linearGradient id="hud-bg" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stop-color="#0c0e1e"/><stop offset="100%" stop-color="#060814"/>
-        </linearGradient>
-        <linearGradient id="hp-bar" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#28a040"/><stop offset="100%" stop-color="#44df5f"/>
-        </linearGradient>
-        <linearGradient id="en-bar" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#3070c0"/><stop offset="100%" stop-color="#5fa0f0"/>
-        </linearGradient>
-        <linearGradient id="gr-bar" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#30a040"/><stop offset="100%" stop-color="#5ff050"/>
-        </linearGradient>
-        <filter id="hud-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="hud-soft" x="-10%" y="-10%" width="120%" height="120%">
-          <feGaussianBlur stdDeviation="0.5"/>
-        </filter>
-      </defs>
+    <svg width="100%" height="140" viewBox="0 0 560 140" class="organism-art" style="border:2px solid #3a3a6a; image-rendering:pixelated;">
       <!-- Background panel -->
-      <rect width="560" height="140" rx="6" fill="url(#hud-bg)"/>
-      <rect x="1" y="1" width="558" height="138" rx="5" fill="none" stroke="#2a2a5a" stroke-width="1"/>
+      <rect width="560" height="140" fill="#0c0e1e"/>
+      <rect x="1" y="1" width="558" height="138" fill="none" stroke="#2a2a5a" stroke-width="1"/>
 
       <!-- LEFT: Status bars -->
       <g transform="translate(16,16)">
         <!-- HP -->
         <text x="0" y="12" font-family="'Press Start 2P',monospace" font-size="7" fill="#44df5f">HP</text>
-        <rect x="28" y="3" width="140" height="12" rx="3" fill="#1a1a2b"/>
-        <rect x="29" y="4" width="105" height="10" rx="2" fill="url(#hp-bar)"/>
+        <rect x="28" y="3" width="140" height="12" fill="#1a1a2b"/>
+        <rect x="29" y="4" width="105" height="10" fill="#44df5f"/>
         <text x="174" y="12" font-family="'Space Mono',monospace" font-size="7" fill="#aaa">75</text>
 
         <!-- EN -->
         <text x="0" y="32" font-family="'Press Start 2P',monospace" font-size="7" fill="#5fa0f0">EN</text>
-        <rect x="28" y="23" width="140" height="12" rx="3" fill="#1a1a2b"/>
-        <rect x="29" y="24" width="84" height="10" rx="2" fill="url(#en-bar)"/>
+        <rect x="28" y="23" width="140" height="12" fill="#1a1a2b"/>
+        <rect x="29" y="24" width="84" height="10" fill="#5fa0f0"/>
         <text x="174" y="32" font-family="'Space Mono',monospace" font-size="7" fill="#aaa">60</text>
 
         <!-- GR -->
         <text x="0" y="52" font-family="'Press Start 2P',monospace" font-size="7" fill="#5ff050">GR</text>
-        <rect x="28" y="43" width="140" height="12" rx="3" fill="#1a1a2b"/>
-        <rect x="29" y="44" width="123" height="10" rx="2" fill="url(#gr-bar)"/>
+        <rect x="28" y="43" width="140" height="12" fill="#1a1a2b"/>
+        <rect x="29" y="44" width="123" height="10" fill="#5ff050"/>
         <!-- Flash indicator for near-full -->
-        <rect x="29" y="44" width="123" height="10" rx="2" fill="#ffff00" opacity="0.15"/>
+        <rect x="29" y="44" width="123" height="10" fill="#ffff00" opacity="0.15"/>
         <text x="174" y="52" font-family="'Space Mono',monospace" font-size="7" fill="#c0c020">88</text>
       </g>
 
@@ -65,24 +45,27 @@
         <text x="22" y="28" font-family="'Space Mono',monospace" font-size="10" fill="#666">/ 5</text>
         <!-- Flow compass -->
         <text x="0" y="46" font-family="'Space Mono',monospace" font-size="6" fill="#888">FLOW</text>
-        <text x="0" y="56" font-family="'Space Mono',monospace" font-size="7" fill="#4fdf6f" filter="url(#hud-glow)">IN &rarr;&rarr;&rarr; OUT</text>
+        <text x="0" y="56" font-family="'Space Mono',monospace" font-size="7" fill="#4fdf6f">IN &rarr;&rarr;&rarr; OUT</text>
       </g>
 
       <!-- CENTER-RIGHT: Redox list -->
       <g transform="translate(330,16)">
         <text x="0" y="10" font-family="'Space Mono',monospace" font-size="6" fill="#888">AVAILABLE</text>
-        <circle cx="5" cy="20" r="3" fill="#4fa4ff" filter="url(#hud-glow)"/>
+        <!-- O2 pixel dot -->
+        <rect x="1" y="16" width="8" height="8" fill="#4fa4ff"/>
         <text x="14" y="23" font-family="'Space Mono',monospace" font-size="7" fill="#4fa4ff">O2  +20 HP</text>
-        <circle cx="5" cy="34" r="3" fill="#4fdf6f" filter="url(#hud-glow)"/>
+        <!-- NO3 pixel dot -->
+        <rect x="1" y="30" width="8" height="8" fill="#4fdf6f"/>
         <text x="14" y="37" font-family="'Space Mono',monospace" font-size="7" fill="#4fdf6f">NO3 +15 HP</text>
-        <circle cx="5" cy="48" r="3" fill="#ff4f4f" filter="url(#hud-glow)"/>
+        <!-- CH4 pixel dot -->
+        <rect x="1" y="44" width="8" height="8" fill="#ff4f4f"/>
         <text x="14" y="51" font-family="'Space Mono',monospace" font-size="7" fill="#ff4f4f">CH4 +5  HP</text>
       </g>
 
       <!-- RIGHT: Score -->
       <g transform="translate(475,16)">
         <text x="0" y="10" font-family="'Space Mono',monospace" font-size="6" fill="#888">SCORE</text>
-        <text x="0" y="26" font-family="'Press Start 2P',monospace" font-size="10" fill="#ffd700" filter="url(#hud-glow)">1,250</text>
+        <text x="0" y="26" font-family="'Press Start 2P',monospace" font-size="10" fill="#ffd700">1,250</text>
         <text x="0" y="42" font-family="'Space Mono',monospace" font-size="6" fill="#ff4f4f">CH4: 8</text>
         <text x="0" y="54" font-family="'Space Mono',monospace" font-size="6" fill="#aaa">Lv 2</text>
       </g>
@@ -96,18 +79,42 @@
         <text x="420" y="10" font-family="'Space Mono',monospace" font-size="6" fill="#555">Q: science mode</text>
       </g>
 
-      <!-- ARKE mini-character in corner -->
-      <g transform="translate(16, 88)">
-        <ellipse cx="14" cy="18" rx="10" ry="14" fill="#2a8a8a" opacity="0.4"/>
-        <ellipse cx="14" cy="14" rx="6" ry="4" fill="#1a2a4a" opacity="0.5"/>
-        <circle cx="11" cy="13" r="1.5" fill="#4aeaff" opacity="0.6"/><circle cx="17" cy="13" r="1.5" fill="#4aeaff" opacity="0.6"/>
+      <!-- ARKE mini-character in corner (pixel art) -->
+      <g transform="translate(6, 88)">
+        <!-- Body -->
+        <rect x="4" y="8" width="4" height="4" fill="#2acfaf"/>
+        <rect x="8" y="4" width="4" height="4" fill="#2acfaf"/>
+        <rect x="8" y="8" width="4" height="4" fill="#2acfaf"/>
+        <rect x="8" y="12" width="4" height="4" fill="#2acfaf"/>
+        <rect x="12" y="4" width="4" height="4" fill="#2acfaf"/>
+        <rect x="12" y="8" width="4" height="4" fill="#2acfaf"/>
+        <rect x="12" y="12" width="4" height="4" fill="#2acfaf"/>
+        <rect x="16" y="4" width="4" height="4" fill="#2acfaf"/>
+        <rect x="16" y="8" width="4" height="4" fill="#2acfaf"/>
+        <rect x="16" y="12" width="4" height="4" fill="#2acfaf"/>
+        <rect x="20" y="8" width="4" height="4" fill="#2acfaf"/>
+        <!-- Helmet -->
+        <rect x="8" y="0" width="4" height="4" fill="#7888a0"/>
+        <rect x="12" y="0" width="4" height="4" fill="#7888a0"/>
+        <rect x="16" y="0" width="4" height="4" fill="#7888a0"/>
+        <!-- Visor / eyes -->
+        <rect x="8" y="4" width="4" height="4" fill="#40c8d8"/>
+        <rect x="16" y="4" width="4" height="4" fill="#40c8d8"/>
       </g>
 
-      <!-- Decorative corner brackets -->
-      <path d="M6,6 L6,20 M6,6 L20,6" fill="none" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
-      <path d="M554,6 L554,20 M554,6 L540,6" fill="none" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
-      <path d="M6,134 L6,120 M6,134 L20,134" fill="none" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
-      <path d="M554,134 L554,120 M554,134 L540,134" fill="none" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
+      <!-- Decorative corner brackets (pixel rects) -->
+      <!-- Top-left -->
+      <rect x="4" y="4" width="14" height="2" fill="#4aeaff" opacity="0.4"/>
+      <rect x="4" y="4" width="2" height="14" fill="#4aeaff" opacity="0.4"/>
+      <!-- Top-right -->
+      <rect x="542" y="4" width="14" height="2" fill="#4aeaff" opacity="0.4"/>
+      <rect x="554" y="4" width="2" height="14" fill="#4aeaff" opacity="0.4"/>
+      <!-- Bottom-left -->
+      <rect x="4" y="134" width="14" height="2" fill="#4aeaff" opacity="0.4"/>
+      <rect x="4" y="122" width="2" height="14" fill="#4aeaff" opacity="0.4"/>
+      <!-- Bottom-right -->
+      <rect x="542" y="134" width="14" height="2" fill="#4aeaff" opacity="0.4"/>
+      <rect x="554" y="122" width="2" height="14" fill="#4aeaff" opacity="0.4"/>
     </svg>
   </div>
 
@@ -137,31 +144,56 @@
   <div style="display:flex; gap:16px; align-items:flex-start; margin:8px 0;">
     <div style="flex-shrink:0;">
       <!-- Minimap SVG -->
-      <svg width="140" height="90" viewBox="0 0 140 90" class="organism-art" style="border:2px solid #3a3a6a; border-radius:4px;">
-        <defs>
-          <radialGradient id="mm-grain" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#9a7030"/><stop offset="100%" stop-color="#5a3a18"/></radialGradient>
-          <radialGradient id="mm-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#d060c0" stop-opacity="0.7"/><stop offset="100%" stop-color="#8020a0" stop-opacity="0"/></radialGradient>
-          <filter id="mm-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <rect width="140" height="90" rx="4" fill="#0a0a1a"/>
-        <!-- Grains -->
-        <ellipse cx="18" cy="14" rx="12" ry="10" fill="url(#mm-grain)" opacity="0.7"/>
-        <ellipse cx="50" cy="72" rx="16" ry="12" fill="url(#mm-grain)" opacity="0.7"/>
-        <ellipse cx="90" cy="16" rx="14" ry="11" fill="url(#mm-grain)" opacity="0.7"/>
-        <ellipse cx="125" cy="65" rx="10" ry="8" fill="url(#mm-grain)" opacity="0.7"/>
-        <ellipse cx="35" cy="48" rx="8" ry="6" fill="url(#mm-grain)" opacity="0.7"/>
-        <ellipse cx="108" cy="45" rx="12" ry="10" fill="url(#mm-grain)" opacity="0.7"/>
-        <!-- Toxic zones -->
-        <ellipse cx="58" cy="28" rx="12" ry="8" fill="url(#mm-toxic)" filter="url(#mm-glow)"/>
-        <ellipse cx="78" cy="58" rx="10" ry="8" fill="url(#mm-toxic)" filter="url(#mm-glow)"/>
-        <!-- Colonies (green glowing dots) -->
-        <circle cx="42" cy="30" r="3.5" fill="#4fdf6f" filter="url(#mm-glow)"/>
-        <circle cx="70" cy="42" r="3.5" fill="#4fdf6f" filter="url(#mm-glow)"/>
-        <!-- Player (white pulsing) -->
-        <circle cx="62" cy="36" r="3" fill="white" filter="url(#mm-glow)"/>
-        <circle cx="62" cy="36" r="5" fill="white" opacity="0.15"/>
-        <!-- Outlet glow -->
-        <rect x="136" y="36" width="4" height="14" rx="2" fill="#4fdf6f" opacity="0.6"/>
+      <svg width="140" height="90" viewBox="0 0 140 90" class="organism-art" style="border:2px solid #3a3a6a; image-rendering:pixelated;">
+        <rect width="140" height="90" fill="#0a0a1a"/>
+        <!-- Grains (rect clusters replacing ellipses) -->
+        <g opacity="0.7">
+          <!-- Grain 1 -->
+          <rect x="8" y="6" width="8" height="6" fill="#7a5a20"/>
+          <rect x="12" y="4" width="8" height="6" fill="#9a7030"/>
+          <rect x="16" y="8" width="8" height="6" fill="#6a4a18"/>
+          <!-- Grain 2 -->
+          <rect x="36" y="62" width="10" height="8" fill="#7a5a20"/>
+          <rect x="42" y="60" width="10" height="8" fill="#9a7030"/>
+          <rect x="48" y="64" width="10" height="8" fill="#6a4a18"/>
+          <rect x="40" y="68" width="8" height="6" fill="#5a3a18"/>
+          <!-- Grain 3 -->
+          <rect x="78" y="8" width="10" height="6" fill="#9a7030"/>
+          <rect x="84" y="6" width="10" height="8" fill="#7a5a20"/>
+          <rect x="90" y="10" width="8" height="6" fill="#6a4a18"/>
+          <!-- Grain 4 -->
+          <rect x="116" y="58" width="8" height="6" fill="#9a7030"/>
+          <rect x="120" y="62" width="8" height="6" fill="#7a5a20"/>
+          <rect x="118" y="66" width="6" height="4" fill="#5a3a18"/>
+          <!-- Grain 5 -->
+          <rect x="28" y="42" width="6" height="6" fill="#9a7030"/>
+          <rect x="32" y="44" width="8" height="6" fill="#7a5a20"/>
+          <rect x="36" y="46" width="4" height="4" fill="#5a3a18"/>
+          <!-- Grain 6 -->
+          <rect x="98" y="38" width="10" height="6" fill="#7a5a20"/>
+          <rect x="104" y="36" width="8" height="8" fill="#9a7030"/>
+          <rect x="110" y="40" width="6" height="6" fill="#6a4a18"/>
+        </g>
+        <!-- Toxic zones (magenta rect clusters) -->
+        <g>
+          <rect x="50" y="22" width="6" height="4" fill="#d060c0" opacity="0.6"/>
+          <rect x="54" y="24" width="8" height="6" fill="#c050b0" opacity="0.5"/>
+          <rect x="56" y="28" width="6" height="4" fill="#a040a0" opacity="0.4"/>
+          <rect x="48" y="26" width="4" height="4" fill="#b040a0" opacity="0.3"/>
+
+          <rect x="72" y="52" width="6" height="4" fill="#d060c0" opacity="0.6"/>
+          <rect x="74" y="56" width="8" height="6" fill="#c050b0" opacity="0.5"/>
+          <rect x="78" y="54" width="4" height="4" fill="#a040a0" opacity="0.4"/>
+          <rect x="70" y="58" width="6" height="4" fill="#b040a0" opacity="0.3"/>
+        </g>
+        <!-- Colonies (green pixel rects) -->
+        <rect x="38" y="26" width="6" height="6" fill="#4fdf6f"/>
+        <rect x="66" y="38" width="6" height="6" fill="#4fdf6f"/>
+        <!-- Player (white pixel rect) -->
+        <rect x="58" y="32" width="6" height="6" fill="white"/>
+        <rect x="56" y="30" width="10" height="10" fill="white" opacity="0.15"/>
+        <!-- Outlet -->
+        <rect x="136" y="36" width="4" height="14" fill="#4fdf6f" opacity="0.6"/>
       </svg>
     </div>
     <div style="font-size:10pt;">
@@ -209,31 +241,44 @@
   <!-- Starvation -->
   <div class="char-card" style="border-color:#cc3333;">
     <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 120 120" class="organism-art">
-        <defs>
-          <radialGradient id="hz-starve-body" cx="50%" cy="40%" r="55%">
-            <stop offset="0%" stop-color="#1a5a5a"/><stop offset="100%" stop-color="#0a2a2a"/>
-          </radialGradient>
-          <radialGradient id="hz-starve-warn" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#ff0000" stop-opacity="0.4"/><stop offset="100%" stop-color="#ff0000" stop-opacity="0"/>
-          </radialGradient>
-          <filter id="hz-starve-glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
-        <!-- Red warning border glow -->
-        <rect x="2" y="2" width="116" height="116" rx="8" fill="none" stroke="#ff0000" stroke-width="4" opacity="0.5"/>
-        <rect x="6" y="6" width="108" height="108" rx="6" fill="none" stroke="#ff0000" stroke-width="2" opacity="0.25"/>
-        <!-- Fading ARKE body -->
-        <ellipse cx="60" cy="58" rx="22" ry="30" fill="url(#hz-starve-body)" opacity="0.5"/>
-        <ellipse cx="60" cy="48" rx="14" ry="10" fill="#0a1a2a" opacity="0.6"/>
-        <!-- Dim, fading eyes -->
-        <circle cx="53" cy="47" r="3.5" fill="#ff4444" opacity="0.5" filter="url(#hz-starve-glow)"/>
-        <circle cx="67" cy="47" r="3.5" fill="#ff4444" opacity="0.5" filter="url(#hz-starve-glow)"/>
-        <!-- Life draining away (downward particles) -->
-        <circle cx="45" cy="75" r="2" fill="#ff4444" opacity="0.4"/><circle cx="55" cy="82" r="1.5" fill="#ff2222" opacity="0.3"/>
-        <circle cx="65" cy="78" r="2" fill="#ff4444" opacity="0.35"/><circle cx="75" cy="85" r="1.5" fill="#ff2222" opacity="0.25"/>
-        <circle cx="50" cy="90" r="1" fill="#ff0000" opacity="0.2"/><circle cx="70" cy="92" r="1" fill="#ff0000" opacity="0.15"/>
+      <svg width="96" height="96" viewBox="0 0 120 120" class="organism-art" style="image-rendering:pixelated;">
+        <!-- Red warning border -->
+        <rect x="2" y="2" width="116" height="116" fill="none" stroke="#ff0000" stroke-width="4" opacity="0.5"/>
+        <rect x="6" y="6" width="108" height="108" fill="none" stroke="#ff0000" stroke-width="2" opacity="0.25"/>
+        <!-- Fading ARKE body (pixel art) -->
+        <g opacity="0.5">
+          <!-- Body column -->
+          <rect x="44" y="32" width="8" height="8" fill="#1a5a5a"/>
+          <rect x="52" y="28" width="8" height="8" fill="#1a5a5a"/>
+          <rect x="60" y="28" width="8" height="8" fill="#1a5a5a"/>
+          <rect x="68" y="32" width="8" height="8" fill="#1a5a5a"/>
+          <rect x="44" y="40" width="8" height="8" fill="#0f4040"/>
+          <rect x="52" y="36" width="8" height="8" fill="#0f4040"/>
+          <rect x="60" y="36" width="8" height="8" fill="#0f4040"/>
+          <rect x="68" y="40" width="8" height="8" fill="#0f4040"/>
+          <rect x="48" y="48" width="8" height="8" fill="#0a2a2a"/>
+          <rect x="56" y="48" width="8" height="8" fill="#0a2a2a"/>
+          <rect x="64" y="48" width="8" height="8" fill="#0a2a2a"/>
+          <rect x="48" y="56" width="8" height="8" fill="#0a2a2a"/>
+          <rect x="56" y="56" width="8" height="8" fill="#0a2a2a"/>
+          <rect x="64" y="56" width="8" height="8" fill="#0a2a2a"/>
+          <rect x="52" y="64" width="8" height="8" fill="#0a2020"/>
+          <rect x="60" y="64" width="8" height="8" fill="#0a2020"/>
+        </g>
+        <!-- Helmet -->
+        <rect x="48" y="28" width="8" height="4" fill="#0a1a2a" opacity="0.6"/>
+        <rect x="56" y="28" width="8" height="4" fill="#0a1a2a" opacity="0.6"/>
+        <rect x="64" y="28" width="8" height="4" fill="#0a1a2a" opacity="0.6"/>
+        <!-- Dim, fading eyes (pixel rects) -->
+        <rect x="48" y="36" width="6" height="6" fill="#ff4444" opacity="0.5"/>
+        <rect x="64" y="36" width="6" height="6" fill="#ff4444" opacity="0.5"/>
+        <!-- Life draining away (downward pixel particles) -->
+        <rect x="42" y="72" width="4" height="4" fill="#ff4444" opacity="0.4"/>
+        <rect x="52" y="80" width="4" height="4" fill="#ff2222" opacity="0.3"/>
+        <rect x="62" y="76" width="4" height="4" fill="#ff4444" opacity="0.35"/>
+        <rect x="72" y="82" width="4" height="4" fill="#ff2222" opacity="0.25"/>
+        <rect x="48" y="88" width="3" height="3" fill="#ff0000" opacity="0.2"/>
+        <rect x="68" y="90" width="3" height="3" fill="#ff0000" opacity="0.15"/>
         <!-- HP drain indicator -->
         <text x="60" y="110" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#ff4444" opacity="0.7">-1.5/s</text>
       </svg>
@@ -256,35 +301,58 @@
   <!-- Toxic Zones -->
   <div class="char-card" style="border-color:#c060c0;">
     <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 120 120" class="organism-art">
-        <defs>
-          <radialGradient id="hz-tox-bg" cx="50%" cy="70%" r="60%">
-            <stop offset="0%" stop-color="#3a0a3a"/><stop offset="100%" stop-color="#180820"/>
-          </radialGradient>
-          <radialGradient id="hz-tox-bubble" cx="40%" cy="30%" r="50%">
-            <stop offset="0%" stop-color="#ff80ff" stop-opacity="0.8"/><stop offset="100%" stop-color="#c040c0" stop-opacity="0"/>
-          </radialGradient>
-          <filter id="hz-tox-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        </defs>
+      <svg width="96" height="96" viewBox="0 0 120 120" class="organism-art" style="image-rendering:pixelated;">
         <!-- Toxic background -->
-        <rect width="120" height="120" rx="8" fill="url(#hz-tox-bg)"/>
-        <!-- Purple-magenta landscape floor -->
-        <path d="M0,90 Q20,82 40,88 Q60,80 80,86 Q100,78 120,85 L120,120 L0,120 Z" fill="#4a1848" opacity="0.6"/>
-        <path d="M0,95 Q30,88 60,94 Q90,86 120,92 L120,120 L0,120 Z" fill="#3a1038" opacity="0.4"/>
-        <!-- Rising gas bubbles -->
-        <circle cx="25" cy="70" r="5" fill="url(#hz-tox-bubble)" filter="url(#hz-tox-glow)"/>
-        <circle cx="55" cy="50" r="7" fill="url(#hz-tox-bubble)" filter="url(#hz-tox-glow)"/>
-        <circle cx="85" cy="62" r="6" fill="url(#hz-tox-bubble)" filter="url(#hz-tox-glow)"/>
-        <circle cx="40" cy="35" r="4" fill="url(#hz-tox-bubble)" filter="url(#hz-tox-glow)" opacity="0.6"/>
-        <circle cx="70" cy="28" r="3" fill="url(#hz-tox-bubble)" filter="url(#hz-tox-glow)" opacity="0.4"/>
-        <circle cx="95" cy="40" r="4.5" fill="url(#hz-tox-bubble)" filter="url(#hz-tox-glow)" opacity="0.5"/>
-        <!-- Skull symbol -->
-        <g transform="translate(42,8)">
-          <ellipse cx="18" cy="12" rx="12" ry="10" fill="#ff80ff" opacity="0.4"/>
-          <circle cx="13" cy="10" r="3" fill="#2a0a2a"/><circle cx="23" cy="10" r="3" fill="#2a0a2a"/>
-          <rect x="14" y="16" width="2" height="3" fill="#2a0a2a"/><rect x="18" y="16" width="2" height="3" fill="#2a0a2a"/><rect x="22" y="16" width="2" height="3" fill="#2a0a2a"/>
+        <rect width="120" height="120" fill="#200a20"/>
+        <!-- Purple-magenta landscape floor (stacked rect rows) -->
+        <rect x="0" y="80" width="120" height="40" fill="#3a1038" opacity="0.4"/>
+        <rect x="0" y="84" width="20" height="4" fill="#4a1848" opacity="0.6"/>
+        <rect x="20" y="82" width="24" height="4" fill="#4a1848" opacity="0.6"/>
+        <rect x="44" y="86" width="20" height="4" fill="#4a1848" opacity="0.6"/>
+        <rect x="64" y="80" width="28" height="4" fill="#4a1848" opacity="0.6"/>
+        <rect x="92" y="78" width="28" height="4" fill="#4a1848" opacity="0.6"/>
+        <rect x="0" y="88" width="30" height="4" fill="#3a1038" opacity="0.5"/>
+        <rect x="30" y="90" width="24" height="4" fill="#3a1038" opacity="0.5"/>
+        <rect x="54" y="88" width="20" height="4" fill="#3a1038" opacity="0.5"/>
+        <rect x="74" y="86" width="24" height="4" fill="#3a1038" opacity="0.5"/>
+        <rect x="98" y="90" width="22" height="4" fill="#3a1038" opacity="0.5"/>
+        <!-- Rising gas bubbles (pixel rects) -->
+        <rect x="20" y="66" width="8" height="8" fill="#ff80ff" opacity="0.6"/>
+        <rect x="50" y="44" width="12" height="12" fill="#c060c0" opacity="0.5"/>
+        <rect x="80" y="56" width="10" height="10" fill="#d070d0" opacity="0.5"/>
+        <rect x="36" y="30" width="6" height="6" fill="#ff80ff" opacity="0.4"/>
+        <rect x="66" y="24" width="6" height="6" fill="#c060c0" opacity="0.3"/>
+        <rect x="90" y="36" width="8" height="8" fill="#d070d0" opacity="0.35"/>
+        <!-- Skull symbol (pixel art using rects) -->
+        <g transform="translate(42,4)">
+          <!-- Skull top -->
+          <rect x="8" y="0" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="12" y="0" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="16" y="0" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="20" y="0" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <!-- Skull mid row -->
+          <rect x="4" y="4" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="8" y="4" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="12" y="4" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="16" y="4" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="20" y="4" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <rect x="24" y="4" width="4" height="4" fill="#ff80ff" opacity="0.5"/>
+          <!-- Eye sockets -->
+          <rect x="8" y="8" width="4" height="4" fill="#2a0a2a"/>
+          <rect x="12" y="8" width="4" height="4" fill="#ff80ff" opacity="0.4"/>
+          <rect x="16" y="8" width="4" height="4" fill="#ff80ff" opacity="0.4"/>
+          <rect x="20" y="8" width="4" height="4" fill="#2a0a2a"/>
+          <rect x="4" y="8" width="4" height="4" fill="#ff80ff" opacity="0.4"/>
+          <rect x="24" y="8" width="4" height="4" fill="#ff80ff" opacity="0.4"/>
+          <!-- Nose/mouth -->
+          <rect x="8" y="12" width="4" height="4" fill="#ff80ff" opacity="0.35"/>
+          <rect x="12" y="12" width="4" height="4" fill="#2a0a2a"/>
+          <rect x="16" y="12" width="4" height="4" fill="#ff80ff" opacity="0.35"/>
+          <rect x="20" y="12" width="4" height="4" fill="#2a0a2a"/>
+          <!-- Teeth row -->
+          <rect x="10" y="16" width="3" height="3" fill="#2a0a2a"/>
+          <rect x="15" y="16" width="3" height="3" fill="#2a0a2a"/>
+          <rect x="20" y="16" width="3" height="3" fill="#2a0a2a"/>
         </g>
         <!-- H2S label -->
         <text x="60" y="110" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#ff80ff" opacity="0.7">H2S</text>
@@ -308,27 +376,91 @@
   <!-- Rivals (food competition) -->
   <div class="char-card" style="border-color:#cc3333;">
     <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 120 120" class="organism-art">
-        <defs>
-          <radialGradient id="hz-rival1" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
-          <radialGradient id="hz-sub-target" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#8fffaf"/><stop offset="70%" stop-color="#4fdf6f"/><stop offset="100%" stop-color="#208040" stop-opacity="0"/></radialGradient>
-          <filter id="hz-rival-gl" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <rect width="120" height="120" rx="8" fill="#0a0810"/>
-        <!-- Target substrate (center, glowing) -->
-        <circle cx="60" cy="60" r="10" fill="url(#hz-sub-target)" filter="url(#hz-rival-gl)"/>
-        <!-- Rival 1 (top-left, approaching) -->
-        <ellipse cx="25" cy="30" rx="10" ry="14" fill="url(#hz-rival1)"/>
-        <circle cx="22" cy="26" r="2" fill="#ff6666"/><circle cx="28" cy="26" r="2" fill="#ff6666"/>
-        <line x1="35" y1="38" x2="52" y2="52" stroke="#ff4444" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
-        <!-- Rival 2 (top-right, approaching) -->
-        <ellipse cx="95" cy="28" rx="10" ry="14" fill="url(#hz-rival1)"/>
-        <circle cx="92" cy="24" r="2" fill="#ff6666"/><circle cx="98" cy="24" r="2" fill="#ff6666"/>
-        <line x1="88" y1="38" x2="68" y2="52" stroke="#ff4444" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
-        <!-- Rival 3 (bottom, approaching) -->
-        <ellipse cx="55" cy="98" rx="10" ry="14" fill="url(#hz-rival1)"/>
-        <circle cx="52" cy="94" r="2" fill="#ff6666"/><circle cx="58" cy="94" r="2" fill="#ff6666"/>
-        <line x1="57" y1="86" x2="60" y2="70" stroke="#ff4444" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+      <svg width="96" height="96" viewBox="0 0 120 120" class="organism-art" style="image-rendering:pixelated;">
+        <rect width="120" height="120" fill="#0a0810"/>
+        <!-- Target substrate (center, pixel rect) -->
+        <rect x="52" y="52" width="16" height="16" fill="#4fdf6f"/>
+        <rect x="56" y="56" width="8" height="8" fill="#8fffaf"/>
+        <!-- Rival 1 (top-left, pixel sprite) -->
+        <g transform="translate(12,16)">
+          <!-- Body -->
+          <rect x="4" y="4" width="4" height="4" fill="#b03030"/>
+          <rect x="8" y="0" width="4" height="4" fill="#b03030"/>
+          <rect x="8" y="4" width="4" height="4" fill="#e06060"/>
+          <rect x="8" y="8" width="4" height="4" fill="#b03030"/>
+          <rect x="12" y="0" width="4" height="4" fill="#b03030"/>
+          <rect x="12" y="4" width="4" height="4" fill="#e06060"/>
+          <rect x="12" y="8" width="4" height="4" fill="#b03030"/>
+          <rect x="16" y="4" width="4" height="4" fill="#b03030"/>
+          <!-- Outline pixels -->
+          <rect x="4" y="0" width="4" height="4" fill="#000000"/>
+          <rect x="16" y="0" width="4" height="4" fill="#000000"/>
+          <rect x="0" y="4" width="4" height="4" fill="#000000"/>
+          <rect x="20" y="4" width="4" height="4" fill="#000000"/>
+          <rect x="4" y="12" width="4" height="4" fill="#000000"/>
+          <rect x="16" y="12" width="4" height="4" fill="#000000"/>
+          <!-- Eyes -->
+          <rect x="8" y="4" width="4" height="4" fill="#ffffff"/>
+          <rect x="14" y="4" width="4" height="4" fill="#ffffff"/>
+          <rect x="10" y="4" width="2" height="2" fill="#1a1a2e"/>
+          <rect x="16" y="4" width="2" height="2" fill="#1a1a2e"/>
+        </g>
+        <!-- Approach line 1 (pixel dashes) -->
+        <rect x="38" y="38" width="4" height="2" fill="#ff4444" opacity="0.5"/>
+        <rect x="44" y="42" width="4" height="2" fill="#ff4444" opacity="0.5"/>
+        <rect x="50" y="46" width="4" height="2" fill="#ff4444" opacity="0.5"/>
+
+        <!-- Rival 2 (top-right, pixel sprite) -->
+        <g transform="translate(80,14)">
+          <rect x="4" y="4" width="4" height="4" fill="#b03030"/>
+          <rect x="8" y="0" width="4" height="4" fill="#b03030"/>
+          <rect x="8" y="4" width="4" height="4" fill="#e06060"/>
+          <rect x="8" y="8" width="4" height="4" fill="#b03030"/>
+          <rect x="12" y="0" width="4" height="4" fill="#b03030"/>
+          <rect x="12" y="4" width="4" height="4" fill="#e06060"/>
+          <rect x="12" y="8" width="4" height="4" fill="#b03030"/>
+          <rect x="16" y="4" width="4" height="4" fill="#b03030"/>
+          <rect x="4" y="0" width="4" height="4" fill="#000000"/>
+          <rect x="16" y="0" width="4" height="4" fill="#000000"/>
+          <rect x="0" y="4" width="4" height="4" fill="#000000"/>
+          <rect x="20" y="4" width="4" height="4" fill="#000000"/>
+          <rect x="4" y="12" width="4" height="4" fill="#000000"/>
+          <rect x="16" y="12" width="4" height="4" fill="#000000"/>
+          <rect x="8" y="4" width="4" height="4" fill="#ffffff"/>
+          <rect x="14" y="4" width="4" height="4" fill="#ffffff"/>
+          <rect x="10" y="4" width="2" height="2" fill="#1a1a2e"/>
+          <rect x="16" y="4" width="2" height="2" fill="#1a1a2e"/>
+        </g>
+        <!-- Approach line 2 (pixel dashes) -->
+        <rect x="78" y="38" width="4" height="2" fill="#ff4444" opacity="0.5"/>
+        <rect x="72" y="42" width="4" height="2" fill="#ff4444" opacity="0.5"/>
+        <rect x="66" y="46" width="4" height="2" fill="#ff4444" opacity="0.5"/>
+
+        <!-- Rival 3 (bottom, pixel sprite) -->
+        <g transform="translate(42,82)">
+          <rect x="4" y="4" width="4" height="4" fill="#b03030"/>
+          <rect x="8" y="0" width="4" height="4" fill="#b03030"/>
+          <rect x="8" y="4" width="4" height="4" fill="#e06060"/>
+          <rect x="8" y="8" width="4" height="4" fill="#b03030"/>
+          <rect x="12" y="0" width="4" height="4" fill="#b03030"/>
+          <rect x="12" y="4" width="4" height="4" fill="#e06060"/>
+          <rect x="12" y="8" width="4" height="4" fill="#b03030"/>
+          <rect x="16" y="4" width="4" height="4" fill="#b03030"/>
+          <rect x="4" y="0" width="4" height="4" fill="#000000"/>
+          <rect x="16" y="0" width="4" height="4" fill="#000000"/>
+          <rect x="0" y="4" width="4" height="4" fill="#000000"/>
+          <rect x="20" y="4" width="4" height="4" fill="#000000"/>
+          <rect x="4" y="12" width="4" height="4" fill="#000000"/>
+          <rect x="16" y="12" width="4" height="4" fill="#000000"/>
+          <rect x="8" y="4" width="4" height="4" fill="#ffffff"/>
+          <rect x="14" y="4" width="4" height="4" fill="#ffffff"/>
+          <rect x="10" y="4" width="2" height="2" fill="#1a1a2e"/>
+          <rect x="16" y="4" width="2" height="2" fill="#1a1a2e"/>
+        </g>
+        <!-- Approach line 3 (pixel dashes) -->
+        <rect x="56" y="76" width="2" height="4" fill="#ff4444" opacity="0.5"/>
+        <rect x="58" y="70" width="2" height="4" fill="#ff4444" opacity="0.5"/>
+        <rect x="60" y="64" width="2" height="4" fill="#ff4444" opacity="0.5"/>
         <!-- Scarcity indicator -->
         <text x="60" y="112" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4444" opacity="0.6">SCARCITY</text>
       </svg>
@@ -394,17 +526,11 @@
   </div>
 
   <h2>The Art of Efficient Eating</h2>
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:8px 0;">
-    <svg width="100%" height="120" viewBox="0 0 500 120" class="organism-art">
-      <defs>
-        <linearGradient id="eat-crit-bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fff0f0"/><stop offset="100%" stop-color="#ffe0e0"/></linearGradient>
-        <linearGradient id="eat-safe-bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fffff0"/><stop offset="100%" stop-color="#fff8e0"/></linearGradient>
-        <linearGradient id="eat-high-bg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#f0fff0"/><stop offset="100%" stop-color="#e0ffe0"/></linearGradient>
-        <filter id="eat-shadow" x="-5%" y="-5%" width="110%" height="110%"><feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-color="#00000030"/></filter>
-      </defs>
+  <div style="background:white; border:2px solid #3a3a4a; padding:12px; margin:8px 0;">
+    <svg width="100%" height="120" viewBox="0 0 500 120" class="organism-art" style="image-rendering:pixelated;">
       <!-- Panel 1: HP Critical -->
-      <g transform="translate(5,5)" filter="url(#eat-shadow)">
-        <rect width="155" height="105" rx="6" fill="url(#eat-crit-bg)" stroke="#cc3333" stroke-width="1.5"/>
+      <g transform="translate(5,5)">
+        <rect width="155" height="105" fill="#ffe0e0" stroke="#cc3333" stroke-width="1.5"/>
         <text x="77" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#cc3333">HP CRITICAL (&lt;30)</text>
         <line x1="15" y1="24" x2="140" y2="24" stroke="#cc3333" stroke-width="0.5" opacity="0.3"/>
         <text x="77" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#333" font-weight="bold">Eat ANYTHING nearby!</text>
@@ -414,8 +540,8 @@
         <text x="77" y="96" text-anchor="middle" font-family="Inter,sans-serif" font-size="6" fill="#cc3333">You have ~20 sec to live!</text>
       </g>
       <!-- Panel 2: HP Safe -->
-      <g transform="translate(172,5)" filter="url(#eat-shadow)">
-        <rect width="155" height="105" rx="6" fill="url(#eat-safe-bg)" stroke="#c0a020" stroke-width="1.5"/>
+      <g transform="translate(172,5)">
+        <rect width="155" height="105" fill="#fff8e0" stroke="#c0a020" stroke-width="1.5"/>
         <text x="77" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#a09020">HP SAFE (30-60)</text>
         <line x1="15" y1="24" x2="140" y2="24" stroke="#c0a020" stroke-width="0.5" opacity="0.3"/>
         <text x="77" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#333" font-weight="bold">Balanced approach</text>
@@ -425,8 +551,8 @@
         <text x="77" y="96" text-anchor="middle" font-family="Inter,sans-serif" font-size="6" fill="#a09020">NO3 = best all-rounder</text>
       </g>
       <!-- Panel 3: HP High -->
-      <g transform="translate(339,5)" filter="url(#eat-shadow)">
-        <rect width="155" height="105" rx="6" fill="url(#eat-high-bg)" stroke="#3a7a5a" stroke-width="1.5"/>
+      <g transform="translate(339,5)">
+        <rect width="155" height="105" fill="#e0ffe0" stroke="#3a7a5a" stroke-width="1.5"/>
         <text x="77" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#3a7a5a">HP HIGH (&gt;60)</text>
         <line x1="15" y1="24" x2="140" y2="24" stroke="#3a7a5a" stroke-width="0.5" opacity="0.3"/>
         <text x="77" y="38" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#333" font-weight="bold">CH4 for MAX growth!</text>
@@ -609,62 +735,115 @@
     <div class="star" style="top:80%;left:80%;animation-delay:0.6s"></div>
   </div>
 
-  <!-- Beautiful organic ARKE illustration -->
-  <svg width="160" height="160" viewBox="0 0 160 160" class="organism-art" style="z-index:2; margin-bottom:30px;">
-    <defs>
-      <radialGradient id="bc-body" cx="45%" cy="38%" r="55%">
-        <stop offset="0%" stop-color="#5ad0d0"/><stop offset="60%" stop-color="#2a8a8a"/><stop offset="100%" stop-color="#1a5a5a"/>
-      </radialGradient>
-      <radialGradient id="bc-visor" cx="50%" cy="40%" r="50%">
-        <stop offset="0%" stop-color="#2a3a6a"/><stop offset="100%" stop-color="#0a1a3a"/>
-      </radialGradient>
-      <radialGradient id="bc-eye" cx="40%" cy="35%" r="50%">
-        <stop offset="0%" stop-color="#8fffff"/><stop offset="50%" stop-color="#4aeaff"/><stop offset="100%" stop-color="#2090c0"/>
-      </radialGradient>
-      <radialGradient id="bc-glow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/><stop offset="100%" stop-color="#4aeaff" stop-opacity="0"/>
-      </radialGradient>
-      <filter id="bc-outer-glow" x="-40%" y="-40%" width="180%" height="180%">
-        <feGaussianBlur stdDeviation="6" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="bc-eye-glow" x="-80%" y="-80%" width="260%" height="260%">
-        <feGaussianBlur stdDeviation="3" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-    </defs>
-    <!-- Outer glow aura -->
-    <ellipse cx="80" cy="80" rx="55" ry="68" fill="url(#bc-glow)"/>
-    <!-- Main body (oval) -->
-    <ellipse cx="80" cy="80" rx="35" ry="48" fill="url(#bc-body)" filter="url(#bc-outer-glow)"/>
-    <!-- Membrane highlight -->
-    <ellipse cx="72" cy="70" rx="18" ry="30" fill="#3ab0b0" opacity="0.2"/>
-    <!-- Visor area -->
-    <ellipse cx="80" cy="66" rx="20" ry="14" fill="url(#bc-visor)"/>
-    <!-- Visor shine -->
-    <ellipse cx="80" cy="62" rx="14" ry="5" fill="#3ac5c9" opacity="0.15"/>
-    <!-- Eyes (glowing) -->
-    <circle cx="72" cy="66" r="5" fill="url(#bc-eye)" filter="url(#bc-eye-glow)"/>
-    <circle cx="88" cy="66" r="5" fill="url(#bc-eye)" filter="url(#bc-eye-glow)"/>
+  <!-- Pixel-art ARKE illustration -->
+  <svg width="160" height="160" viewBox="0 0 160 160" class="organism-art" style="z-index:2; margin-bottom:30px; image-rendering:pixelated;">
+    <!-- Outer glow aura (rect-based) -->
+    <rect x="20" y="8" width="120" height="144" fill="#4aeaff" opacity="0.05"/>
+    <rect x="28" y="16" width="104" height="128" fill="#4aeaff" opacity="0.08"/>
+
+    <!-- Main body (pixel art using 8px grid) -->
+    <!-- Row 1 (top of helmet) -->
+    <rect x="56" y="24" width="8" height="8" fill="#7888a0"/>
+    <rect x="64" y="24" width="8" height="8" fill="#7888a0"/>
+    <rect x="72" y="24" width="8" height="8" fill="#7888a0"/>
+    <rect x="80" y="24" width="8" height="8" fill="#7888a0"/>
+    <rect x="88" y="24" width="8" height="8" fill="#7888a0"/>
+    <!-- Row 2 (helmet wider) -->
+    <rect x="48" y="32" width="8" height="8" fill="#7888a0"/>
+    <rect x="56" y="32" width="8" height="8" fill="#7888a0"/>
+    <rect x="64" y="32" width="8" height="8" fill="#7888a0"/>
+    <rect x="72" y="32" width="8" height="8" fill="#7888a0"/>
+    <rect x="80" y="32" width="8" height="8" fill="#7888a0"/>
+    <rect x="88" y="32" width="8" height="8" fill="#7888a0"/>
+    <rect x="96" y="32" width="8" height="8" fill="#7888a0"/>
+    <!-- Row 3 (visor row with eyes) -->
+    <rect x="48" y="40" width="8" height="8" fill="#1a2a4a"/>
+    <rect x="56" y="40" width="8" height="8" fill="#1a2a4a"/>
+    <rect x="64" y="40" width="8" height="8" fill="#40c8d8"/>
+    <rect x="72" y="40" width="8" height="8" fill="#1a2a4a"/>
+    <rect x="80" y="40" width="8" height="8" fill="#40c8d8"/>
+    <rect x="88" y="40" width="8" height="8" fill="#1a2a4a"/>
+    <rect x="96" y="40" width="8" height="8" fill="#1a2a4a"/>
     <!-- Eye highlights -->
-    <circle cx="70" cy="64" r="1.5" fill="white" opacity="0.7"/>
-    <circle cx="86" cy="64" r="1.5" fill="white" opacity="0.7"/>
-    <!-- Flagella (left, smooth bezier curves) -->
-    <path d="M48,72 Q36,78 28,88 Q22,96 24,104" fill="none" stroke="#1a8a8a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
-    <path d="M46,78 Q38,84 32,92 Q28,98 30,106" fill="none" stroke="#1a7a7a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-    <!-- Flagella (right) -->
-    <path d="M112,72 Q124,78 132,88 Q138,96 136,104" fill="none" stroke="#1a8a8a" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
-    <path d="M114,78 Q122,84 128,92 Q132,98 130,106" fill="none" stroke="#1a7a7a" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
-    <!-- Top cilia -->
-    <path d="M70,34 Q68,26 72,20" fill="none" stroke="#2a9a9a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-    <path d="M80,32 Q80,22 82,16" fill="none" stroke="#2a9a9a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-    <path d="M90,34 Q92,26 88,20" fill="none" stroke="#2a9a9a" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
-    <!-- Body texture dots -->
-    <circle cx="68" cy="90" r="2" fill="#3ab0b0" opacity="0.3"/>
-    <circle cx="80" cy="95" r="2" fill="#3ab0b0" opacity="0.3"/>
-    <circle cx="92" cy="90" r="2" fill="#3ab0b0" opacity="0.3"/>
-    <circle cx="75" cy="104" r="1.5" fill="#3ab0b0" opacity="0.2"/>
-    <circle cx="85" cy="104" r="1.5" fill="#3ab0b0" opacity="0.2"/>
+    <rect x="64" y="40" width="4" height="4" fill="#8fffff"/>
+    <rect x="80" y="40" width="4" height="4" fill="#8fffff"/>
+    <!-- Row 4 (upper body) -->
+    <rect x="48" y="48" width="8" height="8" fill="#2acfaf"/>
+    <rect x="56" y="48" width="8" height="8" fill="#3ad8b8"/>
+    <rect x="64" y="48" width="8" height="8" fill="#2acfaf"/>
+    <rect x="72" y="48" width="8" height="8" fill="#3ad8b8"/>
+    <rect x="80" y="48" width="8" height="8" fill="#2acfaf"/>
+    <rect x="88" y="48" width="8" height="8" fill="#3ad8b8"/>
+    <rect x="96" y="48" width="8" height="8" fill="#2acfaf"/>
+    <!-- Row 5 (mid body) -->
+    <rect x="48" y="56" width="8" height="8" fill="#2acfaf"/>
+    <rect x="56" y="56" width="8" height="8" fill="#2acfaf"/>
+    <rect x="64" y="56" width="8" height="8" fill="#3ad8b8"/>
+    <rect x="72" y="56" width="8" height="8" fill="#2acfaf"/>
+    <rect x="80" y="56" width="8" height="8" fill="#3ad8b8"/>
+    <rect x="88" y="56" width="8" height="8" fill="#2acfaf"/>
+    <rect x="96" y="56" width="8" height="8" fill="#2acfaf"/>
+    <!-- Row 6 (body widens) -->
+    <rect x="44" y="64" width="8" height="8" fill="#1a8a8a"/>
+    <rect x="52" y="64" width="8" height="8" fill="#2acfaf"/>
+    <rect x="60" y="64" width="8" height="8" fill="#2acfaf"/>
+    <rect x="68" y="64" width="8" height="8" fill="#2acfaf"/>
+    <rect x="76" y="64" width="8" height="8" fill="#2acfaf"/>
+    <rect x="84" y="64" width="8" height="8" fill="#2acfaf"/>
+    <rect x="92" y="64" width="8" height="8" fill="#2acfaf"/>
+    <rect x="100" y="64" width="8" height="8" fill="#1a8a8a"/>
+    <!-- Row 7 (body) -->
+    <rect x="44" y="72" width="8" height="8" fill="#1a8a8a"/>
+    <rect x="52" y="72" width="8" height="8" fill="#2acfaf"/>
+    <rect x="60" y="72" width="8" height="8" fill="#2a9a9a"/>
+    <rect x="68" y="72" width="8" height="8" fill="#2acfaf"/>
+    <rect x="76" y="72" width="8" height="8" fill="#2a9a9a"/>
+    <rect x="84" y="72" width="8" height="8" fill="#2acfaf"/>
+    <rect x="92" y="72" width="8" height="8" fill="#2acfaf"/>
+    <rect x="100" y="72" width="8" height="8" fill="#1a8a8a"/>
+    <!-- Row 8 (lower body narrows) -->
+    <rect x="48" y="80" width="8" height="8" fill="#1a7a7a"/>
+    <rect x="56" y="80" width="8" height="8" fill="#2acfaf"/>
+    <rect x="64" y="80" width="8" height="8" fill="#2acfaf"/>
+    <rect x="72" y="80" width="8" height="8" fill="#2a9a9a"/>
+    <rect x="80" y="80" width="8" height="8" fill="#2acfaf"/>
+    <rect x="88" y="80" width="8" height="8" fill="#2acfaf"/>
+    <rect x="96" y="80" width="8" height="8" fill="#1a7a7a"/>
+    <!-- Row 9 (body bottom) -->
+    <rect x="56" y="88" width="8" height="8" fill="#1a6a6a"/>
+    <rect x="64" y="88" width="8" height="8" fill="#2acfaf"/>
+    <rect x="72" y="88" width="8" height="8" fill="#2acfaf"/>
+    <rect x="80" y="88" width="8" height="8" fill="#2acfaf"/>
+    <rect x="88" y="88" width="8" height="8" fill="#1a6a6a"/>
+    <!-- Row 10 (bottom tip) -->
+    <rect x="64" y="96" width="8" height="8" fill="#1a5a5a"/>
+    <rect x="72" y="96" width="8" height="8" fill="#1a6a6a"/>
+    <rect x="80" y="96" width="8" height="8" fill="#1a5a5a"/>
+
+    <!-- Flagella left (pixel stair-step) -->
+    <rect x="36" y="56" width="8" height="4" fill="#1a8a8a" opacity="0.8"/>
+    <rect x="28" y="60" width="8" height="4" fill="#1a8a8a" opacity="0.7"/>
+    <rect x="24" y="64" width="8" height="4" fill="#1a7a7a" opacity="0.6"/>
+    <rect x="20" y="68" width="8" height="4" fill="#1a7a7a" opacity="0.5"/>
+    <rect x="24" y="72" width="8" height="4" fill="#1a7a7a" opacity="0.4"/>
+    <!-- Flagella right (pixel stair-step) -->
+    <rect x="112" y="56" width="8" height="4" fill="#1a8a8a" opacity="0.8"/>
+    <rect x="120" y="60" width="8" height="4" fill="#1a8a8a" opacity="0.7"/>
+    <rect x="124" y="64" width="8" height="4" fill="#1a7a7a" opacity="0.6"/>
+    <rect x="128" y="68" width="8" height="4" fill="#1a7a7a" opacity="0.5"/>
+    <rect x="124" y="72" width="8" height="4" fill="#1a7a7a" opacity="0.4"/>
+
+    <!-- Top cilia (pixel) -->
+    <rect x="64" y="16" width="4" height="8" fill="#2a9a9a" opacity="0.5"/>
+    <rect x="76" y="12" width="4" height="12" fill="#2a9a9a" opacity="0.5"/>
+    <rect x="88" y="16" width="4" height="8" fill="#2a9a9a" opacity="0.5"/>
+
+    <!-- Body texture dots (pixel) -->
+    <rect x="60" y="72" width="4" height="4" fill="#3ab0b0" opacity="0.3"/>
+    <rect x="76" y="76" width="4" height="4" fill="#3ab0b0" opacity="0.3"/>
+    <rect x="88" y="72" width="4" height="4" fill="#3ab0b0" opacity="0.3"/>
+    <rect x="68" y="84" width="4" height="4" fill="#3ab0b0" opacity="0.2"/>
+    <rect x="80" y="84" width="4" height="4" fill="#3ab0b0" opacity="0.2"/>
   </svg>
 
   <div style="z-index:2; text-align:center;">
