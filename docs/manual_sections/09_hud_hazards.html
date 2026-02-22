@@ -1,0 +1,476 @@
+<!-- Section 09: HUD, Hazards, Tips & Science -->
+<div class="page" id="hud">
+  <h1 class="section-number">SECTION 8</h1>
+  <h1 class="section-title">The HUD &amp; Interface</h1>
+
+  <p>
+    The Heads-Up Display (HUD) shows everything you need to survive. Learn to read it at a glance!
+  </p>
+
+  <!-- HUD Mockup -->
+  <div class="hud-mockup">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
+      <!-- Left: Status bars -->
+      <div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <span style="color:#aaa;font-size:8pt;width:20px;">HP</span>
+          <div style="width:120px;height:10px;background:#1a1a2b;border-radius:2px;">
+            <div style="width:75%;height:100%;background:#44df5f;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:7pt;color:#aaa;">75</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <span style="color:#aaa;font-size:8pt;width:20px;">EN</span>
+          <div style="width:120px;height:10px;background:#1a1a2b;border-radius:2px;">
+            <div style="width:60%;height:100%;background:#5fa0f0;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:7pt;color:#aaa;">60</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="color:#aaa;font-size:8pt;width:20px;">GR</span>
+          <div style="width:120px;height:10px;background:#1a1a2b;border-radius:2px;">
+            <div style="width:88%;height:100%;background:#5ff050;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:7pt;color:#aaa;">88</span>
+        </div>
+      </div>
+
+      <!-- Center: Colony progress -->
+      <div style="text-align:center;">
+        <div style="font-size:8pt;color:#aaa;">Colony</div>
+        <div style="font-size:10pt;color:white;font-weight:bold;">3 / 5</div>
+        <div style="font-size:7pt;color:#4fdf6f;margin-top:4px;">IN &rarr;&rarr;&rarr; OUT</div>
+      </div>
+
+      <!-- Center: Redox info -->
+      <div style="font-size:7pt;">
+        <div style="color:#aaa;margin-bottom:2px;">Available:</div>
+        <div style="color:#4fa4ff;">O2 +20</div>
+        <div style="color:#4fdf6f;">NO3 +15</div>
+        <div style="color:#ff4f4f;">CH4 +5</div>
+      </div>
+
+      <!-- Right: Score -->
+      <div style="text-align:right;">
+        <div style="font-size:8pt;color:#ffd700;">Score: 1,250</div>
+        <div style="font-size:7pt;color:#ff4f4f;">CH4: 8</div>
+        <div style="font-size:7pt;color:#aaa;">Lv2</div>
+      </div>
+    </div>
+
+    <!-- Bottom separator -->
+    <div style="border-top:1px solid #3a3a6a; padding-top:4px; font-size:7pt; color:#888; display:flex; justify-content:space-between;">
+      <span>SHIFT: ride flow</span>
+      <span>Q: science mode</span>
+      <span>ESC: pause</span>
+    </div>
+  </div>
+
+  <table style="font-size:9pt;">
+    <tr><th>Element</th><th>Location</th><th>What It Shows</th></tr>
+    <tr><td><strong style="color:#44df5f;">HP Bar</strong></td><td>Bottom-left</td><td>Health. Green &gt;60, Yellow 35-60, Orange 15-35, <span style="color:red;">Red &lt;15 (flashing!)</span></td></tr>
+    <tr><td><strong style="color:#5fa0f0;">EN Bar</strong></td><td>Bottom-left</td><td>Energy for flow riding. Drains at 0.8/sec.</td></tr>
+    <tr><td><strong style="color:#5ff050;">GR Bar</strong></td><td>Bottom-left</td><td>Growth toward division. <span style="color:#c0c020;">Flashes yellow when full (SPACE!)</span></td></tr>
+    <tr><td><strong>Colony X/Y</strong></td><td>Center-left</td><td>Current colonies placed / goal needed to win</td></tr>
+    <tr><td><strong>Flow Compass</strong></td><td>Center</td><td>IN &rarr; OUT shows flow direction; TOXIC warning if present</td></tr>
+    <tr><td><strong>Redox List</strong></td><td>Center-right</td><td>Available substrates and their energy values</td></tr>
+    <tr><td><strong style="color:#ffd700;">Score</strong></td><td>Top-right</td><td>Accumulated points this level</td></tr>
+    <tr><td><strong style="color:#ff4f4f;">CH4 Count</strong></td><td>Right</td><td>Methane consumed (climate impact tracker)</td></tr>
+    <tr><td><strong>Level #</strong></td><td>Right</td><td>Current level number</td></tr>
+  </table>
+
+  <h2>The Minimap</h2>
+
+  <div style="display:flex; gap:16px; align-items:flex-start; margin:10px 0;">
+    <div style="flex-shrink:0;">
+      <!-- Minimap mockup -->
+      <svg width="140" height="90" viewBox="0 0 84 52" style="border:2px solid #3a3a6a; border-radius:4px; background:#0a0a1a;">
+        <!-- Grains -->
+        <circle cx="10" cy="8" r="6" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="30" cy="44" r="8" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="55" cy="10" r="7" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="75" cy="40" r="5" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="20" cy="30" r="4" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="65" cy="28" r="6" fill="#7a5a2a" opacity="0.8"/>
+        <!-- Toxic zones -->
+        <rect x="35" y="15" width="8" height="6" fill="#c060c0" opacity="0.5"/>
+        <rect x="45" y="35" width="6" height="5" fill="#c060c0" opacity="0.5"/>
+        <!-- Colonies (green dots) -->
+        <circle cx="25" cy="18" r="2" fill="#4fdf6f"/>
+        <circle cx="42" cy="28" r="2" fill="#4fdf6f"/>
+        <!-- Player (white blinking) -->
+        <circle cx="38" cy="22" r="2" fill="white"/>
+        <!-- Outlet -->
+        <rect x="82" y="22" width="2" height="8" fill="#4fdf6f" opacity="0.5"/>
+      </svg>
+    </div>
+    <div style="font-size:10pt;">
+      <p>The minimap appears in the <strong>top-right corner</strong> during gameplay. It shows:</p>
+      <ul style="margin-left:16px; font-size:9pt;">
+        <li><span style="color:#7a5a2a;font-weight:bold;">Brown</span> = Rock grains (impassable)</li>
+        <li><span style="color:#c060c0;font-weight:bold;">Purple</span> = Toxic zones (danger!)</li>
+        <li><span style="color:#4fdf6f;font-weight:bold;">Green dots</span> = Your colonies</li>
+        <li><span style="font-weight:bold;">White dot</span> = ARKE (you, blinking)</li>
+        <li><span style="color:#4fdf6f;font-weight:bold;">Green edge</span> = Outlet</li>
+      </ul>
+      <p style="font-size:9pt; margin-top:4px; color:#888;">
+        Use the minimap to plan routes, avoid toxic zones, and find open pore space for colonies.
+      </p>
+    </div>
+  </div>
+
+  <h2>Science Mode (Press Q)</h2>
+  <div class="info-box science">
+    <div class="info-box-title" style="color:#4060a0;">SCIENCE OVERLAY</div>
+    <p style="font-size:10pt;">
+      Press <strong>Q</strong> to toggle the science overlay. It shows:
+    </p>
+    <ul style="margin-left:16px; font-size:9pt;">
+      <li><strong>Flow direction arrows</strong> on every tile with water current</li>
+      <li><strong>Heat map</strong>: Blue (slow) &rarr; Cyan &rarr; Green &rarr; Yellow (fast)</li>
+      <li><strong>Speed labels</strong> showing numeric flow values</li>
+      <li><strong>Tile type labels</strong> (PORE, FAST, TOXIC, INLET, etc.)</li>
+    </ul>
+    <p style="font-size:9pt; margin-top:4px;">
+      Use this to plan flow-riding routes and understand substrate delivery patterns!
+    </p>
+  </div>
+
+  <p class="page-number right">16</p>
+</div>
+
+<!-- Hazards & Dangers -->
+<div class="page" id="hazards">
+  <h1 class="section-number">SECTION 9</h1>
+  <h1 class="section-title">Hazards &amp; Dangers</h1>
+
+  <h2 style="color:#cc3333;">Beware! The Following Are Deadly:</h2>
+
+  <!-- Starvation -->
+  <div class="char-card" style="border-color:#cc3333;">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Dying ARKE -->
+        <rect x="5" y="4" width="6" height="8" fill="#1a4a4a" opacity="0.6"/>
+        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="6" width="1" height="1" fill="#ff4444" opacity="0.7"/>
+        <rect x="9" y="6" width="1" height="1" fill="#ff4444" opacity="0.7"/>
+        <!-- Red flashing edge -->
+        <rect x="0" y="0" width="16" height="1" fill="#ff0000" opacity="0.4"/>
+        <rect x="0" y="15" width="16" height="1" fill="#ff0000" opacity="0.4"/>
+        <rect x="0" y="0" width="1" height="16" fill="#ff0000" opacity="0.4"/>
+        <rect x="15" y="0" width="1" height="16" fill="#ff0000" opacity="0.4"/>
+        <!-- Skull icon -->
+        <rect x="6" y="10" width="4" height="3" fill="#ff4444" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#cc3333;">STARVATION</div>
+      <div class="char-desc">
+        Your Health drains at <strong>1.5 HP per second</strong>, always. If you stop eating,
+        you die in about 67 seconds. Screen edges flash red when HP drops below 30.
+        <strong>"STARVING!"</strong> text appears as a warning.
+      </div>
+      <div class="char-stats" style="color:#cc3333;">
+        DAMAGE: -1.5 HP/sec (constant) &bull; SCREEN: Red flash when HP &lt; 30
+      </div>
+    </div>
+  </div>
+
+  <!-- Toxic Zones -->
+  <div class="char-card" style="border-color:#c060c0;">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <rect width="16" height="16" fill="#2a0a2a"/>
+        <!-- Toxic particles rising -->
+        <rect x="3" y="12" width="1" height="1" fill="#ff80ff" opacity="0.8"/>
+        <rect x="7" y="9" width="1" height="1" fill="#ff80ff" opacity="0.6"/>
+        <rect x="11" y="11" width="1" height="1" fill="#ff80ff" opacity="0.7"/>
+        <rect x="5" y="6" width="1" height="1" fill="#ff80ff" opacity="0.4"/>
+        <rect x="9" y="4" width="1" height="1" fill="#ff80ff" opacity="0.3"/>
+        <!-- Toxic border pulse -->
+        <rect x="0" y="0" width="16" height="1" fill="#c060c0" opacity="0.6"/>
+        <rect x="0" y="15" width="16" height="1" fill="#c060c0" opacity="0.6"/>
+        <rect x="0" y="0" width="1" height="16" fill="#c060c0" opacity="0.6"/>
+        <rect x="15" y="0" width="1" height="16" fill="#c060c0" opacity="0.6"/>
+        <!-- H2S label -->
+        <text x="8" y="10" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="2.5" fill="#ff80ff">H2S</text>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#c060c0;">TOXIC ZONES (H<sub>2</sub>S)</div>
+      <div class="char-desc">
+        Purple/magenta tiles that deal <strong>20 HP per second</strong> while standing on them.
+        Combined with starvation, that's <strong>21.5 HP/sec total</strong>! Visible on the minimap
+        as purple dots. Cross quickly or find alternate routes.
+      </div>
+      <div class="char-stats" style="color:#c060c0;">
+        DAMAGE: -20 HP/sec &bull; LEVELS: 5-10 &bull; COVERAGE: 10-25%
+      </div>
+    </div>
+  </div>
+
+  <!-- Rivals (food competition) -->
+  <div class="char-card" style="border-color:#cc3333;">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Multiple rivals eating -->
+        <rect x="3" y="6" width="3" height="4" fill="#8a2a2a"/>
+        <rect x="4" y="7" width="1" height="1" fill="#ff6666"/>
+        <rect x="7" y="4" width="3" height="4" fill="#8a2a2a"/>
+        <rect x="8" y="5" width="1" height="1" fill="#ff6666"/>
+        <rect x="11" y="7" width="3" height="4" fill="#8a2a2a"/>
+        <rect x="12" y="8" width="1" height="1" fill="#ff6666"/>
+        <!-- Food being consumed -->
+        <circle cx="4" cy="12" r="1.5" fill="#4fdf6f" opacity="0.3"/>
+        <line x1="4" y1="12" x2="4" y2="10" stroke="#ff0000" stroke-width="0.3"/>
+        <circle cx="8" cy="11" r="1.5" fill="#ff4f4f" opacity="0.3"/>
+        <line x1="8" y1="11" x2="8" y2="8" stroke="#ff0000" stroke-width="0.3"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#cc3333;">FOOD COMPETITION (RIVALS)</div>
+      <div class="char-desc">
+        Rivals consume substrates <strong>instantly on contact</strong>, just like you. They can't
+        be killed or stopped. They sense food from 12 tiles away and become more aggressive when
+        hungry. More rivals = less food = faster starvation.
+      </div>
+      <div class="char-stats" style="color:#cc3333;">
+        INDIRECT KILL &bull; RIVALS: 0-5 per level &bull; INVULNERABLE
+      </div>
+    </div>
+  </div>
+
+  <!-- Dead-end pores -->
+  <div class="info-box warning" style="margin-top:12px;">
+    <div class="info-box-title" style="color:#c05030;">DEAD-END PORES</div>
+    <p style="font-size:10pt;">
+      Some corridors lead nowhere! If you wander into a dead end, you waste precious time
+      backtracking while starvation continues. <strong>Use the minimap and Science Mode (Q)</strong>
+      to identify dead ends before entering. Tiles with no flow arrows are likely dead ends.
+    </p>
+  </div>
+
+  <p class="page-number left">17</p>
+</div>
+
+<!-- Tips, Scoring & Science -->
+<div class="page" id="tips">
+  <h1 class="section-number">SECTION 10</h1>
+  <h1 class="section-title">Tips &amp; Strategies</h1>
+
+  <div class="deco-border">
+    <h2 style="margin-top:0;">Survival Tips</h2>
+    <div class="two-col">
+      <div>
+        <h3>Early Game (Levels 1-4)</h3>
+        <ul style="font-size:9pt; margin-left:16px; line-height:1.6;">
+          <li>Learn the controls in Level 1 with no pressure</li>
+          <li>Always keep HP above 50 as a safety margin</li>
+          <li>Eat O<sub>2</sub> when available&mdash;it's the best energy source</li>
+          <li>Mix CH<sub>4</sub> (growth) with NO<sub>3</sub> (balanced)</li>
+          <li>Follow the flow arrows to find substrate-rich zones</li>
+          <li>Use the minimap to plan your route</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Late Game (Levels 5-10)</h3>
+        <ul style="font-size:9pt; margin-left:16px; line-height:1.6;">
+          <li>Master SHIFT (flow riding)&mdash;it's essential!</li>
+          <li>Check minimap for toxic zones BEFORE moving</li>
+          <li>Use Science Mode (Q) to see flow patterns</li>
+          <li>Race rivals to substrate spawn points near INLET</li>
+          <li>Place colonies strategically near food-rich areas</li>
+          <li>Cross toxic zones only when HP is high (&gt;70)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>The Art of Efficient Eating</h2>
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:10px 0;">
+    <svg width="100%" height="100" viewBox="0 0 480 100">
+      <!-- Strategy 1 -->
+      <g transform="translate(0,5)">
+        <rect x="5" y="0" width="145" height="85" rx="4" fill="#f8f4ea" stroke="#3a3a4a"/>
+        <text x="77" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#cc3333">HP CRITICAL (&lt;30)</text>
+        <text x="77" y="32" text-anchor="middle" font-size="7" fill="#333">Eat ANYTHING nearby!</text>
+        <text x="77" y="44" text-anchor="middle" font-size="7" fill="#333">Prioritize: O2 &gt; NO3 &gt; Fe</text>
+        <text x="77" y="60" text-anchor="middle" font-size="6" fill="#888">Survival first.</text>
+        <text x="77" y="72" text-anchor="middle" font-size="6" fill="#888">Growth can wait.</text>
+      </g>
+      <!-- Strategy 2 -->
+      <g transform="translate(165,5)">
+        <rect x="5" y="0" width="145" height="85" rx="4" fill="#f8f8ea" stroke="#3a3a4a"/>
+        <text x="77" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#c0c020">HP SAFE (30-60)</text>
+        <text x="77" y="32" text-anchor="middle" font-size="7" fill="#333">Balanced approach:</text>
+        <text x="77" y="44" text-anchor="middle" font-size="7" fill="#333">NO3 for HP + Growth</text>
+        <text x="77" y="60" text-anchor="middle" font-size="6" fill="#888">CH4 when HP &gt; 50</text>
+        <text x="77" y="72" text-anchor="middle" font-size="6" fill="#888">Keep building GR bar.</text>
+      </g>
+      <!-- Strategy 3 -->
+      <g transform="translate(325,5)">
+        <rect x="5" y="0" width="145" height="85" rx="4" fill="#eaf8ea" stroke="#3a7a5a"/>
+        <text x="77" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#3a7a5a">HP HIGH (&gt;60)</text>
+        <text x="77" y="32" text-anchor="middle" font-size="7" fill="#333">CH4 for MAX growth!</text>
+        <text x="77" y="44" text-anchor="middle" font-size="7" fill="#333">4 CH4 = full GR bar</text>
+        <text x="77" y="60" text-anchor="middle" font-size="6" fill="#888">Sprint for division.</text>
+        <text x="77" y="72" text-anchor="middle" font-size="6" fill="#888">Fastest colony path.</text>
+      </g>
+    </svg>
+  </div>
+
+  <h2>Scoring Guide</h2>
+  <table>
+    <tr><th>Action</th><th>Points</th><th>Notes</th></tr>
+    <tr><td>Eat any substrate</td><td>+10</td><td>Base score for all types</td></tr>
+    <tr><td style="color:#ff4f4f;">Eat CH<sub>4</sub> (methane)</td><td style="color:#ff4f4f;">+35</td><td>+10 base +25 climate bonus</td></tr>
+    <tr><td style="color:#4fdf6f;">Eat NO<sub>3</sub> (nitrate)</td><td style="color:#4fdf6f;">+25</td><td>+10 base +15 climate bonus</td></tr>
+    <tr><td style="color:#3a7a5a;">Place colony</td><td style="color:#3a7a5a;">+100</td><td>Each division</td></tr>
+    <tr><td style="color:#ffd700;">Complete level</td><td style="color:#ffd700;">+1,000</td><td>Reach colony goal</td></tr>
+  </table>
+
+  <div class="info-box tip">
+    <div class="info-box-title" style="color:#3a8a4a;">MAXIMIZE YOUR SCORE</div>
+    <p style="font-size:10pt;">
+      CH<sub>4</sub> gives the most points per eat (35 pts) AND the most growth (+25 GR).
+      Eating 4 methane to divide gives 140 pts from eating + 100 pts from colony = <strong>240 pts
+      per division cycle</strong>. That's the fastest score per cycle in the game!
+    </p>
+  </div>
+
+  <p class="page-number right">18</p>
+</div>
+
+<!-- Science Facts -->
+<div class="page" id="science">
+  <h1 class="section-number">SECTION 11</h1>
+  <h1 class="section-title">The Science Behind ARKE</h1>
+
+  <div class="info-box science" style="margin-bottom:14px;">
+    <div class="info-box-title" style="color:#4060a0;">REAL SCIENCE, REAL IMPACT</div>
+    <p style="font-size:10pt;">
+      Every mechanic in ARKE is based on real biogeochemistry studied by the CompLaB3D
+      research team at the University of Georgia. Here are the science facts you unlock
+      after completing each level:
+    </p>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1fr; gap:8px;">
+
+    <div style="background:white; border-left:4px solid #4fa4ff; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#4fa4ff;">LEVEL 1: THE REDOX LADDER</div>
+      <p style="font-size:9pt;margin-top:4px;">Microbes use chemicals in a strict thermodynamic order:
+      O<sub>2</sub> &rarr; NO<sub>3</sub> &rarr; Mn(IV) &rarr; Fe(III) &rarr; SO<sub>4</sub> &rarr; CH<sub>4</sub>.
+      Each step yields less energy. This "redox ladder" governs all subsurface life.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #4fdf6f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#4fdf6f;">LEVEL 2: METHANOTROPHY</div>
+      <p style="font-size:9pt;margin-top:4px;">Methanotrophic archaea like ARKE consume methane (CH<sub>4</sub>)
+      before it reaches the atmosphere. They prevent ~90% of ocean methane from escaping.
+      Without them, Earth would be 3-5&deg;C warmer.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #4fdf6f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#3a7a5a;">LEVEL 3: DENITRIFICATION</div>
+      <p style="font-size:9pt;margin-top:4px;">Denitrifying microbes convert NO<sub>3</sub>&rarr;N<sub>2</sub> (harmless gas).
+      Without them, nitrate becomes N<sub>2</sub>O (nitrous oxide), a greenhouse gas 300&times; more
+      potent than CO<sub>2</sub> that also destroys the ozone layer.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #ef8f3f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#ef8f3f;">LEVEL 4: DIFFUSION vs ADVECTION</div>
+      <p style="font-size:9pt;margin-top:4px;">The P&eacute;clet number (Pe) determines whether chemicals
+      move by diffusion (random molecular motion) or advection (bulk water flow). In tight pores,
+      diffusion dominates. In wide channels, flow carries everything.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #c060c0; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#c060c0;">LEVEL 5: MONOD KINETICS</div>
+      <p style="font-size:9pt;margin-top:4px;">Growth rate = &mu;<sub>max</sub> &times; S/(K<sub>s</sub>+S).
+      When substrate S is abundant, growth is maximum. When S is scarce, growth slows.
+      The half-saturation constant K<sub>s</sub> determines how efficiently a microbe captures food.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #3a7a5a; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#3a7a5a;">LEVEL 6: BIOFILM FORMATION</div>
+      <p style="font-size:9pt;margin-top:4px;">Biofilms are communities of microbes embedded in a protective matrix.
+      CompLaB3D models biofilm spreading using Cellular Automata (CA): when local biomass exceeds a
+      threshold, it spreads to adjacent cells&mdash;just like ARKE's colony placement!</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #ff4f4f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#ff4f4f;">LEVEL 7: ANAEROBIC METHANE OXIDATION</div>
+      <p style="font-size:9pt;margin-top:4px;">AOM (Anaerobic Oxidation of Methane) is performed by
+      archaea + sulfate-reducing bacteria working together. They consume CH<sub>4</sub> using SO<sub>4</sub>
+      as the oxidant, without needing any oxygen. A critical climate process.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #5a6a7a; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#5a6a7a;">LEVEL 8: PERMAFROST CARBON FEEDBACK</div>
+      <p style="font-size:9pt;margin-top:4px;">Arctic permafrost stores ~1,500 gigatons of carbon.
+      As it thaws, microbes decompose this ancient organic matter, releasing CH<sub>4</sub> and CO<sub>2</sub>.
+      Methanotrophs are the last line of defense against this carbon escaping.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #cc3333; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#cc3333;">LEVEL 9: HYDROTHERMAL CHEMISTRY</div>
+      <p style="font-size:9pt;margin-top:4px;">At ocean-floor hydrothermal vents, superheated water
+      carries dissolved metals (Fe, Mn) and gases (H<sub>2</sub>S, CH<sub>4</sub>). Chemosynthetic
+      microbes thrive here without sunlight&mdash;powered entirely by redox chemistry.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #ffd700; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#ffd700;">LEVEL 10: YOU ARE EARTH'S CLIMATE SHIELD</div>
+      <p style="font-size:9pt;margin-top:4px;">Earth's subsurface contains more microbial biomass than
+      all surface life combined. These invisible organisms regulate our atmosphere, filter our water,
+      and cycle nutrients. You played as one of them&mdash;and now you understand their vital role.</p>
+    </div>
+  </div>
+
+  <p class="page-number left">19</p>
+</div>
+
+<!-- Back cover -->
+<div class="page cover-page" id="back-cover" style="justify-content:flex-end; padding-bottom:1.5in;">
+  <div class="stars">
+    <div class="star" style="top:10%;left:20%;animation-delay:0s"></div>
+    <div class="star" style="top:25%;left:50%;animation-delay:0.8s"></div>
+    <div class="star" style="top:15%;left:75%;animation-delay:1.5s"></div>
+    <div class="star" style="top:40%;left:35%;animation-delay:0.3s"></div>
+    <div class="star" style="top:55%;left:65%;animation-delay:2.0s"></div>
+    <div class="star" style="top:70%;left:15%;animation-delay:1.2s"></div>
+    <div class="star" style="top:80%;left:80%;animation-delay:0.6s"></div>
+  </div>
+
+  <svg width="120" height="120" viewBox="0 0 16 16" class="pixel-art" style="z-index:2; margin-bottom:30px;">
+    <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+    <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+    <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+    <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+    <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+    <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+    <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+    <rect x="3" y="7" width="1" height="1" fill="#1a6a6a"/>
+    <rect x="12" y="7" width="1" height="1" fill="#1a6a6a"/>
+  </svg>
+
+  <div style="z-index:2; text-align:center;">
+    <p style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#4aeaff; letter-spacing:2px;">
+      "One microbe can become billions."
+    </p>
+    <p style="font-size:9pt; color:#888; margin-top:8px; font-style:italic;">
+      &mdash; Elder Archaeon Prime
+    </p>
+
+    <div style="margin-top:40px; padding:12px 24px; border:1px solid #3a3a6a;">
+      <p style="font-family:'Press Start 2P',monospace; font-size:7pt; color:#8888aa; letter-spacing:2px;">
+        CompLaB3D
+      </p>
+      <p style="font-size:8pt; color:#666; margin-top:4px;">
+        University of Georgia &bull; Pore-Scale Reactive Transport
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,314 @@
+<!-- Section 07: Worlds & Environments -->
+<div class="page" id="worlds">
+  <h1 class="section-number">SECTION 6</h1>
+  <h1 class="section-title">Worlds & Environments</h1>
+
+  <p>
+    ARKE's journey spans <strong>5 unique environments</strong> across <strong>10 levels</strong>,
+    each inspired by real subsurface ecosystems studied by the CompLaB3D research team.
+    Each environment has its own color palette, pore geometry, and challenges.
+  </p>
+
+  <!-- World 1: Soil Frontier -->
+  <div style="background:white; border:2px solid #7a5a2a; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <!-- Environment preview -->
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#060c18"/>
+          <!-- Soil grains -->
+          <circle cx="4" cy="4" r="3" fill="#7a5a2a"/>
+          <circle cx="4" cy="4" r="2" fill="#a48a5a" opacity="0.3"/>
+          <circle cx="14" cy="20" r="4" fill="#7a5a2a"/>
+          <circle cx="14" cy="20" r="2.5" fill="#a48a5a" opacity="0.3"/>
+          <circle cx="26" cy="6" r="3.5" fill="#7a5a2a"/>
+          <circle cx="26" cy="6" r="2" fill="#a48a5a" opacity="0.3"/>
+          <circle cx="22" cy="18" r="2.5" fill="#7a5a2a"/>
+          <circle cx="8" cy="14" r="2" fill="#7a5a2a"/>
+          <!-- Water/pore -->
+          <rect x="8" y="8" width="8" height="6" fill="#3060a0" opacity="0.2" rx="1"/>
+          <!-- Substrates -->
+          <circle cx="10" cy="10" r="0.8" fill="#4fa4ff"/>
+          <circle cx="18" cy="12" r="0.8" fill="#4fdf6f"/>
+          <circle cx="14" cy="8" r="0.8" fill="#ff4f4f"/>
+          <!-- Inlet -->
+          <rect x="0" y="10" width="2" height="4" fill="#3060a0"/>
+          <!-- Outlet -->
+          <rect x="30" y="10" width="2" height="4" fill="#4fdf6f"/>
+          <!-- ARKE -->
+          <rect x="16" y="10" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#7a5a2a; margin-bottom:4px;">
+          CHAPTER 1: THE SOIL FRONTIER
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 1-2 &bull; Environment 0</div>
+        <p style="font-size:10pt;">
+          Shallow soil with wide-open pore spaces between rounded rock grains. Water flows gently,
+          carrying abundant nutrients including <strong>oxygen</strong>. The safest environment&mdash;
+          perfect for learning the basics.
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Brown grains, tan highlights, blue water<br>
+          <strong>Geometry:</strong> Circular grains, ~65-70% porosity (lots of space)<br>
+          <strong>Substrates:</strong> O<sub>2</sub>, NO<sub>3</sub>, CH<sub>4</sub><br>
+          <strong>Hazards:</strong> None (Level 1) / 1 rival (Level 2)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World 2: Deep Sediment -->
+  <div style="background:white; border:2px solid #4a3a2a; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#030306"/>
+          <!-- Maze-like sediment walls -->
+          <rect x="0" y="0" width="4" height="24" fill="#4a3a2a"/>
+          <rect x="6" y="0" width="2" height="10" fill="#4a3a2a"/>
+          <rect x="6" y="14" width="2" height="10" fill="#4a3a2a"/>
+          <rect x="10" y="4" width="2" height="16" fill="#4a3a2a"/>
+          <rect x="14" y="0" width="2" height="8" fill="#4a3a2a"/>
+          <rect x="14" y="12" width="2" height="12" fill="#4a3a2a"/>
+          <rect x="18" y="6" width="2" height="12" fill="#4a3a2a"/>
+          <rect x="22" y="0" width="2" height="14" fill="#4a3a2a"/>
+          <rect x="22" y="18" width="2" height="6" fill="#4a3a2a"/>
+          <rect x="26" y="4" width="2" height="10" fill="#4a3a2a"/>
+          <rect x="28" y="0" width="4" height="24" fill="#4a3a2a"/>
+          <!-- Dark corridors -->
+          <rect x="4" y="10" width="2" height="4" fill="#142038" opacity="0.3"/>
+          <rect x="12" y="8" width="2" height="4" fill="#142038" opacity="0.3"/>
+          <!-- Substrates -->
+          <circle cx="5" cy="12" r="0.8" fill="#4fdf6f"/>
+          <circle cx="13" cy="10" r="0.8" fill="#ef8f3f"/>
+          <circle cx="21" cy="16" r="0.8" fill="#ff4f4f"/>
+          <!-- ARKE -->
+          <rect x="8" y="11" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#4a3a2a; margin-bottom:4px;">
+          CHAPTER 2: THE DEEP SEDIMENT
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 3-4 &bull; Environment 1</div>
+        <p style="font-size:10pt;">
+          Deep beneath the ocean floor. No oxygen here! Narrow, maze-like corridors carved through
+          compacted sediment. Flow is sluggish and food is scarce. <strong>Navigation skill</strong>
+          becomes critical.
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Very dark brown, nearly black water<br>
+          <strong>Geometry:</strong> Recursive maze algorithm, ~45-50% porosity (tight!)<br>
+          <strong>Substrates:</strong> NO<sub>3</sub>, Fe(III), Mn(IV), CH<sub>4</sub> (no O<sub>2</sub>!)<br>
+          <strong>Hazards:</strong> 2-3 rivals, slow flow, tight corridors
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World 3: Methane Seeps -->
+  <div style="background:white; border:2px solid #3a3040; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#06040a"/>
+          <!-- Purple grains -->
+          <circle cx="5" cy="5" r="3" fill="#3a3040"/>
+          <circle cx="25" cy="4" r="3.5" fill="#3a3040"/>
+          <circle cx="8" cy="19" r="3" fill="#3a3040"/>
+          <circle cx="27" cy="20" r="2.5" fill="#3a3040"/>
+          <!-- Vent channels (vertical) -->
+          <rect x="12" y="12" width="2" height="12" fill="#2a1a48" opacity="0.5"/>
+          <rect x="20" y="8" width="2" height="16" fill="#2a1a48" opacity="0.5"/>
+          <!-- Toxic zones -->
+          <rect x="14" y="6" width="4" height="3" fill="#b040a0" opacity="0.3"/>
+          <rect x="6" y="12" width="3" height="4" fill="#b040a0" opacity="0.3"/>
+          <!-- Rising CH4 -->
+          <circle cx="13" cy="18" r="0.8" fill="#ff4f4f"/>
+          <circle cx="13" cy="14" r="0.8" fill="#ff4f4f" opacity="0.7"/>
+          <circle cx="21" cy="20" r="0.8" fill="#ff4f4f"/>
+          <circle cx="21" cy="16" r="0.8" fill="#ff4f4f" opacity="0.7"/>
+          <!-- SO4 -->
+          <rect x="16" y="10" width="1.5" height="1.5" fill="#dfdf3f"/>
+          <!-- ARKE -->
+          <rect x="16" y="14" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#b040a0; margin-bottom:4px;">
+          CHAPTER 3: THE METHANE SEEPS
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 5-6 &bull; Environment 2</div>
+        <p style="font-size:10pt;">
+          Methane bubbles up through vertical vent channels. <strong>Toxic H<sub>2</sub>S zones</strong>
+          appear for the first time! Purple-tinted world with abundant CH<sub>4</sub> but
+          dangerous terrain. This is where ARKE truly becomes Earth's climate shield.
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Dark purple grains, violet water, magenta toxins<br>
+          <strong>Geometry:</strong> Soil + vertical vent channels, ~55-60% porosity<br>
+          <strong>Substrates:</strong> SO<sub>4</sub>, CH<sub>4</sub>, Fe(III)<br>
+          <strong>Hazards:</strong> 15-20% toxic zones, 2-3 rivals
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="page-number left">11</p>
+</div>
+
+<!-- Worlds page 2 -->
+<div class="page" id="worlds2">
+
+  <!-- World 4: Permafrost Edge -->
+  <div style="background:white; border:2px solid #5a6a7a; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#040810"/>
+          <!-- Layered ice/sediment -->
+          <rect x="0" y="0" width="32" height="3" fill="#5a6a7a"/>
+          <rect x="0" y="7" width="32" height="3" fill="#5a6a7a"/>
+          <rect x="0" y="14" width="32" height="3" fill="#5a6a7a"/>
+          <rect x="0" y="21" width="32" height="3" fill="#5a6a7a"/>
+          <!-- Flow channels between layers -->
+          <rect x="0" y="3" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
+          <rect x="0" y="10" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
+          <rect x="0" y="17" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
+          <!-- Vertical connectors -->
+          <rect x="8" y="3" width="2" height="4" fill="#3a5a8a" opacity="0.1"/>
+          <rect x="20" y="10" width="2" height="4" fill="#3a5a8a" opacity="0.1"/>
+          <!-- Fast flow arrows -->
+          <g fill="none" stroke="#3a5a8a" stroke-width="0.5" opacity="0.5">
+            <path d="M4,5 L10,5"/>
+            <path d="M14,5 L20,5"/>
+            <path d="M24,5 L30,5"/>
+            <path d="M4,12 L10,12"/>
+            <path d="M14,12 L20,12"/>
+          </g>
+          <!-- Substrates racing by -->
+          <circle cx="6" cy="5" r="0.8" fill="#4fa4ff"/>
+          <circle cx="16" cy="12" r="0.8" fill="#4fdf6f"/>
+          <circle cx="26" cy="5" r="0.8" fill="#ff4f4f"/>
+          <!-- Toxic -->
+          <rect x="10" y="17" width="3" height="4" fill="#70b050" opacity="0.3"/>
+          <!-- ARKE -->
+          <rect x="12" y="4" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#5a6a7a; margin-bottom:4px;">
+          CHAPTER 4: THE PERMAFROST EDGE
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 7-8 &bull; Environment 3</div>
+        <p style="font-size:10pt;">
+          Thawing permafrost releases ancient carbon. <strong>Fast horizontal flow channels</strong>
+          between ice layers demand mastery of <strong>SHIFT (flow riding)</strong>. Substrates
+          race past at high speed. Oxygen returns briefly in Level 7!
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Gray-blue grains, icy blue water, green toxins<br>
+          <strong>Geometry:</strong> Horizontal layers + vertical connectors, ~50-55% porosity<br>
+          <strong>Substrates:</strong> O<sub>2</sub> (Lv7), NO<sub>3</sub>, SO<sub>4</sub>, CH<sub>4</sub><br>
+          <strong>Hazards:</strong> 10-15% toxic zones, 3-4 rivals, fast flow (0.8-1.0&times;)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World 5: Hydrothermal Realm -->
+  <div style="background:white; border:2px solid #cc3333; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#060304"/>
+          <!-- Dark chambers -->
+          <circle cx="8" cy="8" r="5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+          <circle cx="22" cy="10" r="4" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+          <circle cx="14" cy="19" r="4.5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+          <!-- Connecting tunnels -->
+          <rect x="12" y="7" width="7" height="2" fill="#0a0608"/>
+          <rect x="13" y="12" width="2" height="5" fill="#0a0608"/>
+          <!-- Vent columns (red glow) -->
+          <rect x="6" y="12" width="2" height="12" fill="#3a1a20" opacity="0.4"/>
+          <rect x="24" y="14" width="2" height="10" fill="#3a1a20" opacity="0.4"/>
+          <!-- Toxic zones (orange heat) -->
+          <rect x="18" y="16" width="4" height="4" fill="#c07030" opacity="0.3"/>
+          <rect x="2" y="4" width="3" height="3" fill="#c07030" opacity="0.3"/>
+          <!-- Substrates -->
+          <rect x="7" y="7" width="1.5" height="1.5" fill="#dfdf3f"/>
+          <circle cx="22" cy="10" r="0.8" fill="#ef8f3f"/>
+          <circle cx="14" cy="18" r="0.8" fill="#ff4f4f"/>
+          <rect x="9" y="18" width="1.5" height="1.5" fill="#cf6fff"/>
+          <!-- ARKE -->
+          <rect x="15" y="7" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#cc3333; margin-bottom:4px;">
+          CHAPTER 5: THE HYDROTHERMAL REALM
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 9-10 &bull; Environment 4</div>
+        <p style="font-size:10pt;">
+          The deepest, most extreme environment. Chaotic chamber-and-tunnel geology near
+          hydrothermal vents. <strong>Maximum toxic coverage (25%)</strong>, extreme flow speeds,
+          and <strong>5 rivals</strong>. The full redox ladder (minus O<sub>2</sub>) is available.
+          <strong>This is the final challenge.</strong>
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Nearly black grains, dark red water, orange heat toxins<br>
+          <strong>Geometry:</strong> Circular chambers + random tunnels + vent columns<br>
+          <strong>Substrates:</strong> SO<sub>4</sub>, Fe(III), Mn(IV), CH<sub>4</sub>, NO<sub>3</sub> (Lv10)<br>
+          <strong>Hazards:</strong> 20-25% toxic, 4-5 rivals, extreme flow (1.2-1.5&times;)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World map overview -->
+  <h2>Journey Overview</h2>
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; text-align:center;">
+    <svg width="100%" height="70" viewBox="0 0 500 70">
+      <!-- Path line -->
+      <line x1="30" y1="35" x2="470" y2="35" stroke="#ccc" stroke-width="2"/>
+
+      <!-- Chapter nodes -->
+      <!-- Ch1 -->
+      <circle cx="50" cy="35" r="16" fill="#7a5a2a" stroke="#a48a5a" stroke-width="2"/>
+      <text x="50" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">1</text>
+      <text x="50" y="62" text-anchor="middle" font-size="6" fill="#7a5a2a" font-weight="bold">SOIL</text>
+      <text x="50" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 1-2</text>
+
+      <!-- Ch2 -->
+      <circle cx="155" cy="35" r="16" fill="#4a3a2a" stroke="#6a5a3a" stroke-width="2"/>
+      <text x="155" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">2</text>
+      <text x="155" y="62" text-anchor="middle" font-size="6" fill="#4a3a2a" font-weight="bold">DEEP</text>
+      <text x="155" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 3-4</text>
+
+      <!-- Ch3 -->
+      <circle cx="260" cy="35" r="16" fill="#3a3040" stroke="#b040a0" stroke-width="2"/>
+      <text x="260" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">3</text>
+      <text x="260" y="62" text-anchor="middle" font-size="6" fill="#b040a0" font-weight="bold">METHANE</text>
+      <text x="260" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 5-6</text>
+
+      <!-- Ch4 -->
+      <circle cx="365" cy="35" r="16" fill="#5a6a7a" stroke="#8a9aaa" stroke-width="2"/>
+      <text x="365" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">4</text>
+      <text x="365" y="62" text-anchor="middle" font-size="6" fill="#5a6a7a" font-weight="bold">PERMAFROST</text>
+      <text x="365" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 7-8</text>
+
+      <!-- Ch5 -->
+      <circle cx="450" cy="35" r="16" fill="#2a2a3a" stroke="#cc3333" stroke-width="2"/>
+      <text x="450" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">5</text>
+      <text x="450" y="62" text-anchor="middle" font-size="6" fill="#cc3333" font-weight="bold">HYDRO</text>
+      <text x="450" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 9-10</text>
+
+      <!-- Difficulty arrow -->
+      <text x="250" y="8" text-anchor="middle" font-size="5" fill="#aaa">DIFFICULTY &rarr;</text>
+    </svg>
+  </div>
+
+  <p class="page-number right">12</p>
+</div>

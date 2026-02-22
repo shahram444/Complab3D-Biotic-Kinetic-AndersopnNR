@@ -1,0 +1,510 @@
+/* ARKE: Guardians of Earth - Game Manual Styles */
+/* Inspired by classic NES instruction booklets */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg-dark: #0a0c1a;
+  --bg-page: #f5f0e8;
+  --bg-section: #ebe5d8;
+  --text-dark: #1a1a2a;
+  --text-light: #f0f0ff;
+  --accent-cyan: #4aeaff;
+  --accent-green: #4fdf6f;
+  --accent-red: #ff4f4f;
+  --accent-orange: #ef8f3f;
+  --accent-yellow: #dfdf3f;
+  --accent-purple: #cf6fff;
+  --accent-blue: #4fa4ff;
+  --accent-teal: #3ac5c9;
+  --grain-brown: #7a5a2a;
+  --pore-blue: #0c1420;
+  --toxic-magenta: #c060c0;
+  --biofilm-green: #3a7a5a;
+  --page-width: 8.5in;
+  --page-height: 11in;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+/* Page layout for print */
+.page {
+  width: var(--page-width);
+  min-height: var(--page-height);
+  margin: 20px auto;
+  background: var(--bg-page);
+  padding: 0.6in 0.7in;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  page-break-after: always;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-number {
+  position: absolute;
+  bottom: 0.4in;
+  font-family: 'Space Mono', monospace;
+  font-size: 9pt;
+  color: #888;
+}
+.page-number.left { left: 0.7in; }
+.page-number.right { right: 0.7in; }
+
+/* Cover page */
+.cover-page {
+  background: linear-gradient(180deg, #020410 0%, #0a1028 30%, #061020 70%, #000408 100%);
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.cover-page .stars {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+.cover-page .star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.cover-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 42pt;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 20px rgba(74,234,255,0.6), 0 4px 0 #1a6a8a;
+  letter-spacing: 8px;
+  z-index: 2;
+  margin-bottom: 8px;
+}
+
+.cover-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12pt;
+  color: var(--accent-green);
+  text-shadow: 0 0 12px rgba(79,223,111,0.5);
+  letter-spacing: 3px;
+  z-index: 2;
+  margin-bottom: 40px;
+}
+
+.cover-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+  color: #c0c0d0;
+  letter-spacing: 4px;
+  z-index: 2;
+  margin-top: 60px;
+  border: 2px solid #4a4a6a;
+  padding: 10px 24px;
+}
+
+.cover-badge {
+  z-index: 2;
+  margin-top: 30px;
+  font-size: 8pt;
+  color: #8888aa;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Section headers */
+h1.section-number {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+  color: #666;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+h1.section-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 22pt;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 3px solid var(--text-dark);
+  padding-bottom: 6px;
+}
+
+h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 14pt;
+  color: var(--text-dark);
+  margin: 18px 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  margin: 12px 0 6px 0;
+}
+
+p { margin-bottom: 8px; }
+
+/* Info boxes */
+.info-box {
+  background: #ddd8c8;
+  border: 2px solid #aaa48a;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+
+.info-box.warning {
+  background: #f0ddd0;
+  border-color: #d08060;
+}
+
+.info-box.tip {
+  background: #d0e8d8;
+  border-color: #60a070;
+}
+
+.info-box.science {
+  background: #d0d8f0;
+  border-color: #6070a0;
+}
+
+.info-box-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8pt;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+/* Character cards */
+.char-card {
+  display: flex;
+  gap: 16px;
+  border: 2px solid #3a3a4a;
+  background: white;
+  padding: 16px;
+  margin: 12px 0;
+  border-radius: 4px;
+}
+
+.char-card .char-sprite {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.char-card .char-info {
+  flex: 1;
+}
+
+.char-card .char-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+  margin-bottom: 6px;
+}
+
+.char-card .char-desc {
+  font-size: 10pt;
+  line-height: 1.4;
+}
+
+.char-card .char-stats {
+  margin-top: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+  color: #555;
+}
+
+/* Substrate cards */
+.substrate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.sub-card {
+  border: 2px solid #3a3a4a;
+  background: white;
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.sub-card .sub-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.sub-card .sub-info { flex: 1; }
+
+.sub-card .sub-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8pt;
+  margin-bottom: 4px;
+}
+
+.sub-card .sub-values {
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+  color: #555;
+}
+
+/* Level cards */
+.level-card {
+  border: 2px solid #3a3a4a;
+  background: white;
+  padding: 16px;
+  margin: 14px 0;
+  border-radius: 4px;
+  page-break-inside: avoid;
+}
+
+.level-card .level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 6px;
+}
+
+.level-card .level-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+}
+
+.level-card .level-chapter {
+  font-size: 9pt;
+  color: #777;
+  font-style: italic;
+}
+
+.level-card .level-map {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.level-card .level-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 8px 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+}
+
+.level-card .level-stats .stat {
+  background: #f0ece0;
+  padding: 4px 8px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.level-card .stat-label {
+  color: #888;
+  font-size: 7pt;
+  display: block;
+}
+
+.level-card .stat-value {
+  font-weight: 700;
+  color: #333;
+}
+
+.level-card .level-strategy {
+  font-size: 10pt;
+  margin-top: 8px;
+  padding: 8px;
+  background: #f8f4ea;
+  border-left: 3px solid var(--accent-teal);
+}
+
+/* Controls diagram */
+.controls-diagram {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 16px 0;
+}
+
+.key-group {
+  text-align: center;
+}
+
+.key-group .key-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7pt;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+/* HUD mockup */
+.hud-mockup {
+  background: #0a0a1a;
+  border: 2px solid #3a3a6a;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  color: var(--text-light);
+  font-family: 'Space Mono', monospace;
+  font-size: 9pt;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 10pt;
+}
+
+th {
+  background: #3a3a4a;
+  color: white;
+  padding: 6px 10px;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+  letter-spacing: 1px;
+}
+
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+tr:nth-child(even) td {
+  background: #ece8d8;
+}
+
+/* Flow diagram */
+.flow-diagram {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.flow-arrow {
+  display: inline-block;
+  margin: 0 8px;
+  color: #888;
+  font-size: 16pt;
+}
+
+.flow-step {
+  display: inline-block;
+  background: white;
+  border: 2px solid #3a3a4a;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7pt;
+  vertical-align: middle;
+}
+
+/* Two column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.two-col.wide-left {
+  grid-template-columns: 1.5fr 1fr;
+}
+
+/* Pixel art scaling */
+svg.pixel-art {
+  image-rendering: pixelated;
+}
+
+/* Decorative borders */
+.deco-border {
+  border: 3px double #3a3a4a;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+/* Bar chart style for stats */
+.bar-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0;
+}
+
+.bar-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7pt;
+  width: 28px;
+  color: #777;
+}
+
+.bar-track {
+  flex: 1;
+  height: 12px;
+  background: #1a1a2b;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.bar-fill.hp { background: #44df5f; }
+.bar-fill.en { background: #5fa0f0; }
+.bar-fill.gr { background: #5ff050; }
+
+/* Print styles */
+@media print {
+  body { background: white; }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+  }
+  .cover-page .star { display: none; }
+}
+
+/* Responsive for screen */
+@media screen and (max-width: 900px) {
+  .page {
+    width: 100%;
+    padding: 20px;
+    margin: 10px auto;
+  }
+  .substrate-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .level-card .level-stats { grid-template-columns: repeat(2, 1fr); }
+}
