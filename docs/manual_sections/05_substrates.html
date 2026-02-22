@@ -1,5 +1,5 @@
 <!-- Section 05: Substrates & The Redox Ladder -->
-<div class="page" id="substrates">
+<div class="page" id="substrates" style="page-break-after:always;">
   <h1 class="section-number">SECTION 4</h1>
   <h1 class="section-title">Substrates &mdash; Your Food</h1>
 
@@ -7,27 +7,36 @@
     Substrates are dissolved chemicals carried by water flow through the pore space.
     They are your food, energy, and building material. Each substrate provides different
     amounts of <strong>Health</strong>, <strong>Energy</strong>, and <strong>Growth</strong>.
+    Understanding the Redox Ladder is the key to mastering ARKE's feeding strategy.
   </p>
 
   <div class="info-box science">
     <div class="info-box-title" style="color:#4060a0;">THE REDOX LADDER (Real Science!)</div>
     <p style="font-size:10pt;">
       In real microbiology, organisms use chemicals in a specific thermodynamic order called the
-      <strong>Redox Ladder</strong>. Oxygen provides the most energy; methane provides the least.
-      The game faithfully represents this hierarchy!
+      <strong>Redox Ladder</strong>. Oxygen provides the most energy per reaction; methane provides the least.
+      However, nature has a twist: <strong>low-energy substrates often support the highest growth rates</strong>
+      because organisms that use them face less competition and have evolved efficient metabolisms.
+      The game faithfully represents this hierarchy &mdash; energy and growth are inversely related!
     </p>
   </div>
 
-  <!-- The Redox Ladder Visual -->
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
-    <h3 style="font-size:9pt; margin-bottom:12px;">The Redox Ladder &mdash; Energy Hierarchy</h3>
-    <svg width="440" height="310" viewBox="0 0 440 310">
-      <!-- Ladder background -->
-      <rect x="60" y="10" width="320" height="290" fill="#f8f4ea" rx="6" stroke="#ccc"/>
-
-      <!-- Gradient bar (high energy top, low energy bottom) -->
+  <!-- The Redox Ladder Visual - Beautiful Scientific Illustration -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:12px;">The Redox Ladder &mdash; Energy &amp; Growth Hierarchy</h3>
+    <svg width="460" height="370" viewBox="0 0 460 370">
       <defs>
-        <linearGradient id="energyGrad" x1="0" y1="0" x2="0" y2="1">
+        <!-- Vertical gradient background (blue top to red bottom) -->
+        <linearGradient id="ladderBg05" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#e8f0ff"/>
+          <stop offset="25%" stop-color="#e8ffe8"/>
+          <stop offset="45%" stop-color="#f0e8ff"/>
+          <stop offset="60%" stop-color="#fff0e0"/>
+          <stop offset="80%" stop-color="#fff8d0"/>
+          <stop offset="100%" stop-color="#ffe8e0"/>
+        </linearGradient>
+        <!-- Energy gradient bar -->
+        <linearGradient id="energyBar05" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#4fa4ff"/>
           <stop offset="20%" stop-color="#4fdf6f"/>
           <stop offset="40%" stop-color="#cf6fff"/>
@@ -35,86 +44,234 @@
           <stop offset="80%" stop-color="#dfdf3f"/>
           <stop offset="100%" stop-color="#ff4f4f"/>
         </linearGradient>
+        <!-- Growth gradient bar (inverse) -->
+        <linearGradient id="growthBar05" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#88cc88"/>
+          <stop offset="100%" stop-color="#22ff44"/>
+        </linearGradient>
+        <!-- Substrate orb glow -->
+        <filter id="orbGlow05" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="orbGlowSm05" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- O2 orb gradient -->
+        <radialGradient id="o2Grad05" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#a0d4ff"/>
+          <stop offset="50%" stop-color="#4fa4ff"/>
+          <stop offset="100%" stop-color="#2060c0"/>
+        </radialGradient>
+        <!-- NO3 orb gradient -->
+        <radialGradient id="no3Grad05" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#a0ffc0"/>
+          <stop offset="50%" stop-color="#4fdf6f"/>
+          <stop offset="100%" stop-color="#208a40"/>
+        </radialGradient>
+        <!-- Mn orb gradient -->
+        <radialGradient id="mnGrad05" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#e0a0ff"/>
+          <stop offset="50%" stop-color="#cf6fff"/>
+          <stop offset="100%" stop-color="#7030a0"/>
+        </radialGradient>
+        <!-- Fe orb gradient -->
+        <radialGradient id="feGrad05" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#ffc080"/>
+          <stop offset="50%" stop-color="#ef8f3f"/>
+          <stop offset="100%" stop-color="#a05010"/>
+        </radialGradient>
+        <!-- SO4 orb gradient -->
+        <radialGradient id="so4Grad05" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#ffff90"/>
+          <stop offset="50%" stop-color="#dfdf3f"/>
+          <stop offset="100%" stop-color="#8a8a10"/>
+        </radialGradient>
+        <!-- CH4 orb gradient -->
+        <radialGradient id="ch4Grad05" cx="35%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#ff9060"/>
+          <stop offset="40%" stop-color="#ff4f4f"/>
+          <stop offset="100%" stop-color="#aa1010"/>
+        </radialGradient>
+        <radialGradient id="ch4Inner05" cx="40%" cy="40%" r="50%">
+          <stop offset="0%" stop-color="#ffcc44"/>
+          <stop offset="100%" stop-color="#ff6020" stop-opacity="0"/>
+        </radialGradient>
+        <!-- Energy fill bar gradients -->
+        <linearGradient id="enBarFill05" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#4fa4ff"/>
+          <stop offset="100%" stop-color="#70c4ff"/>
+        </linearGradient>
+        <linearGradient id="grBarFill05" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#40c040"/>
+          <stop offset="100%" stop-color="#70ef70"/>
+        </linearGradient>
+        <!-- Arrow marker -->
+        <marker id="arrowDown05" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto">
+          <path d="M1,0 L4,7 L7,0" fill="#666" stroke="none"/>
+        </marker>
+        <marker id="arrowUp05" markerWidth="8" markerHeight="8" refX="4" refY="1" orient="auto">
+          <path d="M1,8 L4,1 L7,8" fill="#4a8a4a" stroke="none"/>
+        </marker>
       </defs>
-      <rect x="70" y="20" width="16" height="270" fill="url(#energyGrad)" rx="3"/>
-      <text x="78" y="14" text-anchor="middle" font-size="6" fill="#666">HIGH</text>
-      <text x="78" y="300" text-anchor="middle" font-size="6" fill="#666">LOW</text>
 
-      <!-- Energy label -->
-      <text x="30" y="155" text-anchor="middle" font-size="6" fill="#888" transform="rotate(-90,30,155)">ENERGY YIELD</text>
+      <!-- Background -->
+      <rect x="55" y="8" width="350" height="340" rx="8" fill="url(#ladderBg05)" stroke="#ccc" stroke-width="1"/>
 
-      <!-- Growth label -->
-      <text x="420" y="155" text-anchor="middle" font-size="6" fill="#888" transform="rotate(90,420,155)">GROWTH YIELD</text>
+      <!-- Energy gradient bar (left side) -->
+      <rect x="62" y="18" width="14" height="320" rx="4" fill="url(#energyBar05)"/>
+      <text x="69" y="14" text-anchor="middle" font-size="6" fill="#4fa4ff" font-weight="bold" font-family="'Inter',sans-serif">HIGH</text>
+      <text x="69" y="348" text-anchor="middle" font-size="6" fill="#ff4f4f" font-weight="bold" font-family="'Inter',sans-serif">LOW</text>
 
-      <!-- O2 - Oxygen (top) -->
-      <g transform="translate(100, 25)">
-        <circle cx="12" cy="12" r="10" fill="#4fa4ff" stroke="#2a6aaa" stroke-width="1.5"/>
-        <text x="12" y="15" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">O2</text>
-        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">OXYGEN</text>
-        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +20 | EN +10 | GR +15</text>
-        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-818 kJ/mol</text>
-        <text x="260" y="22" text-anchor="end" font-size="6" fill="#4fa4ff">MOST ENERGY</text>
+      <!-- Energy label (rotated, left) -->
+      <text x="30" y="178" text-anchor="middle" font-size="7" fill="#666" transform="rotate(-90,30,178)" font-family="'Inter',sans-serif" font-weight="600">ENERGY YIELD</text>
+      <!-- Energy arrow -->
+      <line x1="44" y1="30" x2="44" y2="338" stroke="#666" stroke-width="1.5" marker-end="url(#arrowDown05)"/>
+
+      <!-- Growth label (rotated, right) -->
+      <text x="438" y="178" text-anchor="middle" font-size="7" fill="#4a8a4a" transform="rotate(90,438,178)" font-family="'Inter',sans-serif" font-weight="600">GROWTH YIELD</text>
+      <!-- Growth arrow (pointing UP = high growth at bottom) -->
+      <line x1="422" y1="338" x2="422" y2="30" stroke="#4a8a4a" stroke-width="1.5" marker-end="url(#arrowUp05)"/>
+
+      <!-- =================== O2 - OXYGEN (top) =================== -->
+      <g transform="translate(88, 22)">
+        <!-- Orb -->
+        <g filter="url(#orbGlow05)">
+          <circle cx="16" cy="18" r="14" fill="url(#o2Grad05)"/>
+          <circle cx="11" cy="12" r="3.5" fill="white" opacity="0.35"/>
+          <circle cx="8" cy="10" r="1" fill="white" opacity="0.5"/>
+        </g>
+        <!-- Label & formula -->
+        <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">OXYGEN</text>
+        <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">O<tspan font-size="5" dy="2">2</tspan><tspan dy="-2"> &mdash; Aerobic Respiration</tspan></text>
+        <!-- Energy bar -->
+        <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +20 | EN +10 | GR +15</text>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="url(#enBarFill05)"/>
+        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-818 kJ/mol</text>
         <!-- Growth bar -->
-        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
-        <rect x="270" y="6" width="22" height="8" fill="#5ff050" rx="2"/>
+        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="36" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 15</text>
       </g>
 
-      <!-- NO3 - Nitrate -->
-      <g transform="translate(100, 70)">
-        <circle cx="12" cy="12" r="10" fill="#4fdf6f" stroke="#2a8a3a" stroke-width="1.5"/>
-        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">NO3</text>
-        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">NITRATE</text>
-        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +15 | EN +7.5 | GR +18</text>
-        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-649 kJ/mol</text>
-        <text x="260" y="22" text-anchor="end" font-size="6" fill="#4fdf6f">PREVENTS N2O!</text>
-        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
-        <rect x="270" y="6" width="27" height="8" fill="#5ff050" rx="2"/>
+      <!-- =================== NO3 - NITRATE =================== -->
+      <g transform="translate(88, 74)">
+        <g filter="url(#orbGlow05)">
+          <circle cx="16" cy="18" r="14" fill="url(#no3Grad05)"/>
+          <circle cx="11" cy="12" r="3.5" fill="white" opacity="0.3"/>
+          <circle cx="8" cy="10" r="1" fill="white" opacity="0.45"/>
+        </g>
+        <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">NITRATE</text>
+        <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">NO<tspan font-size="5" dy="2">3</tspan><tspan font-size="5" dy="-2">&minus;</tspan><tspan dy="0"> &mdash; Denitrification</tspan></text>
+        <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +15 | EN +7.5 | GR +18</text>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="63" height="7" rx="3" fill="url(#enBarFill05)"/>
+        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-649 kJ/mol</text>
+        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="43" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 18</text>
       </g>
 
-      <!-- Mn(IV) - Manganese -->
-      <g transform="translate(100, 115)">
-        <rect x="2" y="2" width="20" height="20" fill="#cf6fff" stroke="#8a3aaa" stroke-width="1.5" rx="2"/>
-        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">Mn</text>
-        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#cf6fff">MANGANESE</text>
-        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +12 | EN +6 | GR +12</text>
-        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-558 kJ/mol</text>
-        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
-        <rect x="270" y="6" width="18" height="8" fill="#5ff050" rx="2"/>
+      <!-- =================== Mn(IV) - MANGANESE =================== -->
+      <g transform="translate(88, 126)">
+        <g filter="url(#orbGlow05)">
+          <!-- Octahedral/crystalline shape -->
+          <polygon points="16,4 28,12 28,24 16,32 4,24 4,12" fill="url(#mnGrad05)"/>
+          <polygon points="16,8 24,14 24,22 16,28 8,22 8,14" fill="#e0a0ff" opacity="0.15"/>
+          <polygon points="16,12 20,15 20,21 16,24 12,21 12,15" fill="white" opacity="0.1"/>
+        </g>
+        <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#cf6fff">MANGANESE</text>
+        <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">Mn(IV) &mdash; Mn Reduction</text>
+        <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +12 | EN +6  | GR +12</text>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="54" height="7" rx="3" fill="url(#enBarFill05)"/>
+        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-558 kJ/mol</text>
+        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="29" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 12</text>
       </g>
 
-      <!-- Fe(III) - Iron -->
-      <g transform="translate(100, 160)">
-        <circle cx="12" cy="12" r="10" fill="#ef8f3f" stroke="#aa5a1a" stroke-width="1.5"/>
-        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">Fe</text>
-        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#ef8f3f">IRON</text>
-        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +10 | EN +5 | GR +10</text>
-        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-334 kJ/mol</text>
-        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
-        <rect x="270" y="6" width="15" height="8" fill="#5ff050" rx="2"/>
+      <!-- =================== Fe(III) - IRON =================== -->
+      <g transform="translate(88, 178)">
+        <g filter="url(#orbGlow05)">
+          <circle cx="16" cy="18" r="14" fill="url(#feGrad05)"/>
+          <!-- Metallic sheen -->
+          <ellipse cx="12" cy="12" rx="6" ry="4" fill="white" opacity="0.15" transform="rotate(-30,12,12)"/>
+          <circle cx="10" cy="10" r="2.5" fill="white" opacity="0.25"/>
+        </g>
+        <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#ef8f3f">IRON</text>
+        <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">Fe(III) &mdash; Iron Reduction</text>
+        <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +10 | EN +5  | GR +10</text>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="33" height="7" rx="3" fill="url(#enBarFill05)"/>
+        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-334 kJ/mol</text>
+        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="24" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 10</text>
       </g>
 
-      <!-- SO4 - Sulfate -->
-      <g transform="translate(100, 205)">
-        <rect x="2" y="2" width="20" height="20" fill="#dfdf3f" stroke="#8a8a1a" stroke-width="1.5" rx="1"/>
-        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="#333">SO4</text>
-        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#dfdf3f">SULFATE</text>
-        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +6  | EN +3 | GR +8</text>
-        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-152 kJ/mol</text>
-        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
-        <rect x="270" y="6" width="12" height="8" fill="#5ff050" rx="2"/>
+      <!-- =================== SO4 - SULFATE =================== -->
+      <g transform="translate(88, 230)">
+        <g filter="url(#orbGlow05)">
+          <!-- Angular crystal shape -->
+          <polygon points="16,4 30,10 28,28 8,30 2,14" fill="url(#so4Grad05)"/>
+          <polygon points="16,8 26,13 24,26 10,27 5,16" fill="#ffff90" opacity="0.15"/>
+          <polygon points="14,12 22,15 20,22 12,23 8,18" fill="white" opacity="0.1"/>
+        </g>
+        <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#c0c020">SULFATE</text>
+        <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">SO<tspan font-size="5" dy="2">4</tspan><tspan font-size="5" dy="-2">&sup2;&minus;</tspan><tspan dy="0"> &mdash; Sulfate Reduction</tspan></text>
+        <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +6  | EN +3  | GR +8</text>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="15" height="7" rx="3" fill="url(#enBarFill05)"/>
+        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-152 kJ/mol</text>
+        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="19" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 8</text>
       </g>
 
-      <!-- CH4 - Methane -->
-      <g transform="translate(100, 250)">
-        <circle cx="12" cy="12" r="10" fill="#ff4f4f" stroke="#aa1a1a" stroke-width="1.5"/>
-        <circle cx="12" cy="12" r="7" fill="#ff6f2f" opacity="0.4"/>
-        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">CH4</text>
-        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">METHANE</text>
-        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +5  | EN +2.5 | GR +25</text>
-        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-31 kJ/mol</text>
-        <text x="260" y="22" text-anchor="end" font-size="6" fill="#ff4f4f">MOST GROWTH!</text>
-        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
-        <rect x="270" y="6" width="38" height="8" fill="#5ff050" rx="2"/>
+      <!-- =================== CH4 - METHANE (bottom) =================== -->
+      <g transform="translate(88, 282)">
+        <g filter="url(#orbGlow05)">
+          <circle cx="16" cy="18" r="14" fill="url(#ch4Grad05)"/>
+          <!-- Fire-like inner glow -->
+          <circle cx="16" cy="18" r="9" fill="url(#ch4Inner05)" opacity="0.6"/>
+          <!-- Gas bubble effect -->
+          <circle cx="10" cy="6" r="3" fill="#ff8040" opacity="0.25"/>
+          <circle cx="24" cy="8" r="2" fill="#ff8040" opacity="0.2"/>
+          <circle cx="6" cy="14" r="2" fill="#ff6030" opacity="0.15"/>
+        </g>
+        <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">METHANE</text>
+        <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">CH<tspan font-size="5" dy="2">4</tspan><tspan dy="-2"> &mdash; Methanotrophy</tspan></text>
+        <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +5  | EN +2.5 | GR +25</text>
+        <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="8" width="3" height="7" rx="3" fill="url(#enBarFill05)"/>
+        <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-31 kJ/mol</text>
+        <rect x="220" y="20" width="80" height="7" rx="3" fill="#e8e8e8"/>
+        <rect x="220" y="20" width="60" height="7" rx="3" fill="url(#grBarFill05)"/>
+        <text x="306" y="27" font-size="5.5" fill="#40a040" font-family="'Space Mono',monospace">GR: 25</text>
+      </g>
+
+      <!-- Annotation labels -->
+      <text x="310" y="47" font-size="6" fill="#4fa4ff" font-weight="bold" font-family="'Inter',sans-serif">MOST ENERGY</text>
+      <text x="310" y="316" font-size="6" fill="#ff4f4f" font-weight="bold" font-family="'Inter',sans-serif">LEAST ENERGY</text>
+      <text x="310" y="60" font-size="6" fill="#88aa88" font-family="'Inter',sans-serif">Low growth</text>
+      <text x="310" y="330" font-size="6" fill="#22aa44" font-weight="bold" font-family="'Inter',sans-serif">HIGHEST GROWTH!</text>
+
+      <!-- Connecting line/dividers between substrates -->
+      <g stroke="#ccc" stroke-width="0.5" stroke-dasharray="3,3">
+        <line x1="90" y1="68" x2="395" y2="68"/>
+        <line x1="90" y1="120" x2="395" y2="120"/>
+        <line x1="90" y1="172" x2="395" y2="172"/>
+        <line x1="90" y1="224" x2="395" y2="224"/>
+        <line x1="90" y1="276" x2="395" y2="276"/>
       </g>
     </svg>
   </div>
@@ -122,24 +279,43 @@
   <p class="page-number left">7</p>
 </div>
 
-<!-- Substrates page 2: Detailed cards -->
-<div class="page" id="substrates2">
+<!-- Substrates page 2: Detailed cards & Strategy -->
+<div class="page" id="substrates2" style="page-break-after:always;">
   <h2>Substrate Details</h2>
 
   <div class="substrate-grid">
     <!-- O2 -->
     <div class="sub-card" style="border-left: 4px solid #4fa4ff;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
-          <circle cx="6" cy="6" r="5" fill="#4fa4ff"/>
-          <circle cx="6" cy="6" r="3.5" fill="#7ac4ff" opacity="0.4"/>
-          <circle cx="4" cy="4" r="1" fill="white" opacity="0.5"/>
+        <svg width="48" height="48" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="o2Card05" cx="35%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#c0e0ff"/>
+              <stop offset="50%" stop-color="#4fa4ff"/>
+              <stop offset="100%" stop-color="#2060c0"/>
+            </radialGradient>
+            <filter id="o2CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#o2CardGlow05)">
+            <circle cx="50" cy="50" r="35" fill="url(#o2Card05)"/>
+            <circle cx="38" cy="36" r="10" fill="white" opacity="0.3"/>
+            <circle cx="34" cy="32" r="3.5" fill="white" opacity="0.5"/>
+          </g>
+          <!-- Sparkles -->
+          <circle cx="22" cy="22" r="2" fill="white" opacity="0.6"/>
+          <circle cx="78" cy="28" r="1.5" fill="white" opacity="0.5"/>
+          <circle cx="75" cy="72" r="1.8" fill="white" opacity="0.4"/>
+          <circle cx="28" cy="76" r="1.2" fill="white" opacity="0.35"/>
+          <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="16" font-weight="bold" fill="white">O<tspan font-size="12" dy="4">2</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#4fa4ff;">O2 &mdash; OXYGEN</div>
         <p style="font-size:9pt;">Aerobic respiration. Highest energy yield in nature.
-        Available in surface soils and thawing permafrost.</p>
+        Available in surface soils and thawing permafrost. Best for emergency HP recovery.</p>
         <div class="sub-values">+20 HP | +10 EN | +15 GR | +10 PTS</div>
         <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7</div>
       </div>
@@ -147,16 +323,30 @@
     <!-- NO3 -->
     <div class="sub-card" style="border-left: 4px solid #4fdf6f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
-          <circle cx="6" cy="6" r="5" fill="#4fdf6f"/>
-          <circle cx="6" cy="6" r="3.5" fill="#7fff9f" opacity="0.4"/>
-          <circle cx="4" cy="4" r="1" fill="white" opacity="0.5"/>
+        <svg width="48" height="48" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="no3Card05" cx="35%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#b0ffc0"/>
+              <stop offset="50%" stop-color="#4fdf6f"/>
+              <stop offset="100%" stop-color="#208a40"/>
+            </radialGradient>
+            <filter id="no3CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#no3CardGlow05)">
+            <circle cx="50" cy="50" r="35" fill="url(#no3Card05)"/>
+            <circle cx="38" cy="36" r="10" fill="white" opacity="0.25"/>
+            <circle cx="34" cy="32" r="3" fill="white" opacity="0.4"/>
+          </g>
+          <text x="50" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="bold" fill="white">NO<tspan font-size="10" dy="3">3</tspan><tspan font-size="9" dy="-3">&minus;</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#4fdf6f;">NO3 &mdash; NITRATE</div>
         <p style="font-size:9pt;">Denitrification. Prevents N<sub>2</sub>O (300&times; CO<sub>2</sub>)
-        from forming. Best all-around substrate.</p>
+        from forming. The best all-around substrate &mdash; strong in every stat.</p>
         <div class="sub-values">+15 HP | +7.5 EN | +18 GR | +25 PTS</div>
         <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS!</div>
       </div>
@@ -164,16 +354,31 @@
     <!-- Mn(IV) -->
     <div class="sub-card" style="border-left: 4px solid #cf6fff;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
-          <rect x="1" y="1" width="10" height="10" fill="#cf6fff" rx="2"/>
-          <rect x="3" y="3" width="6" height="6" fill="#df9fff" opacity="0.4" rx="1"/>
-          <rect x="2" y="2" width="2" height="2" fill="white" opacity="0.3"/>
+        <svg width="48" height="48" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="mnCard05" cx="40%" cy="35%" r="55%">
+              <stop offset="0%" stop-color="#e8b0ff"/>
+              <stop offset="50%" stop-color="#cf6fff"/>
+              <stop offset="100%" stop-color="#6020a0"/>
+            </radialGradient>
+            <filter id="mnCardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#mnCardGlow05)">
+            <!-- Octahedral crystal -->
+            <polygon points="50,10 85,30 85,65 50,85 15,65 15,30" fill="url(#mnCard05)"/>
+            <polygon points="50,18 78,34 78,60 50,76 22,60 22,34" fill="#e0b0ff" opacity="0.12"/>
+            <polygon points="50,30 65,40 65,55 50,65 35,55 35,40" fill="white" opacity="0.08"/>
+          </g>
+          <text x="50" y="54" text-anchor="middle" font-family="'Inter',sans-serif" font-size="13" font-weight="bold" fill="white">Mn</text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#cf6fff;">Mn(IV) &mdash; MANGANESE</div>
-        <p style="font-size:9pt;">Manganese reduction. Angular purple particles.
-        Mid-range energy and growth.</p>
+        <p style="font-size:9pt;">Manganese reduction. Crystalline purple particles.
+        Mid-range energy and growth. Found in mineral-rich sediments.</p>
         <div class="sub-values">+12 HP | +6 EN | +12 GR | +10 PTS</div>
         <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10</div>
       </div>
@@ -181,16 +386,32 @@
     <!-- Fe(III) -->
     <div class="sub-card" style="border-left: 4px solid #ef8f3f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
-          <circle cx="6" cy="6" r="5" fill="#ef8f3f"/>
-          <circle cx="6" cy="6" r="3.5" fill="#ffaf6f" opacity="0.4"/>
-          <circle cx="4" cy="4" r="1" fill="white" opacity="0.4"/>
+        <svg width="48" height="48" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="feCard05" cx="35%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#ffd0a0"/>
+              <stop offset="40%" stop-color="#ef8f3f"/>
+              <stop offset="100%" stop-color="#8a4010"/>
+            </radialGradient>
+            <filter id="feCardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#feCardGlow05)">
+            <circle cx="50" cy="50" r="35" fill="url(#feCard05)"/>
+            <!-- Metallic sheen -->
+            <ellipse cx="40" cy="38" rx="14" ry="8" fill="white" opacity="0.15" transform="rotate(-25,40,38)"/>
+            <circle cx="36" cy="34" r="5" fill="white" opacity="0.25"/>
+            <circle cx="34" cy="32" r="2" fill="white" opacity="0.35"/>
+          </g>
+          <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="16" font-weight="bold" fill="white">Fe</text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#ef8f3f;">Fe(III) &mdash; IRON</div>
         <p style="font-size:9pt;">Iron reduction. Moderate energy and growth.
-        Found in deep sediments and vents.</p>
+        Found in deep sediments and hydrothermal vents. Rusty metallic sheen.</p>
         <div class="sub-values">+10 HP | +5 EN | +10 GR | +10 PTS</div>
         <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10</div>
       </div>
@@ -198,16 +419,31 @@
     <!-- SO4 -->
     <div class="sub-card" style="border-left: 4px solid #dfdf3f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
-          <rect x="1" y="1" width="10" height="10" fill="#dfdf3f" rx="1"/>
-          <rect x="3" y="3" width="6" height="6" fill="#ffff7f" opacity="0.4"/>
-          <rect x="2" y="2" width="2" height="2" fill="white" opacity="0.3"/>
+        <svg width="48" height="48" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="so4Card05" cx="40%" cy="35%" r="55%">
+              <stop offset="0%" stop-color="#ffff90"/>
+              <stop offset="50%" stop-color="#dfdf3f"/>
+              <stop offset="100%" stop-color="#7a7a08"/>
+            </radialGradient>
+            <filter id="so4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#so4CardGlow05)">
+            <!-- Angular crystal with sulfur glow -->
+            <polygon points="50,12 82,28 78,72 30,78 14,42" fill="url(#so4Card05)"/>
+            <polygon points="50,20 74,33 71,66 34,70 20,44" fill="#ffff80" opacity="0.12"/>
+            <polygon points="48,32 62,40 60,58 38,60 28,46" fill="white" opacity="0.08"/>
+          </g>
+          <text x="48" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="#444">SO<tspan font-size="8" dy="3">4</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#c0c020;">SO4 &mdash; SULFATE</div>
-        <p style="font-size:9pt;">Sulfate reduction. Produces H<sub>2</sub>S (toxic zones!).
-        Low energy but necessary in anaerobic zones.</p>
+        <p style="font-size:9pt;">Sulfate reduction. Produces H<sub>2</sub>S (creates toxic zones!).
+        Low energy but necessary in deep anaerobic environments.</p>
         <div class="sub-values">+6 HP | +3 EN | +8 GR | +10 PTS</div>
         <div class="sub-values" style="color:#c0c020;">Levels: 5-10</div>
       </div>
@@ -215,41 +451,147 @@
     <!-- CH4 -->
     <div class="sub-card" style="border-left: 4px solid #ff4f4f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
-          <circle cx="6" cy="6" r="5" fill="#ff4f4f"/>
-          <circle cx="6" cy="6" r="3" fill="#ff6f2f" opacity="0.5"/>
-          <circle cx="4" cy="4" r="1.5" fill="#ffaa00" opacity="0.4"/>
-          <circle cx="7" cy="7" r="1" fill="#ff2020" opacity="0.3"/>
+        <svg width="48" height="48" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="ch4Card05" cx="35%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#ffa060"/>
+              <stop offset="40%" stop-color="#ff4f4f"/>
+              <stop offset="100%" stop-color="#aa1010"/>
+            </radialGradient>
+            <radialGradient id="ch4CardInner05" cx="45%" cy="45%" r="45%">
+              <stop offset="0%" stop-color="#ffdd44"/>
+              <stop offset="100%" stop-color="#ff5020" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="ch4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#ch4CardGlow05)">
+            <circle cx="50" cy="50" r="35" fill="url(#ch4Card05)"/>
+            <circle cx="50" cy="50" r="22" fill="url(#ch4CardInner05)" opacity="0.6"/>
+          </g>
+          <!-- Gas bubble effect -->
+          <circle cx="30" cy="24" r="5" fill="#ff8040" opacity="0.3"/>
+          <circle cx="68" cy="20" r="3.5" fill="#ff8040" opacity="0.25"/>
+          <circle cx="22" cy="42" r="3" fill="#ff6030" opacity="0.2"/>
+          <circle cx="74" cy="64" r="4" fill="#ff6030" opacity="0.15"/>
+          <text x="50" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="white">CH<tspan font-size="8" dy="3">4</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#ff4f4f;">CH4 &mdash; METHANE</div>
-        <p style="font-size:9pt;">Methanotrophy! Lowest energy but <strong>HIGHEST GROWTH</strong>.
-        Prevents greenhouse warming (80&times; CO<sub>2</sub>). Your signature food!</p>
+        <p style="font-size:9pt;">Methanotrophy! Lowest energy but <strong>HIGHEST GROWTH</strong> (+25 GR!).
+        Prevents greenhouse warming (80&times; CO<sub>2</sub>). ARKE's signature food!</p>
         <div class="sub-values">+5 HP | +2.5 EN | +25 GR | +35 PTS</div>
         <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS!</div>
       </div>
     </div>
   </div>
 
+  <p class="page-number right">8</p>
+</div>
+
+<!-- Substrates page 3: Feeding Strategy & Spawn Mechanics -->
+<div class="page" id="substrates3" style="page-break-after:always;">
+  <h2>Feeding Strategy &mdash; When to Eat What</h2>
+
+  <p style="font-size:10pt; margin-bottom:8px;">
+    Choosing the right substrate at the right time is the difference between winning and losing.
+    Your three stats &mdash; HP (Health), EN (Energy), and GR (Growth) &mdash; each have different urgency levels.
+    Use this decision framework to maximize your efficiency:
+  </p>
+
   <div class="info-box warning">
-    <div class="info-box-title" style="color:#c05030;">FEEDING STRATEGY</div>
+    <div class="info-box-title" style="color:#c05030;">CRITICAL: HP &lt; 30 &mdash; EMERGENCY MODE</div>
     <p style="font-size:10pt;">
-      <strong>When Health is high (&gt;50):</strong> Prioritize CH<sub>4</sub> for maximum growth (fastest path to division).<br>
-      <strong>When Health is moderate (30-50):</strong> Eat NO<sub>3</sub> for balanced recovery.<br>
-      <strong>When Health is critical (&lt;30):</strong> Eat O<sub>2</sub> or NO<sub>3</sub> immediately&mdash;survival first!<br>
-      <strong>Remember:</strong> Substrates spawn near the INLET and drift with the flow.
+      When your Health drops below 30, you are in danger of dying. <strong>Eat the nearest ANYTHING</strong> &mdash;
+      do not be selective! O<sub>2</sub> gives the best recovery at <strong>+20 HP</strong>, followed by
+      NO<sub>3</sub> at <strong>+15 HP</strong>. If neither is nearby, grab whatever substrate is closest.
+      A dead microbe does not grow. Survival comes first, always.
     </p>
   </div>
 
-  <!-- Substrate spawn info -->
-  <h2>How Substrates Appear</h2>
-  <p style="font-size:10pt;">
-    New substrates spawn every <strong>1.2 seconds</strong> near the INLET (left side). They drift
-    with the water flow, moving right across the map. Each level has a <strong>spawn density</strong>
-    (2-6 per cycle) that determines food abundance. Substrates have limited lifetimes&mdash;if
-    nobody eats them, they eventually disappear.
+  <div class="two-col" style="margin:10px 0;">
+    <div>
+      <div class="info-box tip" style="margin:0;">
+        <div class="info-box-title" style="color:#3a8a4a;">HP 30-60: RECOVERY PRIORITY</div>
+        <p style="font-size:9.5pt;">
+          Eat <strong>NO<sub>3</sub></strong> (Nitrate) as your priority substrate. It provides
+          <strong>+15 HP</strong> (good recovery), <strong>+7.5 EN</strong> (keeps flow-riding available),
+          AND <strong>+18 GR</strong> (excellent growth). It is the best balanced substrate in the game.
+          If NO<sub>3</sub> is not available, eat O<sub>2</sub> for the superior +20 HP recovery.
+        </p>
+      </div>
+    </div>
+    <div>
+      <div class="info-box" style="margin:0; background:#fff0e0; border-color:#e0a040;">
+        <div class="info-box-title" style="color:#c08020;">HP &gt; 60: GROWTH MODE</div>
+        <p style="font-size:9.5pt;">
+          Focus on <strong>CH<sub>4</sub></strong> (Methane) for maximum growth. Each CH<sub>4</sub>
+          gives <strong>+25 GR</strong> &mdash; only 4 methane particles fill your entire Growth bar
+          and trigger cell division! This is the <strong>speed run strategy</strong>: stay healthy, then
+          gorge on methane to divide as fast as possible.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box science" style="margin-top:8px;">
+    <div class="info-box-title" style="color:#4060a0;">ENERGY MANAGEMENT: EN &lt; 20</div>
+    <p style="font-size:10pt;">
+      When your Energy drops below 20, you are about to lose flow-riding ability. Without planktonic mode,
+      you cannot keep up with fast-moving substrates in later levels. Eat <strong>O<sub>2</sub></strong> (+10 EN) or
+      <strong>NO<sub>3</sub></strong> (+7.5 EN) to restore your Energy reserves. Avoid CH<sub>4</sub> (+2.5 EN) and
+      SO<sub>4</sub> (+3 EN) when low on energy &mdash; they barely help.
+    </p>
+  </div>
+
+  <h2>Substrate Spawn Mechanics</h2>
+
+  <p style="font-size:10pt; margin-bottom:6px;">
+    Understanding how and when substrates appear is crucial for positioning and interception strategy.
   </p>
 
-  <p class="page-number right">8</p>
+  <div class="two-col">
+    <div>
+      <h3 style="font-size:10pt;">Spawn Timing &amp; Location</h3>
+      <ul style="font-size:9.5pt; margin-left:16px;">
+        <li>Substrates spawn every <strong>1.2 seconds</strong> in a batch near the <strong>INLET</strong> (left edge of the map).</li>
+        <li>Each batch contains <strong>2&ndash;6 particles</strong> depending on the level's spawn density setting.</li>
+        <li>After spawning, substrates <strong>drift with the water flow</strong> toward the OUTLET (right edge).</li>
+        <li>In fast-flow levels, substrates move quickly &mdash; you must <strong>intercept them</strong> or use flow riding to keep up.</li>
+        <li>Each level has a specific <strong>mix of substrate types</strong> based on its geochemical environment.</li>
+        <li>Substrates that reach the OUTLET or go uneaten for approximately <strong>30 seconds</strong> will despawn and are lost forever.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="font-size:10pt;">Spawn Density by Level</h3>
+      <table style="font-size:8.5pt;">
+        <tr><th>Level</th><th>Density</th><th>Level</th><th>Density</th></tr>
+        <tr><td>Level 1</td><td><strong>4</strong> per cycle</td><td>Level 6</td><td><strong>4</strong> per cycle</td></tr>
+        <tr><td>Level 2</td><td><strong>4</strong> per cycle</td><td>Level 7</td><td><strong>6</strong> per cycle</td></tr>
+        <tr><td>Level 3</td><td><strong>3</strong> per cycle</td><td>Level 8</td><td><strong>5</strong> per cycle</td></tr>
+        <tr><td>Level 4</td><td><strong>2</strong> per cycle</td><td>Level 9</td><td><strong>4</strong> per cycle</td></tr>
+        <tr><td>Level 5</td><td><strong>5</strong> per cycle</td><td>Level 10</td><td><strong>6</strong> per cycle</td></tr>
+      </table>
+      <p style="font-size:8.5pt; margin-top:6px; color:#666;">
+        <strong>Note:</strong> Level 4 has the lowest density (2) &mdash; food is scarce!
+        Levels 7 and 10 have the highest density (6) &mdash; a feast, but so are the rivals.
+      </p>
+    </div>
+  </div>
+
+  <div class="info-box tip" style="margin-top:10px;">
+    <div class="info-box-title" style="color:#3a8a4a;">POSITIONING STRATEGY</div>
+    <p style="font-size:10pt;">
+      The smartest players do not chase substrates &mdash; they <strong>position themselves in the flow path</strong>
+      and let the food come to them. Camp near the INLET in early levels when flow is slow. In fast-flow levels,
+      use Science Mode (Q) to find the main flow channels, then ride alongside drifting substrate batches using
+      planktonic mode. Remember: every 1.2 seconds a new batch appears, so timing your sweeps through high-flow
+      channels is the key to staying fed and growing fast.
+    </p>
+  </div>
+
+  <p class="page-number left">9</p>
 </div>
