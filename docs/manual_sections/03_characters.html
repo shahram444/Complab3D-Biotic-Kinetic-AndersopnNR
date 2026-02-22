@@ -1,39 +1,139 @@
 <!-- Section 03: Characters -->
-<div class="page" id="characters">
+<div class="page" id="characters" style="page-break-after: always;">
   <h1 class="section-number">SECTION 2</h1>
   <h1 class="section-title">Characters</h1>
 
-  <!-- ARKE -->
+  <!-- Shared SVG Definitions (gradients and filters used across all character art) -->
+  <svg width="0" height="0" style="position:absolute;">
+    <defs>
+      <!-- ARKE body gradient -->
+      <radialGradient id="arke-body-grad" cx="40%" cy="35%" r="55%">
+        <stop offset="0%" stop-color="#5cdcdc"/>
+        <stop offset="40%" stop-color="#2a8a8a"/>
+        <stop offset="100%" stop-color="#1a5a5a"/>
+      </radialGradient>
+      <!-- Elder body gradient -->
+      <radialGradient id="elder-body-grad" cx="40%" cy="35%" r="55%">
+        <stop offset="0%" stop-color="#d4aa50"/>
+        <stop offset="40%" stop-color="#8a6a2a"/>
+        <stop offset="100%" stop-color="#4a3a15"/>
+      </radialGradient>
+      <!-- Rival body gradient -->
+      <radialGradient id="rival-body-grad" cx="40%" cy="35%" r="60%">
+        <stop offset="0%" stop-color="#cc5555"/>
+        <stop offset="40%" stop-color="#8a2a2a"/>
+        <stop offset="100%" stop-color="#4a1515"/>
+      </radialGradient>
+      <!-- Colony body gradient -->
+      <radialGradient id="colony-body-grad" cx="40%" cy="35%" r="55%">
+        <stop offset="0%" stop-color="#6acc8a"/>
+        <stop offset="40%" stop-color="#3a7a5a"/>
+        <stop offset="100%" stop-color="#1a4a2a"/>
+      </radialGradient>
+      <!-- Glow filters -->
+      <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-gold" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="shadow"/>
+        <feOffset dx="1" dy="2" result="offsetShadow"/>
+        <feComposite in="offsetShadow" operator="out"/>
+        <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <!-- Eating glow -->
+      <radialGradient id="eating-glow-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#7fff7f" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#3aaa3a" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Division glow -->
+      <radialGradient id="division-glow-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffd700" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#ffd700" stop-opacity="0"/>
+      </radialGradient>
+      <!-- ARKE eating body -->
+      <radialGradient id="arke-eating-grad" cx="40%" cy="35%" r="55%">
+        <stop offset="0%" stop-color="#6aeeaa"/>
+        <stop offset="40%" stop-color="#3aaa6a"/>
+        <stop offset="100%" stop-color="#1a6a3a"/>
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <!-- ARKE Character Card -->
   <div class="char-card">
-    <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
-        <!-- Body (teal archaeon) -->
-        <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-        <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
-        <rect x="6" y="12" width="4" height="1" fill="#2a8a8a"/>
-        <!-- Inner membrane highlights -->
-        <rect x="6" y="5" width="1" height="6" fill="#3aa0a0" opacity="0.5"/>
-        <rect x="9" y="5" width="1" height="6" fill="#3aa0a0" opacity="0.5"/>
-        <!-- Visor -->
-        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="5" width="2" height="1" fill="#4aeaff" opacity="0.6"/>
-        <rect x="6" y="6" width="4" height="1" fill="#3ac5c9" opacity="0.3"/>
-        <!-- Eyes -->
-        <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
-        <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
-        <!-- Side appendages -->
-        <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
-        <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
-        <!-- Flagella -->
-        <rect x="3" y="7" width="1" height="1" fill="#1a6a6a"/>
-        <rect x="2" y="8" width="1" height="1" fill="#1a6a6a"/>
-        <rect x="12" y="7" width="1" height="1" fill="#1a6a6a"/>
-        <rect x="13" y="8" width="1" height="1" fill="#1a6a6a"/>
-        <!-- Glow corners -->
-        <rect x="4" y="3" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
-        <rect x="11" y="3" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
-        <rect x="4" y="12" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
-        <rect x="11" y="12" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
+    <div class="char-sprite" style="width:180px; height:180px;">
+      <!-- Main ARKE illustration ~180x180 -->
+      <svg width="180" height="180" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Soft teal glow halo (outermost) -->
+        <ellipse cx="100" cy="100" rx="90" ry="80" fill="none" stroke="#4aeaff" stroke-width="1.5" opacity="0.12"/>
+        <ellipse cx="100" cy="100" rx="80" ry="70" fill="none" stroke="#4aeaff" stroke-width="1" opacity="0.08"/>
+
+        <!-- Flagella / pili (4 curved bezier paths extending from body) -->
+        <g filter="url(#glow-cyan)" opacity="0.85">
+          <!-- Top-left flagellum -->
+          <path d="M55,65 C35,50 20,60 10,40" fill="none" stroke="#2a8a8a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M10,40 C5,30 12,22 8,15" fill="none" stroke="#2a8a8a" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- Top-right flagellum -->
+          <path d="M145,65 C165,50 180,60 190,40" fill="none" stroke="#2a8a8a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M190,40 C195,30 188,22 192,15" fill="none" stroke="#2a8a8a" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- Bottom-left flagellum -->
+          <path d="M55,135 C35,150 25,145 12,160" fill="none" stroke="#2a8a8a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M12,160 C5,170 15,178 8,185" fill="none" stroke="#2a8a8a" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- Bottom-right flagellum -->
+          <path d="M145,135 C165,150 175,145 188,160" fill="none" stroke="#2a8a8a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M188,160 C195,170 185,178 192,185" fill="none" stroke="#2a8a8a" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+
+        <!-- Outer membrane (translucent, dashed) -->
+        <ellipse cx="100" cy="100" rx="58" ry="48" fill="none" stroke="#5cdcdc" stroke-width="1.8" opacity="0.35" stroke-dasharray="6,4"/>
+        <!-- Inner membrane -->
+        <ellipse cx="100" cy="100" rx="52" ry="42" fill="none" stroke="#3ababa" stroke-width="1" opacity="0.25"/>
+
+        <!-- Cell body (main oval with radialGradient) -->
+        <ellipse cx="100" cy="100" rx="48" ry="38" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="1" filter="url(#soft-shadow)"/>
+
+        <!-- Internal structures -->
+        <!-- Nucleoid region (elongated, semi-transparent) -->
+        <ellipse cx="98" cy="108" rx="22" ry="12" fill="#1a6a6a" opacity="0.25"/>
+        <ellipse cx="98" cy="108" rx="18" ry="9" fill="#1a7a7a" opacity="0.15"/>
+        <!-- Ribosomes (small circles scattered) -->
+        <circle cx="78" cy="92" r="3" fill="#3abcbc" opacity="0.5"/>
+        <circle cx="115" cy="88" r="2.5" fill="#3abcbc" opacity="0.45"/>
+        <circle cx="88" cy="118" r="2.5" fill="#3abcbc" opacity="0.4"/>
+        <circle cx="120" cy="110" r="2" fill="#3abcbc" opacity="0.4"/>
+        <circle cx="105" cy="95" r="2" fill="#3abcbc" opacity="0.35"/>
+        <circle cx="80" cy="105" r="1.8" fill="#3abcbc" opacity="0.35"/>
+        <!-- Small vacuole -->
+        <ellipse cx="118" cy="100" rx="6" ry="5" fill="#2a9a9a" opacity="0.2" stroke="#3ababa" stroke-width="0.5" opacity="0.3"/>
+
+        <!-- Sensor spots (eyes) with glow -->
+        <g filter="url(#glow-cyan)">
+          <circle cx="85" cy="88" r="6" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="115" cy="88" r="6" fill="#4aeaff" opacity="0.9"/>
+          <!-- Specular highlights -->
+          <circle cx="83" cy="86" r="2.5" fill="#ffffff" opacity="0.6"/>
+          <circle cx="113" cy="86" r="2.5" fill="#ffffff" opacity="0.6"/>
+          <!-- Pupil depth -->
+          <circle cx="86" cy="89" r="2" fill="#2a6a8a" opacity="0.4"/>
+          <circle cx="116" cy="89" r="2" fill="#2a6a8a" opacity="0.4"/>
+        </g>
+
+        <!-- Membrane texture highlights -->
+        <ellipse cx="80" cy="80" rx="15" ry="8" fill="#5cdcdc" opacity="0.1" transform="rotate(-20,80,80)"/>
+        <ellipse cx="120" cy="115" rx="12" ry="6" fill="#5cdcdc" opacity="0.08" transform="rotate(15,120,115)"/>
       </svg>
     </div>
     <div class="char-info">
@@ -42,116 +142,180 @@
         A young <strong>methanotrophic archaeon</strong>&mdash;a single-celled organism that
         feeds on dissolved chemicals in underground water. ARKE is Earth's front-line defender
         against greenhouse gas emissions, capable of consuming methane and other substrates
-        to grow biomass and reproduce through binary fission (division).
+        to grow biomass and reproduce through binary fission (division). With translucent double
+        membranes, internal ribosomes, and sensitive chemotactic receptors, ARKE navigates the
+        dark pore spaces guided by chemical gradients.
       </div>
       <div class="char-stats">
-        TYPE: Player Character &bull; SIZE: 32&times;32px &bull; SPEED: 2.5 tiles/sec
+        TYPE: Player Character &bull; SIZE: 32&times;32px &bull; SPEED: 2.5 tiles/sec (5.0 in planktonic mode)
       </div>
     </div>
   </div>
 
-  <!-- ARKE Direction Sprites -->
+  <!-- ARKE Directional Sprites -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:10px 0;">
     <h3 style="font-size:9pt; margin-bottom:8px;">ARKE Directional Sprites</h3>
-    <div style="display:flex; justify-content:space-around; align-items:center;">
-      <!-- Up -->
+    <div style="display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap;">
+
+      <!-- UP -->
       <div style="text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
-          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
-          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-          <rect x="7" y="5" width="2" height="2" fill="#4aeaff" opacity="0.4"/>
-          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <!-- Up arrow indicator -->
-          <rect x="7" y="1" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="38" rx="20" ry="16" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="0.8"/>
+          <ellipse cx="40" cy="38" rx="22" ry="18" fill="none" stroke="#5cdcdc" stroke-width="0.8" opacity="0.3" stroke-dasharray="3,2"/>
+          <!-- Eyes looking up -->
+          <circle cx="35" cy="33" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="45" cy="33" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="34" cy="32" r="1" fill="#fff" opacity="0.5"/>
+          <circle cx="44" cy="32" r="1" fill="#fff" opacity="0.5"/>
+          <!-- Ribosomes -->
+          <circle cx="34" cy="42" r="1.2" fill="#3abcbc" opacity="0.4"/>
+          <circle cx="46" cy="40" r="1" fill="#3abcbc" opacity="0.3"/>
+          <!-- Flagella trailing DOWN (moving up) -->
+          <path d="M30,54 C25,62 30,68 25,75" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M40,54 C42,63 38,70 40,78" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M50,54 C55,62 50,68 55,75" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Motion lines -->
+          <line x1="38" y1="16" x2="38" y2="10" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
+          <line x1="42" y1="14" x2="42" y2="8" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
         </svg>
         <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">UP</div>
       </div>
-      <!-- Down -->
+
+      <!-- DOWN -->
       <div style="text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
-          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
-          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-          <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
-          <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
-          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <rect x="7" y="13" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="42" rx="20" ry="16" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="0.8"/>
+          <ellipse cx="40" cy="42" rx="22" ry="18" fill="none" stroke="#5cdcdc" stroke-width="0.8" opacity="0.3" stroke-dasharray="3,2"/>
+          <!-- Eyes looking down -->
+          <circle cx="35" cy="40" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="45" cy="40" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="35" cy="41" r="1" fill="#fff" opacity="0.5"/>
+          <circle cx="45" cy="41" r="1" fill="#fff" opacity="0.5"/>
+          <!-- Ribosomes -->
+          <circle cx="34" cy="48" r="1.2" fill="#3abcbc" opacity="0.4"/>
+          <circle cx="46" cy="36" r="1" fill="#3abcbc" opacity="0.3"/>
+          <!-- Flagella trailing UP (moving down) -->
+          <path d="M30,26 C25,18 30,12 25,5" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M40,26 C42,17 38,10 40,2" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M50,26 C55,18 50,12 55,5" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Motion lines -->
+          <line x1="38" y1="64" x2="38" y2="70" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
+          <line x1="42" y1="66" x2="42" y2="72" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
         </svg>
         <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">DOWN</div>
       </div>
-      <!-- Left -->
+
+      <!-- LEFT -->
       <div style="text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
-          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
-          <rect x="5" y="5" width="3" height="3" fill="#1a1a3a"/>
-          <rect x="5" y="6" width="1" height="1" fill="#4aeaff"/>
-          <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
-          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <rect x="3" y="7" width="1" height="1" fill="#1a6a6a"/>
-          <rect x="2" y="8" width="1" height="1" fill="#1a6a6a"/>
-          <rect x="1" y="7" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="36" cy="40" rx="20" ry="16" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="0.8"/>
+          <ellipse cx="36" cy="40" rx="22" ry="18" fill="none" stroke="#5cdcdc" stroke-width="0.8" opacity="0.3" stroke-dasharray="3,2"/>
+          <!-- Eyes facing left -->
+          <circle cx="26" cy="36" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="34" cy="36" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="25" cy="35" r="1" fill="#fff" opacity="0.5"/>
+          <circle cx="33" cy="35" r="1" fill="#fff" opacity="0.5"/>
+          <!-- Ribosomes -->
+          <circle cx="40" cy="44" r="1.2" fill="#3abcbc" opacity="0.4"/>
+          <circle cx="30" cy="46" r="1" fill="#3abcbc" opacity="0.3"/>
+          <!-- Flagella trailing RIGHT (moving left) -->
+          <path d="M58,34 C65,30 72,36 78,32" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M58,40 C66,40 72,44 80,42" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M58,46 C65,50 72,44 78,48" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Motion lines -->
+          <line x1="10" y1="38" x2="4" y2="38" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
+          <line x1="8" y1="42" x2="2" y2="42" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
         </svg>
         <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">LEFT</div>
       </div>
-      <!-- Right -->
+
+      <!-- RIGHT -->
       <div style="text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
-          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
-          <rect x="8" y="5" width="3" height="3" fill="#1a1a3a"/>
-          <rect x="8" y="6" width="1" height="1" fill="#4aeaff"/>
-          <rect x="10" y="6" width="1" height="1" fill="#4aeaff"/>
-          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <rect x="12" y="7" width="1" height="1" fill="#1a6a6a"/>
-          <rect x="13" y="8" width="1" height="1" fill="#1a6a6a"/>
-          <rect x="13" y="7" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="44" cy="40" rx="20" ry="16" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="0.8"/>
+          <ellipse cx="44" cy="40" rx="22" ry="18" fill="none" stroke="#5cdcdc" stroke-width="0.8" opacity="0.3" stroke-dasharray="3,2"/>
+          <!-- Eyes facing right -->
+          <circle cx="46" cy="36" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="54" cy="36" r="2.5" fill="#4aeaff" opacity="0.9"/>
+          <circle cx="47" cy="35" r="1" fill="#fff" opacity="0.5"/>
+          <circle cx="55" cy="35" r="1" fill="#fff" opacity="0.5"/>
+          <!-- Ribosomes -->
+          <circle cx="38" cy="44" r="1.2" fill="#3abcbc" opacity="0.4"/>
+          <circle cx="50" cy="46" r="1" fill="#3abcbc" opacity="0.3"/>
+          <!-- Flagella trailing LEFT (moving right) -->
+          <path d="M22,34 C15,30 8,36 2,32" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M22,40 C14,40 8,44 0,42" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M22,46 C15,50 8,44 2,48" fill="none" stroke="#2a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Motion lines -->
+          <line x1="70" y1="38" x2="76" y2="38" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
+          <line x1="72" y1="42" x2="78" y2="42" stroke="#4aeaff" stroke-width="0.8" opacity="0.4"/>
         </svg>
         <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">RIGHT</div>
       </div>
-      <!-- Eating -->
+
+      <!-- EATING -->
       <div style="text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
-          <rect x="5" y="4" width="6" height="8" fill="#3aaa3a"/>
-          <rect x="6" y="3" width="4" height="1" fill="#3aaa3a"/>
-          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-          <rect x="7" y="6" width="1" height="1" fill="#7fff7f"/>
-          <rect x="9" y="6" width="1" height="1" fill="#7fff7f"/>
-          <rect x="4" y="6" width="1" height="4" fill="#2a7a2a"/>
-          <rect x="11" y="6" width="1" height="4" fill="#2a7a2a"/>
-          <!-- Sparkle particles -->
-          <rect x="3" y="3" width="1" height="1" fill="#ffff00" opacity="0.8"/>
-          <rect x="12" y="4" width="1" height="1" fill="#ffff00" opacity="0.8"/>
-          <rect x="2" y="9" width="1" height="1" fill="#ffff00" opacity="0.6"/>
-          <rect x="13" y="10" width="1" height="1" fill="#ffff00" opacity="0.6"/>
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Green eating glow halo -->
+          <ellipse cx="40" cy="40" rx="35" ry="30" fill="url(#eating-glow-grad)"/>
+          <!-- Body glowing green -->
+          <ellipse cx="40" cy="40" rx="20" ry="16" fill="url(#arke-eating-grad)" stroke="#1a6a3a" stroke-width="0.8"/>
+          <ellipse cx="40" cy="40" rx="22" ry="18" fill="none" stroke="#6aee8a" stroke-width="0.8" opacity="0.3" stroke-dasharray="3,2"/>
+          <!-- Eyes glowing green -->
+          <circle cx="35" cy="36" r="2.5" fill="#7fff7f" opacity="0.9"/>
+          <circle cx="45" cy="36" r="2.5" fill="#7fff7f" opacity="0.9"/>
+          <circle cx="34" cy="35" r="1" fill="#fff" opacity="0.5"/>
+          <circle cx="44" cy="35" r="1" fill="#fff" opacity="0.5"/>
+          <!-- Mouth-like opening -->
+          <ellipse cx="40" cy="44" rx="5" ry="3" fill="#1a4a2a" opacity="0.6"/>
+          <!-- Substrate particle being absorbed -->
+          <circle cx="56" cy="38" r="4" fill="#4fa4ff" opacity="0.7"/>
+          <!-- Absorption lines -->
+          <line x1="52" y1="38" x2="48" y2="39" stroke="#4fa4ff" stroke-width="0.8" opacity="0.5" stroke-dasharray="2,1"/>
+          <line x1="54" y1="34" x2="48" y2="36" stroke="#4fa4ff" stroke-width="0.6" opacity="0.4" stroke-dasharray="2,1"/>
+          <line x1="54" y1="42" x2="48" y2="42" stroke="#4fa4ff" stroke-width="0.6" opacity="0.4" stroke-dasharray="2,1"/>
         </svg>
-        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">EATING</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#3a8a3a;">EATING</div>
       </div>
-      <!-- Glowing (ready to divide) -->
+
+      <!-- DIVIDING -->
       <div style="text-align:center;">
-        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
-          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
-          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
-          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
-          <rect x="7" y="6" width="1" height="1" fill="#ffff00"/>
-          <rect x="9" y="6" width="1" height="1" fill="#ffff00"/>
-          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
-          <!-- Glow ring -->
-          <rect x="3" y="3" width="10" height="1" fill="#ffff00" opacity="0.3"/>
-          <rect x="3" y="12" width="10" height="1" fill="#ffff00" opacity="0.3"/>
-          <rect x="3" y="3" width="1" height="10" fill="#ffff00" opacity="0.3"/>
-          <rect x="12" y="3" width="1" height="10" fill="#ffff00" opacity="0.3"/>
+        <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <!-- Golden division glow -->
+          <ellipse cx="40" cy="40" rx="38" ry="28" fill="url(#division-glow-grad)"/>
+          <!-- Body elongating and pinching -->
+          <!-- Left daughter cell -->
+          <ellipse cx="26" cy="40" rx="16" ry="14" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="0.7"/>
+          <!-- Right daughter cell -->
+          <ellipse cx="54" cy="40" rx="16" ry="14" fill="url(#arke-body-grad)" stroke="#1a5a5a" stroke-width="0.7"/>
+          <!-- Pinch point (narrow bridge) -->
+          <ellipse cx="40" cy="40" rx="6" ry="9" fill="url(#arke-body-grad)" opacity="0.7"/>
+          <line x1="40" y1="30" x2="40" y2="50" stroke="#ffd700" stroke-width="1" opacity="0.5" stroke-dasharray="2,2"/>
+          <!-- Eyes on both halves -->
+          <circle cx="22" cy="37" r="2" fill="#ffd700" opacity="0.9"/>
+          <circle cx="30" cy="37" r="2" fill="#ffd700" opacity="0.9"/>
+          <circle cx="50" cy="37" r="2" fill="#ffd700" opacity="0.9"/>
+          <circle cx="58" cy="37" r="2" fill="#ffd700" opacity="0.9"/>
+          <!-- Specular -->
+          <circle cx="21" cy="36" r="0.8" fill="#fff" opacity="0.5"/>
+          <circle cx="29" cy="36" r="0.8" fill="#fff" opacity="0.5"/>
+          <circle cx="49" cy="36" r="0.8" fill="#fff" opacity="0.5"/>
+          <circle cx="57" cy="36" r="0.8" fill="#fff" opacity="0.5"/>
+          <!-- Golden glow ring -->
+          <ellipse cx="40" cy="40" rx="38" ry="26" fill="none" stroke="#ffd700" stroke-width="1" opacity="0.3"/>
+          <!-- Sparkle particles -->
+          <circle cx="12" cy="28" r="1.5" fill="#ffd700" opacity="0.6"/>
+          <circle cx="68" cy="28" r="1.5" fill="#ffd700" opacity="0.6"/>
+          <circle cx="40" cy="16" r="1.5" fill="#ffd700" opacity="0.5"/>
+          <circle cx="20" cy="56" r="1" fill="#ffd700" opacity="0.4"/>
+          <circle cx="60" cy="56" r="1" fill="#ffd700" opacity="0.4"/>
         </svg>
-        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#4a4;">DIVIDE!</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#aa8a20;">DIVIDE!</div>
       </div>
     </div>
   </div>
 
-  <!-- ARKE Stats Detail -->
+  <!-- ARKE Vital Stats (expanded) -->
   <h2>ARKE's Vital Stats</h2>
   <div style="background:white; padding:12px 16px; border:2px solid #3a3a4a; border-radius:4px;">
     <div class="bar-display">
@@ -159,69 +323,105 @@
       <div class="bar-track"><div class="bar-fill hp" style="width:100%"></div></div>
       <span style="font-family:'Space Mono',monospace;font-size:8pt;width:40px;text-align:right;">100</span>
     </div>
-    <p style="font-size:9pt;margin:2px 0 8px 36px;color:#666;">
-      <strong>Health</strong> &mdash; Drains at 1.5/sec (starvation). Restored by eating. Death at 0.
+    <p style="font-size:9pt;margin:2px 0 10px 36px;color:#555; line-height:1.5;">
+      <strong>Health</strong> &mdash; Drains at <strong>1.5 per second</strong> constantly due to
+      cellular maintenance costs (basal metabolism). At full health (100), you have approximately
+      <strong>67 seconds</strong> before death if you eat nothing. When HP drops below
+      <strong>30</strong>, screen edges flash red and <strong>"STARVING!"</strong> text appears.
+      At 0, game over.
     </p>
+
     <div class="bar-display">
       <span class="bar-label" style="color:#5fa0f0;">EN</span>
       <div class="bar-track"><div class="bar-fill en" style="width:100%"></div></div>
       <span style="font-family:'Space Mono',monospace;font-size:8pt;width:40px;text-align:right;">100</span>
     </div>
-    <p style="font-size:9pt;margin:2px 0 8px 36px;color:#666;">
-      <strong>Energy</strong> &mdash; Drains at 0.8/sec. Powers planktonic flow-riding (SHIFT). Restored by eating.
+    <p style="font-size:9pt;margin:2px 0 10px 36px;color:#555; line-height:1.5;">
+      <strong>Energy</strong> &mdash; Drains at <strong>0.8 per second</strong>. Powers planktonic
+      mode (SHIFT key). Each flow-riding move costs <strong>0.5 additional energy</strong>. When EN
+      reaches 0, you cannot ride flow and are stuck at normal speed
+      (<strong>2.5 tiles/sec</strong> instead of <strong>5.0</strong>).
     </p>
+
     <div class="bar-display">
       <span class="bar-label" style="color:#5ff050;">GR</span>
       <div class="bar-track"><div class="bar-fill gr" style="width:100%"></div></div>
       <span style="font-family:'Space Mono',monospace;font-size:8pt;width:40px;text-align:right;">100</span>
     </div>
-    <p style="font-size:9pt;margin:2px 0 0 36px;color:#666;">
-      <strong>Growth</strong> &mdash; Does NOT decay! Accumulates as you eat. Press SPACE to divide at 100.
+    <p style="font-size:9pt;margin:2px 0 0 36px;color:#555; line-height:1.5;">
+      <strong>Growth</strong> &mdash; Does <strong>NOT</strong> decay! This is key&mdash;every substrate
+      you eat permanently increases GR. When GR reaches exactly <strong>100</strong>, your body glows
+      yellow and you can press <strong>SPACE</strong> to divide. Growth persists even if your HP
+      is critically low, so a clutch division is always possible.
     </p>
   </div>
 
-  <p class="page-number left">3</p>
+  <p class="page-number left">4</p>
 </div>
 
-<!-- Characters page 2: Elder, Rivals, Colonies -->
-<div class="page" id="characters2">
+<!-- Characters page 2: Elder, Rivals -->
+<div class="page" id="characters2" style="page-break-after: always;">
   <h2>Elder Archaeon Prime</h2>
 
-  <!-- Elder -->
+  <!-- Elder Character Card -->
   <div class="char-card">
-    <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
-        <!-- Body (golden/ancient) -->
-        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
-        <rect x="6" y="2" width="4" height="1" fill="#8a6a2a"/>
-        <rect x="6" y="13" width="4" height="1" fill="#8a6a2a"/>
-        <!-- Visor -->
-        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
-        <rect x="7" y="4" width="2" height="1" fill="#ffd700" opacity="0.6"/>
-        <rect x="7" y="5" width="1" height="1" fill="#ffd700"/>
-        <rect x="9" y="5" width="1" height="1" fill="#ffd700"/>
-        <!-- Ancient patterns -->
-        <rect x="6" y="8" width="1" height="1" fill="#aa8a3a"/>
-        <rect x="7" y="9" width="2" height="1" fill="#aa8a3a"/>
-        <rect x="9" y="8" width="1" height="1" fill="#aa8a3a"/>
-        <!-- Side appendages (larger, ancient) -->
-        <rect x="4" y="5" width="1" height="6" fill="#6a4a1a"/>
-        <rect x="11" y="5" width="1" height="6" fill="#6a4a1a"/>
-        <rect x="3" y="6" width="1" height="2" fill="#6a4a1a"/>
-        <rect x="12" y="6" width="1" height="2" fill="#6a4a1a"/>
-        <!-- Glow -->
-        <rect x="4" y="2" width="1" height="1" fill="#ffd700" opacity="0.3"/>
-        <rect x="11" y="2" width="1" height="1" fill="#ffd700" opacity="0.3"/>
-        <rect x="4" y="13" width="1" height="1" fill="#ffd700" opacity="0.3"/>
-        <rect x="11" y="13" width="1" height="1" fill="#ffd700" opacity="0.3"/>
+    <div class="char-sprite" style="width:120px; height:120px;">
+      <svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Wisdom glow halo (golden) -->
+        <ellipse cx="100" cy="100" rx="92" ry="82" fill="none" stroke="#ffd700" stroke-width="1.5" opacity="0.12"/>
+        <ellipse cx="100" cy="100" rx="82" ry="72" fill="none" stroke="#ffd700" stroke-width="1" opacity="0.08"/>
+
+        <!-- Longer, elaborate flagella -->
+        <g filter="url(#glow-gold)" opacity="0.75">
+          <path d="M50,60 C28,42 15,55 5,30" fill="none" stroke="#6a4a1a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M5,30 C0,18 10,10 4,2" fill="none" stroke="#6a4a1a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M150,60 C172,42 185,55 195,30" fill="none" stroke="#6a4a1a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M195,30 C200,18 190,10 196,2" fill="none" stroke="#6a4a1a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M50,140 C28,158 18,148 5,170" fill="none" stroke="#6a4a1a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M5,170 C0,182 12,188 4,198" fill="none" stroke="#6a4a1a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M150,140 C172,158 182,148 195,170" fill="none" stroke="#6a4a1a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M195,170 C200,182 188,188 196,198" fill="none" stroke="#6a4a1a" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- Extra pili (wisdom tendrils) -->
+          <path d="M60,52 C50,30 42,35 35,18" fill="none" stroke="#8a6a2a" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M140,52 C150,30 158,35 165,18" fill="none" stroke="#8a6a2a" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+
+        <!-- Outer ornate membrane -->
+        <ellipse cx="100" cy="100" rx="62" ry="52" fill="none" stroke="#d4aa50" stroke-width="1.8" opacity="0.3" stroke-dasharray="5,3"/>
+
+        <!-- Cell body (larger, golden) -->
+        <ellipse cx="100" cy="100" rx="54" ry="44" fill="url(#elder-body-grad)" stroke="#4a3a15" stroke-width="1" filter="url(#soft-shadow)"/>
+
+        <!-- Ancient patterns/markings on membrane -->
+        <path d="M70,110 C80,118 90,115 100,120" fill="none" stroke="#aa8a3a" stroke-width="1.2" opacity="0.4"/>
+        <path d="M100,120 C110,115 120,118 130,110" fill="none" stroke="#aa8a3a" stroke-width="1.2" opacity="0.4"/>
+        <path d="M75,95 L80,100 L75,105" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.3"/>
+        <path d="M125,95 L120,100 L125,105" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.3"/>
+        <circle cx="100" cy="125" r="3" fill="none" stroke="#aa8a3a" stroke-width="0.8" opacity="0.3"/>
+        <path d="M88,130 L100,135 L112,130" fill="none" stroke="#aa8a3a" stroke-width="0.6" opacity="0.25"/>
+
+        <!-- Nucleoid -->
+        <ellipse cx="98" cy="110" rx="24" ry="14" fill="#5a4a1a" opacity="0.2"/>
+
+        <!-- Golden glowing eyes -->
+        <g filter="url(#glow-gold)">
+          <circle cx="82" cy="88" r="7" fill="#ffd700" opacity="0.9"/>
+          <circle cx="118" cy="88" r="7" fill="#ffd700" opacity="0.9"/>
+          <circle cx="80" cy="86" r="3" fill="#ffffff" opacity="0.6"/>
+          <circle cx="116" cy="86" r="3" fill="#ffffff" opacity="0.6"/>
+          <circle cx="84" cy="90" r="2.5" fill="#8a6a00" opacity="0.3"/>
+          <circle cx="120" cy="90" r="2.5" fill="#8a6a00" opacity="0.3"/>
+        </g>
       </svg>
     </div>
     <div class="char-info">
       <div class="char-name" style="color:#8a6a2a;">ELDER ARCHAEON PRIME</div>
       <div class="char-desc">
-        An ancient archaeon who has guarded the subsurface for eons. The Elder serves
-        as your mentor, providing mission briefings before each level and teaching you
-        the science behind your abilities. Appears during cutscenes and narrative sequences.
+        An ancient archaeon who has guarded the subsurface for eons. The Elder's body bears
+        the marks of countless generations&mdash;ornate membrane patterns that tell the story
+        of deep-Earth survival. The Elder serves as your mentor, providing mission briefings
+        before each level and teaching you the science behind your abilities. Appears during
+        cutscenes and narrative sequences.
       </div>
       <div class="char-stats">
         TYPE: Mentor / NPC &bull; APPEARS: Cutscenes &amp; Briefings
@@ -231,27 +431,61 @@
 
   <h2>Rival Microbes</h2>
 
-  <!-- Rival -->
+  <!-- Rival Character Card -->
   <div class="char-card">
-    <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
-        <!-- Body (red bacterium) -->
-        <rect x="6" y="5" width="4" height="6" fill="#8a2a2a"/>
-        <rect x="7" y="4" width="2" height="1" fill="#8a2a2a"/>
-        <rect x="7" y="11" width="2" height="1" fill="#8a2a2a"/>
-        <!-- Highlight -->
-        <rect x="7" y="5" width="1" height="4" fill="#aa4a4a" opacity="0.5"/>
-        <!-- Eyes -->
-        <rect x="7" y="6" width="1" height="1" fill="#ff6666"/>
-        <rect x="9" y="6" width="1" height="1" fill="#ff6666"/>
+    <div class="char-sprite" style="width:150px; height:150px;">
+      <svg width="150" height="150" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Menacing red glow -->
+        <ellipse cx="100" cy="100" rx="90" ry="70" fill="none" stroke="#ff4444" stroke-width="1.5" opacity="0.1"/>
+
+        <!-- Multiple flagella radiating aggressively (8 flagella) -->
+        <g filter="url(#glow-red)" opacity="0.7">
+          <path d="M100,30 C95,15 105,8 98,0" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M60,45 C40,28 45,15 30,5" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M140,45 C160,28 155,15 170,5" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M40,90 C20,85 10,92 0,82" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M160,90 C180,85 190,92 200,82" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M50,140 C30,155 35,168 18,178" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M150,140 C170,155 165,168 182,178" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+          <path d="M100,155 C95,175 108,182 100,195" fill="none" stroke="#6a2020" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <!-- Spiky outer membrane features -->
+        <ellipse cx="100" cy="95" rx="56" ry="62" fill="none" stroke="#cc5555" stroke-width="1.5" opacity="0.25"/>
+        <!-- Spike protrusions on membrane -->
+        <path d="M54,60 L45,52" stroke="#aa3a3a" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        <path d="M146,60 L155,52" stroke="#aa3a3a" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        <path d="M50,120 L40,128" stroke="#aa3a3a" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        <path d="M150,120 L160,128" stroke="#aa3a3a" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        <path d="M70,40 L65,30" stroke="#aa3a3a" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+        <path d="M130,40 L135,30" stroke="#aa3a3a" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>
+
+        <!-- Rod-shaped (bacillus) body -->
+        <rect x="62" y="50" width="76" height="95" rx="38" ry="38" fill="url(#rival-body-grad)" stroke="#4a1515" stroke-width="1" filter="url(#soft-shadow)"/>
+
+        <!-- Internal structure hints -->
+        <ellipse cx="100" cy="105" rx="20" ry="15" fill="#5a2020" opacity="0.2"/>
+        <circle cx="85" cy="110" r="2" fill="#8a4040" opacity="0.3"/>
+        <circle cx="115" cy="115" r="1.5" fill="#8a4040" opacity="0.3"/>
+
+        <!-- Red glowing eyes (angular, menacing) -->
+        <g filter="url(#glow-red)">
+          <!-- Angular eye shapes using paths -->
+          <path d="M78,78 L88,75 L90,82 L82,85 Z" fill="#ff6666" opacity="0.9"/>
+          <path d="M112,78 L122,75 L118,85 L110,82 Z" fill="#ff6666" opacity="0.9"/>
+          <!-- Bright centers -->
+          <circle cx="85" cy="80" r="3" fill="#ff2222" opacity="0.8"/>
+          <circle cx="115" cy="80" r="3" fill="#ff2222" opacity="0.8"/>
+          <!-- Specular highlights -->
+          <circle cx="83" cy="78" r="1.5" fill="#ffffff" opacity="0.5"/>
+          <circle cx="113" cy="78" r="1.5" fill="#ffffff" opacity="0.5"/>
+        </g>
+
         <!-- Alert indicator -->
-        <rect x="7" y="2" width="2" height="2" fill="#ff4444" opacity="0.7"/>
-        <rect x="7.5" y="2.2" width="1" height="1.2" fill="#ffffff" opacity="0.8"/>
-        <!-- Glow ring -->
-        <rect x="5" y="4" width="6" height="1" fill="#ff0000" opacity="0.15"/>
-        <rect x="5" y="11" width="6" height="1" fill="#ff0000" opacity="0.15"/>
-        <rect x="5" y="4" width="1" height="8" fill="#ff0000" opacity="0.15"/>
-        <rect x="10" y="4" width="1" height="8" fill="#ff0000" opacity="0.15"/>
+        <g transform="translate(100,28)" opacity="0.7">
+          <polygon points="0,-12 8,4 -8,4" fill="#ff4444" stroke="#cc2222" stroke-width="0.5"/>
+          <text x="0" y="2" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="900" font-size="10" fill="#fff">!</text>
+        </g>
       </svg>
     </div>
     <div class="char-info">
@@ -260,7 +494,9 @@
         Competing bacteria that hunt for the same substrates as you. Rivals are
         <strong>invulnerable</strong>&mdash;you cannot kill or damage them. They don't
         attack you directly, but they consume food aggressively, creating deadly
-        scarcity. The more rivals in a level, the harder it becomes to survive.
+        scarcity. With their rod-shaped bodies and multiple flagella, they are efficient
+        hunters that use sophisticated decision-making algorithms to find food.
+        The more rivals in a level, the harder it becomes to survive.
       </div>
       <div class="char-stats">
         TYPE: Enemy (Competitor) &bull; SIZE: 10&times;10px &bull;
@@ -269,84 +505,311 @@
     </div>
   </div>
 
-  <!-- Rival behavior diagram -->
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:10px 0;">
-    <h3 style="font-size:9pt; margin-bottom:10px;">Rival Decision Tree</h3>
-    <svg width="100%" height="130" viewBox="0 0 520 130">
-      <!-- Decision boxes -->
-      <rect x="200" y="5" width="120" height="28" rx="4" fill="#8a2a2a" stroke="#cc3333" stroke-width="1.5"/>
-      <text x="260" y="23" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">RIVAL TURN</text>
+  <p class="page-number right">5</p>
+</div>
 
-      <!-- Branch 1: Seek Food -->
-      <line x1="220" y1="33" x2="80" y2="55" stroke="#666" stroke-width="1"/>
-      <rect x="10" y="55" width="140" height="24" rx="4" fill="#f0ece0" stroke="#666"/>
-      <text x="80" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">SEEK FOOD (45-75%)</text>
-      <text x="80" y="95" text-anchor="middle" font-size="7" fill="#666">Senses substrates within</text>
-      <text x="80" y="107" text-anchor="middle" font-size="7" fill="#666">12 tiles, moves toward</text>
-      <text x="80" y="119" text-anchor="middle" font-size="7" fill="#666">nearest one</text>
+<!-- Characters page 3: How Rivals Sense and Hunt -->
+<div class="page" id="characters3" style="page-break-after: always;">
+  <h2>How Rivals Sense and Hunt</h2>
 
-      <!-- Branch 2: Hunt Player -->
-      <line x1="240" y1="33" x2="220" y2="55" stroke="#666" stroke-width="1"/>
-      <rect x="160" y="55" width="120" height="24" rx="4" fill="#f0ddd0" stroke="#d08060"/>
-      <text x="220" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">TRACK ARKE (15%)</text>
-      <text x="220" y="95" text-anchor="middle" font-size="7" fill="#666">Senses player within</text>
-      <text x="220" y="107" text-anchor="middle" font-size="7" fill="#666">10 tiles, moves to</text>
-      <text x="220" y="119" text-anchor="middle" font-size="7" fill="#666">compete for food zone</text>
+  <p style="font-size:10pt; line-height:1.5; margin-bottom:12px;">
+    Every <strong>0.4 seconds</strong> (the decision interval), each rival microbe evaluates its
+    surroundings and chooses an action from its decision tree. Understanding this algorithm is
+    critical to outmaneuvering them.
+  </p>
 
-      <!-- Branch 3: Follow Flow -->
-      <line x1="280" y1="33" x2="360" y2="55" stroke="#666" stroke-width="1"/>
-      <rect x="300" y="55" width="120" height="24" rx="4" fill="#d0d8f0" stroke="#6070a0"/>
-      <text x="360" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">RIDE FLOW (40%)</text>
-      <text x="360" y="95" text-anchor="middle" font-size="7" fill="#666">Follows water current</text>
-      <text x="360" y="107" text-anchor="middle" font-size="7" fill="#666">to find flow-carried</text>
-      <text x="360" y="119" text-anchor="middle" font-size="7" fill="#666">substrates</text>
+  <!-- Beautiful SVG Decision Tree Diagram -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:8px 0;">
+    <svg width="100%" height="240" viewBox="0 0 600 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="dt-root-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#cc4444"/>
+          <stop offset="100%" stop-color="#8a2222"/>
+        </linearGradient>
+        <linearGradient id="dt-food-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#5aa06a"/>
+          <stop offset="100%" stop-color="#3a7a4a"/>
+        </linearGradient>
+        <linearGradient id="dt-track-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#d09050"/>
+          <stop offset="100%" stop-color="#a06830"/>
+        </linearGradient>
+        <linearGradient id="dt-flow-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#5080c0"/>
+          <stop offset="100%" stop-color="#3860a0"/>
+        </linearGradient>
+        <linearGradient id="dt-wander-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#999"/>
+          <stop offset="100%" stop-color="#666"/>
+        </linearGradient>
+        <filter id="dt-shadow" x="-5%" y="-5%" width="110%" height="120%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+          <feOffset dx="1" dy="2"/>
+          <feComposite in2="SourceAlpha" operator="out"/>
+          <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
 
-      <!-- Branch 4: Wander -->
-      <line x1="300" y1="33" x2="480" y2="55" stroke="#666" stroke-width="1"/>
-      <rect x="420" y="55" width="95" height="24" rx="4" fill="#f0f0f0" stroke="#aaa"/>
-      <text x="467" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">WANDER</text>
-      <text x="467" y="95" text-anchor="middle" font-size="7" fill="#666">Random direction</text>
-      <text x="467" y="107" text-anchor="middle" font-size="7" fill="#666">with preference,</text>
-      <text x="467" y="119" text-anchor="middle" font-size="7" fill="#666">exploring the map</text>
+      <!-- Root node -->
+      <rect x="230" y="8" width="140" height="36" rx="18" fill="url(#dt-root-grad)" filter="url(#dt-shadow)"/>
+      <text x="300" y="30" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="11" fill="white">RIVAL DECISION</text>
+      <text x="300" y="40" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#ffcccc">every 0.4 sec</text>
+
+      <!-- Connecting arrows (smooth bezier) -->
+      <!-- To Seek Food -->
+      <path d="M260,44 C220,60 140,60 100,80" fill="none" stroke="#5aa06a" stroke-width="2" marker-end="url(#arrowGreen)"/>
+      <!-- To Track Player -->
+      <path d="M280,44 C265,65 240,70 235,80" fill="none" stroke="#d09050" stroke-width="2"/>
+      <!-- To Ride Flow -->
+      <path d="M320,44 C335,65 360,70 365,80" fill="none" stroke="#5080c0" stroke-width="2"/>
+      <!-- To Wander -->
+      <path d="M340,44 C380,60 460,60 500,80" fill="none" stroke="#999" stroke-width="2"/>
+
+      <!-- Arrow tips (small triangles) -->
+      <polygon points="100,80 96,74 104,74" fill="#5aa06a"/>
+      <polygon points="235,80 231,74 239,74" fill="#d09050"/>
+      <polygon points="365,80 361,74 369,74" fill="#5080c0"/>
+      <polygon points="500,80 496,74 504,74" fill="#999"/>
+
+      <!-- Seek Food node -->
+      <rect x="20" y="82" width="160" height="34" rx="12" fill="url(#dt-food-grad)" filter="url(#dt-shadow)"/>
+      <text x="100" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">SEEK FOOD</text>
+      <text x="100" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#d0ffd0">45-75% priority</text>
+      <!-- Description box -->
+      <rect x="20" y="122" width="160" height="60" rx="6" fill="#f0f8f2" stroke="#5aa06a" stroke-width="1"/>
+      <text x="100" y="136" text-anchor="middle" font-size="8" fill="#333">Scans 12-tile radius.</text>
+      <text x="100" y="148" text-anchor="middle" font-size="8" fill="#333">Moves toward nearest</text>
+      <text x="100" y="160" text-anchor="middle" font-size="8" fill="#333">substrate. Prefers high</text>
+      <text x="100" y="172" text-anchor="middle" font-size="8" fill="#333">energy (O2 > NO3 > ...).</text>
+
+      <!-- Track Player node -->
+      <rect x="190" y="82" width="130" height="34" rx="12" fill="url(#dt-track-grad)" filter="url(#dt-shadow)"/>
+      <text x="255" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">TRACK ARKE</text>
+      <text x="255" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#ffeedd">15% priority</text>
+      <rect x="190" y="122" width="130" height="60" rx="6" fill="#faf5f0" stroke="#d09050" stroke-width="1"/>
+      <text x="255" y="136" text-anchor="middle" font-size="8" fill="#333">Detects ARKE within</text>
+      <text x="255" y="148" text-anchor="middle" font-size="8" fill="#333">10 tiles. Moves to</text>
+      <text x="255" y="160" text-anchor="middle" font-size="8" fill="#333">player's area to</text>
+      <text x="255" y="172" text-anchor="middle" font-size="8" fill="#333">compete for food.</text>
+
+      <!-- Ride Flow node -->
+      <rect x="330" y="82" width="130" height="34" rx="12" fill="url(#dt-flow-grad)" filter="url(#dt-shadow)"/>
+      <text x="395" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">RIDE FLOW</text>
+      <text x="395" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#d0e0ff">40% on flow tiles</text>
+      <rect x="330" y="122" width="130" height="60" rx="6" fill="#f0f2fa" stroke="#5080c0" stroke-width="1"/>
+      <text x="395" y="136" text-anchor="middle" font-size="8" fill="#333">On flow tiles, rides</text>
+      <text x="395" y="148" text-anchor="middle" font-size="8" fill="#333">current at 2x speed.</text>
+      <text x="395" y="160" text-anchor="middle" font-size="8" fill="#333">Reaches food-rich</text>
+      <text x="395" y="172" text-anchor="middle" font-size="8" fill="#333">areas downstream.</text>
+
+      <!-- Wander node -->
+      <rect x="470" y="82" width="110" height="34" rx="12" fill="url(#dt-wander-grad)" filter="url(#dt-shadow)"/>
+      <text x="525" y="100" text-anchor="middle" font-family="'Inter',sans-serif" font-weight="700" font-size="10" fill="white">WANDER</text>
+      <text x="525" y="112" text-anchor="middle" font-family="'Space Mono',monospace" font-size="7" fill="#ddd">fallback</text>
+      <rect x="470" y="122" width="110" height="60" rx="6" fill="#f4f4f4" stroke="#999" stroke-width="1"/>
+      <text x="525" y="136" text-anchor="middle" font-size="8" fill="#333">Random walkable</text>
+      <text x="525" y="148" text-anchor="middle" font-size="8" fill="#333">tile. Prefers current</text>
+      <text x="525" y="160" text-anchor="middle" font-size="8" fill="#333">direction (momentum)</text>
+      <text x="525" y="172" text-anchor="middle" font-size="8" fill="#333">for patrol behavior.</text>
+
+      <!-- Priority legend bar -->
+      <rect x="20" y="200" width="560" height="30" rx="6" fill="#f8f4ea" stroke="#ccc" stroke-width="1"/>
+      <text x="30" y="220" font-family="'Space Mono',monospace" font-size="7" fill="#888">PRIORITY ORDER:</text>
+      <circle cx="140" cy="215" r="6" fill="url(#dt-food-grad)"/>
+      <text x="155" y="219" font-size="8" fill="#333">Highest (food)</text>
+      <text x="220" y="219" font-size="8" fill="#888">&rarr;</text>
+      <circle cx="250" cy="215" r="6" fill="url(#dt-flow-grad)"/>
+      <text x="265" y="219" font-size="8" fill="#333">Flow (if on tile)</text>
+      <text x="350" y="219" font-size="8" fill="#888">&rarr;</text>
+      <circle cx="380" cy="215" r="6" fill="url(#dt-track-grad)"/>
+      <text x="395" y="219" font-size="8" fill="#333">Track player</text>
+      <text x="470" y="219" font-size="8" fill="#888">&rarr;</text>
+      <circle cx="500" cy="215" r="6" fill="url(#dt-wander-grad)"/>
+      <text x="515" y="219" font-size="8" fill="#333">Wander (fallback)</text>
     </svg>
+  </div>
+
+  <!-- Detailed decision branch explanations -->
+  <h3 style="margin-top:12px;">1. Seek Food (45-75% Priority)</h3>
+  <p style="font-size:9.5pt; line-height:1.5;">
+    The rival calculates <strong>Manhattan distance</strong> to every substrate within
+    <strong>12 tiles</strong>. It moves one tile toward the nearest substrate. If multiple
+    substrates are equidistant, it prefers the one with the highest energy value
+    (<strong>O<sub>2</sub> &gt; NO<sub>3</sub><sup>-</sup> &gt; Mn &gt; Fe &gt;
+    SO<sub>4</sub><sup>2-</sup> &gt; CH<sub>4</sub></strong>). The seek probability
+    increases when the rival hasn't eaten recently, rising from 45% to 75% after
+    several seconds without food.
+  </p>
+
+  <h3>2. Track Player (15% Priority)</h3>
+  <p style="font-size:9.5pt; line-height:1.5;">
+    If ARKE is within <strong>10 tiles</strong>, the rival has a <strong>15% chance</strong>
+    per decision cycle to move toward the player's position. This doesn't mean they attack
+    you&mdash;they move to <em>your area</em> because you're likely near food. This creates
+    intense <strong>competition zones</strong> where you and rivals are racing for the same
+    substrates.
+  </p>
+
+  <h3>3. Ride Flow (40% on Flow Tiles)</h3>
+  <p style="font-size:9.5pt; line-height:1.5;">
+    When standing on a tile with water flow, rivals have a <strong>40% chance</strong> to enter
+    planktonic mode, traveling at <strong>2x speed</strong> along the flow direction. This lets
+    them quickly reach substrate-rich areas downstream. Rivals on flow tiles can cover large
+    distances rapidly, often beating you to fresh substrate spawns.
+  </p>
+
+  <h3>4. Wander (Fallback)</h3>
+  <p style="font-size:9.5pt; line-height:1.5;">
+    If no food is detected, no player nearby, and not on a flow tile, the rival picks a random
+    walkable adjacent tile and moves there. They tend to <strong>prefer their current
+    direction</strong> (momentum), which creates patrol-like behavior across the map.
+  </p>
+
+  <p class="page-number left">6</p>
+</div>
+
+<!-- Characters page 4: Key Facts About Rivals, Biofilm Colonies -->
+<div class="page" id="characters4" style="page-break-after: always;">
+  <h2>Key Facts About Rivals</h2>
+
+  <div class="info-box warning" style="margin-top:8px;">
+    <div class="info-box-title" style="color:#cc3333;">CRITICAL RIVAL INFORMATION</div>
+    <table style="font-size:9.5pt;">
+      <tr>
+        <td style="width:30%; font-weight:700; color:#8a2a2a;">Invulnerable</td>
+        <td>Rivals are <strong>INVULNERABLE</strong>&mdash;you cannot kill, damage, or block them.
+            There is no combat mechanic. Your only strategy is to outmaneuver them.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#8a2a2a;">Instant Consumption</td>
+        <td>Rivals consume substrates <strong>instantly on contact</strong>, just like you.
+            If a rival reaches a substrate first, it's gone permanently.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#8a2a2a;">Equal Speed</td>
+        <td>Rivals move at <strong>2.5 tiles/sec</strong>&mdash;the same speed as you in
+            normal (benthic) mode. Your only speed advantage is planktonic mode (SHIFT).</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#8a2a2a;">Toxic Immunity</td>
+        <td>Rivals do <strong>NOT</strong> take damage from toxic zones. This is unfair but
+            realistic&mdash;different species have different chemical tolerances.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#8a2a2a;">Scaling Count</td>
+        <td>Each level has <strong>0-5 rivals</strong>. Level 1: 0 rivals. Level 10: 5 rivals.
+            The count increases by approximately one rival every two levels.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#8a2a2a;">Food Competition</td>
+        <td>Rivals effectively reduce your food supply. With <strong>5 rivals</strong>, you get
+            roughly <strong>1/6</strong> of all food that spawns (assuming equal efficiency).</td>
+      </tr>
+    </table>
   </div>
 
   <h2>Biofilm Colonies</h2>
 
-  <!-- Colony -->
+  <!-- Colony Character Card -->
   <div class="char-card">
-    <div class="char-sprite">
-      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
-        <!-- Colony cell body -->
-        <rect x="5" y="5" width="6" height="6" fill="#3a7a5a"/>
-        <rect x="6" y="4" width="4" height="1" fill="#3a7a5a"/>
-        <rect x="6" y="11" width="4" height="1" fill="#3a7a5a"/>
-        <rect x="4" y="6" width="1" height="4" fill="#3a7a5a"/>
-        <rect x="11" y="6" width="1" height="4" fill="#3a7a5a"/>
-        <!-- Highlight -->
-        <rect x="6" y="5" width="2" height="2" fill="#5aaa7a" opacity="0.6"/>
-        <rect x="8" y="7" width="2" height="2" fill="#5aaa7a" opacity="0.4"/>
-        <!-- Glow pulse -->
-        <rect x="3" y="4" width="10" height="1" fill="#4fdf6f" opacity="0.2"/>
-        <rect x="3" y="11" width="10" height="1" fill="#4fdf6f" opacity="0.2"/>
-        <rect x="3" y="4" width="1" height="8" fill="#4fdf6f" opacity="0.2"/>
-        <rect x="12" y="4" width="1" height="8" fill="#4fdf6f" opacity="0.2"/>
+    <div class="char-sprite" style="width:120px; height:120px;">
+      <svg width="120" height="120" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- Soft green glow -->
+        <ellipse cx="100" cy="100" rx="88" ry="82" fill="none" stroke="#4fdf6f" stroke-width="1" opacity="0.1"/>
+
+        <!-- Green biofilm matrix (semi-transparent blob surrounding cells) -->
+        <ellipse cx="100" cy="100" rx="72" ry="65" fill="#3a7a5a" opacity="0.12"/>
+        <ellipse cx="100" cy="100" rx="65" ry="58" fill="#4a9a6a" opacity="0.1"/>
+
+        <!-- Cluster of 5-7 small oval cells grouped together -->
+        <g filter="url(#glow-green)">
+          <!-- Central cell -->
+          <ellipse cx="100" cy="98" rx="18" ry="14" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.8"/>
+          <!-- Top-left cell -->
+          <ellipse cx="76" cy="80" rx="15" ry="12" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.7"/>
+          <!-- Top-right cell -->
+          <ellipse cx="124" cy="82" rx="14" ry="11" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.7"/>
+          <!-- Bottom-left cell -->
+          <ellipse cx="80" cy="118" rx="13" ry="11" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.7"/>
+          <!-- Bottom-right cell -->
+          <ellipse cx="122" cy="116" rx="14" ry="12" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.7"/>
+          <!-- Small top cell -->
+          <ellipse cx="98" cy="72" rx="10" ry="8" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.6"/>
+          <!-- Small bottom cell -->
+          <ellipse cx="105" cy="130" rx="11" ry="9" fill="url(#colony-body-grad)" stroke="#1a4a2a" stroke-width="0.6"/>
+        </g>
+
+        <!-- Internal structure hints on cells -->
+        <circle cx="100" cy="96" r="2" fill="#5aaa7a" opacity="0.4"/>
+        <circle cx="76" cy="78" r="1.5" fill="#5aaa7a" opacity="0.3"/>
+        <circle cx="124" cy="80" r="1.5" fill="#5aaa7a" opacity="0.3"/>
+
+        <!-- Biofilm matrix connections (thin lines between cells) -->
+        <line x1="88" y1="86" x2="92" y2="92" stroke="#5aaa7a" stroke-width="0.8" opacity="0.3"/>
+        <line x1="112" y1="88" x2="108" y2="94" stroke="#5aaa7a" stroke-width="0.8" opacity="0.3"/>
+        <line x1="86" y1="108" x2="92" y2="104" stroke="#5aaa7a" stroke-width="0.8" opacity="0.3"/>
+        <line x1="114" y1="108" x2="108" y2="104" stroke="#5aaa7a" stroke-width="0.8" opacity="0.3"/>
+        <line x1="98" y1="80" x2="98" y2="86" stroke="#5aaa7a" stroke-width="0.6" opacity="0.25"/>
+        <line x1="104" y1="112" x2="104" y2="122" stroke="#5aaa7a" stroke-width="0.6" opacity="0.25"/>
+
+        <!-- Tiny substrate particles being drawn in -->
+        <circle cx="42" cy="75" r="3" fill="#4fa4ff" opacity="0.5"/>
+        <path d="M42,75 C52,78 60,80 68,80" fill="none" stroke="#4fa4ff" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,2"/>
+        <circle cx="155" cy="90" r="2.5" fill="#4fdf6f" opacity="0.5"/>
+        <path d="M155,90 C145,90 140,88 136,86" fill="none" stroke="#4fdf6f" stroke-width="0.6" opacity="0.3" stroke-dasharray="2,2"/>
+        <circle cx="60" cy="140" r="2.5" fill="#ff4f4f" opacity="0.4"/>
+        <path d="M60,140 C68,135 72,128 76,122" fill="none" stroke="#ff4f4f" stroke-width="0.5" opacity="0.25" stroke-dasharray="2,2"/>
       </svg>
     </div>
     <div class="char-info">
       <div class="char-name" style="color:#3a7a5a;">BIOFILM COLONY</div>
       <div class="char-desc">
-        When ARKE divides, a permanent biofilm colony is placed on the map. Colonies
-        are stationary sentinels that <strong>passively consume</strong> nearby substrates
-        (within 1.5 tiles). They cannot be destroyed. Each colony placed earns
-        <strong>+100 points</strong> and counts toward the level goal.
+        When ARKE divides, a permanent biofilm colony is placed on the map. Colonies are clusters
+        of daughter cells embedded in a protective extracellular matrix&mdash;the biofilm. They are
+        stationary sentinels that <strong>passively consume</strong> nearby substrates. Each colony
+        placed earns <strong>+100 points</strong> and counts toward the level goal.
       </div>
       <div class="char-stats">
         TYPE: Stationary Ally &bull; SIZE: 12&times;12px &bull;
-        FEED RANGE: 1.5 tiles &bull; PERMANENT
+        FEED RANGE: 1.5 tiles &bull; PERMANENT &bull; INDESTRUCTIBLE
       </div>
     </div>
   </div>
 
-  <p class="page-number right">4</p>
+  <!-- Expanded Colony Explanation -->
+  <div class="info-box tip" style="margin-top:10px;">
+    <div class="info-box-title" style="color:#3a8a4a;">COLONY MECHANICS IN DETAIL</div>
+    <table style="font-size:9.5pt;">
+      <tr>
+        <td style="width:30%; font-weight:700; color:#3a7a5a;">Placement</td>
+        <td>Colonies are placed <strong>automatically</strong> on the best adjacent pore tile when
+            you press SPACE at GR=100. The game selects the tile furthest from grain walls,
+            preferring open space with good flow exposure.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#3a7a5a;">Feeding Radius</td>
+        <td>Each colony has a passive feeding radius of <strong>1.5 tiles</strong>. Any substrate
+            particle that drifts within this zone has a chance to be consumed.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#3a7a5a;">Consumption Rate</td>
+        <td>Colonies consume substrates with <strong>2% probability per frame</strong> for any
+            substrate within range. This is a slow, steady drain&mdash;not as fast as active eating.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#3a7a5a;">Permanence</td>
+        <td>Colonies are <strong>permanent and indestructible</strong>. Once placed, they remain
+            for the entire level. Rivals cannot destroy or interact with them.</td>
+      </tr>
+      <tr>
+        <td style="font-weight:700; color:#3a7a5a;">Strategic Note</td>
+        <td>Colony passive feeding does <strong>NOT</strong> benefit you directly&mdash;it removes
+            food from the map. However, this also <strong>reduces rival food</strong>, creating
+            zones of scarcity that hinder your competitors. Place colonies strategically along
+            rival patrol routes to starve them out.</td>
+      </tr>
+    </table>
+  </div>
+
+  <p class="page-number right">7</p>
 </div>

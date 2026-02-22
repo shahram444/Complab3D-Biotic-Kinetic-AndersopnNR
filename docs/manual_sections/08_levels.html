@@ -10,23 +10,69 @@
       <div class="level-chapter">Chapter 1 &mdash; The Soil Frontier</div>
     </div>
     <div class="level-map">
-      <svg width="300" height="100" viewBox="0 0 60 20" class="pixel-art">
-        <rect width="60" height="20" fill="#060c18"/>
-        <!-- Grains -->
-        <circle cx="6" cy="4" r="3" fill="#7a5a2a"/><circle cx="18" cy="17" r="4" fill="#7a5a2a"/>
-        <circle cx="30" cy="3" r="2.5" fill="#7a5a2a"/><circle cx="42" cy="16" r="3" fill="#7a5a2a"/>
-        <circle cx="54" cy="5" r="3" fill="#7a5a2a"/><circle cx="10" cy="12" r="2" fill="#7a5a2a"/>
-        <circle cx="48" cy="11" r="2.5" fill="#7a5a2a"/>
-        <!-- Inlet/Outlet -->
-        <rect x="0" y="8" width="1.5" height="4" fill="#3060a0"/>
-        <rect x="58.5" y="8" width="1.5" height="4" fill="#4fdf6f"/>
-        <!-- Substrates -->
-        <circle cx="14" cy="8" r="0.8" fill="#4fa4ff"/><circle cx="24" cy="10" r="0.8" fill="#4fdf6f"/>
-        <circle cx="34" cy="8" r="0.8" fill="#ff4f4f"/><circle cx="44" cy="10" r="0.8" fill="#4fa4ff"/>
-        <!-- ARKE -->
-        <rect x="3" y="8" width="2" height="3" fill="#2a8a8a"/>
-        <!-- "Tutorial" label -->
-        <text x="30" y="1.5" text-anchor="middle" font-size="1.5" fill="#4aeaff" font-family="'Press Start 2P',monospace">TUTORIAL</text>
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l1-grain1" cx="50%" cy="40%" r="55%">
+            <stop offset="0%" stop-color="#a07840"/><stop offset="100%" stop-color="#5a3a18"/>
+          </radialGradient>
+          <radialGradient id="l1-grain2" cx="45%" cy="35%" r="50%">
+            <stop offset="0%" stop-color="#9a7038"/><stop offset="100%" stop-color="#503210"/>
+          </radialGradient>
+          <radialGradient id="l1-sub-o2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#8ac8ff"/><stop offset="70%" stop-color="#4fa4ff"/><stop offset="100%" stop-color="#2060c0" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="l1-sub-no3" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#8fffaf"/><stop offset="70%" stop-color="#4fdf6f"/><stop offset="100%" stop-color="#208040" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="l1-sub-ch4" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#ff8888"/><stop offset="70%" stop-color="#ff4f4f"/><stop offset="100%" stop-color="#c02020" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="l1-arke" cx="40%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/>
+          </radialGradient>
+          <filter id="l1-glow-sub" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <linearGradient id="l1-water" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#2050a0" stop-opacity="0.6"/><stop offset="50%" stop-color="#3070c0" stop-opacity="0.3"/><stop offset="100%" stop-color="#4090e0" stop-opacity="0.1"/>
+          </linearGradient>
+        </defs>
+        <!-- Background -->
+        <rect width="300" height="100" rx="4" fill="#060c18"/>
+        <!-- Water channels with flow -->
+        <path d="M0,45 Q30,42 60,48 Q100,55 150,46 Q200,38 250,50 Q280,55 300,48" fill="none" stroke="url(#l1-water)" stroke-width="18" opacity="0.5"/>
+        <path d="M0,65 Q40,60 80,68 Q130,75 180,62 Q230,56 300,65" fill="none" stroke="url(#l1-water)" stroke-width="12" opacity="0.3"/>
+        <!-- Flow direction arrows -->
+        <polygon points="70,46 78,43 78,49" fill="#4090e0" opacity="0.4"/>
+        <polygon points="150,47 158,44 158,50" fill="#4090e0" opacity="0.3"/>
+        <polygon points="230,49 238,46 238,52" fill="#4090e0" opacity="0.3"/>
+        <!-- Grain shapes with smooth gradients -->
+        <ellipse cx="35" cy="18" rx="22" ry="16" fill="url(#l1-grain1)"/>
+        <ellipse cx="110" cy="88" rx="28" ry="18" fill="url(#l1-grain2)"/>
+        <ellipse cx="185" cy="14" rx="18" ry="13" fill="url(#l1-grain1)"/>
+        <ellipse cx="260" cy="85" rx="20" ry="14" fill="url(#l1-grain2)"/>
+        <ellipse cx="70" cy="82" rx="14" ry="10" fill="url(#l1-grain1)"/>
+        <ellipse cx="240" cy="20" rx="16" ry="12" fill="url(#l1-grain2)"/>
+        <!-- Inlet marker -->
+        <rect x="0" y="38" width="6" height="24" rx="3" fill="#3060a0" opacity="0.8"/>
+        <text x="3" y="52" text-anchor="middle" font-size="5" fill="#8ac0ff" font-family="Inter,sans-serif">IN</text>
+        <!-- Outlet marker -->
+        <rect x="294" y="40" width="6" height="20" rx="3" fill="#4fdf6f" opacity="0.8"/>
+        <text x="297" y="52" text-anchor="middle" font-size="5" fill="#8fffaf" font-family="Inter,sans-serif">OUT</text>
+        <!-- Substrate orbs (glowing) -->
+        <circle cx="80" cy="42" r="4" fill="url(#l1-sub-o2)" filter="url(#l1-glow-sub)"/>
+        <circle cx="140" cy="52" r="4" fill="url(#l1-sub-no3)" filter="url(#l1-glow-sub)"/>
+        <circle cx="200" cy="44" r="4" fill="url(#l1-sub-ch4)" filter="url(#l1-glow-sub)"/>
+        <circle cx="260" cy="55" r="3.5" fill="url(#l1-sub-o2)" filter="url(#l1-glow-sub)"/>
+        <circle cx="115" cy="60" r="3.5" fill="url(#l1-sub-no3)" filter="url(#l1-glow-sub)"/>
+        <!-- ARKE figure -->
+        <ellipse cx="30" cy="48" rx="7" ry="9" fill="url(#l1-arke)"/>
+        <ellipse cx="30" cy="44" rx="4" ry="3" fill="#1a2a4a" opacity="0.8"/>
+        <circle cx="28" cy="43.5" r="1.2" fill="#4aeaff"/><circle cx="32" cy="43.5" r="1.2" fill="#4aeaff"/>
+        <path d="M20,46 Q16,48 14,52" fill="none" stroke="#1a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M40,46 Q44,48 46,52" fill="none" stroke="#1a8a8a" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Tutorial label -->
+        <text x="150" y="10" text-anchor="middle" font-size="8" fill="#4aeaff" font-family="'Press Start 2P',monospace" opacity="0.7">TUTORIAL</text>
       </svg>
     </div>
     <div class="level-stats">
@@ -36,9 +82,10 @@
       <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
     </div>
     <div class="level-strategy">
-      <strong>Strategy:</strong> Pure tutorial. No enemies, no hazards. Learn to move (WASD/Arrows),
-      eat substrates (auto on contact), watch your Growth bar fill, and press SPACE to divide.
-      Wide open pores with 70% porosity. Take your time.
+      <strong>Strategy:</strong> Pure tutorial level. No enemies, no hazards. Wide open pore space with 70% porosity means
+      tons of room to move. O<sub>2</sub>, NO<sub>3</sub>, and CH<sub>4</sub> are all available. Learn the basics: WASD/Arrow
+      movement, eating on contact, watching GR bar fill, pressing SPACE to divide. Food density is 4 (moderate). Take
+      your time learning &mdash; there is no pressure.
     </div>
   </div>
 
@@ -49,19 +96,47 @@
       <div class="level-chapter">Chapter 1 &mdash; The Soil Frontier</div>
     </div>
     <div class="level-map">
-      <svg width="300" height="100" viewBox="0 0 70 22" class="pixel-art">
-        <rect width="70" height="22" fill="#060c18"/>
-        <circle cx="8" cy="4" r="3.5" fill="#7a5a2a"/><circle cx="22" cy="18" r="4" fill="#7a5a2a"/>
-        <circle cx="35" cy="5" r="3" fill="#7a5a2a"/><circle cx="50" cy="17" r="3.5" fill="#7a5a2a"/>
-        <circle cx="62" cy="6" r="3" fill="#7a5a2a"/><circle cx="14" cy="12" r="2.5" fill="#7a5a2a"/>
-        <circle cx="42" cy="10" r="2" fill="#7a5a2a"/>
-        <rect x="0" y="9" width="1.5" height="4" fill="#3060a0"/>
-        <rect x="68.5" y="9" width="1.5" height="4" fill="#4fdf6f"/>
-        <!-- Rival -->
-        <rect x="55" y="10" width="1.5" height="2" fill="#8a2a2a"/>
-        <text x="55" y="9" text-anchor="middle" font-size="1.2" fill="#ff4444">!</text>
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l2-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#a07840"/><stop offset="100%" stop-color="#5a3a18"/></radialGradient>
+          <radialGradient id="l2-g2" cx="45%" cy="35%" r="50%"><stop offset="0%" stop-color="#9a7038"/><stop offset="100%" stop-color="#503210"/></radialGradient>
+          <radialGradient id="l2-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l2-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <radialGradient id="l2-sub" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#8ac8ff"/><stop offset="70%" stop-color="#4fa4ff"/><stop offset="100%" stop-color="#2060c0" stop-opacity="0"/></radialGradient>
+          <filter id="l2-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+          <linearGradient id="l2-water" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#2050a0" stop-opacity="0.5"/><stop offset="100%" stop-color="#4090e0" stop-opacity="0.1"/></linearGradient>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#060c18"/>
+        <!-- Water flow -->
+        <path d="M0,40 Q50,35 100,45 Q150,55 200,42 Q250,32 300,44" fill="none" stroke="url(#l2-water)" stroke-width="16" opacity="0.5"/>
+        <polygon points="90,43 98,40 98,46" fill="#4090e0" opacity="0.4"/>
+        <polygon points="200,43 208,40 208,46" fill="#4090e0" opacity="0.3"/>
+        <!-- Grains -->
+        <ellipse cx="50" cy="16" rx="24" ry="15" fill="url(#l2-g1)"/>
+        <ellipse cx="140" cy="88" rx="30" ry="16" fill="url(#l2-g2)"/>
+        <ellipse cx="220" cy="18" rx="20" ry="14" fill="url(#l2-g1)"/>
+        <ellipse cx="85" cy="78" rx="16" ry="12" fill="url(#l2-g2)"/>
+        <ellipse cx="270" cy="80" rx="22" ry="14" fill="url(#l2-g1)"/>
+        <ellipse cx="175" cy="15" rx="14" ry="10" fill="url(#l2-g2)"/>
+        <!-- Inlet / Outlet -->
+        <rect x="0" y="34" width="6" height="22" rx="3" fill="#3060a0" opacity="0.8"/>
+        <rect x="294" y="36" width="6" height="20" rx="3" fill="#4fdf6f" opacity="0.8"/>
+        <!-- Substrates -->
+        <circle cx="60" cy="40" r="3.5" fill="url(#l2-sub)" filter="url(#l2-gl)"/>
+        <circle cx="120" cy="50" r="3.5" fill="#8fffaf" filter="url(#l2-gl)"/>
+        <circle cx="190" cy="44" r="3.5" fill="url(#l2-sub)" filter="url(#l2-gl)"/>
+        <circle cx="250" cy="48" r="3" fill="#ff8888" filter="url(#l2-gl)"/>
         <!-- ARKE -->
-        <rect x="5" y="9" width="2" height="3" fill="#2a8a8a"/>
+        <ellipse cx="28" cy="42" rx="6" ry="8" fill="url(#l2-arke)"/>
+        <ellipse cx="28" cy="38" rx="3.5" ry="2.5" fill="#1a2a4a" opacity="0.8"/>
+        <circle cx="26.5" cy="37.5" r="1" fill="#4aeaff"/><circle cx="29.5" cy="37.5" r="1" fill="#4aeaff"/>
+        <path d="M20,40 Q16,42 14,46" fill="none" stroke="#1a8a8a" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M36,40 Q40,42 42,46" fill="none" stroke="#1a8a8a" stroke-width="1.2" stroke-linecap="round"/>
+        <!-- Rival -->
+        <ellipse cx="240" cy="40" rx="5" ry="6.5" fill="url(#l2-rival)"/>
+        <ellipse cx="240" cy="37" rx="3" ry="2" fill="#2a0a0a" opacity="0.8"/>
+        <circle cx="238.5" cy="36.5" r="0.9" fill="#ff6666"/><circle cx="241.5" cy="36.5" r="0.9" fill="#ff6666"/>
+        <text x="240" y="30" text-anchor="middle" font-size="8" fill="#ff4444" font-family="Inter,sans-serif" font-weight="bold">!</text>
       </svg>
     </div>
     <div class="level-stats">
@@ -71,28 +146,10 @@
       <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
     </div>
     <div class="level-strategy">
-      <strong>Strategy:</strong> Your first rival appears! It wanders seeking food.
-      Move quickly to eat substrates before it does. Larger map requires navigation.
-      Try using SHIFT on flow tiles to outpace the rival. Still O<sub>2</sub>-rich.
-    </div>
-  </div>
-
-  <!-- Level 3 -->
-  <div class="level-card">
-    <div class="level-header">
-      <div class="level-name" style="color:#4a3a2a;">LEVEL 3: INTO THE DEPTHS</div>
-      <div class="level-chapter">Chapter 2 &mdash; The Deep Sediment</div>
-    </div>
-    <div class="level-stats">
-      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">4 colonies</span></div>
-      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">35&times;25</span></div>
-      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">2</span></div>
-      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
-    </div>
-    <div class="level-strategy">
-      <strong>Strategy:</strong> <span style="color:#cc3333;">No oxygen!</span> Tight maze corridors (50% porosity).
-      Slow flow (0.3&times;). Food is scarce (density 3). NO<sub>3</sub> is your best friend (+15 HP, +18 GR).
-      Two rivals compete. Navigate carefully&mdash;dead ends waste time.
+      <strong>Strategy:</strong> Your first rival appears! It wanders the map seeking substrates. Move quickly to eat
+      before it does. Larger map (35&times;22) requires better navigation. Try using SHIFT on flow tiles to outpace
+      the rival. Still O<sub>2</sub>-rich environment. The rival has 12-tile sense range &mdash; if you see food, it
+      probably does too. <strong>Strategy: race to food clusters near the INLET where substrates spawn fresh.</strong>
     </div>
   </div>
 
@@ -102,11 +159,110 @@
 <!-- Levels page 2 -->
 <div class="page" id="levels2">
 
+  <!-- Level 3 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#4a3a2a;">LEVEL 3: INTO THE DEPTHS</div>
+      <div class="level-chapter">Chapter 2 &mdash; The Deep Sediment</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l3-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#705030"/><stop offset="100%" stop-color="#3a2010"/></radialGradient>
+          <radialGradient id="l3-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l3-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l3-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5"/></filter>
+          <linearGradient id="l3-water" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1a3060" stop-opacity="0.4"/><stop offset="100%" stop-color="#203a70" stop-opacity="0.15"/></linearGradient>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#040810"/>
+        <!-- Tight maze corridors -->
+        <path d="M0,50 Q15,48 30,50 L30,30 Q35,28 50,30 L50,50 Q60,52 80,48 L80,70 Q90,72 110,68 L110,40 Q120,38 140,42 L140,60 Q160,64 180,58 L180,35 Q190,33 210,38 L210,55 Q230,58 250,52 L250,40 Q270,38 300,44" fill="none" stroke="url(#l3-water)" stroke-width="10" opacity="0.5"/>
+        <!-- Grains (many, tight spacing = 50% porosity) -->
+        <ellipse cx="20" cy="18" rx="18" ry="14" fill="url(#l3-g1)"/><ellipse cx="65" cy="15" rx="15" ry="12" fill="url(#l3-g1)"/>
+        <ellipse cx="115" cy="20" rx="20" ry="15" fill="url(#l3-g1)"/><ellipse cx="170" cy="12" rx="16" ry="10" fill="url(#l3-g1)"/>
+        <ellipse cx="230" cy="18" rx="18" ry="14" fill="url(#l3-g1)"/><ellipse cx="280" cy="15" rx="16" ry="12" fill="url(#l3-g1)"/>
+        <ellipse cx="40" cy="88" rx="22" ry="14" fill="url(#l3-g1)"/><ellipse cx="100" cy="90" rx="18" ry="12" fill="url(#l3-g1)"/>
+        <ellipse cx="160" cy="88" rx="20" ry="14" fill="url(#l3-g1)"/><ellipse cx="230" cy="86" rx="16" ry="12" fill="url(#l3-g1)"/>
+        <ellipse cx="280" cy="90" rx="18" ry="12" fill="url(#l3-g1)"/>
+        <ellipse cx="140" cy="72" rx="12" ry="8" fill="url(#l3-g1)"/>
+        <!-- Slow flow arrow -->
+        <polygon points="90,50 95,48 95,52" fill="#3060a0" opacity="0.3"/>
+        <!-- Substrates (NO3 dominant) -->
+        <circle cx="55" cy="48" r="3" fill="#8fffaf" filter="url(#l3-gl)"/>
+        <circle cx="130" cy="55" r="3" fill="#8fffaf" filter="url(#l3-gl)"/>
+        <circle cx="200" cy="42" r="2.5" fill="#ff8888" filter="url(#l3-gl)"/>
+        <circle cx="260" cy="48" r="3" fill="#8fffaf" filter="url(#l3-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="42" width="5" height="16" rx="2.5" fill="#3060a0" opacity="0.7"/>
+        <rect x="295" y="38" width="5" height="14" rx="2.5" fill="#4fdf6f" opacity="0.7"/>
+        <!-- ARKE -->
+        <ellipse cx="25" cy="50" rx="5" ry="7" fill="url(#l3-arke)"/>
+        <circle cx="23.5" cy="47" r="0.9" fill="#4aeaff"/><circle cx="26.5" cy="47" r="0.9" fill="#4aeaff"/>
+        <!-- Rivals -->
+        <ellipse cx="160" cy="55" rx="4" ry="5.5" fill="url(#l3-rival)"/>
+        <circle cx="158.5" cy="52.5" r="0.7" fill="#ff6666"/><circle cx="161.5" cy="52.5" r="0.7" fill="#ff6666"/>
+        <ellipse cx="250" cy="45" rx="4" ry="5.5" fill="url(#l3-rival)"/>
+        <circle cx="248.5" cy="42.5" r="0.7" fill="#ff6666"/><circle cx="251.5" cy="42.5" r="0.7" fill="#ff6666"/>
+        <!-- NO OXYGEN warning -->
+        <text x="150" y="10" text-anchor="middle" font-size="7" fill="#cc3333" font-family="'Press Start 2P',monospace" opacity="0.7">NO OXYGEN</text>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">4 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">35&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">2</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> <span style="color:#cc3333;">No oxygen available!</span> This is a shock after O<sub>2</sub>-rich
+      soil. Tight maze corridors with only 50% porosity. Slow flow (0.3&times;). Food is scarce (density 3).
+      NO<sub>3</sub> becomes your best friend: +15 HP and +18 GR is the best balanced substrate. Two rivals compete
+      for limited food. Navigate carefully &mdash; dead ends waste precious time while starvation continues at
+      &minus;1.5 HP/sec.
+    </div>
+  </div>
+
   <!-- Level 4 -->
   <div class="level-card">
     <div class="level-header">
       <div class="level-name" style="color:#4a3a2a;">LEVEL 4: THE HUNGRY DARK</div>
       <div class="level-chapter">Chapter 2 &mdash; The Deep Sediment</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l4-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#604028"/><stop offset="100%" stop-color="#2a1808"/></radialGradient>
+          <radialGradient id="l4-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l4-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l4-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5"/></filter>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#030608"/>
+        <!-- Very tight pore network (45% porosity) -->
+        <ellipse cx="20" cy="12" rx="20" ry="14" fill="url(#l4-g1)"/><ellipse cx="60" cy="8" rx="16" ry="10" fill="url(#l4-g1)"/>
+        <ellipse cx="100" cy="14" rx="22" ry="15" fill="url(#l4-g1)"/><ellipse cx="150" cy="8" rx="18" ry="10" fill="url(#l4-g1)"/>
+        <ellipse cx="200" cy="12" rx="20" ry="14" fill="url(#l4-g1)"/><ellipse cx="250" cy="10" rx="18" ry="12" fill="url(#l4-g1)"/>
+        <ellipse cx="30" cy="92" rx="24" ry="14" fill="url(#l4-g1)"/><ellipse cx="80" cy="90" rx="18" ry="12" fill="url(#l4-g1)"/>
+        <ellipse cx="130" cy="92" rx="22" ry="14" fill="url(#l4-g1)"/><ellipse cx="180" cy="88" rx="16" ry="12" fill="url(#l4-g1)"/>
+        <ellipse cx="225" cy="92" rx="20" ry="14" fill="url(#l4-g1)"/><ellipse cx="275" cy="88" rx="18" ry="14" fill="url(#l4-g1)"/>
+        <ellipse cx="48" cy="55" rx="10" ry="8" fill="url(#l4-g1)"/><ellipse cx="165" cy="52" rx="12" ry="9" fill="url(#l4-g1)"/>
+        <ellipse cx="260" cy="55" rx="10" ry="8" fill="url(#l4-g1)"/>
+        <!-- Minimal substrates (density 2) -->
+        <circle cx="70" cy="45" r="2.5" fill="#8fffaf" filter="url(#l4-gl)"/>
+        <circle cx="140" cy="42" r="2.5" fill="#cf6fff" filter="url(#l4-gl)"/>
+        <circle cx="210" cy="50" r="2.5" fill="#ff8888" filter="url(#l4-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="35" width="5" height="16" rx="2.5" fill="#3060a0" opacity="0.6"/>
+        <rect x="295" y="38" width="5" height="14" rx="2.5" fill="#4fdf6f" opacity="0.6"/>
+        <!-- ARKE -->
+        <ellipse cx="25" cy="45" rx="5" ry="7" fill="url(#l4-arke)"/>
+        <circle cx="23.5" cy="42" r="0.8" fill="#4aeaff"/><circle cx="26.5" cy="42" r="0.8" fill="#4aeaff"/>
+        <!-- 3 Rivals -->
+        <ellipse cx="100" cy="50" rx="3.5" ry="5" fill="url(#l4-rival)"/>
+        <ellipse cx="190" cy="40" rx="3.5" ry="5" fill="url(#l4-rival)"/>
+        <ellipse cx="250" cy="45" rx="3.5" ry="5" fill="url(#l4-rival)"/>
+        <!-- Label -->
+        <text x="150" y="10" text-anchor="middle" font-size="6" fill="#cc7733" font-family="'Press Start 2P',monospace" opacity="0.6">SCARCE FOOD</text>
+      </svg>
     </div>
     <div class="level-stats">
       <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">6 colonies</span></div>
@@ -115,9 +271,10 @@
       <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value">0.25&times; (crawl)</span></div>
     </div>
     <div class="level-strategy">
-      <strong>Strategy:</strong> Survival test. Very scarce food (density 2), tightest porosity (45%),
-      three rivals. Manganese (Mn<sup>IV</sup>, purple) appears. Must be extremely efficient with every
-      substrate. Eat CH<sub>4</sub> for growth when safe, NO<sub>3</sub>/Fe when desperate.
+      <strong>Strategy:</strong> The hardest early-game level. Absolute minimum food density (2 per spawn cycle).
+      Tightest porosity (45%). Three rivals fight for scraps. Crawling flow (0.25&times;). Manganese Mn(IV) appears
+      (purple, +12 GR). Must be surgical with every substrate &mdash; eat CH<sub>4</sub> for growth when safe,
+      NO<sub>3</sub>/Fe when HP drops. This level teaches resource management.
     </div>
   </div>
 
@@ -128,27 +285,47 @@
       <div class="level-chapter">Chapter 3 &mdash; The Methane Seeps</div>
     </div>
     <div class="level-map">
-      <svg width="300" height="80" viewBox="0 0 70 22" class="pixel-art">
-        <rect width="70" height="22" fill="#06040a"/>
-        <!-- Purple grains -->
-        <circle cx="8" cy="4" r="3" fill="#3a3040"/><circle cx="25" cy="3" r="3.5" fill="#3a3040"/>
-        <circle cx="45" cy="4" r="2.5" fill="#3a3040"/><circle cx="60" cy="3" r="3" fill="#3a3040"/>
-        <circle cx="8" cy="19" r="3" fill="#3a3040"/><circle cx="30" cy="19" r="4" fill="#3a3040"/>
-        <circle cx="55" cy="20" r="3" fill="#3a3040"/>
-        <!-- Vent channels -->
-        <rect x="16" y="10" width="2" height="12" fill="#2a1a48" opacity="0.3"/>
-        <rect x="38" y="8" width="2" height="14" fill="#2a1a48" opacity="0.3"/>
-        <!-- Toxic zones! -->
-        <rect x="20" y="8" width="4" height="3" fill="#b040a0" opacity="0.4"/>
-        <rect x="48" y="12" width="3" height="4" fill="#b040a0" opacity="0.4"/>
-        <rect x="10" y="14" width="3" height="3" fill="#b040a0" opacity="0.4"/>
-        <!-- CH4 rising -->
-        <circle cx="17" cy="16" r="0.8" fill="#ff4f4f"/><circle cx="39" cy="14" r="0.8" fill="#ff4f4f"/>
-        <circle cx="17" cy="12" r="0.8" fill="#ff4f4f" opacity="0.6"/>
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l5-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#4a3848"/><stop offset="100%" stop-color="#201828"/></radialGradient>
+          <radialGradient id="l5-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e060d0" stop-opacity="0.6"/><stop offset="100%" stop-color="#8020a0" stop-opacity="0"/></radialGradient>
+          <radialGradient id="l5-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l5-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l5-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+          <filter id="l5-tox-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#06040a"/>
+        <!-- Vent channels (vertical) -->
+        <rect x="80" y="40" width="8" height="60" rx="4" fill="#1a0a28" opacity="0.4"/>
+        <rect x="190" y="30" width="8" height="70" rx="4" fill="#1a0a28" opacity="0.4"/>
+        <!-- Toxic zones (glowing purple-magenta) -->
+        <ellipse cx="120" cy="42" rx="18" ry="12" fill="url(#l5-toxic)" filter="url(#l5-tox-glow)"/>
+        <ellipse cx="240" cy="60" rx="14" ry="16" fill="url(#l5-toxic)" filter="url(#l5-tox-glow)"/>
+        <ellipse cx="55" cy="70" rx="12" ry="10" fill="url(#l5-toxic)" filter="url(#l5-tox-glow)"/>
+        <!-- Grains -->
+        <ellipse cx="40" cy="15" rx="20" ry="13" fill="url(#l5-g1)"/><ellipse cx="130" cy="10" rx="24" ry="12" fill="url(#l5-g1)"/>
+        <ellipse cx="230" cy="14" rx="18" ry="11" fill="url(#l5-g1)"/><ellipse cx="280" cy="12" rx="16" ry="10" fill="url(#l5-g1)"/>
+        <ellipse cx="40" cy="90" rx="18" ry="12" fill="url(#l5-g1)"/><ellipse cx="160" cy="92" rx="22" ry="12" fill="url(#l5-g1)"/>
+        <ellipse cx="280" cy="90" rx="16" ry="12" fill="url(#l5-g1)"/>
+        <!-- CH4 substrates (rising bubbles) -->
+        <circle cx="84" cy="75" r="3" fill="#ff8888" filter="url(#l5-gl)"/>
+        <circle cx="84" cy="58" r="2.5" fill="#ff8888" filter="url(#l5-gl)" opacity="0.7"/>
+        <circle cx="194" cy="68" r="3" fill="#ff8888" filter="url(#l5-gl)"/>
+        <circle cx="194" cy="50" r="2.5" fill="#ff8888" filter="url(#l5-gl)" opacity="0.7"/>
         <!-- SO4 -->
-        <rect x="32" y="10" width="1.2" height="1.2" fill="#dfdf3f"/>
+        <circle cx="160" cy="50" r="3" fill="#dfdf3f" filter="url(#l5-gl)"/>
+        <circle cx="260" cy="45" r="2.5" fill="#dfdf3f" filter="url(#l5-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="38" width="5" height="20" rx="2.5" fill="#3060a0" opacity="0.7"/>
+        <rect x="295" y="40" width="5" height="18" rx="2.5" fill="#4fdf6f" opacity="0.7"/>
         <!-- ARKE -->
-        <rect x="28" y="10" width="2" height="3" fill="#2a8a8a"/>
+        <ellipse cx="145" cy="50" rx="6" ry="8" fill="url(#l5-arke)"/>
+        <circle cx="143" cy="46.5" r="1" fill="#4aeaff"/><circle cx="147" cy="46.5" r="1" fill="#4aeaff"/>
+        <!-- Rivals -->
+        <ellipse cx="70" cy="48" rx="4" ry="5.5" fill="url(#l5-rival)"/>
+        <ellipse cx="210" cy="44" rx="4" ry="5.5" fill="url(#l5-rival)"/>
+        <!-- TOXIC label -->
+        <text x="150" y="9" text-anchor="middle" font-size="6" fill="#c060c0" font-family="'Press Start 2P',monospace" opacity="0.7">TOXIC ZONES!</text>
       </svg>
     </div>
     <div class="level-stats">
@@ -158,49 +335,11 @@
       <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c060c0;">15%</span></div>
     </div>
     <div class="level-strategy">
-      <strong>Strategy:</strong> <span style="color:#c060c0;">Toxic zones appear!</span>
-      Only SO<sub>4</sub> and CH<sub>4</sub> available. Abundant food (density 5) compensates.
-      Check minimap for purple dots (toxic). Avoid or cross quickly (&minus;20 HP/sec!).
-      CH<sub>4</sub> = primary growth source. Sulfate for energy maintenance.
-    </div>
-  </div>
-
-  <!-- Level 6 -->
-  <div class="level-card">
-    <div class="level-header">
-      <div class="level-name" style="color:#b040a0;">LEVEL 6: VENT GUARDIANS</div>
-      <div class="level-chapter">Chapter 3 &mdash; The Methane Seeps</div>
-    </div>
-    <div class="level-stats">
-      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">8 colonies</span></div>
-      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;25</span></div>
-      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
-      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c060c0;">20%</span></div>
-    </div>
-    <div class="level-strategy">
-      <strong>Strategy:</strong> 8 colonies needed (double Level 5). Fe(III) now available for
-      better energy (+10). Toxic zones cover 1 in 5 tiles. Three rivals. Balance avoiding toxins
-      while maintaining food access. Plan colony locations near rich food zones.
-    </div>
-  </div>
-
-  <!-- Level 7 -->
-  <div class="level-card">
-    <div class="level-header">
-      <div class="level-name" style="color:#5a6a7a;">LEVEL 7: THAWING GROUNDS</div>
-      <div class="level-chapter">Chapter 4 &mdash; The Permafrost Edge</div>
-    </div>
-    <div class="level-stats">
-      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">6 colonies</span></div>
-      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;25</span></div>
-      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
-      <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value" style="color:#4fa4ff;">0.8&times; (fast!)</span></div>
-    </div>
-    <div class="level-strategy">
-      <strong>Strategy:</strong> <span style="color:#4fa4ff;">Oxygen returns!</span> Fast flow (0.8&times;)
-      makes SHIFT essential. Abundant food (density 6). O<sub>2</sub> provides strongest HP recovery (+20).
-      Use flow riding to cover distance and intercept fast-moving substrates.
-      Only 10% toxic&mdash;manageable.
+      <strong>Strategy:</strong> <span style="color:#c060c0;">TOXIC ZONES APPEAR!</span> Purple H<sub>2</sub>S tiles deal
+      &minus;20 HP/sec on contact. Combined with starvation (&minus;1.5), that is &minus;21.5 HP/sec &mdash; you will
+      die in under 5 seconds in toxic! Check minimap for purple patches. Only SO<sub>4</sub> and CH<sub>4</sub>
+      available (no O<sub>2</sub>/NO<sub>3</sub>). Abundant food (density 5) compensates for toxins.
+      CH<sub>4</sub> is your primary growth source (+25 GR). Sulfate keeps energy up. Navigate around toxic zones.
     </div>
   </div>
 
@@ -210,11 +349,183 @@
 <!-- Levels page 3 -->
 <div class="page" id="levels3">
 
+  <!-- Level 6 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#b040a0;">LEVEL 6: VENT GUARDIANS</div>
+      <div class="level-chapter">Chapter 3 &mdash; The Methane Seeps</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l6-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#4a3848"/><stop offset="100%" stop-color="#201828"/></radialGradient>
+          <radialGradient id="l6-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e060d0" stop-opacity="0.5"/><stop offset="100%" stop-color="#8020a0" stop-opacity="0"/></radialGradient>
+          <radialGradient id="l6-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l6-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l6-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.5"/></filter>
+          <filter id="l6-tox" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#06040a"/>
+        <!-- 20% toxic coverage -->
+        <ellipse cx="50" cy="55" rx="20" ry="15" fill="url(#l6-toxic)" filter="url(#l6-tox)"/>
+        <ellipse cx="130" cy="35" rx="16" ry="12" fill="url(#l6-toxic)" filter="url(#l6-tox)"/>
+        <ellipse cx="220" cy="65" rx="22" ry="14" fill="url(#l6-toxic)" filter="url(#l6-tox)"/>
+        <ellipse cx="280" cy="30" rx="14" ry="10" fill="url(#l6-toxic)" filter="url(#l6-tox)"/>
+        <!-- Grains -->
+        <ellipse cx="30" cy="14" rx="18" ry="12" fill="url(#l6-g1)"/><ellipse cx="100" cy="10" rx="22" ry="10" fill="url(#l6-g1)"/>
+        <ellipse cx="180" cy="12" rx="16" ry="10" fill="url(#l6-g1)"/><ellipse cx="260" cy="8" rx="20" ry="10" fill="url(#l6-g1)"/>
+        <ellipse cx="60" cy="90" rx="20" ry="12" fill="url(#l6-g1)"/><ellipse cx="150" cy="92" rx="24" ry="12" fill="url(#l6-g1)"/>
+        <ellipse cx="250" cy="92" rx="18" ry="10" fill="url(#l6-g1)"/>
+        <!-- Substrates (CH4, SO4, Fe) -->
+        <circle cx="80" cy="50" r="3" fill="#ff8888" filter="url(#l6-gl)"/><circle cx="170" cy="52" r="3" fill="#dfdf3f" filter="url(#l6-gl)"/>
+        <circle cx="110" cy="60" r="2.5" fill="#ef8f3f" filter="url(#l6-gl)"/><circle cx="240" cy="48" r="3" fill="#ff8888" filter="url(#l6-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="40" width="5" height="18" rx="2.5" fill="#3060a0" opacity="0.7"/>
+        <rect x="295" y="42" width="5" height="16" rx="2.5" fill="#4fdf6f" opacity="0.7"/>
+        <!-- ARKE -->
+        <ellipse cx="30" cy="50" rx="5" ry="7" fill="url(#l6-arke)"/>
+        <circle cx="28.5" cy="47" r="0.8" fill="#4aeaff"/><circle cx="31.5" cy="47" r="0.8" fill="#4aeaff"/>
+        <!-- 3 Rivals -->
+        <ellipse cx="140" cy="48" rx="3.5" ry="5" fill="url(#l6-rival)"/>
+        <ellipse cx="200" cy="42" rx="3.5" ry="5" fill="url(#l6-rival)"/>
+        <ellipse cx="270" cy="52" rx="3.5" ry="5" fill="url(#l6-rival)"/>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">8 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c060c0;">20%</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> Double the colonies of Level 5! Fe(III) now available for +10 HP recovery. Toxic zones
+      now cover 20% of tiles &mdash; 1 in 5 tiles is dangerous. Three rivals compete aggressively. Balance toxin
+      avoidance with food access. Plan colony locations near food-rich safe zones. Long level requiring 8 complete
+      eat-grow-divide cycles.
+    </div>
+  </div>
+
+  <!-- Level 7 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#5a6a7a;">LEVEL 7: THAWING GROUNDS</div>
+      <div class="level-chapter">Chapter 4 &mdash; The Permafrost Edge</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l7-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#7a8a9a"/><stop offset="100%" stop-color="#3a4a5a"/></radialGradient>
+          <radialGradient id="l7-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e060d0" stop-opacity="0.4"/><stop offset="100%" stop-color="#8020a0" stop-opacity="0"/></radialGradient>
+          <radialGradient id="l7-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l7-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l7-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+          <linearGradient id="l7-flow" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4090e0" stop-opacity="0.6"/><stop offset="50%" stop-color="#60b0ff" stop-opacity="0.4"/><stop offset="100%" stop-color="#80d0ff" stop-opacity="0.15"/></linearGradient>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#080c14"/>
+        <!-- Fast flow channels (0.8x) -->
+        <path d="M0,40 Q40,30 80,38 Q140,50 200,35 Q260,25 300,38" fill="none" stroke="url(#l7-flow)" stroke-width="20" opacity="0.6"/>
+        <path d="M0,65 Q50,70 100,62 Q160,55 220,65 Q270,72 300,65" fill="none" stroke="url(#l7-flow)" stroke-width="14" opacity="0.35"/>
+        <!-- Fast flow arrows -->
+        <polygon points="60,36 72,32 72,40" fill="#60b0ff" opacity="0.5"/>
+        <polygon points="140,42 152,38 152,46" fill="#60b0ff" opacity="0.4"/>
+        <polygon points="220,34 232,30 232,38" fill="#60b0ff" opacity="0.4"/>
+        <!-- Icy grains (blue-grey) -->
+        <ellipse cx="45" cy="14" rx="20" ry="12" fill="url(#l7-g1)"/><ellipse cx="150" cy="10" rx="18" ry="10" fill="url(#l7-g1)"/>
+        <ellipse cx="260" cy="14" rx="22" ry="12" fill="url(#l7-g1)"/>
+        <ellipse cx="80" cy="90" rx="22" ry="12" fill="url(#l7-g1)"/><ellipse cx="200" cy="92" rx="20" ry="12" fill="url(#l7-g1)"/>
+        <!-- Minor toxic (10%) -->
+        <ellipse cx="120" cy="60" rx="12" ry="10" fill="url(#l7-toxic)" filter="url(#l7-gl)"/>
+        <ellipse cx="260" cy="70" rx="10" ry="8" fill="url(#l7-toxic)" filter="url(#l7-gl)"/>
+        <!-- Abundant substrates (density 6!) -->
+        <circle cx="50" cy="38" r="3.5" fill="#8ac8ff" filter="url(#l7-gl)"/>
+        <circle cx="100" cy="42" r="3" fill="#8fffaf" filter="url(#l7-gl)"/>
+        <circle cx="160" cy="36" r="3.5" fill="#8ac8ff" filter="url(#l7-gl)"/>
+        <circle cx="190" cy="50" r="3" fill="#ff8888" filter="url(#l7-gl)"/>
+        <circle cx="240" cy="35" r="3" fill="#8fffaf" filter="url(#l7-gl)"/>
+        <circle cx="280" cy="42" r="3" fill="#8ac8ff" filter="url(#l7-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="32" width="6" height="22" rx="3" fill="#3060a0" opacity="0.8"/>
+        <rect x="294" y="30" width="6" height="20" rx="3" fill="#4fdf6f" opacity="0.8"/>
+        <!-- ARKE -->
+        <ellipse cx="28" cy="40" rx="6" ry="8" fill="url(#l7-arke)"/>
+        <circle cx="26" cy="36.5" r="1" fill="#4aeaff"/><circle cx="30" cy="36.5" r="1" fill="#4aeaff"/>
+        <!-- 3 Rivals -->
+        <ellipse cx="130" cy="44" rx="3.5" ry="5" fill="url(#l7-rival)"/>
+        <ellipse cx="210" cy="38" rx="3.5" ry="5" fill="url(#l7-rival)"/>
+        <ellipse cx="270" cy="45" rx="3.5" ry="5" fill="url(#l7-rival)"/>
+        <!-- Label -->
+        <text x="150" y="9" text-anchor="middle" font-size="6" fill="#4fa4ff" font-family="'Press Start 2P',monospace" opacity="0.7">O2 RETURNS!</text>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">6 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
+      <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value" style="color:#4fa4ff;">0.8&times; (fast!)</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> <span style="color:#4fa4ff;">OXYGEN RETURNS!</span> Fast flow (0.8&times;) makes SHIFT
+      essential. Substrates race past at high speed. O<sub>2</sub> provides +20 HP (best recovery). Abundant food
+      (density 6 &mdash; highest yet!). Only 10% toxic. Master flow-riding here &mdash; position at INLET and
+      intercept food as it flows past. This level rewards aggressive play.
+    </div>
+  </div>
+
+  <p class="page-number left">15</p>
+</div>
+
+<!-- Levels page 4 -->
+<div class="page" id="levels4">
+
   <!-- Level 8 -->
   <div class="level-card">
     <div class="level-header">
       <div class="level-name" style="color:#5a6a7a;">LEVEL 8: THE GREAT THAW</div>
       <div class="level-chapter">Chapter 4 &mdash; The Permafrost Edge</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l8-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#6a7a8a"/><stop offset="100%" stop-color="#2a3a4a"/></radialGradient>
+          <radialGradient id="l8-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e060d0" stop-opacity="0.5"/><stop offset="100%" stop-color="#8020a0" stop-opacity="0"/></radialGradient>
+          <radialGradient id="l8-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l8-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l8-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+          <linearGradient id="l8-flow" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4090e0" stop-opacity="0.7"/><stop offset="100%" stop-color="#80d0ff" stop-opacity="0.2"/></linearGradient>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#080c14"/>
+        <!-- Very fast flow (1.0x) -->
+        <path d="M0,42 Q60,28 120,40 Q180,55 240,35 Q280,28 300,40" fill="none" stroke="url(#l8-flow)" stroke-width="22" opacity="0.6"/>
+        <!-- Speed arrows -->
+        <polygon points="50,36 65,30 65,42" fill="#60b0ff" opacity="0.5"/>
+        <polygon points="130,44 145,38 145,50" fill="#60b0ff" opacity="0.4"/>
+        <polygon points="210,37 225,31 225,43" fill="#60b0ff" opacity="0.4"/>
+        <!-- Icy grains -->
+        <ellipse cx="35" cy="12" rx="22" ry="12" fill="url(#l8-g1)"/><ellipse cx="120" cy="8" rx="18" ry="10" fill="url(#l8-g1)"/>
+        <ellipse cx="220" cy="12" rx="20" ry="11" fill="url(#l8-g1)"/><ellipse cx="280" cy="10" rx="16" ry="10" fill="url(#l8-g1)"/>
+        <ellipse cx="60" cy="92" rx="24" ry="12" fill="url(#l8-g1)"/><ellipse cx="170" cy="92" rx="22" ry="12" fill="url(#l8-g1)"/>
+        <ellipse cx="270" cy="92" rx="20" ry="10" fill="url(#l8-g1)"/>
+        <!-- 15% toxic -->
+        <ellipse cx="100" cy="60" rx="16" ry="12" fill="url(#l8-toxic)" filter="url(#l8-gl)"/>
+        <ellipse cx="230" cy="65" rx="14" ry="10" fill="url(#l8-toxic)" filter="url(#l8-gl)"/>
+        <!-- Substrates (density 5) -->
+        <circle cx="55" cy="40" r="3" fill="#8fffaf" filter="url(#l8-gl)"/><circle cx="110" cy="44" r="3" fill="#ff8888" filter="url(#l8-gl)"/>
+        <circle cx="170" cy="38" r="3" fill="#8fffaf" filter="url(#l8-gl)"/><circle cx="240" cy="36" r="2.5" fill="#dfdf3f" filter="url(#l8-gl)"/>
+        <circle cx="280" cy="40" r="3" fill="#ef8f3f" filter="url(#l8-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="34" width="6" height="22" rx="3" fill="#3060a0" opacity="0.8"/>
+        <rect x="294" y="32" width="6" height="20" rx="3" fill="#4fdf6f" opacity="0.8"/>
+        <!-- ARKE -->
+        <ellipse cx="25" cy="42" rx="5.5" ry="7.5" fill="url(#l8-arke)"/>
+        <circle cx="23.5" cy="38.5" r="0.9" fill="#4aeaff"/><circle cx="26.5" cy="38.5" r="0.9" fill="#4aeaff"/>
+        <!-- 4 Rivals -->
+        <ellipse cx="80" cy="46" rx="3.5" ry="5" fill="url(#l8-rival)"/>
+        <ellipse cx="150" cy="50" rx="3.5" ry="5" fill="url(#l8-rival)"/>
+        <ellipse cx="210" cy="40" rx="3.5" ry="5" fill="url(#l8-rival)"/>
+        <ellipse cx="265" cy="45" rx="3.5" ry="5" fill="url(#l8-rival)"/>
+        <!-- Label -->
+        <text x="150" y="9" text-anchor="middle" font-size="6" fill="#cc7733" font-family="'Press Start 2P',monospace" opacity="0.6">NO O2 AGAIN</text>
+      </svg>
     </div>
     <div class="level-stats">
       <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">8 colonies</span></div>
@@ -223,9 +534,10 @@
       <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value" style="color:#cc3333;">1.0&times; (very fast!)</span></div>
     </div>
     <div class="level-strategy">
-      <strong>Strategy:</strong> No oxygen again&mdash;thaw accelerates. Fastest flow yet (1.0&times;).
-      Largest map so far. Four rivals! Must ride flow constantly with SHIFT. NO<sub>3</sub> is critical
-      (+15 HP, +18 GR). Very difficult&mdash;requires expert navigation.
+      <strong>Strategy:</strong> No oxygen again &mdash; thaw accelerates. Fastest flow yet (1.0&times;). Largest map so
+      far (45&times;28 = 1,260 tiles). FOUR rivals! Must constantly ride flow with SHIFT. NO<sub>3</sub> is critical
+      (+15 HP, +18 GR). Very difficult &mdash; requires expert navigation. Food density 5 is good but 4 rivals eating
+      means intense competition.
     </div>
   </div>
 
@@ -236,34 +548,46 @@
       <div class="level-chapter">Chapter 5 &mdash; The Hydrothermal Realm</div>
     </div>
     <div class="level-map">
-      <svg width="300" height="80" viewBox="0 0 90 25" class="pixel-art">
-        <rect width="90" height="25" fill="#060304"/>
-        <!-- Chambers -->
-        <circle cx="15" cy="10" r="6" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
-        <circle cx="40" cy="14" r="5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
-        <circle cx="65" cy="8" r="5.5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
-        <circle cx="80" cy="18" r="4" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
-        <!-- Tunnels -->
-        <rect x="20" y="10" width="16" height="2" fill="#0a0608"/>
-        <rect x="44" y="9" width="17" height="2" fill="#0a0608"/>
-        <rect x="38" y="14" width="2" height="7" fill="#0a0608"/>
-        <!-- Vent glow -->
-        <rect x="10" y="16" width="2" height="9" fill="#3a1a20" opacity="0.5"/>
-        <rect x="60" y="14" width="2" height="11" fill="#3a1a20" opacity="0.5"/>
-        <!-- Toxic -->
-        <rect x="25" y="4" width="4" height="3" fill="#c07030" opacity="0.4"/>
-        <rect x="50" y="16" width="5" height="4" fill="#c07030" opacity="0.4"/>
-        <rect x="72" y="6" width="3" height="3" fill="#c07030" opacity="0.4"/>
-        <!-- Substrates -->
-        <rect x="14" y="9" width="1" height="1" fill="#dfdf3f"/><circle cx="40" cy="13" r="0.8" fill="#ef8f3f"/>
-        <circle cx="65" cy="8" r="0.8" fill="#ff4f4f"/><rect x="79" y="17" width="1" height="1" fill="#cf6fff"/>
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l9-chamber" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#0c0810"/><stop offset="80%" stop-color="#060408"/><stop offset="100%" stop-color="#1a1828"/></radialGradient>
+          <radialGradient id="l9-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e06030" stop-opacity="0.5"/><stop offset="100%" stop-color="#a04020" stop-opacity="0"/></radialGradient>
+          <radialGradient id="l9-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l9-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <radialGradient id="l9-vent" cx="50%" cy="0%" r="100%"><stop offset="0%" stop-color="#6a2030" stop-opacity="0.5"/><stop offset="100%" stop-color="#200810" stop-opacity="0"/></radialGradient>
+          <filter id="l9-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#060304"/>
+        <!-- Chamber rooms -->
+        <ellipse cx="55" cy="40" rx="30" ry="24" fill="url(#l9-chamber)" stroke="#2a2a3a" stroke-width="1"/>
+        <ellipse cx="150" cy="52" rx="28" ry="22" fill="url(#l9-chamber)" stroke="#2a2a3a" stroke-width="1"/>
+        <ellipse cx="235" cy="35" rx="26" ry="22" fill="url(#l9-chamber)" stroke="#2a2a3a" stroke-width="1"/>
+        <ellipse cx="280" cy="72" rx="18" ry="16" fill="url(#l9-chamber)" stroke="#2a2a3a" stroke-width="1"/>
+        <!-- Connecting tunnels -->
+        <rect x="82" y="42" width="40" height="8" rx="4" fill="#0a0608"/>
+        <rect x="175" y="38" width="35" height="8" rx="4" fill="#0a0608"/>
+        <rect x="256" y="50" width="8" height="22" rx="4" fill="#0a0608"/>
+        <!-- Vent glows -->
+        <ellipse cx="40" cy="80" rx="10" ry="20" fill="url(#l9-vent)"/>
+        <ellipse cx="220" cy="80" rx="10" ry="20" fill="url(#l9-vent)"/>
+        <!-- 20% toxic -->
+        <ellipse cx="100" cy="18" rx="16" ry="12" fill="url(#l9-toxic)" filter="url(#l9-gl)"/>
+        <ellipse cx="200" cy="72" rx="18" ry="14" fill="url(#l9-toxic)" filter="url(#l9-gl)"/>
+        <ellipse cx="270" cy="20" rx="12" ry="10" fill="url(#l9-toxic)" filter="url(#l9-gl)"/>
+        <!-- Substrates (full redox minus O2) -->
+        <circle cx="50" cy="38" r="3" fill="#8fffaf" filter="url(#l9-gl)"/>
+        <circle cx="145" cy="48" r="3" fill="#ef8f3f" filter="url(#l9-gl)"/>
+        <circle cx="230" cy="34" r="3" fill="#ff8888" filter="url(#l9-gl)"/>
+        <circle cx="275" cy="70" r="2.5" fill="#cf6fff" filter="url(#l9-gl)"/>
+        <circle cx="160" cy="58" r="2.5" fill="#dfdf3f" filter="url(#l9-gl)"/>
         <!-- ARKE -->
-        <rect x="30" y="10" width="2" height="3" fill="#2a8a8a"/>
-        <!-- Rivals -->
-        <rect x="17" y="8" width="1.5" height="2" fill="#8a2a2a"/>
-        <rect x="42" y="12" width="1.5" height="2" fill="#8a2a2a"/>
-        <rect x="67" cy="7" width="1.5" height="2" fill="#8a2a2a"/>
-        <rect x="78" y="16" width="1.5" height="2" fill="#8a2a2a"/>
+        <ellipse cx="110" cy="45" rx="5" ry="7" fill="url(#l9-arke)"/>
+        <circle cx="108.5" cy="41.5" r="0.9" fill="#4aeaff"/><circle cx="111.5" cy="41.5" r="0.9" fill="#4aeaff"/>
+        <!-- 4 Rivals -->
+        <ellipse cx="60" cy="36" rx="3.5" ry="4.5" fill="url(#l9-rival)"/>
+        <ellipse cx="155" cy="44" rx="3.5" ry="4.5" fill="url(#l9-rival)"/>
+        <ellipse cx="240" cy="30" rx="3.5" ry="4.5" fill="url(#l9-rival)"/>
+        <ellipse cx="278" cy="66" rx="3" ry="4" fill="url(#l9-rival)"/>
       </svg>
     </div>
     <div class="level-stats">
@@ -273,17 +597,73 @@
       <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c07030;">20%</span></div>
     </div>
     <div class="level-strategy">
-      <strong>Strategy:</strong> Deep-sea vents. Full redox ladder (minus O<sub>2</sub>). Extreme flow
-      (1.2&times;). Toxic everywhere (20%). Scarce food (density 4). Four rivals. Chamber-based
-      topology. Master all mechanics. Requires expert planktonic riding and efficient foraging.
+      <strong>Strategy:</strong> Deep-sea hydrothermal vents. Full redox ladder minus O<sub>2</sub>: NO<sub>3</sub>,
+      Fe(III), Mn(IV), SO<sub>4</sub>, CH<sub>4</sub>. Extreme flow (1.2&times;). Toxic everywhere (20%).
+      Chamber-based topology &mdash; connected rooms with tunnels. Food density 4 (scarce with 4 rivals). Requires
+      mastery of all mechanics: efficient eating, toxic avoidance, flow riding, strategic colony placement.
     </div>
   </div>
+
+  <p class="page-number right">16</p>
+</div>
+
+<!-- Levels page 5 -->
+<div class="page" id="levels5">
 
   <!-- Level 10 (FINAL) -->
   <div class="level-card" style="border-color:#cc3333; border-width:3px;">
     <div class="level-header" style="border-bottom-color:#cc3333;">
       <div class="level-name" style="color:#cc3333;">LEVEL 10: EARTH'S LAST STAND</div>
       <div class="level-chapter" style="color:#cc3333; font-weight:bold;">FINAL LEVEL</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 300 100" class="organism-art">
+        <defs>
+          <radialGradient id="l10-g1" cx="50%" cy="40%" r="55%"><stop offset="0%" stop-color="#4a2028"/><stop offset="100%" stop-color="#200a10"/></radialGradient>
+          <radialGradient id="l10-toxic" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e040c0" stop-opacity="0.6"/><stop offset="100%" stop-color="#a01080" stop-opacity="0"/></radialGradient>
+          <radialGradient id="l10-arke" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#5ad0d0"/><stop offset="100%" stop-color="#1a6a6a"/></radialGradient>
+          <radialGradient id="l10-rival" cx="40%" cy="35%" r="60%"><stop offset="0%" stop-color="#cc5555"/><stop offset="100%" stop-color="#6a1a1a"/></radialGradient>
+          <filter id="l10-gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+          <filter id="l10-tox" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4"/></filter>
+          <linearGradient id="l10-flow" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#c04040" stop-opacity="0.5"/><stop offset="50%" stop-color="#ff6060" stop-opacity="0.3"/><stop offset="100%" stop-color="#ff8080" stop-opacity="0.1"/></linearGradient>
+        </defs>
+        <rect width="300" height="100" rx="4" fill="#0a0204"/>
+        <!-- Extreme flow (1.5x) - reddish tint -->
+        <path d="M0,45 Q50,25 100,42 Q150,60 200,35 Q250,18 300,42" fill="none" stroke="url(#l10-flow)" stroke-width="24" opacity="0.5"/>
+        <!-- Speed arrows (triple) -->
+        <polygon points="40,38 55,28 55,48" fill="#ff6060" opacity="0.4"/>
+        <polygon points="120,48 135,38 135,58" fill="#ff6060" opacity="0.3"/>
+        <polygon points="220,30 235,20 235,40" fill="#ff6060" opacity="0.3"/>
+        <!-- 25% toxic coverage -->
+        <ellipse cx="60" cy="65" rx="20" ry="15" fill="url(#l10-toxic)" filter="url(#l10-tox)"/>
+        <ellipse cx="140" cy="25" rx="18" ry="14" fill="url(#l10-toxic)" filter="url(#l10-tox)"/>
+        <ellipse cx="200" cy="75" rx="22" ry="16" fill="url(#l10-toxic)" filter="url(#l10-tox)"/>
+        <ellipse cx="265" cy="60" rx="16" ry="12" fill="url(#l10-toxic)" filter="url(#l10-tox)"/>
+        <ellipse cx="100" cy="80" rx="14" ry="10" fill="url(#l10-toxic)" filter="url(#l10-tox)"/>
+        <!-- Dark grains -->
+        <ellipse cx="30" cy="10" rx="20" ry="10" fill="url(#l10-g1)"/><ellipse cx="100" cy="8" rx="16" ry="8" fill="url(#l10-g1)"/>
+        <ellipse cx="180" cy="10" rx="18" ry="10" fill="url(#l10-g1)"/><ellipse cx="260" cy="8" rx="20" ry="10" fill="url(#l10-g1)"/>
+        <ellipse cx="50" cy="95" rx="22" ry="8" fill="url(#l10-g1)"/><ellipse cx="150" cy="95" rx="20" ry="8" fill="url(#l10-g1)"/>
+        <ellipse cx="240" cy="95" rx="18" ry="8" fill="url(#l10-g1)"/>
+        <!-- All substrates except O2 -->
+        <circle cx="50" cy="42" r="3" fill="#8fffaf" filter="url(#l10-gl)"/><circle cx="100" cy="48" r="2.5" fill="#ef8f3f" filter="url(#l10-gl)"/>
+        <circle cx="155" cy="38" r="3" fill="#ff8888" filter="url(#l10-gl)"/><circle cx="210" cy="42" r="2.5" fill="#cf6fff" filter="url(#l10-gl)"/>
+        <circle cx="260" cy="36" r="3" fill="#dfdf3f" filter="url(#l10-gl)"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="36" width="6" height="22" rx="3" fill="#3060a0" opacity="0.8"/>
+        <rect x="294" y="34" width="6" height="20" rx="3" fill="#4fdf6f" opacity="0.8"/>
+        <!-- ARKE -->
+        <ellipse cx="25" cy="44" rx="5.5" ry="7.5" fill="url(#l10-arke)"/>
+        <circle cx="23.5" cy="40.5" r="0.9" fill="#4aeaff"/><circle cx="26.5" cy="40.5" r="0.9" fill="#4aeaff"/>
+        <!-- 5 Rivals! -->
+        <ellipse cx="75" cy="44" rx="3" ry="4.5" fill="url(#l10-rival)"/>
+        <ellipse cx="125" cy="50" rx="3" ry="4.5" fill="url(#l10-rival)"/>
+        <ellipse cx="175" cy="40" rx="3" ry="4.5" fill="url(#l10-rival)"/>
+        <ellipse cx="230" cy="38" rx="3" ry="4.5" fill="url(#l10-rival)"/>
+        <ellipse cx="275" cy="44" rx="3" ry="4.5" fill="url(#l10-rival)"/>
+        <!-- FINAL label -->
+        <text x="150" y="10" text-anchor="middle" font-size="7" fill="#ff4444" font-family="'Press Start 2P',monospace" opacity="0.8">FINAL LEVEL</text>
+      </svg>
     </div>
     <div class="level-stats">
       <div class="stat" style="background:#fff0f0;"><span class="stat-label">GOAL</span><span class="stat-value" style="color:#cc3333;">12 colonies!</span></div>
@@ -292,21 +672,21 @@
       <div class="stat" style="background:#fff0f0;"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#cc3333;">25% (MAX)</span></div>
     </div>
     <div class="level-strategy" style="border-color:#cc3333; background:#fff8f4;">
-      <strong style="color:#cc3333;">THE ULTIMATE TEST.</strong> Everything at maximum. Largest map (50&times;30 = 1,500 tiles).
-      Most colonies needed (12). Fastest flow (1.5&times;). Most toxic (1 in 4 tiles!). Most rivals (5).
-      All substrates available except O<sub>2</sub>. Victory requires complete mastery of all mechanics.
-      <strong>Completing this level triggers the VICTORY screen showing your total score and
-      climate impact!</strong>
+      <strong style="color:#cc3333;">THE ULTIMATE TEST.</strong> Everything at maximum intensity. Largest map
+      (50&times;30 = 1,500 tiles). Most colonies needed (12 &mdash; twelve full eat-grow-divide cycles!). Fastest
+      flow (1.5&times;). Most toxic (1 in 4 tiles!). Most rivals (5 &mdash; you get roughly 1/6 of all food). All
+      substrates except O<sub>2</sub>. Victory requires COMPLETE mastery. <strong>Completing this level triggers the
+      VICTORY screen showing total score and climate impact. You have saved the planet!</strong>
     </div>
   </div>
 
   <div class="info-box warning" style="margin-top: 10px;">
     <div class="info-box-title" style="color:#c05030;">GAME OVER</div>
     <p style="font-size:10pt;">
-      If your Health reaches 0, you die. Don't panic! Press <strong>ENTER</strong> after 2 seconds
+      If your Health reaches 0, you die. Do not panic! Press <strong>ENTER</strong> after 2 seconds
       to retry the same level. Your score for that level resets, but you keep your global progress.
     </p>
   </div>
 
-  <p class="page-number left">15</p>
+  <p class="page-number left">17</p>
 </div>

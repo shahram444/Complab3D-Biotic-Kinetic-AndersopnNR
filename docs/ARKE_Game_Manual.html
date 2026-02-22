@@ -3067,7 +3067,7 @@ svg.pixel-art {
   <p class="page-number right">6</p>
 </div>
 <!-- Section 05: Substrates & The Redox Ladder -->
-<div class="page" id="substrates" style="page-break-after:always;">
+<div class="page" id="substrates" style="page-break-after: always;">
   <h1 class="section-number">SECTION 4</h1>
   <h1 class="section-title">Substrates &mdash; Your Food</h1>
 
@@ -3076,23 +3076,29 @@ svg.pixel-art {
     They are your food, energy, and building material. Each substrate provides different
     amounts of <strong>Health</strong>, <strong>Energy</strong>, and <strong>Growth</strong>.
     Understanding the Redox Ladder is the key to mastering ARKE's feeding strategy.
+    In real soil and sediment ecosystems, the availability of these electron acceptors
+    determines which microbial metabolisms dominate &mdash; and in this game, which
+    substrates you pursue determines whether you thrive or perish.
   </p>
 
   <div class="info-box science">
     <div class="info-box-title" style="color:#4060a0;">THE REDOX LADDER (Real Science!)</div>
     <p style="font-size:10pt;">
       In real microbiology, organisms use chemicals in a specific thermodynamic order called the
-      <strong>Redox Ladder</strong>. Oxygen provides the most energy per reaction; methane provides the least.
+      <strong>Redox Ladder</strong>. Oxygen provides the most energy per reaction
+      (&Delta;G&deg;&prime; = &minus;818 kJ/mol); methane provides the least (&minus;31 kJ/mol).
       However, nature has a twist: <strong>low-energy substrates often support the highest growth rates</strong>
       because organisms that use them face less competition and have evolved efficient metabolisms.
       The game faithfully represents this hierarchy &mdash; energy and growth are inversely related!
+      This inverse relationship is one of the most elegant trade-offs in all of biology, and mastering
+      it is the secret to high scores.
     </p>
   </div>
 
-  <!-- The Redox Ladder Visual - Beautiful Scientific Illustration -->
+  <!-- The Redox Ladder Visual - Beautiful Organic Scientific Illustration -->
   <div style="background:white; border:2px solid #3a3a4a; border-radius:6px; padding:16px; margin:12px 0; text-align:center;">
     <h3 style="font-size:9pt; margin-bottom:12px;">The Redox Ladder &mdash; Energy &amp; Growth Hierarchy</h3>
-    <svg width="460" height="370" viewBox="0 0 460 370">
+    <svg width="460" height="370" viewBox="0 0 460 370" class="organism-art">
       <defs>
         <!-- Vertical gradient background (blue top to red bottom) -->
         <linearGradient id="ladderBg05" x1="0" y1="0" x2="0" y2="1">
@@ -3117,7 +3123,8 @@ svg.pixel-art {
           <stop offset="0%" stop-color="#88cc88"/>
           <stop offset="100%" stop-color="#22ff44"/>
         </linearGradient>
-        <!-- Substrate orb glow -->
+
+        <!-- ====== ORB GLOW FILTERS ====== -->
         <filter id="orbGlow05" x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
           <feMerge>
@@ -3125,54 +3132,94 @@ svg.pixel-art {
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-        <filter id="orbGlowSm05" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+        <filter id="orbGlowStrong05" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
           <feMerge>
             <feMergeNode in="blur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-        <!-- O2 orb gradient -->
-        <radialGradient id="o2Grad05" cx="35%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#a0d4ff"/>
-          <stop offset="50%" stop-color="#4fa4ff"/>
-          <stop offset="100%" stop-color="#2060c0"/>
+
+        <!-- ====== ORB RADIAL GRADIENTS ====== -->
+        <!-- O2 orb gradient - luminous blue sphere -->
+        <radialGradient id="o2Grad05" cx="35%" cy="28%" r="65%">
+          <stop offset="0%" stop-color="#d0eaff"/>
+          <stop offset="30%" stop-color="#8dc8ff"/>
+          <stop offset="60%" stop-color="#4fa4ff"/>
+          <stop offset="85%" stop-color="#2060c0"/>
+          <stop offset="100%" stop-color="#102860"/>
         </radialGradient>
-        <!-- NO3 orb gradient -->
-        <radialGradient id="no3Grad05" cx="35%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#a0ffc0"/>
-          <stop offset="50%" stop-color="#4fdf6f"/>
-          <stop offset="100%" stop-color="#208a40"/>
+        <radialGradient id="o2Glow05" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#4fa4ff" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#4fa4ff" stop-opacity="0.25"/>
         </radialGradient>
-        <!-- Mn orb gradient -->
-        <radialGradient id="mnGrad05" cx="35%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#e0a0ff"/>
-          <stop offset="50%" stop-color="#cf6fff"/>
-          <stop offset="100%" stop-color="#7030a0"/>
+        <!-- NO3 orb gradient - verdant green sphere -->
+        <radialGradient id="no3Grad05" cx="35%" cy="28%" r="65%">
+          <stop offset="0%" stop-color="#c0ffd0"/>
+          <stop offset="30%" stop-color="#80df90"/>
+          <stop offset="60%" stop-color="#4fdf6f"/>
+          <stop offset="85%" stop-color="#208a40"/>
+          <stop offset="100%" stop-color="#104820"/>
         </radialGradient>
-        <!-- Fe orb gradient -->
-        <radialGradient id="feGrad05" cx="35%" cy="30%" r="60%">
+        <radialGradient id="no3Glow05" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#4fdf6f" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#4fdf6f" stop-opacity="0.25"/>
+        </radialGradient>
+        <!-- Mn orb gradient - amethyst crystal -->
+        <radialGradient id="mnGrad05" cx="38%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#f0c8ff"/>
+          <stop offset="30%" stop-color="#d88eff"/>
+          <stop offset="60%" stop-color="#cf6fff"/>
+          <stop offset="85%" stop-color="#7030a0"/>
+          <stop offset="100%" stop-color="#381060"/>
+        </radialGradient>
+        <radialGradient id="mnGlow05" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#cf6fff" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#cf6fff" stop-opacity="0.25"/>
+        </radialGradient>
+        <!-- Fe orb gradient - molten orange sphere -->
+        <radialGradient id="feGrad05" cx="35%" cy="28%" r="65%">
+          <stop offset="0%" stop-color="#ffe0b0"/>
+          <stop offset="30%" stop-color="#ffb870"/>
+          <stop offset="60%" stop-color="#ef8f3f"/>
+          <stop offset="85%" stop-color="#a05010"/>
+          <stop offset="100%" stop-color="#502808"/>
+        </radialGradient>
+        <radialGradient id="feGlow05" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#ef8f3f" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#ef8f3f" stop-opacity="0.25"/>
+        </radialGradient>
+        <!-- SO4 orb gradient - sulfur crystal -->
+        <radialGradient id="so4Grad05" cx="38%" cy="30%" r="60%">
+          <stop offset="0%" stop-color="#ffffc0"/>
+          <stop offset="30%" stop-color="#f0f060"/>
+          <stop offset="60%" stop-color="#dfdf3f"/>
+          <stop offset="85%" stop-color="#8a8a10"/>
+          <stop offset="100%" stop-color="#484808"/>
+        </radialGradient>
+        <radialGradient id="so4Glow05" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#dfdf3f" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#dfdf3f" stop-opacity="0.25"/>
+        </radialGradient>
+        <!-- CH4 orb gradient - fiery red sphere -->
+        <radialGradient id="ch4Grad05" cx="35%" cy="28%" r="65%">
           <stop offset="0%" stop-color="#ffc080"/>
-          <stop offset="50%" stop-color="#ef8f3f"/>
-          <stop offset="100%" stop-color="#a05010"/>
+          <stop offset="25%" stop-color="#ff8040"/>
+          <stop offset="50%" stop-color="#ff4f4f"/>
+          <stop offset="80%" stop-color="#cc1818"/>
+          <stop offset="100%" stop-color="#601010"/>
         </radialGradient>
-        <!-- SO4 orb gradient -->
-        <radialGradient id="so4Grad05" cx="35%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#ffff90"/>
-          <stop offset="50%" stop-color="#dfdf3f"/>
-          <stop offset="100%" stop-color="#8a8a10"/>
+        <radialGradient id="ch4Inner05" cx="42%" cy="42%" r="48%">
+          <stop offset="0%" stop-color="#ffee66"/>
+          <stop offset="50%" stop-color="#ff8020" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ff4020" stop-opacity="0"/>
         </radialGradient>
-        <!-- CH4 orb gradient -->
-        <radialGradient id="ch4Grad05" cx="35%" cy="30%" r="60%">
-          <stop offset="0%" stop-color="#ff9060"/>
-          <stop offset="40%" stop-color="#ff4f4f"/>
-          <stop offset="100%" stop-color="#aa1010"/>
+        <radialGradient id="ch4Glow05" cx="50%" cy="50%" r="50%">
+          <stop offset="60%" stop-color="#ff4f4f" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#ff4f4f" stop-opacity="0.3"/>
         </radialGradient>
-        <radialGradient id="ch4Inner05" cx="40%" cy="40%" r="50%">
-          <stop offset="0%" stop-color="#ffcc44"/>
-          <stop offset="100%" stop-color="#ff6020" stop-opacity="0"/>
-        </radialGradient>
-        <!-- Energy fill bar gradients -->
+
+        <!-- Energy/Growth fill bar gradients -->
         <linearGradient id="enBarFill05" x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stop-color="#4fa4ff"/>
           <stop offset="100%" stop-color="#70c4ff"/>
@@ -3181,7 +3228,7 @@ svg.pixel-art {
           <stop offset="0%" stop-color="#40c040"/>
           <stop offset="100%" stop-color="#70ef70"/>
         </linearGradient>
-        <!-- Arrow marker -->
+        <!-- Arrow markers -->
         <marker id="arrowDown05" markerWidth="8" markerHeight="8" refX="4" refY="7" orient="auto">
           <path d="M1,0 L4,7 L7,0" fill="#666" stroke="none"/>
         </marker>
@@ -3200,27 +3247,31 @@ svg.pixel-art {
 
       <!-- Energy label (rotated, left) -->
       <text x="30" y="178" text-anchor="middle" font-size="7" fill="#666" transform="rotate(-90,30,178)" font-family="'Inter',sans-serif" font-weight="600">ENERGY YIELD</text>
-      <!-- Energy arrow -->
       <line x1="44" y1="30" x2="44" y2="338" stroke="#666" stroke-width="1.5" marker-end="url(#arrowDown05)"/>
 
       <!-- Growth label (rotated, right) -->
       <text x="438" y="178" text-anchor="middle" font-size="7" fill="#4a8a4a" transform="rotate(90,438,178)" font-family="'Inter',sans-serif" font-weight="600">GROWTH YIELD</text>
-      <!-- Growth arrow (pointing UP = high growth at bottom) -->
       <line x1="422" y1="338" x2="422" y2="30" stroke="#4a8a4a" stroke-width="1.5" marker-end="url(#arrowUp05)"/>
 
       <!-- =================== O2 - OXYGEN (top) =================== -->
       <g transform="translate(88, 22)">
-        <!-- Orb -->
+        <!-- Outer soft glow ring -->
+        <circle cx="16" cy="18" r="20" fill="url(#o2Glow05)"/>
+        <!-- Main orb with glow filter -->
         <g filter="url(#orbGlow05)">
           <circle cx="16" cy="18" r="14" fill="url(#o2Grad05)"/>
-          <circle cx="11" cy="12" r="3.5" fill="white" opacity="0.35"/>
-          <circle cx="8" cy="10" r="1" fill="white" opacity="0.5"/>
+          <!-- Specular highlight -->
+          <ellipse cx="11" cy="12" rx="5" ry="3.5" fill="white" opacity="0.4" transform="rotate(-15,11,12)"/>
+          <circle cx="9" cy="10" r="1.5" fill="white" opacity="0.6"/>
+          <!-- Inner detail - dissolved gas bubbles -->
+          <circle cx="20" cy="22" r="1.5" fill="#a0d4ff" opacity="0.3"/>
+          <circle cx="18" cy="14" r="1" fill="#c0e0ff" opacity="0.25"/>
         </g>
         <!-- Label & formula -->
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">OXYGEN</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">O<tspan font-size="5" dy="2">2</tspan><tspan dy="-2"> &mdash; Aerobic Respiration</tspan></text>
-        <!-- Energy bar -->
         <text x="40" y="37" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +20 | EN +10 | GR +15</text>
+        <!-- Energy bar -->
         <rect x="220" y="8" width="80" height="7" rx="3" fill="#e8e8e8"/>
         <rect x="220" y="8" width="80" height="7" rx="3" fill="url(#enBarFill05)"/>
         <text x="306" y="15" font-size="5.5" fill="#4fa4ff" font-family="'Space Mono',monospace">-818 kJ/mol</text>
@@ -3232,10 +3283,14 @@ svg.pixel-art {
 
       <!-- =================== NO3 - NITRATE =================== -->
       <g transform="translate(88, 74)">
+        <circle cx="16" cy="18" r="20" fill="url(#no3Glow05)"/>
         <g filter="url(#orbGlow05)">
           <circle cx="16" cy="18" r="14" fill="url(#no3Grad05)"/>
-          <circle cx="11" cy="12" r="3.5" fill="white" opacity="0.3"/>
-          <circle cx="8" cy="10" r="1" fill="white" opacity="0.45"/>
+          <ellipse cx="11" cy="12" rx="5" ry="3.5" fill="white" opacity="0.35" transform="rotate(-15,11,12)"/>
+          <circle cx="9" cy="10" r="1.5" fill="white" opacity="0.5"/>
+          <!-- Inner detail - nitrogen molecule hints -->
+          <circle cx="14" cy="20" r="2" fill="#a0ffc0" opacity="0.2"/>
+          <circle cx="20" cy="16" r="1.5" fill="#c0ffd0" opacity="0.2"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">NITRATE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">NO<tspan font-size="5" dy="2">3</tspan><tspan font-size="5" dy="-2">&minus;</tspan><tspan dy="0"> &mdash; Denitrification</tspan></text>
@@ -3250,11 +3305,16 @@ svg.pixel-art {
 
       <!-- =================== Mn(IV) - MANGANESE =================== -->
       <g transform="translate(88, 126)">
+        <circle cx="16" cy="18" r="20" fill="url(#mnGlow05)"/>
         <g filter="url(#orbGlow05)">
-          <!-- Octahedral/crystalline shape -->
+          <!-- Octahedral/crystalline shape with organic rounding -->
           <polygon points="16,4 28,12 28,24 16,32 4,24 4,12" fill="url(#mnGrad05)"/>
-          <polygon points="16,8 24,14 24,22 16,28 8,22 8,14" fill="#e0a0ff" opacity="0.15"/>
-          <polygon points="16,12 20,15 20,21 16,24 12,21 12,15" fill="white" opacity="0.1"/>
+          <!-- Facet highlights -->
+          <polygon points="16,7 25,13 25,22 16,29 7,22 7,13" fill="#e8c0ff" opacity="0.12"/>
+          <polygon points="16,11 21,15 21,21 16,25 11,21 11,15" fill="white" opacity="0.1"/>
+          <!-- Specular highlight -->
+          <ellipse cx="12" cy="11" rx="4" ry="2.5" fill="white" opacity="0.3" transform="rotate(-20,12,11)"/>
+          <circle cx="10" cy="9" r="1" fill="white" opacity="0.45"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#cf6fff">MANGANESE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">Mn(IV) &mdash; Mn Reduction</text>
@@ -3269,11 +3329,18 @@ svg.pixel-art {
 
       <!-- =================== Fe(III) - IRON =================== -->
       <g transform="translate(88, 178)">
+        <circle cx="16" cy="18" r="20" fill="url(#feGlow05)"/>
         <g filter="url(#orbGlow05)">
           <circle cx="16" cy="18" r="14" fill="url(#feGrad05)"/>
-          <!-- Metallic sheen -->
-          <ellipse cx="12" cy="12" rx="6" ry="4" fill="white" opacity="0.15" transform="rotate(-30,12,12)"/>
-          <circle cx="10" cy="10" r="2.5" fill="white" opacity="0.25"/>
+          <!-- Metallic sheen bands -->
+          <ellipse cx="12" cy="12" rx="7" ry="4" fill="white" opacity="0.15" transform="rotate(-30,12,12)"/>
+          <ellipse cx="14" cy="14" rx="4" ry="2" fill="white" opacity="0.1" transform="rotate(-30,14,14)"/>
+          <!-- Specular highlight -->
+          <circle cx="10" cy="10" r="2.5" fill="white" opacity="0.3"/>
+          <circle cx="9" cy="9" r="1" fill="white" opacity="0.45"/>
+          <!-- Rust texture details -->
+          <circle cx="20" cy="22" r="1.5" fill="#ffd0a0" opacity="0.2"/>
+          <circle cx="22" cy="18" r="1" fill="#ffe0b0" opacity="0.15"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#ef8f3f">IRON</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">Fe(III) &mdash; Iron Reduction</text>
@@ -3288,11 +3355,16 @@ svg.pixel-art {
 
       <!-- =================== SO4 - SULFATE =================== -->
       <g transform="translate(88, 230)">
+        <circle cx="16" cy="18" r="20" fill="url(#so4Glow05)"/>
         <g filter="url(#orbGlow05)">
-          <!-- Angular crystal shape -->
+          <!-- Angular crystal shape with softer edges -->
           <polygon points="16,4 30,10 28,28 8,30 2,14" fill="url(#so4Grad05)"/>
-          <polygon points="16,8 26,13 24,26 10,27 5,16" fill="#ffff90" opacity="0.15"/>
-          <polygon points="14,12 22,15 20,22 12,23 8,18" fill="white" opacity="0.1"/>
+          <!-- Facet glow layers -->
+          <polygon points="16,7 27,12 25,26 10,28 5,16" fill="#ffff90" opacity="0.12"/>
+          <polygon points="16,11 23,15 21,24 12,25 7,17" fill="white" opacity="0.08"/>
+          <!-- Specular highlight -->
+          <ellipse cx="13" cy="12" rx="4" ry="2.5" fill="white" opacity="0.3" transform="rotate(-10,13,12)"/>
+          <circle cx="11" cy="10" r="1" fill="white" opacity="0.4"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#c0c020">SULFATE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">SO<tspan font-size="5" dy="2">4</tspan><tspan font-size="5" dy="-2">&sup2;&minus;</tspan><tspan dy="0"> &mdash; Sulfate Reduction</tspan></text>
@@ -3307,14 +3379,21 @@ svg.pixel-art {
 
       <!-- =================== CH4 - METHANE (bottom) =================== -->
       <g transform="translate(88, 282)">
-        <g filter="url(#orbGlow05)">
+        <circle cx="16" cy="18" r="22" fill="url(#ch4Glow05)"/>
+        <g filter="url(#orbGlowStrong05)">
           <circle cx="16" cy="18" r="14" fill="url(#ch4Grad05)"/>
           <!-- Fire-like inner glow -->
-          <circle cx="16" cy="18" r="9" fill="url(#ch4Inner05)" opacity="0.6"/>
+          <circle cx="16" cy="18" r="9" fill="url(#ch4Inner05)" opacity="0.7"/>
+          <!-- Flame wisps -->
+          <ellipse cx="14" cy="12" rx="3" ry="5" fill="#ffcc44" opacity="0.2" transform="rotate(-10,14,12)"/>
+          <ellipse cx="19" cy="14" rx="2" ry="4" fill="#ff9944" opacity="0.15" transform="rotate(15,19,14)"/>
           <!-- Gas bubble effect -->
-          <circle cx="10" cy="6" r="3" fill="#ff8040" opacity="0.25"/>
-          <circle cx="24" cy="8" r="2" fill="#ff8040" opacity="0.2"/>
-          <circle cx="6" cy="14" r="2" fill="#ff6030" opacity="0.15"/>
+          <circle cx="10" cy="8" r="2.5" fill="#ff8040" opacity="0.25"/>
+          <circle cx="23" cy="10" r="1.5" fill="#ffa060" opacity="0.2"/>
+          <circle cx="7" cy="16" r="1.5" fill="#ff6030" opacity="0.15"/>
+          <!-- Specular highlight -->
+          <circle cx="10" cy="10" r="2" fill="white" opacity="0.25"/>
+          <circle cx="9" cy="9" r="0.8" fill="white" opacity="0.4"/>
         </g>
         <text x="40" y="12" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">METHANE</text>
         <text x="40" y="24" font-family="'Inter',sans-serif" font-size="7" fill="#333" font-weight="600">CH<tspan font-size="5" dy="2">4</tspan><tspan dy="-2"> &mdash; Methanotrophy</tspan></text>
@@ -3347,212 +3426,320 @@ svg.pixel-art {
   <p class="page-number left">7</p>
 </div>
 
-<!-- Substrates page 2: Detailed cards & Strategy -->
-<div class="page" id="substrates2" style="page-break-after:always;">
+<!-- Substrates page 2: Detailed cards with organic orb illustrations -->
+<div class="page" id="substrates2" style="page-break-after: always;">
   <h2>Substrate Details</h2>
 
   <div class="substrate-grid">
-    <!-- O2 -->
+    <!-- ============ O2 - OXYGEN ============ -->
     <div class="sub-card" style="border-left: 4px solid #4fa4ff;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 100 100">
+        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
           <defs>
-            <radialGradient id="o2Card05" cx="35%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#c0e0ff"/>
-              <stop offset="50%" stop-color="#4fa4ff"/>
-              <stop offset="100%" stop-color="#2060c0"/>
+            <radialGradient id="o2Card05" cx="32%" cy="28%" r="68%">
+              <stop offset="0%" stop-color="#e0f0ff"/>
+              <stop offset="25%" stop-color="#a0d4ff"/>
+              <stop offset="55%" stop-color="#4fa4ff"/>
+              <stop offset="80%" stop-color="#2060c0"/>
+              <stop offset="100%" stop-color="#102050"/>
+            </radialGradient>
+            <radialGradient id="o2CardOuter05" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#4fa4ff" stop-opacity="0"/>
+              <stop offset="85%" stop-color="#4fa4ff" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#4fa4ff" stop-opacity="0.3"/>
             </radialGradient>
             <filter id="o2CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
+          <!-- Outer soft glow ring -->
+          <circle cx="50" cy="50" r="46" fill="url(#o2CardOuter05)"/>
           <g filter="url(#o2CardGlow05)">
+            <!-- Main sphere -->
             <circle cx="50" cy="50" r="35" fill="url(#o2Card05)"/>
-            <circle cx="38" cy="36" r="10" fill="white" opacity="0.3"/>
-            <circle cx="34" cy="32" r="3.5" fill="white" opacity="0.5"/>
+            <!-- Specular highlight -->
+            <ellipse cx="38" cy="35" rx="12" ry="7" fill="white" opacity="0.4" transform="rotate(-15,38,35)"/>
+            <circle cx="34" cy="31" r="4" fill="white" opacity="0.55"/>
+            <circle cx="32" cy="29" r="1.5" fill="white" opacity="0.7"/>
+            <!-- Inner molecular detail - dissolved O2 bubbles -->
+            <circle cx="55" cy="58" r="3" fill="#a0d4ff" opacity="0.25"/>
+            <circle cx="60" cy="45" r="2" fill="#c0e0ff" opacity="0.2"/>
+            <circle cx="45" cy="62" r="2.5" fill="#90c8ff" opacity="0.18"/>
           </g>
-          <!-- Sparkles -->
-          <circle cx="22" cy="22" r="2" fill="white" opacity="0.6"/>
-          <circle cx="78" cy="28" r="1.5" fill="white" opacity="0.5"/>
-          <circle cx="75" cy="72" r="1.8" fill="white" opacity="0.4"/>
-          <circle cx="28" cy="76" r="1.2" fill="white" opacity="0.35"/>
-          <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="16" font-weight="bold" fill="white">O<tspan font-size="12" dy="4">2</tspan></text>
+          <!-- Ambient sparkles -->
+          <circle cx="22" cy="22" r="1.5" fill="white" opacity="0.5"/>
+          <circle cx="78" cy="28" r="1.2" fill="white" opacity="0.4"/>
+          <circle cx="75" cy="72" r="1.4" fill="white" opacity="0.35"/>
+          <circle cx="26" cy="76" r="1" fill="white" opacity="0.3"/>
+          <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="15" font-weight="bold" fill="white">O<tspan font-size="11" dy="3">2</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#4fa4ff;">O2 &mdash; OXYGEN</div>
-        <p style="font-size:9pt;">Aerobic respiration. Highest energy yield in nature.
-        Available in surface soils and thawing permafrost. Best for emergency HP recovery.</p>
+        <p style="font-size:9pt;">Aerobic respiration &mdash; the most thermodynamically favorable electron acceptor
+        in nature. In real soils, aerobic microbes dominate oxygenated surface layers where O<sub>2</sub>
+        diffuses from the atmosphere. Provides the highest HP recovery in the game, making it your
+        best emergency food source. The luminous blue orb is easy to spot drifting near surface inlets.</p>
         <div class="sub-values">+20 HP | +10 EN | +15 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7</div>
+        <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7 | &Delta;G&deg;&prime; = &minus;818 kJ/mol</div>
       </div>
     </div>
-    <!-- NO3 -->
+
+    <!-- ============ NO3 - NITRATE ============ -->
     <div class="sub-card" style="border-left: 4px solid #4fdf6f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 100 100">
+        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
           <defs>
-            <radialGradient id="no3Card05" cx="35%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#b0ffc0"/>
-              <stop offset="50%" stop-color="#4fdf6f"/>
-              <stop offset="100%" stop-color="#208a40"/>
+            <radialGradient id="no3Card05" cx="32%" cy="28%" r="68%">
+              <stop offset="0%" stop-color="#d8ffe0"/>
+              <stop offset="25%" stop-color="#90f0a0"/>
+              <stop offset="55%" stop-color="#4fdf6f"/>
+              <stop offset="80%" stop-color="#208a40"/>
+              <stop offset="100%" stop-color="#104020"/>
+            </radialGradient>
+            <radialGradient id="no3CardOuter05" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#4fdf6f" stop-opacity="0"/>
+              <stop offset="85%" stop-color="#4fdf6f" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#4fdf6f" stop-opacity="0.3"/>
             </radialGradient>
             <filter id="no3CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#no3CardOuter05)"/>
           <g filter="url(#no3CardGlow05)">
             <circle cx="50" cy="50" r="35" fill="url(#no3Card05)"/>
-            <circle cx="38" cy="36" r="10" fill="white" opacity="0.25"/>
-            <circle cx="34" cy="32" r="3" fill="white" opacity="0.4"/>
+            <ellipse cx="38" cy="35" rx="12" ry="7" fill="white" opacity="0.35" transform="rotate(-15,38,35)"/>
+            <circle cx="34" cy="31" r="4" fill="white" opacity="0.5"/>
+            <circle cx="32" cy="29" r="1.5" fill="white" opacity="0.65"/>
+            <!-- Nitrogen atom hints -->
+            <circle cx="55" cy="55" r="3" fill="#a0ffc0" opacity="0.2"/>
+            <circle cx="48" cy="63" r="2" fill="#b0ffd0" opacity="0.15"/>
           </g>
-          <text x="50" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="bold" fill="white">NO<tspan font-size="10" dy="3">3</tspan><tspan font-size="9" dy="-3">&minus;</tspan></text>
+          <text x="50" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="13" font-weight="bold" fill="white">NO<tspan font-size="9" dy="3">3</tspan><tspan font-size="8" dy="-3">&minus;</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#4fdf6f;">NO3 &mdash; NITRATE</div>
-        <p style="font-size:9pt;">Denitrification. Prevents N<sub>2</sub>O (300&times; CO<sub>2</sub>)
-        from forming. The best all-around substrate &mdash; strong in every stat.</p>
+        <p style="font-size:9pt;">Denitrification &mdash; the process of converting nitrate to nitrogen gas.
+        In the real world, denitrifiers prevent the accumulation of N<sub>2</sub>O, a greenhouse gas
+        with 300&times; the warming potential of CO<sub>2</sub>. The best all-around substrate in the
+        game: strong HP recovery, solid energy, and excellent growth. Always eat nitrate when you see it.</p>
         <div class="sub-values">+15 HP | +7.5 EN | +18 GR | +25 PTS</div>
-        <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS!</div>
+        <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS! | &Delta;G&deg;&prime; = &minus;649 kJ/mol</div>
       </div>
     </div>
-    <!-- Mn(IV) -->
+
+    <!-- ============ Mn(IV) - MANGANESE ============ -->
     <div class="sub-card" style="border-left: 4px solid #cf6fff;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 100 100">
+        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
           <defs>
-            <radialGradient id="mnCard05" cx="40%" cy="35%" r="55%">
-              <stop offset="0%" stop-color="#e8b0ff"/>
-              <stop offset="50%" stop-color="#cf6fff"/>
-              <stop offset="100%" stop-color="#6020a0"/>
+            <radialGradient id="mnCard05" cx="38%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#f0d0ff"/>
+              <stop offset="25%" stop-color="#d898ff"/>
+              <stop offset="55%" stop-color="#cf6fff"/>
+              <stop offset="80%" stop-color="#7030a0"/>
+              <stop offset="100%" stop-color="#301050"/>
+            </radialGradient>
+            <radialGradient id="mnCardOuter05" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#cf6fff" stop-opacity="0"/>
+              <stop offset="85%" stop-color="#cf6fff" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#cf6fff" stop-opacity="0.25"/>
             </radialGradient>
             <filter id="mnCardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#mnCardOuter05)"/>
           <g filter="url(#mnCardGlow05)">
-            <!-- Octahedral crystal -->
+            <!-- Octahedral crystal form -->
             <polygon points="50,10 85,30 85,65 50,85 15,65 15,30" fill="url(#mnCard05)"/>
-            <polygon points="50,18 78,34 78,60 50,76 22,60 22,34" fill="#e0b0ff" opacity="0.12"/>
-            <polygon points="50,30 65,40 65,55 50,65 35,55 35,40" fill="white" opacity="0.08"/>
+            <!-- Facet highlight layers -->
+            <polygon points="50,16 79,33 79,62 50,79 21,62 21,33" fill="#e0b0ff" opacity="0.1"/>
+            <polygon points="50,24 70,37 70,58 50,71 30,58 30,37" fill="#f0d0ff" opacity="0.08"/>
+            <polygon points="50,32 62,40 62,55 50,63 38,55 38,40" fill="white" opacity="0.06"/>
+            <!-- Specular highlight -->
+            <ellipse cx="38" cy="30" rx="10" ry="6" fill="white" opacity="0.3" transform="rotate(-20,38,30)"/>
+            <circle cx="34" cy="27" r="3" fill="white" opacity="0.4"/>
+            <circle cx="33" cy="26" r="1.2" fill="white" opacity="0.55"/>
           </g>
-          <text x="50" y="54" text-anchor="middle" font-family="'Inter',sans-serif" font-size="13" font-weight="bold" fill="white">Mn</text>
+          <text x="50" y="54" text-anchor="middle" font-family="'Inter',sans-serif" font-size="14" font-weight="bold" fill="white">Mn</text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#cf6fff;">Mn(IV) &mdash; MANGANESE</div>
-        <p style="font-size:9pt;">Manganese reduction. Crystalline purple particles.
-        Mid-range energy and growth. Found in mineral-rich sediments.</p>
+        <p style="font-size:9pt;">Manganese reduction &mdash; dissimilatory metal reduction of Mn(IV) oxides
+        to soluble Mn(II). In nature, manganese-reducing bacteria are found in mineral-rich sediments
+        where crystalline MnO<sub>2</sub> particles accumulate. Mid-range energy and growth make this
+        a balanced but unremarkable substrate. Its angular purple form reflects its crystalline origin.</p>
         <div class="sub-values">+12 HP | +6 EN | +12 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10</div>
+        <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10 | &Delta;G&deg;&prime; = &minus;558 kJ/mol</div>
       </div>
     </div>
-    <!-- Fe(III) -->
+
+    <!-- ============ Fe(III) - IRON ============ -->
     <div class="sub-card" style="border-left: 4px solid #ef8f3f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 100 100">
+        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
           <defs>
-            <radialGradient id="feCard05" cx="35%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#ffd0a0"/>
-              <stop offset="40%" stop-color="#ef8f3f"/>
-              <stop offset="100%" stop-color="#8a4010"/>
+            <radialGradient id="feCard05" cx="32%" cy="28%" r="68%">
+              <stop offset="0%" stop-color="#ffe8c0"/>
+              <stop offset="20%" stop-color="#ffc080"/>
+              <stop offset="50%" stop-color="#ef8f3f"/>
+              <stop offset="80%" stop-color="#a05010"/>
+              <stop offset="100%" stop-color="#402008"/>
+            </radialGradient>
+            <radialGradient id="feCardOuter05" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#ef8f3f" stop-opacity="0"/>
+              <stop offset="85%" stop-color="#ef8f3f" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#ef8f3f" stop-opacity="0.28"/>
             </radialGradient>
             <filter id="feCardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#feCardOuter05)"/>
           <g filter="url(#feCardGlow05)">
             <circle cx="50" cy="50" r="35" fill="url(#feCard05)"/>
-            <!-- Metallic sheen -->
-            <ellipse cx="40" cy="38" rx="14" ry="8" fill="white" opacity="0.15" transform="rotate(-25,40,38)"/>
-            <circle cx="36" cy="34" r="5" fill="white" opacity="0.25"/>
-            <circle cx="34" cy="32" r="2" fill="white" opacity="0.35"/>
+            <!-- Metallic sheen bands -->
+            <ellipse cx="40" cy="38" rx="14" ry="7" fill="white" opacity="0.18" transform="rotate(-25,40,38)"/>
+            <ellipse cx="42" cy="40" rx="8" ry="4" fill="white" opacity="0.1" transform="rotate(-25,42,40)"/>
+            <!-- Specular highlight -->
+            <circle cx="36" cy="34" r="5" fill="white" opacity="0.3"/>
+            <circle cx="34" cy="32" r="2" fill="white" opacity="0.45"/>
+            <circle cx="33" cy="31" r="0.8" fill="white" opacity="0.6"/>
+            <!-- Rusty surface detail -->
+            <circle cx="58" cy="58" r="3" fill="#ffd0a0" opacity="0.15"/>
+            <circle cx="55" cy="50" r="2" fill="#ffe0b0" opacity="0.12"/>
+            <circle cx="50" cy="65" r="2.5" fill="#ffc880" opacity="0.1"/>
           </g>
           <text x="50" y="56" text-anchor="middle" font-family="'Inter',sans-serif" font-size="16" font-weight="bold" fill="white">Fe</text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#ef8f3f;">Fe(III) &mdash; IRON</div>
-        <p style="font-size:9pt;">Iron reduction. Moderate energy and growth.
-        Found in deep sediments and hydrothermal vents. Rusty metallic sheen.</p>
+        <p style="font-size:9pt;">Iron reduction &mdash; dissimilatory Fe(III) to Fe(II) conversion. Iron-reducing
+        bacteria like <em>Geobacter</em> are among the most studied organisms in geomicrobiology. Found in
+        deep sediments, wetlands, and hydrothermal vents. Moderate energy and growth with a warm metallic
+        sheen. Reliable but unspectacular &mdash; a solid workhorse substrate.</p>
         <div class="sub-values">+10 HP | +5 EN | +10 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10</div>
+        <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10 | &Delta;G&deg;&prime; = &minus;334 kJ/mol</div>
       </div>
     </div>
-    <!-- SO4 -->
+
+    <!-- ============ SO4 - SULFATE ============ -->
     <div class="sub-card" style="border-left: 4px solid #dfdf3f;">
       <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 100 100">
+        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
           <defs>
-            <radialGradient id="so4Card05" cx="40%" cy="35%" r="55%">
-              <stop offset="0%" stop-color="#ffff90"/>
-              <stop offset="50%" stop-color="#dfdf3f"/>
-              <stop offset="100%" stop-color="#7a7a08"/>
+            <radialGradient id="so4Card05" cx="38%" cy="30%" r="60%">
+              <stop offset="0%" stop-color="#ffffd0"/>
+              <stop offset="25%" stop-color="#f8f870"/>
+              <stop offset="55%" stop-color="#dfdf3f"/>
+              <stop offset="80%" stop-color="#8a8a10"/>
+              <stop offset="100%" stop-color="#3a3a08"/>
+            </radialGradient>
+            <radialGradient id="so4CardOuter05" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#dfdf3f" stop-opacity="0"/>
+              <stop offset="85%" stop-color="#dfdf3f" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#dfdf3f" stop-opacity="0.25"/>
             </radialGradient>
             <filter id="so4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <g filter="url(#so4CardGlow05)">
-            <!-- Angular crystal with sulfur glow -->
-            <polygon points="50,12 82,28 78,72 30,78 14,42" fill="url(#so4Card05)"/>
-            <polygon points="50,20 74,33 71,66 34,70 20,44" fill="#ffff80" opacity="0.12"/>
-            <polygon points="48,32 62,40 60,58 38,60 28,46" fill="white" opacity="0.08"/>
-          </g>
-          <text x="48" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="#444">SO<tspan font-size="8" dy="3">4</tspan></text>
-        </svg>
-      </div>
-      <div class="sub-info">
-        <div class="sub-name" style="color:#c0c020;">SO4 &mdash; SULFATE</div>
-        <p style="font-size:9pt;">Sulfate reduction. Produces H<sub>2</sub>S (creates toxic zones!).
-        Low energy but necessary in deep anaerobic environments.</p>
-        <div class="sub-values">+6 HP | +3 EN | +8 GR | +10 PTS</div>
-        <div class="sub-values" style="color:#c0c020;">Levels: 5-10</div>
-      </div>
-    </div>
-    <!-- CH4 -->
-    <div class="sub-card" style="border-left: 4px solid #ff4f4f;">
-      <div class="sub-icon">
-        <svg width="48" height="48" viewBox="0 0 100 100">
-          <defs>
-            <radialGradient id="ch4Card05" cx="35%" cy="30%" r="60%">
-              <stop offset="0%" stop-color="#ffa060"/>
-              <stop offset="40%" stop-color="#ff4f4f"/>
-              <stop offset="100%" stop-color="#aa1010"/>
-            </radialGradient>
-            <radialGradient id="ch4CardInner05" cx="45%" cy="45%" r="45%">
-              <stop offset="0%" stop-color="#ffdd44"/>
-              <stop offset="100%" stop-color="#ff5020" stop-opacity="0"/>
-            </radialGradient>
-            <filter id="ch4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
               <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
               <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
+          <circle cx="50" cy="50" r="46" fill="url(#so4CardOuter05)"/>
+          <g filter="url(#so4CardGlow05)">
+            <!-- Angular crystal with sulfur glow -->
+            <polygon points="50,12 82,28 78,72 30,78 14,42" fill="url(#so4Card05)"/>
+            <!-- Facet layers -->
+            <polygon points="50,18 76,32 73,67 33,72 19,44" fill="#ffff90" opacity="0.1"/>
+            <polygon points="50,24 70,36 68,62 36,66 24,46" fill="#ffffc0" opacity="0.08"/>
+            <polygon points="50,32 62,40 60,56 40,58 30,46" fill="white" opacity="0.06"/>
+            <!-- Specular highlight -->
+            <ellipse cx="40" cy="32" rx="10" ry="5" fill="white" opacity="0.3" transform="rotate(-10,40,32)"/>
+            <circle cx="36" cy="29" r="3" fill="white" opacity="0.4"/>
+            <circle cx="35" cy="28" r="1.2" fill="white" opacity="0.5"/>
+          </g>
+          <text x="48" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="#333">SO<tspan font-size="8" dy="3">4</tspan></text>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#c0c020;">SO4 &mdash; SULFATE</div>
+        <p style="font-size:9pt;">Sulfate reduction &mdash; one of the oldest metabolisms on Earth, dating back
+        over 3.5 billion years. Produces hydrogen sulfide (H<sub>2</sub>S), which creates toxic zones in
+        the game environment. In real marine sediments, sulfate-reducing bacteria dominate below the
+        iron reduction zone. Low energy but necessary when deeper, more anaerobic levels limit your options.</p>
+        <div class="sub-values">+6 HP | +3 EN | +8 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#c0c020;">Levels: 5-10 | &Delta;G&deg;&prime; = &minus;152 kJ/mol</div>
+      </div>
+    </div>
+
+    <!-- ============ CH4 - METHANE ============ -->
+    <div class="sub-card" style="border-left: 4px solid #ff4f4f;">
+      <div class="sub-icon">
+        <svg width="64" height="64" viewBox="0 0 100 100" class="organism-art">
+          <defs>
+            <radialGradient id="ch4Card05" cx="32%" cy="28%" r="68%">
+              <stop offset="0%" stop-color="#ffd090"/>
+              <stop offset="20%" stop-color="#ffa050"/>
+              <stop offset="45%" stop-color="#ff4f4f"/>
+              <stop offset="75%" stop-color="#cc1818"/>
+              <stop offset="100%" stop-color="#501010"/>
+            </radialGradient>
+            <radialGradient id="ch4CardInner05" cx="42%" cy="42%" r="50%">
+              <stop offset="0%" stop-color="#ffee66"/>
+              <stop offset="40%" stop-color="#ff9930" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#ff4020" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="ch4CardOuter05" cx="50%" cy="50%" r="50%">
+              <stop offset="50%" stop-color="#ff4f4f" stop-opacity="0"/>
+              <stop offset="80%" stop-color="#ff4f4f" stop-opacity="0.18"/>
+              <stop offset="100%" stop-color="#ff2020" stop-opacity="0.35"/>
+            </radialGradient>
+            <filter id="ch4CardGlow05" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Outer fiery glow ring -->
+          <circle cx="50" cy="50" r="48" fill="url(#ch4CardOuter05)"/>
           <g filter="url(#ch4CardGlow05)">
             <circle cx="50" cy="50" r="35" fill="url(#ch4Card05)"/>
-            <circle cx="50" cy="50" r="22" fill="url(#ch4CardInner05)" opacity="0.6"/>
+            <!-- Inner flame core -->
+            <circle cx="50" cy="50" r="22" fill="url(#ch4CardInner05)" opacity="0.7"/>
+            <!-- Flame wisps -->
+            <ellipse cx="45" cy="38" rx="6" ry="10" fill="#ffcc44" opacity="0.2" transform="rotate(-8,45,38)"/>
+            <ellipse cx="56" cy="40" rx="4" ry="8" fill="#ff9944" opacity="0.15" transform="rotate(12,56,40)"/>
+            <ellipse cx="50" cy="35" rx="3" ry="7" fill="#ffdd66" opacity="0.12" transform="rotate(3,50,35)"/>
+            <!-- Specular highlight -->
+            <circle cx="38" cy="36" r="4" fill="white" opacity="0.25"/>
+            <circle cx="36" cy="34" r="1.5" fill="white" opacity="0.4"/>
           </g>
           <!-- Gas bubble effect -->
-          <circle cx="30" cy="24" r="5" fill="#ff8040" opacity="0.3"/>
-          <circle cx="68" cy="20" r="3.5" fill="#ff8040" opacity="0.25"/>
-          <circle cx="22" cy="42" r="3" fill="#ff6030" opacity="0.2"/>
-          <circle cx="74" cy="64" r="4" fill="#ff6030" opacity="0.15"/>
-          <text x="50" y="52" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="white">CH<tspan font-size="8" dy="3">4</tspan></text>
+          <circle cx="28" cy="24" r="4" fill="#ff8040" opacity="0.25"/>
+          <circle cx="70" cy="22" r="3" fill="#ffa060" opacity="0.2"/>
+          <circle cx="22" cy="44" r="2.5" fill="#ff6030" opacity="0.18"/>
+          <circle cx="76" cy="62" r="3.5" fill="#ff6030" opacity="0.14"/>
+          <circle cx="30" cy="70" r="2" fill="#ff5020" opacity="0.12"/>
+          <text x="50" y="55" text-anchor="middle" font-family="'Inter',sans-serif" font-size="12" font-weight="bold" fill="white">CH<tspan font-size="8" dy="3">4</tspan></text>
         </svg>
       </div>
       <div class="sub-info">
         <div class="sub-name" style="color:#ff4f4f;">CH4 &mdash; METHANE</div>
-        <p style="font-size:9pt;">Methanotrophy! Lowest energy but <strong>HIGHEST GROWTH</strong> (+25 GR!).
-        Prevents greenhouse warming (80&times; CO<sub>2</sub>). ARKE's signature food!</p>
+        <p style="font-size:9pt;">Methanotrophy &mdash; ARKE's signature metabolism! Methane is a greenhouse gas
+        with 80&times; the warming potential of CO<sub>2</sub> over 20 years. By consuming it, ARKE performs
+        a vital climate service. Lowest energy yield but <strong>HIGHEST GROWTH</strong> (+25 GR!). Only
+        4 methane particles fill your entire Growth bar and trigger cell division. The fiery red orb with its
+        roiling inner flame is unmistakable. Chase it relentlessly when your HP is safe.</p>
         <div class="sub-values">+5 HP | +2.5 EN | +25 GR | +35 PTS</div>
-        <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS!</div>
+        <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS! | &Delta;G&deg;&prime; = &minus;31 kJ/mol</div>
       </div>
     </div>
   </div>
@@ -3560,8 +3747,8 @@ svg.pixel-art {
   <p class="page-number right">8</p>
 </div>
 
-<!-- Substrates page 3: Feeding Strategy & Spawn Mechanics -->
-<div class="page" id="substrates3" style="page-break-after:always;">
+<!-- Substrates page 3: Feeding Strategy, Spawn Mechanics & Optimal Strategy -->
+<div class="page" id="substrates3" style="page-break-after: always;">
   <h2>Feeding Strategy &mdash; When to Eat What</h2>
 
   <p style="font-size:10pt; margin-bottom:8px;">
@@ -3615,10 +3802,57 @@ svg.pixel-art {
     </p>
   </div>
 
+  <!-- Optimal Feeding Strategy Thresholds -->
+  <h3 style="font-size:10pt; margin-top:12px;">Optimal Feeding Strategy &mdash; HP Thresholds</h3>
+  <table style="font-size:8.5pt;">
+    <tr>
+      <th>HP Range</th>
+      <th>Priority</th>
+      <th>Best Substrate</th>
+      <th>Fallback</th>
+      <th>Rationale</th>
+    </tr>
+    <tr>
+      <td style="color:#c05030; font-weight:bold;">0 &ndash; 30</td>
+      <td><strong>SURVIVE</strong></td>
+      <td>Nearest anything</td>
+      <td>&mdash;</td>
+      <td>Death is imminent. Eat whatever is closest regardless of type.</td>
+    </tr>
+    <tr>
+      <td style="color:#c08020; font-weight:bold;">30 &ndash; 60</td>
+      <td><strong>RECOVER</strong></td>
+      <td>NO<sub>3</sub> (+15 HP, +18 GR)</td>
+      <td>O<sub>2</sub> (+20 HP)</td>
+      <td>Balance HP recovery with growth. NO<sub>3</sub> is the best all-rounder.</td>
+    </tr>
+    <tr>
+      <td style="color:#3a8a4a; font-weight:bold;">60 &ndash; 80</td>
+      <td><strong>GROW</strong></td>
+      <td>CH<sub>4</sub> (+25 GR)</td>
+      <td>NO<sub>3</sub> (+18 GR)</td>
+      <td>Safe enough to prioritize growth. Methane fills the GR bar fastest.</td>
+    </tr>
+    <tr>
+      <td style="color:#4fa4ff; font-weight:bold;">80 &ndash; 100</td>
+      <td><strong>SPEED RUN</strong></td>
+      <td>CH<sub>4</sub> exclusively</td>
+      <td>Any high-GR</td>
+      <td>Fully healthy. Gorge on methane to trigger cell division ASAP.</td>
+    </tr>
+  </table>
+
+  <p class="page-number left">9</p>
+</div>
+
+<!-- Substrates page 4: Spawn Mechanics & Advanced Interception -->
+<div class="page" id="substrates4" style="page-break-after: always;">
   <h2>Substrate Spawn Mechanics</h2>
 
-  <p style="font-size:10pt; margin-bottom:6px;">
-    Understanding how and when substrates appear is crucial for positioning and interception strategy.
+  <p style="font-size:10pt; margin-bottom:8px;">
+    Understanding how, when, and where substrates appear is crucial for positioning and interception strategy.
+    Substrates are not random pickups &mdash; they follow deterministic flow physics, and learning to
+    predict their arrival is what separates expert players from beginners.
   </p>
 
   <div class="two-col">
@@ -3627,10 +3861,11 @@ svg.pixel-art {
       <ul style="font-size:9.5pt; margin-left:16px;">
         <li>Substrates spawn every <strong>1.2 seconds</strong> in a batch near the <strong>INLET</strong> (left edge of the map).</li>
         <li>Each batch contains <strong>2&ndash;6 particles</strong> depending on the level's spawn density setting.</li>
-        <li>After spawning, substrates <strong>drift with the water flow</strong> toward the OUTLET (right edge).</li>
-        <li>In fast-flow levels, substrates move quickly &mdash; you must <strong>intercept them</strong> or use flow riding to keep up.</li>
-        <li>Each level has a specific <strong>mix of substrate types</strong> based on its geochemical environment.</li>
-        <li>Substrates that reach the OUTLET or go uneaten for approximately <strong>30 seconds</strong> will despawn and are lost forever.</li>
+        <li>After spawning, substrates <strong>drift with the water flow</strong> at the local flow velocity toward the OUTLET (right edge).</li>
+        <li>Substrate drift speed matches the <strong>flow speed</strong> of the water at their position &mdash; in fast-flow channels, they move quickly.</li>
+        <li>Each substrate particle has a limited lifetime of approximately <strong>15 seconds</strong>. After this, the particle fades and despawns.</li>
+        <li>Substrates that reach the OUTLET boundary also despawn immediately and are lost forever.</li>
+        <li>Each level has a specific <strong>mix of substrate types</strong> based on its geochemical environment (see Level Guide).</li>
       </ul>
     </div>
     <div>
@@ -3650,18 +3885,51 @@ svg.pixel-art {
     </div>
   </div>
 
-  <div class="info-box tip" style="margin-top:10px;">
-    <div class="info-box-title" style="color:#3a8a4a;">POSITIONING STRATEGY</div>
+  <h3 style="font-size:10pt; margin-top:10px;">Substrate Availability by Level</h3>
+  <p style="font-size:9.5pt; margin-bottom:4px;">
+    Not all substrates are available in every level. The geochemical environment of each chapter
+    determines which electron acceptors are present. Early levels feature oxygen-rich surface soils;
+    deeper levels transition through the full Redox Ladder.
+  </p>
+
+  <!-- Interception Strategy Section -->
+  <div class="info-box tip" style="margin-top:8px;">
+    <div class="info-box-title" style="color:#3a8a4a;">INTERCEPTION STRATEGY</div>
     <p style="font-size:10pt;">
-      The smartest players do not chase substrates &mdash; they <strong>position themselves in the flow path</strong>
-      and let the food come to them. Camp near the INLET in early levels when flow is slow. In fast-flow levels,
-      use Science Mode (Q) to find the main flow channels, then ride alongside drifting substrate batches using
-      planktonic mode. Remember: every 1.2 seconds a new batch appears, so timing your sweeps through high-flow
-      channels is the key to staying fed and growing fast.
+      The smartest players do not chase substrates &mdash; they <strong>position themselves between the
+      INLET and rival microbes</strong>, letting the food come to them. This is called <strong>interception
+      positioning</strong>. Here is how to master it:
+    </p>
+    <ul style="font-size:9.5pt; margin-left:16px; margin-top:4px;">
+      <li><strong>Camp near the INLET</strong> in early, slow-flow levels. New batches spawn every 1.2 seconds
+      right where you are sitting. You get first pick before rivals even see the substrates.</li>
+      <li><strong>Use Science Mode (Q)</strong> to visualize flow channels. Substrates follow these channels
+      precisely. Position yourself in the main flow path for maximum interception.</li>
+      <li><strong>Flow-ride alongside substrate batches</strong> using planktonic mode (SHIFT). In fast-flow
+      levels, substrates outrun your swimming speed. Hold SHIFT to ride the current alongside them,
+      then steer into each particle as it drifts past.</li>
+      <li><strong>Time your sweeps:</strong> Every 1.2 seconds a new batch appears at the INLET. Sweep through
+      the high-flow channel, consume a batch, then loop back upstream for the next spawn. This cyclical
+      rhythm is the key to sustained feeding in competitive levels.</li>
+      <li><strong>Block rival paths:</strong> If a rival is downstream of the INLET, position yourself upstream
+      of them. You intercept the substrates first, starving the competition while keeping yourself fed.</li>
+    </ul>
+  </div>
+
+  <div class="info-box science" style="margin-top:8px;">
+    <div class="info-box-title" style="color:#4060a0;">FLOW-RIDING TECHNIQUE (Advanced)</div>
+    <p style="font-size:10pt;">
+      In levels with fast water flow (Levels 5, 8, 10), substrates move faster than ARKE can swim in
+      sessile (attached) mode. You <strong>must</strong> use planktonic mode (hold SHIFT) to match their speed.
+      Flow-riding costs Energy continuously, so manage your EN bar carefully. The optimal technique is to
+      <strong>ride the flow in short bursts</strong>: engage SHIFT, grab 2&ndash;3 substrates in rapid succession,
+      then release SHIFT and swim back upstream to conserve energy. Each burst should last 2&ndash;3 seconds.
+      This &ldquo;sprint-and-recover&rdquo; cycle lets you sustain flow-riding across an entire level without
+      running out of Energy.
     </p>
   </div>
 
-  <p class="page-number left">9</p>
+  <p class="page-number right">10</p>
 </div>
 <!-- Section 06: Growth & Division -->
 <div class="page" id="growth" style="page-break-after:always;">
