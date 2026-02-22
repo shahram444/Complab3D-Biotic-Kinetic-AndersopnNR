@@ -1,156 +1,294 @@
 <!-- Section 07: Worlds & Environments -->
-<div class="page" id="worlds">
+<div class="page" id="worlds" style="page-break-after:always;">
   <h1 class="section-number">SECTION 6</h1>
   <h1 class="section-title">Worlds & Environments</h1>
 
   <p>
     ARKE's journey spans <strong>5 unique environments</strong> across <strong>10 levels</strong>,
     each inspired by real subsurface ecosystems studied by the CompLaB3D research team.
-    Each environment has its own color palette, pore geometry, and challenges.
+    Each environment has its own color palette, pore geometry, procedural generation algorithm, and challenges.
   </p>
 
-  <!-- World 1: Soil Frontier -->
-  <div style="background:white; border:2px solid #7a5a2a; border-radius:6px; padding:16px; margin:14px 0;">
+  <!-- ================================================================
+       CHAPTER 1: THE SOIL FRONTIER
+       ================================================================ -->
+  <div style="background:white; border:2px solid #7a5a2a; border-radius:8px; padding:14px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <div style="display:flex; gap:16px; align-items:flex-start;">
-      <!-- Environment preview -->
+      <!-- Environment SVG landscape -->
       <div style="flex-shrink:0;">
-        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
-          <rect width="32" height="24" fill="#060c18"/>
-          <!-- Soil grains -->
-          <circle cx="4" cy="4" r="3" fill="#7a5a2a"/>
-          <circle cx="4" cy="4" r="2" fill="#a48a5a" opacity="0.3"/>
-          <circle cx="14" cy="20" r="4" fill="#7a5a2a"/>
-          <circle cx="14" cy="20" r="2.5" fill="#a48a5a" opacity="0.3"/>
-          <circle cx="26" cy="6" r="3.5" fill="#7a5a2a"/>
-          <circle cx="26" cy="6" r="2" fill="#a48a5a" opacity="0.3"/>
-          <circle cx="22" cy="18" r="2.5" fill="#7a5a2a"/>
-          <circle cx="8" cy="14" r="2" fill="#7a5a2a"/>
-          <!-- Water/pore -->
-          <rect x="8" y="8" width="8" height="6" fill="#3060a0" opacity="0.2" rx="1"/>
-          <!-- Substrates -->
-          <circle cx="10" cy="10" r="0.8" fill="#4fa4ff"/>
-          <circle cx="18" cy="12" r="0.8" fill="#4fdf6f"/>
-          <circle cx="14" cy="8" r="0.8" fill="#ff4f4f"/>
-          <!-- Inlet -->
-          <rect x="0" y="10" width="2" height="4" fill="#3060a0"/>
-          <!-- Outlet -->
-          <rect x="30" y="10" width="2" height="4" fill="#4fdf6f"/>
-          <!-- ARKE -->
-          <rect x="16" y="10" width="2" height="3" fill="#2a8a8a"/>
+        <svg width="200" height="150" viewBox="0 0 200 150" class="organism-art">
+          <defs>
+            <radialGradient id="w1-grain" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#c4a46a"/>
+              <stop offset="50%" stop-color="#8a6a3a"/>
+              <stop offset="100%" stop-color="#5a3a1a"/>
+            </radialGradient>
+            <radialGradient id="w1-grain2" cx="45%" cy="30%">
+              <stop offset="0%" stop-color="#b89a5a"/>
+              <stop offset="50%" stop-color="#7a5a2a"/>
+              <stop offset="100%" stop-color="#4a2a0a"/>
+            </radialGradient>
+            <linearGradient id="w1-bg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1a2a48"/>
+              <stop offset="100%" stop-color="#0c1828"/>
+            </linearGradient>
+            <filter id="w1-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="w1-shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="1" dy="1.5" stdDeviation="2" flood-color="rgba(0,0,0,0.25)"/>
+            </filter>
+            <radialGradient id="w1-arke" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
+              <stop offset="40%" stop-color="#2a8a8a"/>
+              <stop offset="100%" stop-color="#1a5a5a"/>
+            </radialGradient>
+          </defs>
+          <!-- Sky/background (lighter for well-lit feel) -->
+          <rect width="200" height="150" rx="6" fill="url(#w1-bg)"/>
+          <!-- Ambient light overlay -->
+          <rect width="200" height="150" rx="6" fill="#3060a0" opacity="0.06"/>
+
+          <!-- Wide blue water channels -->
+          <ellipse cx="80" cy="75" rx="40" ry="20" fill="#1a3a6a" opacity="0.25"/>
+          <ellipse cx="140" cy="110" rx="35" ry="18" fill="#1a3a6a" opacity="0.2"/>
+          <ellipse cx="55" cy="120" rx="30" ry="15" fill="#1a3a6a" opacity="0.18"/>
+
+          <!-- Rounded brown grain particles (river pebbles) -->
+          <ellipse cx="30" cy="30" rx="22" ry="18" fill="url(#w1-grain)" filter="url(#w1-shadow)"/>
+          <ellipse cx="30" cy="28" rx="10" ry="7" fill="#c4a46a" opacity="0.12"/>
+
+          <ellipse cx="100" cy="130" rx="28" ry="20" fill="url(#w1-grain2)" filter="url(#w1-shadow)"/>
+          <ellipse cx="98" cy="127" rx="14" ry="9" fill="#b89a5a" opacity="0.1"/>
+
+          <ellipse cx="170" cy="35" rx="24" ry="19" fill="url(#w1-grain)" filter="url(#w1-shadow)"/>
+          <ellipse cx="168" cy="33" rx="12" ry="8" fill="#c4a46a" opacity="0.12"/>
+
+          <ellipse cx="155" cy="125" rx="18" ry="16" fill="url(#w1-grain2)" filter="url(#w1-shadow)"/>
+
+          <ellipse cx="55" cy="80" rx="16" ry="14" fill="url(#w1-grain)" filter="url(#w1-shadow)"/>
+
+          <!-- Scattered substrate orbs -->
+          <circle cx="75" cy="62" r="4.5" fill="#4fa4ff" filter="url(#w1-glow)"/>
+          <circle cx="73" cy="60" r="1.5" fill="white" opacity="0.3"/>
+          <text x="75" y="64" text-anchor="middle" font-size="3" fill="white" font-weight="bold">O2</text>
+
+          <circle cx="120" cy="90" r="4.5" fill="#4fdf6f" filter="url(#w1-glow)"/>
+          <circle cx="118" cy="88" r="1.5" fill="white" opacity="0.3"/>
+          <text x="120" y="92" text-anchor="middle" font-size="3" fill="white" font-weight="bold">NO3</text>
+
+          <circle cx="145" cy="70" r="4.5" fill="#ff4f4f" filter="url(#w1-glow)"/>
+          <circle cx="143" cy="68" r="1.5" fill="white" opacity="0.3"/>
+          <text x="145" y="72" text-anchor="middle" font-size="3" fill="white" font-weight="bold">CH4</text>
+
+          <!-- Small ARKE navigating -->
+          <ellipse cx="100" cy="70" rx="6" ry="7.5" fill="url(#w1-arke)" filter="url(#w1-glow)"/>
+          <ellipse cx="100" cy="67" rx="3.5" ry="2" fill="#1a1a3a"/>
+          <ellipse cx="101" cy="66.5" rx="1.5" ry="1" fill="#4aeaff" opacity="0.9"/>
+
+          <!-- Inlet indicator -->
+          <rect x="0" y="60" width="6" height="25" rx="3" fill="#3060a0" opacity="0.5"/>
+          <text x="3" y="55" text-anchor="middle" font-size="3.5" fill="#5090d0" font-weight="bold">IN</text>
+          <!-- Outlet indicator -->
+          <rect x="194" y="65" width="6" height="20" rx="3" fill="#4fdf6f" opacity="0.4"/>
+          <text x="197" y="60" text-anchor="middle" font-size="3.5" fill="#4fdf6f" font-weight="bold">OUT</text>
         </svg>
       </div>
       <div style="flex:1;">
-        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#7a5a2a; margin-bottom:4px;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:9pt; color:#7a5a2a; margin-bottom:4px;">
           CHAPTER 1: THE SOIL FRONTIER
         </div>
-        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 1-2 &bull; Environment 0</div>
-        <p style="font-size:10pt;">
+        <div style="font-size:9pt; color:#888; margin-bottom:6px;">Levels 1-2 &bull; Environment 0</div>
+        <p style="font-size:9.5pt; line-height:1.45;">
           Shallow soil with wide-open pore spaces between rounded rock grains. Water flows gently,
           carrying abundant nutrients including <strong>oxygen</strong>. The safest environment&mdash;
-          perfect for learning the basics.
+          perfect for learning the basics of movement, feeding, and division.
         </p>
-        <div style="font-size:9pt; color:#666; margin-top:6px;">
-          <strong>Palette:</strong> Brown grains, tan highlights, blue water<br>
-          <strong>Geometry:</strong> Circular grains, ~65-70% porosity (lots of space)<br>
+        <div style="font-size:8.5pt; color:#555; margin-top:5px; line-height:1.5;">
+          <strong>Porosity:</strong> 65-70% (very open &mdash; ample room to maneuver)<br>
+          <strong>Generation:</strong> Circle-packing algorithm (random radii, no overlap)<br>
           <strong>Substrates:</strong> O<sub>2</sub>, NO<sub>3</sub>, CH<sub>4</sub><br>
-          <strong>Hazards:</strong> None (Level 1) / 1 rival (Level 2)
+          <strong>Hazards:</strong> None (Lv1) / 1 rival (Lv2)<br>
+          <strong>Flow Speed:</strong> 0.3&times; (gentle current)
         </div>
       </div>
     </div>
   </div>
 
-  <!-- World 2: Deep Sediment -->
-  <div style="background:white; border:2px solid #4a3a2a; border-radius:6px; padding:16px; margin:14px 0;">
+  <!-- ================================================================
+       CHAPTER 2: THE DEEP SEDIMENT
+       ================================================================ -->
+  <div style="background:white; border:2px solid #4a3a2a; border-radius:8px; padding:14px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <div style="display:flex; gap:16px; align-items:flex-start;">
       <div style="flex-shrink:0;">
-        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
-          <rect width="32" height="24" fill="#030306"/>
-          <!-- Maze-like sediment walls -->
-          <rect x="0" y="0" width="4" height="24" fill="#4a3a2a"/>
-          <rect x="6" y="0" width="2" height="10" fill="#4a3a2a"/>
-          <rect x="6" y="14" width="2" height="10" fill="#4a3a2a"/>
-          <rect x="10" y="4" width="2" height="16" fill="#4a3a2a"/>
-          <rect x="14" y="0" width="2" height="8" fill="#4a3a2a"/>
-          <rect x="14" y="12" width="2" height="12" fill="#4a3a2a"/>
-          <rect x="18" y="6" width="2" height="12" fill="#4a3a2a"/>
-          <rect x="22" y="0" width="2" height="14" fill="#4a3a2a"/>
-          <rect x="22" y="18" width="2" height="6" fill="#4a3a2a"/>
-          <rect x="26" y="4" width="2" height="10" fill="#4a3a2a"/>
-          <rect x="28" y="0" width="4" height="24" fill="#4a3a2a"/>
-          <!-- Dark corridors -->
-          <rect x="4" y="10" width="2" height="4" fill="#142038" opacity="0.3"/>
-          <rect x="12" y="8" width="2" height="4" fill="#142038" opacity="0.3"/>
-          <!-- Substrates -->
-          <circle cx="5" cy="12" r="0.8" fill="#4fdf6f"/>
-          <circle cx="13" cy="10" r="0.8" fill="#ef8f3f"/>
-          <circle cx="21" cy="16" r="0.8" fill="#ff4f4f"/>
-          <!-- ARKE -->
-          <rect x="8" y="11" width="2" height="3" fill="#2a8a8a"/>
+        <svg width="200" height="150" viewBox="0 0 200 150" class="organism-art">
+          <defs>
+            <linearGradient id="w2-bg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#050508"/>
+              <stop offset="100%" stop-color="#020204"/>
+            </linearGradient>
+            <linearGradient id="w2-wall" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#5a4a3a"/>
+              <stop offset="50%" stop-color="#3a2a1a"/>
+              <stop offset="100%" stop-color="#2a1a0a"/>
+            </linearGradient>
+            <filter id="w2-shadow" x="-5%" y="-5%" width="110%" height="110%">
+              <feDropShadow dx="0.5" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.4)"/>
+            </filter>
+            <radialGradient id="w2-arke" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.4"/>
+              <stop offset="40%" stop-color="#2a8a8a"/>
+              <stop offset="100%" stop-color="#1a5a5a"/>
+            </radialGradient>
+            <filter id="w2-dim-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Near-black background -->
+          <rect width="200" height="150" rx="6" fill="url(#w2-bg)"/>
+
+          <!-- Angular compacted sediment walls (maze-like) -->
+          <path d="M0,0 L30,0 L30,150 L0,150 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M40,0 L52,0 L52,58 L40,58 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M40,80 L52,80 L52,150 L40,150 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M62,25 L74,25 L74,110 L62,110 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M84,0 L96,0 L96,50 L84,50 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M84,72 L96,72 L96,150 L84,150 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M106,30 L118,30 L118,90 L106,90 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M128,0 L140,0 L140,80 L128,80 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M128,105 L140,105 L140,150 L128,150 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M150,40 L162,40 L162,70 L150,70 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M150,95 L162,95 L162,150 L150,150 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+          <path d="M172,0 L200,0 L200,150 L172,150 Z" fill="url(#w2-wall)" filter="url(#w2-shadow)"/>
+
+          <!-- Dark narrow corridors (subtle water hints) -->
+          <rect x="32" y="60" width="6" height="18" fill="#0a1020" opacity="0.4" rx="2"/>
+          <rect x="54" y="112" width="6" height="14" fill="#0a1020" opacity="0.3" rx="2"/>
+          <rect x="76" y="52" width="6" height="18" fill="#0a1020" opacity="0.3" rx="2"/>
+
+          <!-- Sparse substrates (dim) -->
+          <circle cx="35" cy="70" r="3" fill="#4fdf6f" opacity="0.6" filter="url(#w2-dim-glow)"/>
+          <circle cx="79" cy="62" r="3" fill="#ef8f3f" opacity="0.5" filter="url(#w2-dim-glow)"/>
+          <circle cx="135" cy="95" r="3" fill="#ff4f4f" opacity="0.5" filter="url(#w2-dim-glow)"/>
+
+          <!-- ARKE squeezed in corridor -->
+          <ellipse cx="57" cy="95" rx="4" ry="5.5" fill="url(#w2-arke)" filter="url(#w2-dim-glow)"/>
+          <ellipse cx="57" cy="93" rx="2.5" ry="1.5" fill="#1a1a3a"/>
+          <ellipse cx="57.5" cy="92.5" rx="1" ry="0.7" fill="#4aeaff" opacity="0.8"/>
         </svg>
       </div>
       <div style="flex:1;">
-        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#4a3a2a; margin-bottom:4px;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:9pt; color:#4a3a2a; margin-bottom:4px;">
           CHAPTER 2: THE DEEP SEDIMENT
         </div>
-        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 3-4 &bull; Environment 1</div>
-        <p style="font-size:10pt;">
+        <div style="font-size:9pt; color:#888; margin-bottom:6px;">Levels 3-4 &bull; Environment 1</div>
+        <p style="font-size:9.5pt; line-height:1.45;">
           Deep beneath the ocean floor. No oxygen here! Narrow, maze-like corridors carved through
           compacted sediment. Flow is sluggish and food is scarce. <strong>Navigation skill</strong>
-          becomes critical.
+          becomes critical as dead ends can trap you.
         </p>
-        <div style="font-size:9pt; color:#666; margin-top:6px;">
-          <strong>Palette:</strong> Very dark brown, nearly black water<br>
-          <strong>Geometry:</strong> Recursive maze algorithm, ~45-50% porosity (tight!)<br>
+        <div style="font-size:8.5pt; color:#555; margin-top:5px; line-height:1.5;">
+          <strong>Porosity:</strong> 45-50% (tight &mdash; many dead ends and chokepoints)<br>
+          <strong>Generation:</strong> Recursive maze algorithm (binary subdivision)<br>
           <strong>Substrates:</strong> NO<sub>3</sub>, Fe(III), Mn(IV), CH<sub>4</sub> (no O<sub>2</sub>!)<br>
-          <strong>Hazards:</strong> 2-3 rivals, slow flow, tight corridors
+          <strong>Hazards:</strong> 2-3 rivals, slow flow, claustrophobic corridors<br>
+          <strong>Flow Speed:</strong> 0.4&times; (sluggish, stagnant current)
         </div>
       </div>
     </div>
   </div>
 
-  <!-- World 3: Methane Seeps -->
-  <div style="background:white; border:2px solid #3a3040; border-radius:6px; padding:16px; margin:14px 0;">
+  <!-- ================================================================
+       CHAPTER 3: THE METHANE SEEPS
+       ================================================================ -->
+  <div style="background:white; border:2px solid #6a3060; border-radius:8px; padding:14px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <div style="display:flex; gap:16px; align-items:flex-start;">
       <div style="flex-shrink:0;">
-        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
-          <rect width="32" height="24" fill="#06040a"/>
+        <svg width="200" height="150" viewBox="0 0 200 150" class="organism-art">
+          <defs>
+            <linearGradient id="w3-bg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0a0412"/>
+              <stop offset="100%" stop-color="#060210"/>
+            </linearGradient>
+            <radialGradient id="w3-grain" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#5a4060"/>
+              <stop offset="60%" stop-color="#3a2040"/>
+              <stop offset="100%" stop-color="#2a1030"/>
+            </radialGradient>
+            <radialGradient id="w3-toxic" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#ff40d0" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#b040a0" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="w3-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="w3-shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0.5" dy="1" stdDeviation="1.5" flood-color="rgba(30,0,40,0.4)"/>
+            </filter>
+            <radialGradient id="w3-arke" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
+              <stop offset="40%" stop-color="#2a8a8a"/>
+              <stop offset="100%" stop-color="#1a5a5a"/>
+            </radialGradient>
+          </defs>
+          <!-- Purple-tinted dark background -->
+          <rect width="200" height="150" rx="6" fill="url(#w3-bg)"/>
+          <!-- Purple atmospheric haze -->
+          <rect width="200" height="150" rx="6" fill="#4020a0" opacity="0.04"/>
+
           <!-- Purple grains -->
-          <circle cx="5" cy="5" r="3" fill="#3a3040"/>
-          <circle cx="25" cy="4" r="3.5" fill="#3a3040"/>
-          <circle cx="8" cy="19" r="3" fill="#3a3040"/>
-          <circle cx="27" cy="20" r="2.5" fill="#3a3040"/>
-          <!-- Vent channels (vertical) -->
-          <rect x="12" y="12" width="2" height="12" fill="#2a1a48" opacity="0.5"/>
-          <rect x="20" y="8" width="2" height="16" fill="#2a1a48" opacity="0.5"/>
-          <!-- Toxic zones -->
-          <rect x="14" y="6" width="4" height="3" fill="#b040a0" opacity="0.3"/>
-          <rect x="6" y="12" width="3" height="4" fill="#b040a0" opacity="0.3"/>
-          <!-- Rising CH4 -->
-          <circle cx="13" cy="18" r="0.8" fill="#ff4f4f"/>
-          <circle cx="13" cy="14" r="0.8" fill="#ff4f4f" opacity="0.7"/>
-          <circle cx="21" cy="20" r="0.8" fill="#ff4f4f"/>
-          <circle cx="21" cy="16" r="0.8" fill="#ff4f4f" opacity="0.7"/>
-          <!-- SO4 -->
-          <rect x="16" y="10" width="1.5" height="1.5" fill="#dfdf3f"/>
+          <ellipse cx="35" cy="30" rx="22" ry="18" fill="url(#w3-grain)" filter="url(#w3-shadow)"/>
+          <ellipse cx="170" cy="25" rx="25" ry="20" fill="url(#w3-grain)" filter="url(#w3-shadow)"/>
+          <ellipse cx="55" cy="130" rx="20" ry="17" fill="url(#w3-grain)" filter="url(#w3-shadow)"/>
+          <ellipse cx="175" cy="135" rx="18" ry="14" fill="url(#w3-grain)" filter="url(#w3-shadow)"/>
+
+          <!-- Vertical vent channels -->
+          <rect x="78" y="60" width="10" height="90" rx="5" fill="#2a1a48" opacity="0.4"/>
+          <rect x="130" y="50" width="10" height="100" rx="5" fill="#2a1a48" opacity="0.35"/>
+
+          <!-- Rising methane bubbles (red circles ascending) -->
+          <circle cx="83" cy="130" r="4" fill="#ff4f4f" opacity="0.8" filter="url(#w3-glow)"/>
+          <circle cx="83" cy="110" r="3.5" fill="#ff4f4f" opacity="0.65" filter="url(#w3-glow)"/>
+          <circle cx="83" cy="90" r="3" fill="#ff4f4f" opacity="0.5" filter="url(#w3-glow)"/>
+          <circle cx="83" cy="72" r="2.5" fill="#ff4f4f" opacity="0.35"/>
+          <circle cx="135" cy="140" r="4" fill="#ff4f4f" opacity="0.75" filter="url(#w3-glow)"/>
+          <circle cx="135" cy="118" r="3.5" fill="#ff4f4f" opacity="0.6" filter="url(#w3-glow)"/>
+          <circle cx="135" cy="96" r="3" fill="#ff4f4f" opacity="0.45"/>
+          <circle cx="135" cy="76" r="2.5" fill="#ff4f4f" opacity="0.3"/>
+
+          <!-- Toxic magenta zones -->
+          <ellipse cx="95" cy="40" rx="20" ry="14" fill="url(#w3-toxic)" filter="url(#w3-glow)"/>
+          <ellipse cx="45" cy="85" rx="16" ry="18" fill="url(#w3-toxic)" filter="url(#w3-glow)"/>
+
+          <!-- SO4 yellow crystals -->
+          <path d="M110,78 L114,72 L118,78 L114,84 Z" fill="#dfdf3f" opacity="0.7" filter="url(#w3-glow)"/>
+          <path d="M150,65 L153,60 L156,65 L153,70 Z" fill="#dfdf3f" opacity="0.6"/>
+
           <!-- ARKE -->
-          <rect x="16" y="14" width="2" height="3" fill="#2a8a8a"/>
+          <ellipse cx="110" cy="105" rx="5" ry="6.5" fill="url(#w3-arke)" filter="url(#w3-glow)"/>
+          <ellipse cx="110" cy="103" rx="3" ry="1.8" fill="#1a1a3a"/>
+          <ellipse cx="111" cy="102.5" rx="1.2" ry="0.8" fill="#4aeaff" opacity="0.9"/>
         </svg>
       </div>
       <div style="flex:1;">
-        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#b040a0; margin-bottom:4px;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:9pt; color:#b040a0; margin-bottom:4px;">
           CHAPTER 3: THE METHANE SEEPS
         </div>
-        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 5-6 &bull; Environment 2</div>
-        <p style="font-size:10pt;">
+        <div style="font-size:9pt; color:#888; margin-bottom:6px;">Levels 5-6 &bull; Environment 2</div>
+        <p style="font-size:9.5pt; line-height:1.45;">
           Methane bubbles up through vertical vent channels. <strong>Toxic H<sub>2</sub>S zones</strong>
           appear for the first time! Purple-tinted world with abundant CH<sub>4</sub> but
           dangerous terrain. This is where ARKE truly becomes Earth's climate shield.
         </p>
-        <div style="font-size:9pt; color:#666; margin-top:6px;">
-          <strong>Palette:</strong> Dark purple grains, violet water, magenta toxins<br>
-          <strong>Geometry:</strong> Soil + vertical vent channels, ~55-60% porosity<br>
+        <div style="font-size:8.5pt; color:#555; margin-top:5px; line-height:1.5;">
+          <strong>Porosity:</strong> 55-60% (moderate &mdash; open areas between vents)<br>
+          <strong>Generation:</strong> Circle-packing + vertical vent channel overlay<br>
           <strong>Substrates:</strong> SO<sub>4</sub>, CH<sub>4</sub>, Fe(III)<br>
-          <strong>Hazards:</strong> 15-20% toxic zones, 2-3 rivals
+          <strong>Hazards:</strong> 15-20% toxic zones, 2-3 rivals<br>
+          <strong>Flow Speed:</strong> 0.5&times; (moderate with upward vent drafts)
         </div>
       </div>
     </div>
@@ -160,154 +298,325 @@
 </div>
 
 <!-- Worlds page 2 -->
-<div class="page" id="worlds2">
+<div class="page" id="worlds2" style="page-break-after:always;">
 
-  <!-- World 4: Permafrost Edge -->
-  <div style="background:white; border:2px solid #5a6a7a; border-radius:6px; padding:16px; margin:14px 0;">
+  <!-- ================================================================
+       CHAPTER 4: THE PERMAFROST EDGE
+       ================================================================ -->
+  <div style="background:white; border:2px solid #5a6a7a; border-radius:8px; padding:14px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <div style="display:flex; gap:16px; align-items:flex-start;">
       <div style="flex-shrink:0;">
-        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
-          <rect width="32" height="24" fill="#040810"/>
-          <!-- Layered ice/sediment -->
-          <rect x="0" y="0" width="32" height="3" fill="#5a6a7a"/>
-          <rect x="0" y="7" width="32" height="3" fill="#5a6a7a"/>
-          <rect x="0" y="14" width="32" height="3" fill="#5a6a7a"/>
-          <rect x="0" y="21" width="32" height="3" fill="#5a6a7a"/>
-          <!-- Flow channels between layers -->
-          <rect x="0" y="3" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
-          <rect x="0" y="10" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
-          <rect x="0" y="17" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
-          <!-- Vertical connectors -->
-          <rect x="8" y="3" width="2" height="4" fill="#3a5a8a" opacity="0.1"/>
-          <rect x="20" y="10" width="2" height="4" fill="#3a5a8a" opacity="0.1"/>
-          <!-- Fast flow arrows -->
-          <g fill="none" stroke="#3a5a8a" stroke-width="0.5" opacity="0.5">
-            <path d="M4,5 L10,5"/>
-            <path d="M14,5 L20,5"/>
-            <path d="M24,5 L30,5"/>
-            <path d="M4,12 L10,12"/>
-            <path d="M14,12 L20,12"/>
+        <svg width="200" height="150" viewBox="0 0 200 150" class="organism-art">
+          <defs>
+            <linearGradient id="w4-bg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#060a14"/>
+              <stop offset="100%" stop-color="#040810"/>
+            </linearGradient>
+            <linearGradient id="w4-ice" x1="0" y1="0" x2="1" y2="0.3">
+              <stop offset="0%" stop-color="#7a8a9a"/>
+              <stop offset="40%" stop-color="#5a6a7a"/>
+              <stop offset="100%" stop-color="#3a4a5a"/>
+            </linearGradient>
+            <linearGradient id="w4-water" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#2a4a7a" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#3a5a8a" stop-opacity="0.15"/>
+            </linearGradient>
+            <filter id="w4-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="w4-shadow" x="-5%" y="-5%" width="110%" height="110%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
+            </filter>
+            <radialGradient id="w4-toxic" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#70ff50" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#40a030" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="w4-arke" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
+              <stop offset="40%" stop-color="#2a8a8a"/>
+              <stop offset="100%" stop-color="#1a5a5a"/>
+            </radialGradient>
+          </defs>
+          <!-- Cold dark background -->
+          <rect width="200" height="150" rx="6" fill="url(#w4-bg)"/>
+
+          <!-- Horizontal ice/sediment layers -->
+          <rect x="0" y="0" width="200" height="16" rx="0" fill="url(#w4-ice)" filter="url(#w4-shadow)"/>
+          <rect x="0" y="36" width="200" height="16" rx="0" fill="url(#w4-ice)" filter="url(#w4-shadow)"/>
+          <rect x="0" y="72" width="200" height="16" rx="0" fill="url(#w4-ice)" filter="url(#w4-shadow)"/>
+          <rect x="0" y="108" width="200" height="16" rx="0" fill="url(#w4-ice)" filter="url(#w4-shadow)"/>
+          <rect x="0" y="140" width="200" height="10" rx="0" fill="url(#w4-ice)" filter="url(#w4-shadow)"/>
+
+          <!-- Frost texture on layers -->
+          <line x1="10" y1="5" x2="50" y2="5" stroke="#8a9aaa" stroke-width="0.5" opacity="0.3"/>
+          <line x1="80" y1="10" x2="130" y2="10" stroke="#8a9aaa" stroke-width="0.5" opacity="0.25"/>
+          <line x1="30" y1="42" x2="90" y2="42" stroke="#8a9aaa" stroke-width="0.5" opacity="0.3"/>
+          <line x1="120" y1="78" x2="170" y2="78" stroke="#8a9aaa" stroke-width="0.5" opacity="0.25"/>
+
+          <!-- Fast-flowing water channels between layers -->
+          <rect x="0" y="17" width="200" height="18" fill="url(#w4-water)"/>
+          <rect x="0" y="53" width="200" height="18" fill="url(#w4-water)"/>
+          <rect x="0" y="89" width="200" height="18" fill="url(#w4-water)"/>
+          <rect x="0" y="125" width="200" height="14" fill="url(#w4-water)"/>
+
+          <!-- Speed lines (flow indicators) -->
+          <g stroke="#5a8abb" stroke-width="0.6" opacity="0.4">
+            <line x1="20" y1="25" x2="55" y2="25"/>
+            <line x1="70" y1="27" x2="110" y2="27"/>
+            <line x1="125" y1="25" x2="170" y2="25"/>
+            <line x1="15" y1="62" x2="60" y2="62"/>
+            <line x1="80" y1="60" x2="130" y2="60"/>
+            <line x1="140" y1="62" x2="185" y2="62"/>
+            <line x1="25" y1="97" x2="75" y2="97"/>
+            <line x1="95" y1="95" x2="145" y2="95"/>
+            <line x1="160" y1="97" x2="190" y2="97"/>
           </g>
-          <!-- Substrates racing by -->
-          <circle cx="6" cy="5" r="0.8" fill="#4fa4ff"/>
-          <circle cx="16" cy="12" r="0.8" fill="#4fdf6f"/>
-          <circle cx="26" cy="5" r="0.8" fill="#ff4f4f"/>
-          <!-- Toxic -->
-          <rect x="10" y="17" width="3" height="4" fill="#70b050" opacity="0.3"/>
-          <!-- ARKE -->
-          <rect x="12" y="4" width="2" height="3" fill="#2a8a8a"/>
+          <!-- Flow arrow tips -->
+          <polygon points="55,23 58,25 55,27" fill="#5a8abb" opacity="0.4"/>
+          <polygon points="110,25 113,27 110,29" fill="#5a8abb" opacity="0.4"/>
+          <polygon points="170,23 173,25 170,27" fill="#5a8abb" opacity="0.4"/>
+
+          <!-- Vertical connectors between layers -->
+          <rect x="50" y="16" width="8" height="20" rx="4" fill="#1a2a44" opacity="0.3"/>
+          <rect x="135" y="52" width="8" height="20" rx="4" fill="#1a2a44" opacity="0.3"/>
+
+          <!-- Substrates racing past -->
+          <circle cx="38" cy="25" r="3" fill="#4fa4ff" filter="url(#w4-glow)"/>
+          <circle cx="100" cy="61" r="3" fill="#4fdf6f" filter="url(#w4-glow)"/>
+          <circle cx="155" cy="96" r="3" fill="#ff4f4f" filter="url(#w4-glow)"/>
+
+          <!-- Toxic green zone -->
+          <ellipse cx="70" cy="96" rx="18" ry="8" fill="url(#w4-toxic)" filter="url(#w4-glow)"/>
+
+          <!-- ARKE in flow channel -->
+          <ellipse cx="80" cy="26" rx="5" ry="6" fill="url(#w4-arke)" filter="url(#w4-glow)"/>
+          <ellipse cx="80" cy="24" rx="3" ry="1.6" fill="#1a1a3a"/>
+          <ellipse cx="81" cy="23.5" rx="1.2" ry="0.8" fill="#4aeaff" opacity="0.9"/>
         </svg>
       </div>
       <div style="flex:1;">
-        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#5a6a7a; margin-bottom:4px;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:9pt; color:#5a6a7a; margin-bottom:4px;">
           CHAPTER 4: THE PERMAFROST EDGE
         </div>
-        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 7-8 &bull; Environment 3</div>
-        <p style="font-size:10pt;">
+        <div style="font-size:9pt; color:#888; margin-bottom:6px;">Levels 7-8 &bull; Environment 3</div>
+        <p style="font-size:9.5pt; line-height:1.45;">
           Thawing permafrost releases ancient carbon. <strong>Fast horizontal flow channels</strong>
           between ice layers demand mastery of <strong>SHIFT (flow riding)</strong>. Substrates
           race past at high speed. Oxygen returns briefly in Level 7!
         </p>
-        <div style="font-size:9pt; color:#666; margin-top:6px;">
-          <strong>Palette:</strong> Gray-blue grains, icy blue water, green toxins<br>
-          <strong>Geometry:</strong> Horizontal layers + vertical connectors, ~50-55% porosity<br>
+        <div style="font-size:8.5pt; color:#555; margin-top:5px; line-height:1.5;">
+          <strong>Porosity:</strong> 50-55% (layered &mdash; wide horizontal, narrow vertical)<br>
+          <strong>Generation:</strong> Horizontal layer stacking + vertical connector cuts<br>
           <strong>Substrates:</strong> O<sub>2</sub> (Lv7), NO<sub>3</sub>, SO<sub>4</sub>, CH<sub>4</sub><br>
-          <strong>Hazards:</strong> 10-15% toxic zones, 3-4 rivals, fast flow (0.8-1.0&times;)
+          <strong>Hazards:</strong> 10-15% toxic zones, 3-4 rivals, fast flow<br>
+          <strong>Flow Speed:</strong> 0.8-1.0&times; (rapid horizontal currents)
         </div>
       </div>
     </div>
   </div>
 
-  <!-- World 5: Hydrothermal Realm -->
-  <div style="background:white; border:2px solid #cc3333; border-radius:6px; padding:16px; margin:14px 0;">
+  <!-- ================================================================
+       CHAPTER 5: THE HYDROTHERMAL REALM
+       ================================================================ -->
+  <div style="background:white; border:2px solid #cc3333; border-radius:8px; padding:14px; margin:12px 0; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
     <div style="display:flex; gap:16px; align-items:flex-start;">
       <div style="flex-shrink:0;">
-        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
-          <rect width="32" height="24" fill="#060304"/>
-          <!-- Dark chambers -->
-          <circle cx="8" cy="8" r="5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
-          <circle cx="22" cy="10" r="4" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
-          <circle cx="14" cy="19" r="4.5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+        <svg width="200" height="150" viewBox="0 0 200 150" class="organism-art">
+          <defs>
+            <radialGradient id="w5-bg" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#0a0406"/>
+              <stop offset="100%" stop-color="#040204"/>
+            </radialGradient>
+            <radialGradient id="w5-chamber" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#0e0810"/>
+              <stop offset="100%" stop-color="#060408"/>
+            </radialGradient>
+            <linearGradient id="w5-vent" x1="0.5" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stop-color="#ff4020" stop-opacity="0.5"/>
+              <stop offset="50%" stop-color="#cc2010" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#661008" stop-opacity="0.1"/>
+            </linearGradient>
+            <radialGradient id="w5-toxic" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#ff8040" stop-opacity="0.45"/>
+              <stop offset="100%" stop-color="#cc6030" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="w5-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="w5-heat" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="w5-shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="rgba(0,0,0,0.5)"/>
+            </filter>
+            <radialGradient id="w5-arke" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#4aeaff" stop-opacity="0.3"/>
+              <stop offset="40%" stop-color="#2a8a8a"/>
+              <stop offset="100%" stop-color="#1a5a5a"/>
+            </radialGradient>
+          </defs>
+          <!-- Extremely dark background -->
+          <rect width="200" height="150" rx="6" fill="url(#w5-bg)"/>
+
+          <!-- Dark circular chambers -->
+          <circle cx="50" cy="45" r="30" fill="url(#w5-chamber)" stroke="#2a2a3a" stroke-width="1" filter="url(#w5-shadow)"/>
+          <circle cx="140" cy="55" r="25" fill="url(#w5-chamber)" stroke="#2a2a3a" stroke-width="1" filter="url(#w5-shadow)"/>
+          <circle cx="90" cy="115" r="28" fill="url(#w5-chamber)" stroke="#2a2a3a" stroke-width="1" filter="url(#w5-shadow)"/>
+
           <!-- Connecting tunnels -->
-          <rect x="12" y="7" width="7" height="2" fill="#0a0608"/>
-          <rect x="13" y="12" width="2" height="5" fill="#0a0608"/>
-          <!-- Vent columns (red glow) -->
-          <rect x="6" y="12" width="2" height="12" fill="#3a1a20" opacity="0.4"/>
-          <rect x="24" y="14" width="2" height="10" fill="#3a1a20" opacity="0.4"/>
-          <!-- Toxic zones (orange heat) -->
-          <rect x="18" y="16" width="4" height="4" fill="#c07030" opacity="0.3"/>
-          <rect x="2" y="4" width="3" height="3" fill="#c07030" opacity="0.3"/>
-          <!-- Substrates -->
-          <rect x="7" y="7" width="1.5" height="1.5" fill="#dfdf3f"/>
-          <circle cx="22" cy="10" r="0.8" fill="#ef8f3f"/>
-          <circle cx="14" cy="18" r="0.8" fill="#ff4f4f"/>
-          <rect x="9" y="18" width="1.5" height="1.5" fill="#cf6fff"/>
+          <rect x="75" y="40" width="42" height="12" rx="6" fill="#080610" stroke="#2a2a3a" stroke-width="0.5"/>
+          <rect x="82" y="72" width="12" height="30" rx="6" fill="#080610" stroke="#2a2a3a" stroke-width="0.5"/>
+
+          <!-- Red/orange vent columns with heat shimmer -->
+          <rect x="38" y="70" width="10" height="80" rx="5" fill="url(#w5-vent)" filter="url(#w5-heat)"/>
+          <rect x="155" y="75" width="10" height="75" rx="5" fill="url(#w5-vent)" filter="url(#w5-heat)"/>
+          <!-- Heat shimmer waves -->
+          <path d="M42,75 Q45,72 48,75 Q45,78 42,75" fill="none" stroke="#ff6030" stroke-width="0.5" opacity="0.4"/>
+          <path d="M40,85 Q43,82 46,85 Q43,88 40,85" fill="none" stroke="#ff6030" stroke-width="0.5" opacity="0.3"/>
+          <path d="M159,80 Q162,77 165,80 Q162,83 159,80" fill="none" stroke="#ff6030" stroke-width="0.5" opacity="0.35"/>
+
+          <!-- Toxic orange zones -->
+          <ellipse cx="120" cy="100" rx="18" ry="14" fill="url(#w5-toxic)" filter="url(#w5-glow)"/>
+          <ellipse cx="25" cy="25" rx="14" ry="12" fill="url(#w5-toxic)" filter="url(#w5-glow)"/>
+
+          <!-- All substrate types scattered -->
+          <path d="M55,40 L58,35 L61,40 L58,45 Z" fill="#dfdf3f" opacity="0.6" filter="url(#w5-glow)"/>
+          <circle cx="140" cy="50" r="3" fill="#ef8f3f" opacity="0.7" filter="url(#w5-glow)"/>
+          <circle cx="88" cy="112" r="3" fill="#ff4f4f" opacity="0.7" filter="url(#w5-glow)"/>
+          <path d="M70,105 L73,100 L76,105 L73,110 Z" fill="#cf6fff" opacity="0.5"/>
+
           <!-- ARKE -->
-          <rect x="15" y="7" width="2" height="3" fill="#2a8a8a"/>
+          <ellipse cx="100" cy="48" rx="5" ry="6.5" fill="url(#w5-arke)" filter="url(#w5-glow)"/>
+          <ellipse cx="100" cy="46" rx="3" ry="1.8" fill="#1a1a3a"/>
+          <ellipse cx="101" cy="45.5" rx="1.2" ry="0.8" fill="#4aeaff" opacity="0.9"/>
         </svg>
       </div>
       <div style="flex:1;">
-        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#cc3333; margin-bottom:4px;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:9pt; color:#cc3333; margin-bottom:4px;">
           CHAPTER 5: THE HYDROTHERMAL REALM
         </div>
-        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 9-10 &bull; Environment 4</div>
-        <p style="font-size:10pt;">
+        <div style="font-size:9pt; color:#888; margin-bottom:6px;">Levels 9-10 &bull; Environment 4</div>
+        <p style="font-size:9.5pt; line-height:1.45;">
           The deepest, most extreme environment. Chaotic chamber-and-tunnel geology near
           hydrothermal vents. <strong>Maximum toxic coverage (25%)</strong>, extreme flow speeds,
           and <strong>5 rivals</strong>. The full redox ladder (minus O<sub>2</sub>) is available.
           <strong>This is the final challenge.</strong>
         </p>
-        <div style="font-size:9pt; color:#666; margin-top:6px;">
-          <strong>Palette:</strong> Nearly black grains, dark red water, orange heat toxins<br>
-          <strong>Geometry:</strong> Circular chambers + random tunnels + vent columns<br>
+        <div style="font-size:8.5pt; color:#555; margin-top:5px; line-height:1.5;">
+          <strong>Porosity:</strong> 40-50% (chambers connected by narrow tunnels)<br>
+          <strong>Generation:</strong> Random chambers + tunnel connections + vent columns<br>
           <strong>Substrates:</strong> SO<sub>4</sub>, Fe(III), Mn(IV), CH<sub>4</sub>, NO<sub>3</sub> (Lv10)<br>
-          <strong>Hazards:</strong> 20-25% toxic, 4-5 rivals, extreme flow (1.2-1.5&times;)
+          <strong>Hazards:</strong> 20-25% toxic, 4-5 rivals, extreme flow<br>
+          <strong>Flow Speed:</strong> 1.2-1.5&times; (violent currents near vents)
         </div>
       </div>
     </div>
   </div>
 
-  <!-- World map overview -->
+  <!-- ================================================================
+       JOURNEY OVERVIEW - Beautiful horizontal progression map
+       ================================================================ -->
   <h2>Journey Overview</h2>
-  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; text-align:center;">
-    <svg width="100%" height="70" viewBox="0 0 500 70">
-      <!-- Path line -->
-      <line x1="30" y1="35" x2="470" y2="35" stroke="#ccc" stroke-width="2"/>
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:8px; padding:14px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <svg width="100%" height="90" viewBox="0 0 520 90" class="organism-art">
+      <defs>
+        <filter id="jo-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="jo-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="rgba(0,0,0,0.2)"/>
+        </filter>
+        <linearGradient id="jo-path" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#a48a5a"/>
+          <stop offset="25%" stop-color="#5a4a3a"/>
+          <stop offset="50%" stop-color="#6a3060"/>
+          <stop offset="75%" stop-color="#5a7a8a"/>
+          <stop offset="100%" stop-color="#cc3333"/>
+        </linearGradient>
+        <radialGradient id="jo-n1" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#c4a46a"/>
+          <stop offset="100%" stop-color="#6a4a1a"/>
+        </radialGradient>
+        <radialGradient id="jo-n2" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#6a5a4a"/>
+          <stop offset="100%" stop-color="#2a1a0a"/>
+        </radialGradient>
+        <radialGradient id="jo-n3" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#6a4070"/>
+          <stop offset="100%" stop-color="#2a1030"/>
+        </radialGradient>
+        <radialGradient id="jo-n4" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#8a9aaa"/>
+          <stop offset="100%" stop-color="#3a4a5a"/>
+        </radialGradient>
+        <radialGradient id="jo-n5" cx="40%" cy="35%">
+          <stop offset="0%" stop-color="#4a3a4a"/>
+          <stop offset="100%" stop-color="#1a0a0a"/>
+        </radialGradient>
+      </defs>
 
-      <!-- Chapter nodes -->
-      <!-- Ch1 -->
-      <circle cx="50" cy="35" r="16" fill="#7a5a2a" stroke="#a48a5a" stroke-width="2"/>
-      <text x="50" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">1</text>
-      <text x="50" y="62" text-anchor="middle" font-size="6" fill="#7a5a2a" font-weight="bold">SOIL</text>
-      <text x="50" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 1-2</text>
+      <!-- Difficulty label -->
+      <text x="260" y="10" text-anchor="middle" font-size="6" fill="#aaa" letter-spacing="3" font-weight="bold">DIFFICULTY</text>
+      <!-- Difficulty arrow line -->
+      <path d="M160,7 L360,7" fill="none" stroke="#ccc" stroke-width="0.8"/>
+      <polygon points="358,5 364,7 358,9" fill="#ccc"/>
 
-      <!-- Ch2 -->
-      <circle cx="155" cy="35" r="16" fill="#4a3a2a" stroke="#6a5a3a" stroke-width="2"/>
-      <text x="155" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">2</text>
-      <text x="155" y="62" text-anchor="middle" font-size="6" fill="#4a3a2a" font-weight="bold">DEEP</text>
-      <text x="155" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 3-4</text>
+      <!-- Curved path connecting nodes -->
+      <path d="M50,45 C90,45 100,45 155,45 C190,45 200,45 260,45 C300,45 310,45 365,45 C400,45 410,45 470,45"
+            fill="none" stroke="url(#jo-path)" stroke-width="3" stroke-linecap="round"/>
 
-      <!-- Ch3 -->
-      <circle cx="260" cy="35" r="16" fill="#3a3040" stroke="#b040a0" stroke-width="2"/>
-      <text x="260" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">3</text>
-      <text x="260" y="62" text-anchor="middle" font-size="6" fill="#b040a0" font-weight="bold">METHANE</text>
-      <text x="260" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 5-6</text>
+      <!-- Connecting dots along the path -->
+      <circle cx="102" cy="45" r="2" fill="#8a7a5a" opacity="0.5"/>
+      <circle cx="207" cy="45" r="2" fill="#5a4a3a" opacity="0.5"/>
+      <circle cx="312" cy="45" r="2" fill="#6a5a7a" opacity="0.5"/>
+      <circle cx="417" cy="45" r="2" fill="#7a6a6a" opacity="0.5"/>
 
-      <!-- Ch4 -->
-      <circle cx="365" cy="35" r="16" fill="#5a6a7a" stroke="#8a9aaa" stroke-width="2"/>
-      <text x="365" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">4</text>
-      <text x="365" y="62" text-anchor="middle" font-size="6" fill="#5a6a7a" font-weight="bold">PERMAFROST</text>
-      <text x="365" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 7-8</text>
+      <!-- Chapter 1: Soil -->
+      <circle cx="50" cy="45" r="18" fill="url(#jo-n1)" stroke="#c4a46a" stroke-width="2.5" filter="url(#jo-shadow)"/>
+      <text x="50" y="49" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="white">1</text>
+      <text x="50" y="72" text-anchor="middle" font-size="7" fill="#7a5a2a" font-weight="bold">SOIL</text>
+      <text x="50" y="82" text-anchor="middle" font-size="5.5" fill="#888">Lv 1-2</text>
 
-      <!-- Ch5 -->
-      <circle cx="450" cy="35" r="16" fill="#2a2a3a" stroke="#cc3333" stroke-width="2"/>
-      <text x="450" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">5</text>
-      <text x="450" y="62" text-anchor="middle" font-size="6" fill="#cc3333" font-weight="bold">HYDRO</text>
-      <text x="450" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 9-10</text>
+      <!-- Chapter 2: Deep -->
+      <circle cx="155" cy="45" r="18" fill="url(#jo-n2)" stroke="#6a5a3a" stroke-width="2.5" filter="url(#jo-shadow)"/>
+      <text x="155" y="49" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="white">2</text>
+      <text x="155" y="72" text-anchor="middle" font-size="7" fill="#4a3a2a" font-weight="bold">DEEP</text>
+      <text x="155" y="82" text-anchor="middle" font-size="5.5" fill="#888">Lv 3-4</text>
 
-      <!-- Difficulty arrow -->
-      <text x="250" y="8" text-anchor="middle" font-size="5" fill="#aaa">DIFFICULTY &rarr;</text>
+      <!-- Chapter 3: Methane -->
+      <circle cx="260" cy="45" r="18" fill="url(#jo-n3)" stroke="#b040a0" stroke-width="2.5" filter="url(#jo-shadow)"/>
+      <text x="260" y="49" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="white">3</text>
+      <text x="260" y="72" text-anchor="middle" font-size="7" fill="#b040a0" font-weight="bold">METHANE</text>
+      <text x="260" y="82" text-anchor="middle" font-size="5.5" fill="#888">Lv 5-6</text>
+
+      <!-- Chapter 4: Permafrost -->
+      <circle cx="365" cy="45" r="18" fill="url(#jo-n4)" stroke="#8a9aaa" stroke-width="2.5" filter="url(#jo-shadow)"/>
+      <text x="365" y="49" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="white">4</text>
+      <text x="365" y="72" text-anchor="middle" font-size="7" fill="#5a6a7a" font-weight="bold">PERMAFROST</text>
+      <text x="365" y="82" text-anchor="middle" font-size="5.5" fill="#888">Lv 7-8</text>
+
+      <!-- Chapter 5: Hydrothermal -->
+      <circle cx="470" cy="45" r="18" fill="url(#jo-n5)" stroke="#cc3333" stroke-width="2.5" filter="url(#jo-shadow)"/>
+      <circle cx="470" cy="45" r="22" fill="none" stroke="#ff4f4f" stroke-width="0.8" opacity="0.4" filter="url(#jo-glow)"/>
+      <text x="470" y="49" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#ff4f4f" filter="url(#jo-glow)">5</text>
+      <text x="470" y="72" text-anchor="middle" font-size="7" fill="#cc3333" font-weight="bold">HYDRO</text>
+      <text x="470" y="82" text-anchor="middle" font-size="5.5" fill="#888">Lv 9-10</text>
     </svg>
+  </div>
+
+  <div class="info-box" style="margin-top:10px;">
+    <div class="info-box-title">ENVIRONMENT SUMMARY</div>
+    <p style="font-size:9.5pt; line-height:1.5;">
+      Each world is <strong>procedurally generated</strong> from its own algorithm, meaning no two playthroughs
+      are identical. Porosity determines how much open space you have to maneuver: higher porosity = easier navigation,
+      lower porosity = tighter corridors and more dead ends. Flow speed affects how fast substrates move through
+      pore channels and how effective the SHIFT (flow riding) ability is. Toxic zone coverage increases steadily
+      from 0% in the Soil Frontier to 25% in the Hydrothermal Realm.
+    </p>
   </div>
 
   <p class="page-number right">12</p>
