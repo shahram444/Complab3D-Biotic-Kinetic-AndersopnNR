@@ -1,8 +1,20 @@
 /* ARKE: Guardians of Earth - Game Manual Styles */
 /* Inspired by classic NES instruction booklets */
+/* Rewritten for organic SVG illustrations + weasyprint PDF generation */
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
 
+/* ================================================================
+   PAGE SETUP FOR WEASYPRINT PDF GENERATION
+   ================================================================ */
+@page {
+  size: letter;
+  margin: 0.5in;
+}
+
+/* ================================================================
+   CSS VARIABLES
+   ================================================================ */
 :root {
   --bg-dark: #0a0c1a;
   --bg-page: #f5f0e8;
@@ -25,7 +37,14 @@
   --page-height: 11in;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   background: var(--bg-dark);
@@ -35,17 +54,23 @@ body {
   line-height: 1.5;
 }
 
-/* Page layout for print */
+/* ================================================================
+   PAGE LAYOUT
+   Every .page div gets strict page-break controls and overflow hidden
+   to prevent content bleeding across PDF pages.
+   ================================================================ */
 .page {
   width: var(--page-width);
-  min-height: var(--page-height);
+  height: var(--page-height);
+  max-height: var(--page-height);
   margin: 20px auto;
   background: var(--bg-page);
   padding: 0.6in 0.7in;
-  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-  page-break-after: always;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
   position: relative;
   overflow: hidden;
+  page-break-after: always;
+  page-break-inside: avoid;
 }
 
 .page-number {
@@ -55,10 +80,18 @@ body {
   font-size: 9pt;
   color: #888;
 }
-.page-number.left { left: 0.7in; }
-.page-number.right { right: 0.7in; }
 
-/* Cover page */
+.page-number.left {
+  left: 0.7in;
+}
+
+.page-number.right {
+  right: 0.7in;
+}
+
+/* ================================================================
+   COVER PAGE
+   ================================================================ */
 .cover-page {
   background: linear-gradient(180deg, #020410 0%, #0a1028 30%, #061020 70%, #000408 100%);
   color: var(--text-light);
@@ -72,13 +105,17 @@ body {
 
 .cover-page .stars {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
 }
 
 .cover-page .star {
   position: absolute;
-  width: 2px; height: 2px;
+  width: 2px;
+  height: 2px;
   background: white;
   border-radius: 50%;
   animation: twinkle 3s ease-in-out infinite alternate;
@@ -93,7 +130,7 @@ body {
   font-family: 'Press Start 2P', monospace;
   font-size: 42pt;
   color: var(--accent-cyan);
-  text-shadow: 0 0 20px rgba(74,234,255,0.6), 0 4px 0 #1a6a8a;
+  text-shadow: 0 0 20px rgba(74, 234, 255, 0.6), 0 4px 0 #1a6a8a;
   letter-spacing: 8px;
   z-index: 2;
   margin-bottom: 8px;
@@ -103,7 +140,7 @@ body {
   font-family: 'Press Start 2P', monospace;
   font-size: 12pt;
   color: var(--accent-green);
-  text-shadow: 0 0 12px rgba(79,223,111,0.5);
+  text-shadow: 0 0 12px rgba(79, 223, 111, 0.5);
   letter-spacing: 3px;
   z-index: 2;
   margin-bottom: 40px;
@@ -128,7 +165,9 @@ body {
   font-family: 'Space Mono', monospace;
 }
 
-/* Section headers */
+/* ================================================================
+   SECTION HEADERS
+   ================================================================ */
 h1.section-number {
   font-family: 'Press Start 2P', monospace;
   font-size: 10pt;
@@ -166,15 +205,20 @@ h3 {
   margin: 12px 0 6px 0;
 }
 
-p { margin-bottom: 8px; }
+p {
+  margin-bottom: 8px;
+}
 
-/* Info boxes */
+/* ================================================================
+   INFO BOXES (page-break-inside: avoid)
+   ================================================================ */
 .info-box {
   background: #ddd8c8;
   border: 2px solid #aaa48a;
   border-radius: 4px;
   padding: 12px 16px;
   margin: 12px 0;
+  page-break-inside: avoid;
 }
 
 .info-box.warning {
@@ -199,7 +243,9 @@ p { margin-bottom: 8px; }
   letter-spacing: 1px;
 }
 
-/* Character cards */
+/* ================================================================
+   CHARACTER CARDS (page-break-inside: avoid)
+   ================================================================ */
 .char-card {
   display: flex;
   gap: 16px;
@@ -208,6 +254,7 @@ p { margin-bottom: 8px; }
   padding: 16px;
   margin: 12px 0;
   border-radius: 4px;
+  page-break-inside: avoid;
 }
 
 .char-card .char-sprite {
@@ -241,7 +288,9 @@ p { margin-bottom: 8px; }
   color: #555;
 }
 
-/* Substrate cards */
+/* ================================================================
+   SUBSTRATE CARDS (page-break-inside: avoid)
+   ================================================================ */
 .substrate-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -257,6 +306,7 @@ p { margin-bottom: 8px; }
   display: flex;
   gap: 10px;
   align-items: flex-start;
+  page-break-inside: avoid;
 }
 
 .sub-card .sub-icon {
@@ -265,7 +315,9 @@ p { margin-bottom: 8px; }
   height: 48px;
 }
 
-.sub-card .sub-info { flex: 1; }
+.sub-card .sub-info {
+  flex: 1;
+}
 
 .sub-card .sub-name {
   font-family: 'Press Start 2P', monospace;
@@ -279,7 +331,9 @@ p { margin-bottom: 8px; }
   color: #555;
 }
 
-/* Level cards */
+/* ================================================================
+   LEVEL CARDS (page-break-inside: avoid)
+   ================================================================ */
 .level-card {
   border: 2px solid #3a3a4a;
   background: white;
@@ -312,6 +366,8 @@ p { margin-bottom: 8px; }
 .level-card .level-map {
   margin: 10px 0;
   text-align: center;
+  max-height: 3.5in;
+  overflow: hidden;
 }
 
 .level-card .level-stats {
@@ -349,12 +405,17 @@ p { margin-bottom: 8px; }
   border-left: 3px solid var(--accent-teal);
 }
 
-/* Controls diagram */
+/* ================================================================
+   CONTROLS DIAGRAM
+   Constrained max-height to prevent page overflow
+   ================================================================ */
 .controls-diagram {
   display: flex;
   justify-content: center;
   gap: 40px;
   margin: 16px 0;
+  max-height: 3in;
+  overflow: hidden;
 }
 
 .key-group {
@@ -368,7 +429,9 @@ p { margin-bottom: 8px; }
   color: #555;
 }
 
-/* HUD mockup */
+/* ================================================================
+   HUD MOCKUP
+   ================================================================ */
 .hud-mockup {
   background: #0a0a1a;
   border: 2px solid #3a3a6a;
@@ -378,9 +441,13 @@ p { margin-bottom: 8px; }
   color: var(--text-light);
   font-family: 'Space Mono', monospace;
   font-size: 9pt;
+  max-height: 3.5in;
+  overflow: hidden;
 }
 
-/* Tables */
+/* ================================================================
+   TABLES
+   ================================================================ */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -407,10 +474,14 @@ tr:nth-child(even) td {
   background: #ece8d8;
 }
 
-/* Flow diagram */
+/* ================================================================
+   FLOW DIAGRAM
+   ================================================================ */
 .flow-diagram {
   text-align: center;
   margin: 16px 0;
+  max-height: 2.5in;
+  overflow: hidden;
 }
 
 .flow-arrow {
@@ -431,7 +502,9 @@ tr:nth-child(even) td {
   vertical-align: middle;
 }
 
-/* Two column layout */
+/* ================================================================
+   TWO COLUMN LAYOUT
+   ================================================================ */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -442,19 +515,43 @@ tr:nth-child(even) td {
   grid-template-columns: 1.5fr 1fr;
 }
 
-/* Pixel art scaling */
-svg.pixel-art {
-  image-rendering: pixelated;
+/* ================================================================
+   SVG ILLUSTRATIONS
+   Organic, smooth SVG art replaces old pixelated rects.
+   ================================================================ */
+svg.organism-art {
+  /* Smooth anti-aliased rendering for organic illustrations */
+  shape-rendering: geometricPrecision;
 }
 
-/* Decorative borders */
+/* Legacy class kept for backward compatibility; no longer pixelated */
+svg.pixel-art {
+  shape-rendering: geometricPrecision;
+}
+
+/* ================================================================
+   SVG GLOW FILTER HELPER CLASSES
+   These mirror the filter ids defined in the global <defs> SVG block
+   embedded in 01_cover.html. Apply via CSS for convenience.
+   ================================================================ */
+.glow-cyan  { filter: url(#glow-cyan); }
+.glow-gold  { filter: url(#glow-gold); }
+.glow-red   { filter: url(#glow-red); }
+.glow-green { filter: url(#glow-green); }
+.soft-shadow { filter: url(#soft-shadow); }
+
+/* ================================================================
+   DECORATIVE BORDERS
+   ================================================================ */
 .deco-border {
   border: 3px double #3a3a4a;
   padding: 16px;
   margin: 12px 0;
 }
 
-/* Bar chart style for stats */
+/* ================================================================
+   BAR CHART STAT DISPLAYS
+   ================================================================ */
 .bar-display {
   display: flex;
   align-items: center;
@@ -486,25 +583,87 @@ svg.pixel-art {
 .bar-fill.en { background: #5fa0f0; }
 .bar-fill.gr { background: #5ff050; }
 
-/* Print styles */
+/* ================================================================
+   DIAGRAM HEIGHT CONSTRAINTS
+   Prevents large diagrams from overflowing their page.
+   ================================================================ */
+.level-card .level-map svg,
+.controls-diagram svg,
+.flow-diagram svg {
+  max-height: 3in;
+  width: auto;
+}
+
+/* ================================================================
+   PRINT STYLES FOR WEASYPRINT
+   ================================================================ */
 @media print {
-  body { background: white; }
+  body {
+    background: white;
+  }
+
   .page {
     margin: 0;
     box-shadow: none;
+    width: 100%;
+    height: auto;
+    max-height: none;
     page-break-after: always;
+    page-break-inside: avoid;
+    overflow: hidden;
   }
-  .cover-page .star { display: none; }
+
+  /* Force page breaks to be respected on all card types */
+  .char-card,
+  .level-card,
+  .sub-card,
+  .info-box {
+    page-break-inside: avoid;
+  }
+
+  /* Avoid orphaned headers */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* Keep tables together when possible */
+  table, tr {
+    page-break-inside: avoid;
+  }
+
+  /* Disable animated stars in print */
+  .cover-page .star {
+    display: none;
+  }
+
+  /* Ensure SVG illustrations render in print */
+  svg {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }
 
-/* Responsive for screen */
+/* ================================================================
+   RESPONSIVE FOR SCREEN
+   ================================================================ */
 @media screen and (max-width: 900px) {
   .page {
     width: 100%;
+    height: auto;
+    max-height: none;
     padding: 20px;
     margin: 10px auto;
   }
-  .substrate-grid { grid-template-columns: 1fr; }
-  .two-col { grid-template-columns: 1fr; }
-  .level-card .level-stats { grid-template-columns: repeat(2, 1fr); }
+
+  .substrate-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .level-card .level-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
