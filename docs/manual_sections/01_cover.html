@@ -1,5 +1,56 @@
 <!-- Section 01: Cover Page -->
+<!-- Global SVG filter & gradient definitions used across the entire manual -->
+<svg style="position:absolute;width:0;height:0;" aria-hidden="true">
+<defs>
+  <!-- Glow filters -->
+  <filter id="glow-cyan">
+    <feGaussianBlur stdDeviation="3" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="glow-gold">
+    <feGaussianBlur stdDeviation="2.5" result="blur"/>
+    <feFlood flood-color="#ffd700" flood-opacity="0.3"/>
+    <feComposite in2="blur" operator="in"/>
+    <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="glow-red">
+    <feGaussianBlur stdDeviation="2" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="glow-green">
+    <feGaussianBlur stdDeviation="2" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="soft-shadow">
+    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+  </filter>
+
+  <!-- Organism body gradients -->
+  <radialGradient id="arke-body-grad">
+    <stop offset="10%" stop-color="#3ac5c9"/>
+    <stop offset="60%" stop-color="#2a8a8a"/>
+    <stop offset="100%" stop-color="#0a4a4a"/>
+  </radialGradient>
+  <radialGradient id="elder-body-grad">
+    <stop offset="10%" stop-color="#c0a050"/>
+    <stop offset="60%" stop-color="#8a6a2a"/>
+    <stop offset="100%" stop-color="#4a3a10"/>
+  </radialGradient>
+  <radialGradient id="rival-body-grad">
+    <stop offset="10%" stop-color="#cc5555"/>
+    <stop offset="60%" stop-color="#8a2a2a"/>
+    <stop offset="100%" stop-color="#4a0a0a"/>
+  </radialGradient>
+  <radialGradient id="colony-body-grad">
+    <stop offset="10%" stop-color="#5aaa7a"/>
+    <stop offset="60%" stop-color="#3a7a5a"/>
+    <stop offset="100%" stop-color="#1a4a2a"/>
+  </radialGradient>
+</defs>
+</svg>
+
 <div class="page cover-page" id="cover">
+  <!-- Starfield background -->
   <div class="stars">
     <div class="star" style="top:5%;left:12%;animation-delay:0s"></div>
     <div class="star" style="top:8%;left:45%;animation-delay:0.5s"></div>
@@ -19,39 +70,184 @@
     <div class="star" style="top:92%;left:85%;animation-delay:0.4s"></div>
   </div>
 
-  <!-- ARKE character SVG -->
-  <svg width="160" height="160" viewBox="0 0 16 16" class="pixel-art" style="z-index:2; margin-bottom:20px;">
-    <!-- Body -->
-    <rect x="5" y="4" width="6" height="8" fill="#2a8a8a" />
-    <rect x="6" y="3" width="4" height="1" fill="#2a8a8a" />
-    <rect x="6" y="12" width="4" height="1" fill="#2a8a8a" />
-    <!-- Visor -->
-    <rect x="6" y="5" width="4" height="3" fill="#1a1a3a" />
-    <rect x="7" y="5" width="2" height="1" fill="#4aeaff" />
-    <rect x="6" y="6" width="4" height="1" fill="#3ac5c9" />
-    <!-- Eye glow -->
-    <rect x="7" y="6" width="1" height="1" fill="#4aeaff" />
-    <rect x="9" y="6" width="1" height="1" fill="#4aeaff" />
-    <!-- Membrane detail -->
-    <rect x="4" y="6" width="1" height="4" fill="#1a6a6a" />
-    <rect x="11" y="6" width="1" height="4" fill="#1a6a6a" />
-    <!-- Flagella -->
-    <rect x="3" y="7" width="1" height="1" fill="#1a6a6a" />
-    <rect x="2" y="8" width="1" height="1" fill="#1a6a6a" />
-    <rect x="12" y="7" width="1" height="1" fill="#1a6a6a" />
-    <rect x="13" y="8" width="1" height="1" fill="#1a6a6a" />
-    <!-- Glow outline -->
-    <rect x="5" y="3" width="1" height="1" fill="#4aeaff" opacity="0.4" />
-    <rect x="10" y="3" width="1" height="1" fill="#4aeaff" opacity="0.4" />
-    <rect x="5" y="12" width="1" height="1" fill="#4aeaff" opacity="0.4" />
-    <rect x="10" y="12" width="1" height="1" fill="#4aeaff" opacity="0.4" />
+  <!-- ============================================================
+       ARKE CHARACTER - Organic SVG Illustration
+       A beautiful archaeon microorganism with:
+       - Oval body with radial gradient for 3D depth
+       - Semi-transparent membrane
+       - Internal organelles (ribosomes, nucleoid)
+       - Glowing cyan sensor spots
+       - Curved flagella/pili (bezier paths)
+       - Bioluminescent halo
+       ============================================================ -->
+  <svg width="240" height="240" viewBox="0 0 200 200" class="organism-art"
+       style="z-index:2; margin-bottom:20px;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Bioluminescent outer halo -->
+      <radialGradient id="cover-halo-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="40%" stop-color="#3ac5c9" stop-opacity="0.15"/>
+        <stop offset="70%" stop-color="#2a8a8a" stop-opacity="0.06"/>
+        <stop offset="100%" stop-color="#0a4a4a" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Membrane sheen gradient -->
+      <radialGradient id="cover-membrane-grad" cx="40%" cy="35%" r="55%">
+        <stop offset="0%" stop-color="#7fffff" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#2a8a8a" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Sensor spot glow -->
+      <radialGradient id="cover-sensor-grad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#afffff"/>
+        <stop offset="40%" stop-color="#4aeaff"/>
+        <stop offset="100%" stop-color="#2a8a8a" stop-opacity="0"/>
+      </radialGradient>
+      <!-- Nucleoid gradient -->
+      <radialGradient id="cover-nucleoid-grad" cx="45%" cy="45%" r="50%">
+        <stop offset="0%" stop-color="#1a5a6a" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#0a3a4a" stop-opacity="0.5"/>
+      </radialGradient>
+      <!-- Glow filter for sensor spots -->
+      <filter id="cover-sensor-glow">
+        <feGaussianBlur stdDeviation="4" result="glow"/>
+        <feMerge>
+          <feMergeNode in="glow"/>
+          <feMergeNode in="glow"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <!-- Soft outer glow for the whole body -->
+      <filter id="cover-body-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+        <feColorMatrix type="matrix" in="blur" result="colored"
+          values="0 0 0 0 0.23
+                  0 0 0 0 0.77
+                  0 0 0 0 0.79
+                  0 0 0 0.4 0"/>
+        <feMerge>
+          <feMergeNode in="colored"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- Layer 1: Bioluminescent halo -->
+    <ellipse cx="100" cy="100" rx="95" ry="90" fill="url(#cover-halo-grad)"/>
+
+    <!-- Layer 2: Flagella / pili (behind the body) -->
+    <!-- Left flagellum - sinuous curve -->
+    <path d="M 42,80 C 28,72 12,82 8,68 C 4,54 18,44 10,32"
+          stroke="#1a7a7a" stroke-width="2.5" fill="none" stroke-linecap="round"
+          stroke-opacity="0.7"/>
+    <path d="M 38,92 C 22,96 10,108 4,100 C -2,92 8,78 2,70"
+          stroke="#1a7a7a" stroke-width="2" fill="none" stroke-linecap="round"
+          stroke-opacity="0.6"/>
+    <!-- Right flagellum - sinuous curve -->
+    <path d="M 158,80 C 172,72 188,82 192,68 C 196,54 182,44 190,32"
+          stroke="#1a7a7a" stroke-width="2.5" fill="none" stroke-linecap="round"
+          stroke-opacity="0.7"/>
+    <path d="M 162,92 C 178,96 190,108 196,100 C 202,92 192,78 198,70"
+          stroke="#1a7a7a" stroke-width="2" fill="none" stroke-linecap="round"
+          stroke-opacity="0.6"/>
+    <!-- Bottom pili - shorter tendrils -->
+    <path d="M 80,148 C 76,162 68,170 72,180"
+          stroke="#1a7a7a" stroke-width="1.8" fill="none" stroke-linecap="round"
+          stroke-opacity="0.5"/>
+    <path d="M 100,152 C 100,166 96,176 100,186"
+          stroke="#1a7a7a" stroke-width="1.8" fill="none" stroke-linecap="round"
+          stroke-opacity="0.5"/>
+    <path d="M 120,148 C 124,162 132,170 128,180"
+          stroke="#1a7a7a" stroke-width="1.8" fill="none" stroke-linecap="round"
+          stroke-opacity="0.5"/>
+    <!-- Top pili -->
+    <path d="M 85,52 C 82,38 76,28 80,18"
+          stroke="#1a7a7a" stroke-width="1.5" fill="none" stroke-linecap="round"
+          stroke-opacity="0.45"/>
+    <path d="M 115,52 C 118,38 124,28 120,18"
+          stroke="#1a7a7a" stroke-width="1.5" fill="none" stroke-linecap="round"
+          stroke-opacity="0.45"/>
+
+    <!-- Layer 3: Main body with 3D radial gradient -->
+    <g filter="url(#cover-body-glow)">
+      <ellipse cx="100" cy="100" rx="58" ry="50" fill="url(#arke-body-grad)"/>
+    </g>
+
+    <!-- Layer 4: Semi-transparent outer membrane -->
+    <ellipse cx="100" cy="100" rx="60" ry="52"
+             fill="none" stroke="#5aeaea" stroke-width="1.5"
+             stroke-opacity="0.35"/>
+    <ellipse cx="100" cy="100" rx="63" ry="55"
+             fill="none" stroke="#3ac5c9" stroke-width="0.8"
+             stroke-opacity="0.2" stroke-dasharray="4 6"/>
+
+    <!-- Layer 5: Membrane sheen (specular highlight) -->
+    <ellipse cx="88" cy="85" rx="38" ry="28"
+             fill="url(#cover-membrane-grad)"/>
+
+    <!-- Layer 6: Internal structures visible through membrane -->
+    <!-- Nucleoid region - amorphous curved shape -->
+    <path d="M 82,105 C 78,95 85,88 95,86 C 105,84 115,90 118,100
+             C 121,110 114,118 104,120 C 94,122 86,115 82,105 Z"
+          fill="url(#cover-nucleoid-grad)" opacity="0.6"/>
+    <!-- DNA-like fiber within nucleoid -->
+    <path d="M 88,100 C 92,92 98,96 102,90 C 106,84 110,92 114,96"
+          stroke="#2a7a8a" stroke-width="1.2" fill="none" stroke-linecap="round"
+          opacity="0.5"/>
+    <path d="M 86,108 C 90,102 96,106 100,100 C 104,94 110,98 112,104"
+          stroke="#2a7a8a" stroke-width="1" fill="none" stroke-linecap="round"
+          opacity="0.4"/>
+
+    <!-- Ribosomes - small scattered circles -->
+    <circle cx="72" cy="95" r="2.5" fill="#1a6a7a" opacity="0.5"/>
+    <circle cx="76" cy="110" r="2" fill="#1a6a7a" opacity="0.45"/>
+    <circle cx="68" cy="103" r="1.8" fill="#1a6a7a" opacity="0.4"/>
+    <circle cx="128" cy="92" r="2.2" fill="#1a6a7a" opacity="0.5"/>
+    <circle cx="132" cy="105" r="1.8" fill="#1a6a7a" opacity="0.4"/>
+    <circle cx="125" cy="114" r="2" fill="#1a6a7a" opacity="0.45"/>
+    <circle cx="80" cy="80" r="1.5" fill="#1a6a7a" opacity="0.35"/>
+    <circle cx="120" cy="78" r="1.5" fill="#1a6a7a" opacity="0.35"/>
+    <circle cx="90" cy="122" r="1.8" fill="#1a6a7a" opacity="0.4"/>
+    <circle cx="112" cy="124" r="2" fill="#1a6a7a" opacity="0.4"/>
+
+    <!-- Storage granules -->
+    <circle cx="78" cy="88" r="3.5" fill="#2a7070" opacity="0.3" stroke="#3a9090" stroke-width="0.5" stroke-opacity="0.3"/>
+    <circle cx="124" cy="86" r="3" fill="#2a7070" opacity="0.3" stroke="#3a9090" stroke-width="0.5" stroke-opacity="0.3"/>
+    <circle cx="86" cy="118" r="3.2" fill="#2a7070" opacity="0.25" stroke="#3a9090" stroke-width="0.5" stroke-opacity="0.25"/>
+
+    <!-- Layer 7: Glowing cyan sensor spots ("eyes") -->
+    <g filter="url(#cover-sensor-glow)">
+      <!-- Left sensor -->
+      <circle cx="84" cy="90" r="5" fill="url(#cover-sensor-grad)"/>
+      <circle cx="84" cy="90" r="2.5" fill="#dfffff"/>
+      <!-- Right sensor -->
+      <circle cx="116" cy="90" r="5" fill="url(#cover-sensor-grad)"/>
+      <circle cx="116" cy="90" r="2.5" fill="#dfffff"/>
+    </g>
+
+    <!-- Layer 8: Subtle surface texture dots -->
+    <circle cx="94" cy="72" r="0.8" fill="#5af0f0" opacity="0.2"/>
+    <circle cx="106" cy="70" r="0.6" fill="#5af0f0" opacity="0.15"/>
+    <circle cx="76" cy="100" r="0.7" fill="#5af0f0" opacity="0.18"/>
+    <circle cx="130" cy="98" r="0.8" fill="#5af0f0" opacity="0.2"/>
+    <circle cx="100" cy="130" r="0.7" fill="#5af0f0" opacity="0.15"/>
+    <circle cx="88" cy="74" r="0.5" fill="#5af0f0" opacity="0.12"/>
+    <circle cx="112" cy="128" r="0.6" fill="#5af0f0" opacity="0.14"/>
   </svg>
 
+  <!-- Title -->
   <div class="cover-title">ARKE</div>
   <div class="cover-subtitle">GUARDIANS OF EARTH</div>
 
-  <svg width="400" height="2" style="z-index:2">
-    <line x1="0" y1="1" x2="400" y2="1" stroke="#4a4a6a" stroke-width="1"/>
+  <!-- Decorative divider line -->
+  <svg width="400" height="4" style="z-index:2" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cover-divider-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#4a4a6a" stop-opacity="0"/>
+        <stop offset="30%" stop-color="#4aeaff" stop-opacity="0.5"/>
+        <stop offset="50%" stop-color="#4aeaff" stop-opacity="0.8"/>
+        <stop offset="70%" stop-color="#4aeaff" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#4a4a6a" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <line x1="0" y1="2" x2="400" y2="2" stroke="url(#cover-divider-grad)" stroke-width="1.5"/>
   </svg>
 
   <p style="z-index:2; margin-top:20px; font-size:10pt; color:#a0a0c0; max-width:400px; font-style:italic;">
@@ -65,42 +261,102 @@
     CompLaB3D &bull; University of Georgia &bull; Pore-Scale Reactive Transport
   </div>
 
-  <!-- Bottom decorative pore landscape -->
-  <svg width="600" height="60" viewBox="0 0 60 6" class="pixel-art" style="z-index:2; position:absolute; bottom:40px;">
-    <!-- Grain particles -->
-    <circle cx="5" cy="4" r="2" fill="#7a5a2a" opacity="0.6"/>
-    <circle cx="12" cy="5" r="2.5" fill="#6a4a1a" opacity="0.5"/>
-    <circle cx="22" cy="3" r="1.5" fill="#7a5a2a" opacity="0.6"/>
-    <circle cx="30" cy="5" r="2" fill="#6a4a1a" opacity="0.5"/>
-    <circle cx="38" cy="4" r="2.5" fill="#7a5a2a" opacity="0.6"/>
-    <circle cx="48" cy="3" r="1.5" fill="#6a4a1a" opacity="0.5"/>
-    <circle cx="55" cy="5" r="2" fill="#7a5a2a" opacity="0.6"/>
-    <!-- Pore water -->
-    <rect x="7" y="3" width="3" height="2" fill="#0c1420" opacity="0.4" rx="0.5"/>
-    <rect x="15" y="2" width="5" height="3" fill="#0c1420" opacity="0.4" rx="0.5"/>
-    <rect x="25" y="3" width="3" height="2" fill="#0c1420" opacity="0.4" rx="0.5"/>
-    <rect x="33" y="2" width="3" height="3" fill="#0c1420" opacity="0.4" rx="0.5"/>
-    <rect x="42" y="3" width="4" height="2" fill="#0c1420" opacity="0.4" rx="0.5"/>
-    <rect x="51" y="2" width="3" height="3" fill="#0c1420" opacity="0.4" rx="0.5"/>
-    <!-- Substrate particles -->
-    <rect x="9" y="3" width="1" height="1" fill="#4fa4ff" opacity="0.7"/>
-    <rect x="18" y="2" width="1" height="1" fill="#ff4f4f" opacity="0.7"/>
-    <rect x="27" y="3" width="1" height="1" fill="#4fdf6f" opacity="0.7"/>
-    <rect x="36" y="3" width="1" height="1" fill="#dfdf3f" opacity="0.7"/>
-    <rect x="45" y="3" width="1" height="1" fill="#ef8f3f" opacity="0.7"/>
+  <!-- ============================================================
+       BOTTOM PORE LANDSCAPE - Organic SVG
+       Smooth mineral grains, flowing pore water, tiny substrate particles
+       ============================================================ -->
+  <svg width="600" height="80" viewBox="0 0 600 80" class="organism-art"
+       style="z-index:2; position:absolute; bottom:30px;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Grain surface gradients -->
+      <radialGradient id="grain-grad-1" cx="40%" cy="35%" r="60%">
+        <stop offset="0%" stop-color="#9a7a4a"/>
+        <stop offset="60%" stop-color="#7a5a2a"/>
+        <stop offset="100%" stop-color="#5a3a10"/>
+      </radialGradient>
+      <radialGradient id="grain-grad-2" cx="45%" cy="30%" r="55%">
+        <stop offset="0%" stop-color="#8a6a3a"/>
+        <stop offset="60%" stop-color="#6a4a1a"/>
+        <stop offset="100%" stop-color="#4a2a08"/>
+      </radialGradient>
+      <!-- Pore water gradient -->
+      <linearGradient id="pore-water-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#0c1420" stop-opacity="0.15"/>
+        <stop offset="50%" stop-color="#1a3050" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#0c1420" stop-opacity="0.15"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Flowing pore water channels (behind grains) -->
+    <path d="M 0,50 C 30,45 50,55 80,48 C 110,41 130,52 160,46
+             C 190,40 210,54 240,48 C 270,42 290,50 320,46
+             C 350,42 380,54 410,48 C 440,42 460,50 490,46
+             C 520,42 550,52 580,48 L 600,48 L 600,70 L 0,70 Z"
+          fill="url(#pore-water-grad)" opacity="0.6"/>
+    <path d="M 0,56 C 40,52 70,60 100,54 C 130,48 160,58 200,54
+             C 240,50 270,58 310,54 C 350,50 390,60 430,54
+             C 470,48 510,58 550,54 C 570,52 590,56 600,54
+             L 600,75 L 0,75 Z"
+          fill="#0c1420" opacity="0.2"/>
+
+    <!-- Large mineral grains - smooth organic ellipses -->
+    <ellipse cx="45" cy="55" rx="28" ry="22" fill="url(#grain-grad-1)" opacity="0.65"/>
+    <ellipse cx="45" cy="55" rx="28" ry="22" fill="none" stroke="#a08a5a" stroke-width="0.5" stroke-opacity="0.3"/>
+
+    <ellipse cx="130" cy="60" rx="34" ry="20" fill="url(#grain-grad-2)" opacity="0.6"/>
+    <ellipse cx="130" cy="60" rx="34" ry="20" fill="none" stroke="#a08a5a" stroke-width="0.5" stroke-opacity="0.25"/>
+
+    <ellipse cx="230" cy="52" rx="22" ry="18" fill="url(#grain-grad-1)" opacity="0.6"/>
+
+    <ellipse cx="310" cy="62" rx="30" ry="19" fill="url(#grain-grad-2)" opacity="0.65"/>
+    <ellipse cx="310" cy="62" rx="30" ry="19" fill="none" stroke="#a08a5a" stroke-width="0.5" stroke-opacity="0.3"/>
+
+    <ellipse cx="405" cy="54" rx="26" ry="21" fill="url(#grain-grad-1)" opacity="0.6"/>
+
+    <ellipse cx="490" cy="58" rx="32" ry="20" fill="url(#grain-grad-2)" opacity="0.6"/>
+    <ellipse cx="490" cy="58" rx="32" ry="20" fill="none" stroke="#a08a5a" stroke-width="0.5" stroke-opacity="0.25"/>
+
+    <ellipse cx="570" cy="56" rx="24" ry="19" fill="url(#grain-grad-1)" opacity="0.65"/>
+
+    <!-- Small grains scattered on top -->
+    <ellipse cx="85" cy="48" rx="10" ry="8" fill="#6a4a1a" opacity="0.4"/>
+    <ellipse cx="180" cy="44" rx="8" ry="6" fill="#7a5a2a" opacity="0.35"/>
+    <ellipse cx="270" cy="50" rx="9" ry="7" fill="#6a4a1a" opacity="0.4"/>
+    <ellipse cx="355" cy="46" rx="7" ry="6" fill="#7a5a2a" opacity="0.35"/>
+    <ellipse cx="450" cy="48" rx="10" ry="7" fill="#6a4a1a" opacity="0.4"/>
+    <ellipse cx="540" cy="44" rx="8" ry="7" fill="#7a5a2a" opacity="0.35"/>
+
+    <!-- Dissolved substrate particles - glowing dots in pore water -->
+    <circle cx="90" cy="52" r="2.5" fill="#4fa4ff" opacity="0.6" filter="url(#glow-cyan)"/>
+    <circle cx="175" cy="48" r="2" fill="#ff5555" opacity="0.55" filter="url(#glow-red)"/>
+    <circle cx="260" cy="54" r="2.2" fill="#4fdf6f" opacity="0.6" filter="url(#glow-green)"/>
+    <circle cx="350" cy="50" r="2" fill="#dfdf3f" opacity="0.55" filter="url(#glow-gold)"/>
+    <circle cx="440" cy="52" r="2.3" fill="#ef8f3f" opacity="0.55" filter="url(#glow-gold)"/>
+    <circle cx="530" cy="48" r="2" fill="#4aeaff" opacity="0.6" filter="url(#glow-cyan)"/>
+
+    <!-- Tiny microbe silhouettes in pore spaces -->
+    <ellipse cx="188" cy="54" rx="4" ry="3" fill="#3ac5c9" opacity="0.2"/>
+    <ellipse cx="365" cy="52" rx="3.5" ry="2.5" fill="#3ac5c9" opacity="0.18"/>
+    <ellipse cx="520" cy="50" rx="3" ry="2.5" fill="#3ac5c9" opacity="0.15"/>
   </svg>
 </div>
 
 <!-- Inner cover / credits page -->
 <div class="page" id="credits" style="background: #f0ece0;">
   <div style="text-align:center; padding-top: 60px;">
-    <svg width="200" height="40" viewBox="0 0 200 40" style="margin-bottom: 40px;">
-      <text x="100" y="25" text-anchor="middle" font-family="'Press Start 2P', monospace" font-size="8" fill="#3a3a4a" letter-spacing="2">CompLaB3D</text>
-      <text x="100" y="36" text-anchor="middle" font-family="'Inter', sans-serif" font-size="5" fill="#888">Pore-Scale Reactive Transport Lab</text>
-      <line x1="40" y1="28" x2="160" y2="28" stroke="#aaa" stroke-width="0.5"/>
+
+    <!-- CompLaB3D logo -->
+    <svg width="240" height="50" viewBox="0 0 240 50" style="margin-bottom: 40px;" xmlns="http://www.w3.org/2000/svg">
+      <text x="120" y="25" text-anchor="middle"
+            font-family="'Press Start 2P', monospace" font-size="10" fill="#3a3a4a"
+            letter-spacing="3">CompLaB3D</text>
+      <line x1="40" y1="32" x2="200" y2="32" stroke="#bbb" stroke-width="0.5"/>
+      <text x="120" y="43" text-anchor="middle"
+            font-family="'Inter', sans-serif" font-size="6" fill="#888"
+            letter-spacing="1">Pore-Scale Reactive Transport Lab</text>
     </svg>
 
-    <p style="font-size:10pt; color:#555; max-width:350px; margin:0 auto 30px auto; text-align: center;">
+    <p style="font-size:10pt; color:#555; max-width:380px; margin:0 auto 30px auto; text-align: center; line-height:1.6;">
       <strong>ARKE: Guardians of Earth</strong> is an educational tile-based game
       that teaches biogeochemical concepts through interactive microbial gameplay.
     </p>
@@ -112,7 +368,20 @@
       CompLaB3D Pore-Scale Reactive Transport Framework
     </p>
 
-    <div style="border:1px solid #ccc; padding:16px; max-width:350px; margin:0 auto; text-align:left; font-size:9pt;">
+    <!-- Small ARKE illustration for credits page -->
+    <svg width="80" height="80" viewBox="0 0 200 200" class="organism-art"
+         style="margin-bottom:24px;" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="100" rx="90" ry="85" fill="#3ac5c9" opacity="0.08"/>
+      <ellipse cx="100" cy="100" rx="58" ry="50" fill="url(#arke-body-grad)"/>
+      <ellipse cx="100" cy="100" rx="60" ry="52" fill="none" stroke="#5aeaea"
+               stroke-width="1.5" stroke-opacity="0.3"/>
+      <circle cx="84" cy="90" r="5" fill="#4aeaff" opacity="0.9"/>
+      <circle cx="84" cy="90" r="2.5" fill="#dfffff"/>
+      <circle cx="116" cy="90" r="5" fill="#4aeaff" opacity="0.9"/>
+      <circle cx="116" cy="90" r="2.5" fill="#dfffff"/>
+    </svg>
+
+    <div style="border:1px solid #ccc; padding:16px 20px; max-width:360px; margin:0 auto; text-align:left; font-size:9pt; border-radius:4px; background:#faf8f2;">
       <p><strong>Game Engine:</strong> Godot 4.2+</p>
       <p><strong>Genre:</strong> Educational / Strategy / Tile-based</p>
       <p><strong>Players:</strong> 1</p>
@@ -125,7 +394,7 @@
   </div>
 
   <div style="position:absolute; bottom:0.6in; left:0.7in; right:0.7in; text-align:center;">
-    <p style="font-size:8pt; color:#999;">
+    <p style="font-size:8pt; color:#999; line-height:1.5;">
       This instruction booklet contains important information about gameplay mechanics,
       characters, worlds, and the real science behind the game. Please read it thoroughly
       before beginning your mission.
