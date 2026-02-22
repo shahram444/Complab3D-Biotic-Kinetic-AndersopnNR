@@ -1,0 +1,255 @@
+<!-- Section 05: Substrates & The Redox Ladder -->
+<div class="page" id="substrates">
+  <h1 class="section-number">SECTION 4</h1>
+  <h1 class="section-title">Substrates &mdash; Your Food</h1>
+
+  <p>
+    Substrates are dissolved chemicals carried by water flow through the pore space.
+    They are your food, energy, and building material. Each substrate provides different
+    amounts of <strong>Health</strong>, <strong>Energy</strong>, and <strong>Growth</strong>.
+  </p>
+
+  <div class="info-box science">
+    <div class="info-box-title" style="color:#4060a0;">THE REDOX LADDER (Real Science!)</div>
+    <p style="font-size:10pt;">
+      In real microbiology, organisms use chemicals in a specific thermodynamic order called the
+      <strong>Redox Ladder</strong>. Oxygen provides the most energy; methane provides the least.
+      The game faithfully represents this hierarchy!
+    </p>
+  </div>
+
+  <!-- The Redox Ladder Visual -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:12px;">The Redox Ladder &mdash; Energy Hierarchy</h3>
+    <svg width="440" height="310" viewBox="0 0 440 310">
+      <!-- Ladder background -->
+      <rect x="60" y="10" width="320" height="290" fill="#f8f4ea" rx="6" stroke="#ccc"/>
+
+      <!-- Gradient bar (high energy top, low energy bottom) -->
+      <defs>
+        <linearGradient id="energyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4fa4ff"/>
+          <stop offset="20%" stop-color="#4fdf6f"/>
+          <stop offset="40%" stop-color="#cf6fff"/>
+          <stop offset="60%" stop-color="#ef8f3f"/>
+          <stop offset="80%" stop-color="#dfdf3f"/>
+          <stop offset="100%" stop-color="#ff4f4f"/>
+        </linearGradient>
+      </defs>
+      <rect x="70" y="20" width="16" height="270" fill="url(#energyGrad)" rx="3"/>
+      <text x="78" y="14" text-anchor="middle" font-size="6" fill="#666">HIGH</text>
+      <text x="78" y="300" text-anchor="middle" font-size="6" fill="#666">LOW</text>
+
+      <!-- Energy label -->
+      <text x="30" y="155" text-anchor="middle" font-size="6" fill="#888" transform="rotate(-90,30,155)">ENERGY YIELD</text>
+
+      <!-- Growth label -->
+      <text x="420" y="155" text-anchor="middle" font-size="6" fill="#888" transform="rotate(90,420,155)">GROWTH YIELD</text>
+
+      <!-- O2 - Oxygen (top) -->
+      <g transform="translate(100, 25)">
+        <circle cx="12" cy="12" r="10" fill="#4fa4ff" stroke="#2a6aaa" stroke-width="1.5"/>
+        <text x="12" y="15" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">O2</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">OXYGEN</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +20 | EN +10 | GR +15</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-818 kJ/mol</text>
+        <text x="260" y="22" text-anchor="end" font-size="6" fill="#4fa4ff">MOST ENERGY</text>
+        <!-- Growth bar -->
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="22" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- NO3 - Nitrate -->
+      <g transform="translate(100, 70)">
+        <circle cx="12" cy="12" r="10" fill="#4fdf6f" stroke="#2a8a3a" stroke-width="1.5"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">NO3</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">NITRATE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +15 | EN +7.5 | GR +18</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-649 kJ/mol</text>
+        <text x="260" y="22" text-anchor="end" font-size="6" fill="#4fdf6f">PREVENTS N2O!</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="27" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- Mn(IV) - Manganese -->
+      <g transform="translate(100, 115)">
+        <rect x="2" y="2" width="20" height="20" fill="#cf6fff" stroke="#8a3aaa" stroke-width="1.5" rx="2"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">Mn</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#cf6fff">MANGANESE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +12 | EN +6 | GR +12</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-558 kJ/mol</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="18" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- Fe(III) - Iron -->
+      <g transform="translate(100, 160)">
+        <circle cx="12" cy="12" r="10" fill="#ef8f3f" stroke="#aa5a1a" stroke-width="1.5"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">Fe</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#ef8f3f">IRON</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +10 | EN +5 | GR +10</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-334 kJ/mol</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="15" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- SO4 - Sulfate -->
+      <g transform="translate(100, 205)">
+        <rect x="2" y="2" width="20" height="20" fill="#dfdf3f" stroke="#8a8a1a" stroke-width="1.5" rx="1"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="#333">SO4</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#dfdf3f">SULFATE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +6  | EN +3 | GR +8</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-152 kJ/mol</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="12" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- CH4 - Methane -->
+      <g transform="translate(100, 250)">
+        <circle cx="12" cy="12" r="10" fill="#ff4f4f" stroke="#aa1a1a" stroke-width="1.5"/>
+        <circle cx="12" cy="12" r="7" fill="#ff6f2f" opacity="0.4"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">CH4</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">METHANE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +5  | EN +2.5 | GR +25</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-31 kJ/mol</text>
+        <text x="260" y="22" text-anchor="end" font-size="6" fill="#ff4f4f">MOST GROWTH!</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="38" height="8" fill="#5ff050" rx="2"/>
+      </g>
+    </svg>
+  </div>
+
+  <p class="page-number left">7</p>
+</div>
+
+<!-- Substrates page 2: Detailed cards -->
+<div class="page" id="substrates2">
+  <h2>Substrate Details</h2>
+
+  <div class="substrate-grid">
+    <!-- O2 -->
+    <div class="sub-card" style="border-left: 4px solid #4fa4ff;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#4fa4ff"/>
+          <circle cx="6" cy="6" r="3.5" fill="#7ac4ff" opacity="0.4"/>
+          <circle cx="4" cy="4" r="1" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#4fa4ff;">O2 &mdash; OXYGEN</div>
+        <p style="font-size:9pt;">Aerobic respiration. Highest energy yield in nature.
+        Available in surface soils and thawing permafrost.</p>
+        <div class="sub-values">+20 HP | +10 EN | +15 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7</div>
+      </div>
+    </div>
+    <!-- NO3 -->
+    <div class="sub-card" style="border-left: 4px solid #4fdf6f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#4fdf6f"/>
+          <circle cx="6" cy="6" r="3.5" fill="#7fff9f" opacity="0.4"/>
+          <circle cx="4" cy="4" r="1" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#4fdf6f;">NO3 &mdash; NITRATE</div>
+        <p style="font-size:9pt;">Denitrification. Prevents N<sub>2</sub>O (300&times; CO<sub>2</sub>)
+        from forming. Best all-around substrate.</p>
+        <div class="sub-values">+15 HP | +7.5 EN | +18 GR | +25 PTS</div>
+        <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS!</div>
+      </div>
+    </div>
+    <!-- Mn(IV) -->
+    <div class="sub-card" style="border-left: 4px solid #cf6fff;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <rect x="1" y="1" width="10" height="10" fill="#cf6fff" rx="2"/>
+          <rect x="3" y="3" width="6" height="6" fill="#df9fff" opacity="0.4" rx="1"/>
+          <rect x="2" y="2" width="2" height="2" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#cf6fff;">Mn(IV) &mdash; MANGANESE</div>
+        <p style="font-size:9pt;">Manganese reduction. Angular purple particles.
+        Mid-range energy and growth.</p>
+        <div class="sub-values">+12 HP | +6 EN | +12 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10</div>
+      </div>
+    </div>
+    <!-- Fe(III) -->
+    <div class="sub-card" style="border-left: 4px solid #ef8f3f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#ef8f3f"/>
+          <circle cx="6" cy="6" r="3.5" fill="#ffaf6f" opacity="0.4"/>
+          <circle cx="4" cy="4" r="1" fill="white" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#ef8f3f;">Fe(III) &mdash; IRON</div>
+        <p style="font-size:9pt;">Iron reduction. Moderate energy and growth.
+        Found in deep sediments and vents.</p>
+        <div class="sub-values">+10 HP | +5 EN | +10 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10</div>
+      </div>
+    </div>
+    <!-- SO4 -->
+    <div class="sub-card" style="border-left: 4px solid #dfdf3f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <rect x="1" y="1" width="10" height="10" fill="#dfdf3f" rx="1"/>
+          <rect x="3" y="3" width="6" height="6" fill="#ffff7f" opacity="0.4"/>
+          <rect x="2" y="2" width="2" height="2" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#c0c020;">SO4 &mdash; SULFATE</div>
+        <p style="font-size:9pt;">Sulfate reduction. Produces H<sub>2</sub>S (toxic zones!).
+        Low energy but necessary in anaerobic zones.</p>
+        <div class="sub-values">+6 HP | +3 EN | +8 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#c0c020;">Levels: 5-10</div>
+      </div>
+    </div>
+    <!-- CH4 -->
+    <div class="sub-card" style="border-left: 4px solid #ff4f4f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#ff4f4f"/>
+          <circle cx="6" cy="6" r="3" fill="#ff6f2f" opacity="0.5"/>
+          <circle cx="4" cy="4" r="1.5" fill="#ffaa00" opacity="0.4"/>
+          <circle cx="7" cy="7" r="1" fill="#ff2020" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#ff4f4f;">CH4 &mdash; METHANE</div>
+        <p style="font-size:9pt;">Methanotrophy! Lowest energy but <strong>HIGHEST GROWTH</strong>.
+        Prevents greenhouse warming (80&times; CO<sub>2</sub>). Your signature food!</p>
+        <div class="sub-values">+5 HP | +2.5 EN | +25 GR | +35 PTS</div>
+        <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box warning">
+    <div class="info-box-title" style="color:#c05030;">FEEDING STRATEGY</div>
+    <p style="font-size:10pt;">
+      <strong>When Health is high (&gt;50):</strong> Prioritize CH<sub>4</sub> for maximum growth (fastest path to division).<br>
+      <strong>When Health is moderate (30-50):</strong> Eat NO<sub>3</sub> for balanced recovery.<br>
+      <strong>When Health is critical (&lt;30):</strong> Eat O<sub>2</sub> or NO<sub>3</sub> immediately&mdash;survival first!<br>
+      <strong>Remember:</strong> Substrates spawn near the INLET and drift with the flow.
+    </p>
+  </div>
+
+  <!-- Substrate spawn info -->
+  <h2>How Substrates Appear</h2>
+  <p style="font-size:10pt;">
+    New substrates spawn every <strong>1.2 seconds</strong> near the INLET (left side). They drift
+    with the water flow, moving right across the map. Each level has a <strong>spawn density</strong>
+    (2-6 per cycle) that determines food abundance. Substrates have limited lifetimes&mdash;if
+    nobody eats them, they eventually disappear.
+  </p>
+
+  <p class="page-number right">8</p>
+</div>

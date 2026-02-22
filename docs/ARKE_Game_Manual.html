@@ -1,0 +1,3277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARKE: Guardians of Earth — Instruction Booklet</title>
+  <style>
+/* ARKE: Guardians of Earth - Game Manual Styles */
+/* Inspired by classic NES instruction booklets */
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+  --bg-dark: #0a0c1a;
+  --bg-page: #f5f0e8;
+  --bg-section: #ebe5d8;
+  --text-dark: #1a1a2a;
+  --text-light: #f0f0ff;
+  --accent-cyan: #4aeaff;
+  --accent-green: #4fdf6f;
+  --accent-red: #ff4f4f;
+  --accent-orange: #ef8f3f;
+  --accent-yellow: #dfdf3f;
+  --accent-purple: #cf6fff;
+  --accent-blue: #4fa4ff;
+  --accent-teal: #3ac5c9;
+  --grain-brown: #7a5a2a;
+  --pore-blue: #0c1420;
+  --toxic-magenta: #c060c0;
+  --biofilm-green: #3a7a5a;
+  --page-width: 8.5in;
+  --page-height: 11in;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+/* Page layout for print */
+.page {
+  width: var(--page-width);
+  min-height: var(--page-height);
+  margin: 20px auto;
+  background: var(--bg-page);
+  padding: 0.6in 0.7in;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  page-break-after: always;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-number {
+  position: absolute;
+  bottom: 0.4in;
+  font-family: 'Space Mono', monospace;
+  font-size: 9pt;
+  color: #888;
+}
+.page-number.left { left: 0.7in; }
+.page-number.right { right: 0.7in; }
+
+/* Cover page */
+.cover-page {
+  background: linear-gradient(180deg, #020410 0%, #0a1028 30%, #061020 70%, #000408 100%);
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+.cover-page .stars {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
+}
+
+.cover-page .star {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.cover-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 42pt;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 20px rgba(74,234,255,0.6), 0 4px 0 #1a6a8a;
+  letter-spacing: 8px;
+  z-index: 2;
+  margin-bottom: 8px;
+}
+
+.cover-subtitle {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12pt;
+  color: var(--accent-green);
+  text-shadow: 0 0 12px rgba(79,223,111,0.5);
+  letter-spacing: 3px;
+  z-index: 2;
+  margin-bottom: 40px;
+}
+
+.cover-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+  color: #c0c0d0;
+  letter-spacing: 4px;
+  z-index: 2;
+  margin-top: 60px;
+  border: 2px solid #4a4a6a;
+  padding: 10px 24px;
+}
+
+.cover-badge {
+  z-index: 2;
+  margin-top: 30px;
+  font-size: 8pt;
+  color: #8888aa;
+  font-family: 'Space Mono', monospace;
+}
+
+/* Section headers */
+h1.section-number {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+  color: #666;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+h1.section-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: 22pt;
+  color: var(--text-dark);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 3px solid var(--text-dark);
+  padding-bottom: 6px;
+}
+
+h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 14pt;
+  color: var(--text-dark);
+  margin: 18px 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 11pt;
+  margin: 12px 0 6px 0;
+}
+
+p { margin-bottom: 8px; }
+
+/* Info boxes */
+.info-box {
+  background: #ddd8c8;
+  border: 2px solid #aaa48a;
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin: 12px 0;
+}
+
+.info-box.warning {
+  background: #f0ddd0;
+  border-color: #d08060;
+}
+
+.info-box.tip {
+  background: #d0e8d8;
+  border-color: #60a070;
+}
+
+.info-box.science {
+  background: #d0d8f0;
+  border-color: #6070a0;
+}
+
+.info-box-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8pt;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+/* Character cards */
+.char-card {
+  display: flex;
+  gap: 16px;
+  border: 2px solid #3a3a4a;
+  background: white;
+  padding: 16px;
+  margin: 12px 0;
+  border-radius: 4px;
+}
+
+.char-card .char-sprite {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.char-card .char-info {
+  flex: 1;
+}
+
+.char-card .char-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+  margin-bottom: 6px;
+}
+
+.char-card .char-desc {
+  font-size: 10pt;
+  line-height: 1.4;
+}
+
+.char-card .char-stats {
+  margin-top: 6px;
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+  color: #555;
+}
+
+/* Substrate cards */
+.substrate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.sub-card {
+  border: 2px solid #3a3a4a;
+  background: white;
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.sub-card .sub-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.sub-card .sub-info { flex: 1; }
+
+.sub-card .sub-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8pt;
+  margin-bottom: 4px;
+}
+
+.sub-card .sub-values {
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+  color: #555;
+}
+
+/* Level cards */
+.level-card {
+  border: 2px solid #3a3a4a;
+  background: white;
+  padding: 16px;
+  margin: 14px 0;
+  border-radius: 4px;
+  page-break-inside: avoid;
+}
+
+.level-card .level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 6px;
+}
+
+.level-card .level-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10pt;
+}
+
+.level-card .level-chapter {
+  font-size: 9pt;
+  color: #777;
+  font-style: italic;
+}
+
+.level-card .level-map {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.level-card .level-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 8px 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+}
+
+.level-card .level-stats .stat {
+  background: #f0ece0;
+  padding: 4px 8px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.level-card .stat-label {
+  color: #888;
+  font-size: 7pt;
+  display: block;
+}
+
+.level-card .stat-value {
+  font-weight: 700;
+  color: #333;
+}
+
+.level-card .level-strategy {
+  font-size: 10pt;
+  margin-top: 8px;
+  padding: 8px;
+  background: #f8f4ea;
+  border-left: 3px solid var(--accent-teal);
+}
+
+/* Controls diagram */
+.controls-diagram {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 16px 0;
+}
+
+.key-group {
+  text-align: center;
+}
+
+.key-group .key-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7pt;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+/* HUD mockup */
+.hud-mockup {
+  background: #0a0a1a;
+  border: 2px solid #3a3a6a;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  color: var(--text-light);
+  font-family: 'Space Mono', monospace;
+  font-size: 9pt;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 10pt;
+}
+
+th {
+  background: #3a3a4a;
+  color: white;
+  padding: 6px 10px;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  font-size: 8pt;
+  letter-spacing: 1px;
+}
+
+td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+tr:nth-child(even) td {
+  background: #ece8d8;
+}
+
+/* Flow diagram */
+.flow-diagram {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.flow-arrow {
+  display: inline-block;
+  margin: 0 8px;
+  color: #888;
+  font-size: 16pt;
+}
+
+.flow-step {
+  display: inline-block;
+  background: white;
+  border: 2px solid #3a3a4a;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7pt;
+  vertical-align: middle;
+}
+
+/* Two column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.two-col.wide-left {
+  grid-template-columns: 1.5fr 1fr;
+}
+
+/* Pixel art scaling */
+svg.pixel-art {
+  image-rendering: pixelated;
+}
+
+/* Decorative borders */
+.deco-border {
+  border: 3px double #3a3a4a;
+  padding: 16px;
+  margin: 12px 0;
+}
+
+/* Bar chart style for stats */
+.bar-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 3px 0;
+}
+
+.bar-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7pt;
+  width: 28px;
+  color: #777;
+}
+
+.bar-track {
+  flex: 1;
+  height: 12px;
+  background: #1a1a2b;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+
+.bar-fill.hp { background: #44df5f; }
+.bar-fill.en { background: #5fa0f0; }
+.bar-fill.gr { background: #5ff050; }
+
+/* Print styles */
+@media print {
+  body { background: white; }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+  }
+  .cover-page .star { display: none; }
+}
+
+/* Responsive for screen */
+@media screen and (max-width: 900px) {
+  .page {
+    width: 100%;
+    padding: 20px;
+    margin: 10px auto;
+  }
+  .substrate-grid { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .level-card .level-stats { grid-template-columns: repeat(2, 1fr); }
+}
+  </style>
+</head>
+<body>
+<!-- Section 01: Cover Page -->
+<div class="page cover-page" id="cover">
+  <div class="stars">
+    <div class="star" style="top:5%;left:12%;animation-delay:0s"></div>
+    <div class="star" style="top:8%;left:45%;animation-delay:0.5s"></div>
+    <div class="star" style="top:12%;left:78%;animation-delay:1.2s"></div>
+    <div class="star" style="top:18%;left:23%;animation-delay:0.3s"></div>
+    <div class="star" style="top:22%;left:67%;animation-delay:2.1s"></div>
+    <div class="star" style="top:28%;left:90%;animation-delay:0.8s"></div>
+    <div class="star" style="top:35%;left:8%;animation-delay:1.5s"></div>
+    <div class="star" style="top:40%;left:55%;animation-delay:0.2s"></div>
+    <div class="star" style="top:50%;left:30%;animation-delay:1.8s"></div>
+    <div class="star" style="top:55%;left:82%;animation-delay:0.6s"></div>
+    <div class="star" style="top:62%;left:15%;animation-delay:2.5s"></div>
+    <div class="star" style="top:70%;left:60%;animation-delay:1.1s"></div>
+    <div class="star" style="top:75%;left:40%;animation-delay:0.9s"></div>
+    <div class="star" style="top:82%;left:72%;animation-delay:1.7s"></div>
+    <div class="star" style="top:88%;left:25%;animation-delay:2.3s"></div>
+    <div class="star" style="top:92%;left:85%;animation-delay:0.4s"></div>
+  </div>
+
+  <!-- ARKE character SVG -->
+  <svg width="160" height="160" viewBox="0 0 16 16" class="pixel-art" style="z-index:2; margin-bottom:20px;">
+    <!-- Body -->
+    <rect x="5" y="4" width="6" height="8" fill="#2a8a8a" />
+    <rect x="6" y="3" width="4" height="1" fill="#2a8a8a" />
+    <rect x="6" y="12" width="4" height="1" fill="#2a8a8a" />
+    <!-- Visor -->
+    <rect x="6" y="5" width="4" height="3" fill="#1a1a3a" />
+    <rect x="7" y="5" width="2" height="1" fill="#4aeaff" />
+    <rect x="6" y="6" width="4" height="1" fill="#3ac5c9" />
+    <!-- Eye glow -->
+    <rect x="7" y="6" width="1" height="1" fill="#4aeaff" />
+    <rect x="9" y="6" width="1" height="1" fill="#4aeaff" />
+    <!-- Membrane detail -->
+    <rect x="4" y="6" width="1" height="4" fill="#1a6a6a" />
+    <rect x="11" y="6" width="1" height="4" fill="#1a6a6a" />
+    <!-- Flagella -->
+    <rect x="3" y="7" width="1" height="1" fill="#1a6a6a" />
+    <rect x="2" y="8" width="1" height="1" fill="#1a6a6a" />
+    <rect x="12" y="7" width="1" height="1" fill="#1a6a6a" />
+    <rect x="13" y="8" width="1" height="1" fill="#1a6a6a" />
+    <!-- Glow outline -->
+    <rect x="5" y="3" width="1" height="1" fill="#4aeaff" opacity="0.4" />
+    <rect x="10" y="3" width="1" height="1" fill="#4aeaff" opacity="0.4" />
+    <rect x="5" y="12" width="1" height="1" fill="#4aeaff" opacity="0.4" />
+    <rect x="10" y="12" width="1" height="1" fill="#4aeaff" opacity="0.4" />
+  </svg>
+
+  <div class="cover-title">ARKE</div>
+  <div class="cover-subtitle">GUARDIANS OF EARTH</div>
+
+  <svg width="400" height="2" style="z-index:2">
+    <line x1="0" y1="1" x2="400" y2="1" stroke="#4a4a6a" stroke-width="1"/>
+  </svg>
+
+  <p style="z-index:2; margin-top:20px; font-size:10pt; color:#a0a0c0; max-width:400px; font-style:italic;">
+    A Pore-Scale Microbial Adventure<br>
+    Based on Real Science from CompLaB3D
+  </p>
+
+  <div class="cover-label">INSTRUCTION BOOKLET</div>
+
+  <div class="cover-badge">
+    CompLaB3D &bull; University of Georgia &bull; Pore-Scale Reactive Transport
+  </div>
+
+  <!-- Bottom decorative pore landscape -->
+  <svg width="600" height="60" viewBox="0 0 60 6" class="pixel-art" style="z-index:2; position:absolute; bottom:40px;">
+    <!-- Grain particles -->
+    <circle cx="5" cy="4" r="2" fill="#7a5a2a" opacity="0.6"/>
+    <circle cx="12" cy="5" r="2.5" fill="#6a4a1a" opacity="0.5"/>
+    <circle cx="22" cy="3" r="1.5" fill="#7a5a2a" opacity="0.6"/>
+    <circle cx="30" cy="5" r="2" fill="#6a4a1a" opacity="0.5"/>
+    <circle cx="38" cy="4" r="2.5" fill="#7a5a2a" opacity="0.6"/>
+    <circle cx="48" cy="3" r="1.5" fill="#6a4a1a" opacity="0.5"/>
+    <circle cx="55" cy="5" r="2" fill="#7a5a2a" opacity="0.6"/>
+    <!-- Pore water -->
+    <rect x="7" y="3" width="3" height="2" fill="#0c1420" opacity="0.4" rx="0.5"/>
+    <rect x="15" y="2" width="5" height="3" fill="#0c1420" opacity="0.4" rx="0.5"/>
+    <rect x="25" y="3" width="3" height="2" fill="#0c1420" opacity="0.4" rx="0.5"/>
+    <rect x="33" y="2" width="3" height="3" fill="#0c1420" opacity="0.4" rx="0.5"/>
+    <rect x="42" y="3" width="4" height="2" fill="#0c1420" opacity="0.4" rx="0.5"/>
+    <rect x="51" y="2" width="3" height="3" fill="#0c1420" opacity="0.4" rx="0.5"/>
+    <!-- Substrate particles -->
+    <rect x="9" y="3" width="1" height="1" fill="#4fa4ff" opacity="0.7"/>
+    <rect x="18" y="2" width="1" height="1" fill="#ff4f4f" opacity="0.7"/>
+    <rect x="27" y="3" width="1" height="1" fill="#4fdf6f" opacity="0.7"/>
+    <rect x="36" y="3" width="1" height="1" fill="#dfdf3f" opacity="0.7"/>
+    <rect x="45" y="3" width="1" height="1" fill="#ef8f3f" opacity="0.7"/>
+  </svg>
+</div>
+
+<!-- Inner cover / credits page -->
+<div class="page" id="credits" style="background: #f0ece0;">
+  <div style="text-align:center; padding-top: 60px;">
+    <svg width="200" height="40" viewBox="0 0 200 40" style="margin-bottom: 40px;">
+      <text x="100" y="25" text-anchor="middle" font-family="'Press Start 2P', monospace" font-size="8" fill="#3a3a4a" letter-spacing="2">CompLaB3D</text>
+      <text x="100" y="36" text-anchor="middle" font-family="'Inter', sans-serif" font-size="5" fill="#888">Pore-Scale Reactive Transport Lab</text>
+      <line x1="40" y1="28" x2="160" y2="28" stroke="#aaa" stroke-width="0.5"/>
+    </svg>
+
+    <p style="font-size:10pt; color:#555; max-width:350px; margin:0 auto 30px auto; text-align: center;">
+      <strong>ARKE: Guardians of Earth</strong> is an educational tile-based game
+      that teaches biogeochemical concepts through interactive microbial gameplay.
+    </p>
+
+    <p style="font-size:9pt; color:#777; margin-bottom:6px;">
+      Based on research from the <strong>University of Georgia</strong>
+    </p>
+    <p style="font-size:9pt; color:#777; margin-bottom:30px;">
+      CompLaB3D Pore-Scale Reactive Transport Framework
+    </p>
+
+    <div style="border:1px solid #ccc; padding:16px; max-width:350px; margin:0 auto; text-align:left; font-size:9pt;">
+      <p><strong>Game Engine:</strong> Godot 4.2+</p>
+      <p><strong>Genre:</strong> Educational / Strategy / Tile-based</p>
+      <p><strong>Players:</strong> 1</p>
+      <p><strong>Platform:</strong> PC / Web (itch.io)</p>
+      <p style="margin-top:10px; font-size:8pt; color:#999;">
+        All game art, music, and sound effects are procedurally generated.
+        No external assets required.
+      </p>
+    </div>
+  </div>
+
+  <div style="position:absolute; bottom:0.6in; left:0.7in; right:0.7in; text-align:center;">
+    <p style="font-size:8pt; color:#999;">
+      This instruction booklet contains important information about gameplay mechanics,
+      characters, worlds, and the real science behind the game. Please read it thoroughly
+      before beginning your mission.
+    </p>
+  </div>
+</div>
+
+<!-- Section 02: Story & Introduction -->
+<div class="page" id="story">
+  <h1 class="section-number">SECTION 1</h1>
+  <h1 class="section-title">The Story</h1>
+
+  <div class="deco-border" style="background:white;">
+    <!-- Scene illustration: underground pore space -->
+    <svg width="100%" height="140" viewBox="0 0 500 140" class="pixel-art">
+      <!-- Background pore space -->
+      <rect x="0" y="0" width="500" height="140" fill="#0c1420"/>
+
+      <!-- Grain particles (brown circles) -->
+      <circle cx="30" cy="20" r="25" fill="#7a5a2a"/>
+      <circle cx="100" cy="130" r="30" fill="#8a6a3a"/>
+      <circle cx="180" cy="10" r="20" fill="#6a4a1a"/>
+      <circle cx="250" cy="130" r="25" fill="#7a5a2a"/>
+      <circle cx="330" cy="15" r="22" fill="#8a6a3a"/>
+      <circle cx="400" cy="125" r="28" fill="#6a4a1a"/>
+      <circle cx="470" cy="20" r="25" fill="#7a5a2a"/>
+      <circle cx="60" cy="85" r="15" fill="#6a4a1a"/>
+      <circle cx="440" cy="80" r="18" fill="#8a6a3a"/>
+
+      <!-- Flow arrows -->
+      <g fill="none" stroke="#3060a0" stroke-width="1" opacity="0.5">
+        <path d="M80,60 L120,60 L115,55 M120,60 L115,65"/>
+        <path d="M200,70 L240,70 L235,65 M240,70 L235,75"/>
+        <path d="M320,55 L360,55 L355,50 M360,55 L355,60"/>
+      </g>
+
+      <!-- Substrate particles floating -->
+      <circle cx="140" cy="70" r="4" fill="#4fa4ff" opacity="0.8"/> <!-- O2 -->
+      <circle cx="220" cy="50" r="4" fill="#4fdf6f" opacity="0.8"/> <!-- NO3 -->
+      <circle cx="300" cy="80" r="4" fill="#ff4f4f" opacity="0.8"/> <!-- CH4 -->
+      <circle cx="380" cy="60" r="4" fill="#dfdf3f" opacity="0.8"/> <!-- SO4 -->
+
+      <!-- ARKE character (center) -->
+      <g transform="translate(255,55)">
+        <rect x="-8" y="-10" width="16" height="20" fill="#2a8a8a" rx="2"/>
+        <rect x="-6" y="-8" width="12" height="6" fill="#1a1a3a"/>
+        <rect x="-4" y="-7" width="3" height="2" fill="#4aeaff"/>
+        <rect x="2" y="-7" width="3" height="2" fill="#4aeaff"/>
+        <!-- Glow -->
+        <circle cx="0" cy="0" r="14" fill="none" stroke="#4aeaff" stroke-width="0.5" opacity="0.4"/>
+      </g>
+
+      <!-- Labels -->
+      <text x="250" y="135" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#4aeaff" opacity="0.6">THE PORE SPACE</text>
+    </svg>
+  </div>
+
+  <div style="margin-top:16px;">
+    <p style="font-size: 11pt; line-height: 1.7;">
+      Deep beneath the surface of the Earth, between grains of rock and soil,
+      there exists a hidden world. In the microscopic spaces called <strong>pores</strong>,
+      water flows carrying dissolved chemicals&mdash;the fuel of life itself.
+    </p>
+
+    <p style="font-size: 11pt; line-height: 1.7;">
+      For billions of years, tiny organisms called <strong>archaea</strong> have lived
+      here in the dark, feeding on chemicals that seep up from deep underground.
+      They are Earth's invisible guardians&mdash;consuming <strong>methane (CH<sub>4</sub>)</strong>,
+      a greenhouse gas <strong>80 times</strong> more potent than CO<sub>2</sub>, and
+      <strong>nitrate (NO<sub>3</sub><sup>-</sup>)</strong>, which would otherwise become
+      <strong>nitrous oxide (N<sub>2</sub>O)</strong>, a gas <strong>300 times</strong>
+      more potent than CO<sub>2</sub>.
+    </p>
+
+    <p style="font-size: 11pt; line-height: 1.7;">
+      Without these microbes, Earth's climate would spiral out of control.
+    </p>
+  </div>
+
+  <div class="info-box" style="margin-top: 16px;">
+    <div class="info-box-title" style="color: var(--accent-cyan);">YOUR MISSION</div>
+    <p>
+      You are <strong>ARKE</strong>&mdash;a young methanotrophic archaeon, newly awakened
+      in the pore space. Guided by the ancient <strong>Elder Archaeon Prime</strong>,
+      you must navigate through five increasingly hostile environments:
+    </p>
+    <ol style="margin: 8px 0 0 20px; font-size: 10pt;">
+      <li>Eat <strong>substrates</strong> (dissolved chemicals) to survive and grow</li>
+      <li>Manage your <strong>Health</strong>, <strong>Energy</strong>, and <strong>Growth</strong></li>
+      <li>Place <strong>biofilm colonies</strong> to secure territory and protect the planet</li>
+      <li>Outcompete <strong>rival microbes</strong> who hunt for the same food</li>
+      <li>Survive <strong>toxic zones</strong>, starvation, and hostile environments</li>
+    </ol>
+  </div>
+
+  <p class="page-number left">1</p>
+</div>
+
+<!-- Story continued: The Opening -->
+<div class="page" id="story2">
+  <h2>The Awakening</h2>
+
+  <div style="background: #1a1a2a; color: #c0c0d0; padding: 16px; border-radius: 4px; margin: 12px 0; font-size: 10pt; line-height: 1.8;">
+
+    <!-- Dialogue scene -->
+    <div style="margin-bottom: 12px;">
+      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
+        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
+        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+        <rect x="4" y="6" width="1" height="4" fill="#6a4a1a"/>
+        <rect x="11" y="6" width="1" height="4" fill="#6a4a1a"/>
+      </svg>
+      <strong style="color:#ffd700;">Elder Archaeon Prime:</strong>
+      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+        "Wake up, young one. You're deep in the subsurface now, between the grains.
+        This is your home&mdash;the pore space."
+      </p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
+        <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+        <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+      </svg>
+      <strong style="color:#4aeaff;">ARKE:</strong>
+      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+        "Where... where am I? Everything is so dark..."
+      </p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
+        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
+        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+      </svg>
+      <strong style="color:#ffd700;">Elder:</strong>
+      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+        "Look around you. See those brown walls? Those are rock grains. The dark blue
+        space between them is water&mdash;your world. And those glowing particles?
+        That's your food."
+      </p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
+        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
+        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+      </svg>
+      <strong style="color:#ffd700;">Elder:</strong>
+      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+        "There's methane rising from below&mdash;CH<sub>4</sub>. It's a greenhouse gas, 80 times
+        more potent than CO<sub>2</sub>. And nitrous oxide seeping from thawing soil above&mdash;300 times
+        more potent! If these gases reach the atmosphere... the planet warms."
+      </p>
+    </div>
+
+    <div style="margin-bottom: 12px;">
+      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
+        <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+        <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+      </svg>
+      <strong style="color:#4aeaff;">ARKE:</strong>
+      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+        "What can I do? I'm just one microbe..."
+      </p>
+    </div>
+
+    <div>
+      <svg width="32" height="32" viewBox="0 0 16 16" class="pixel-art" style="vertical-align:middle; margin-right:8px;">
+        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
+        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="5" width="2" height="1" fill="#ffd700"/>
+      </svg>
+      <strong style="color:#ffd700;">Elder:</strong>
+      <p style="margin-left:44px; margin-top:4px; font-style:italic;">
+        "One microbe can become billions. Eat substrates, grow your biomass, and
+        when you're ready&mdash;divide! Place biofilm colonies across the pore space.
+        Each colony is a sentinel, consuming greenhouse gases. You are Earth's
+        climate shield. Now go, young one. The Soil Frontier awaits."
+      </p>
+    </div>
+  </div>
+
+  <h2>Object of the Game</h2>
+
+  <p>
+    Navigate through <strong>10 levels</strong> across <strong>5 unique environments</strong>,
+    each inspired by real subsurface ecosystems. In each level, you must place a target number
+    of <strong>biofilm colonies</strong> by eating substrates and growing your biomass to the
+    division threshold.
+  </p>
+
+  <div class="two-col" style="margin-top: 12px;">
+    <div>
+      <h3>To Win Each Level:</h3>
+      <ul style="margin-left: 16px; font-size: 10pt;">
+        <li>Eat substrates to fill your Growth bar</li>
+        <li>Press <strong>SPACE</strong> when Growth reaches 100 to divide</li>
+        <li>Place the required number of colonies</li>
+        <li>Advance to the next level</li>
+      </ul>
+    </div>
+    <div>
+      <h3>You Lose If:</h3>
+      <ul style="margin-left: 16px; font-size: 10pt;">
+        <li>Your Health drops to 0 (starvation)</li>
+        <li>Toxic zones drain your Health too fast</li>
+        <li>Rivals consume all available food</li>
+        <li style="color:#888;">(You can always retry the level!)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="info-box tip" style="margin-top: 16px;">
+    <div class="info-box-title" style="color:#3a8a4a;">REMEMBER</div>
+    <p style="font-size: 10pt;">
+      Every molecule of methane (CH<sub>4</sub>) you eat prevents greenhouse warming.
+      Every nitrate (NO<sub>3</sub><sup>-</sup>) you consume prevents nitrous oxide release.
+      <strong>You are playing for the planet!</strong>
+    </p>
+  </div>
+
+  <p class="page-number right">2</p>
+</div>
+
+<!-- Section 03: Characters -->
+<div class="page" id="characters">
+  <h1 class="section-number">SECTION 2</h1>
+  <h1 class="section-title">Characters</h1>
+
+  <!-- ARKE -->
+  <div class="char-card">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Body (teal archaeon) -->
+        <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+        <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+        <rect x="6" y="12" width="4" height="1" fill="#2a8a8a"/>
+        <!-- Inner membrane highlights -->
+        <rect x="6" y="5" width="1" height="6" fill="#3aa0a0" opacity="0.5"/>
+        <rect x="9" y="5" width="1" height="6" fill="#3aa0a0" opacity="0.5"/>
+        <!-- Visor -->
+        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="5" width="2" height="1" fill="#4aeaff" opacity="0.6"/>
+        <rect x="6" y="6" width="4" height="1" fill="#3ac5c9" opacity="0.3"/>
+        <!-- Eyes -->
+        <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+        <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+        <!-- Side appendages -->
+        <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+        <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+        <!-- Flagella -->
+        <rect x="3" y="7" width="1" height="1" fill="#1a6a6a"/>
+        <rect x="2" y="8" width="1" height="1" fill="#1a6a6a"/>
+        <rect x="12" y="7" width="1" height="1" fill="#1a6a6a"/>
+        <rect x="13" y="8" width="1" height="1" fill="#1a6a6a"/>
+        <!-- Glow corners -->
+        <rect x="4" y="3" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
+        <rect x="11" y="3" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
+        <rect x="4" y="12" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
+        <rect x="11" y="12" width="1" height="1" fill="#4aeaff" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#2a8a8a;">ARKE</div>
+      <div class="char-desc">
+        A young <strong>methanotrophic archaeon</strong>&mdash;a single-celled organism that
+        feeds on dissolved chemicals in underground water. ARKE is Earth's front-line defender
+        against greenhouse gas emissions, capable of consuming methane and other substrates
+        to grow biomass and reproduce through binary fission (division).
+      </div>
+      <div class="char-stats">
+        TYPE: Player Character &bull; SIZE: 32&times;32px &bull; SPEED: 2.5 tiles/sec
+      </div>
+    </div>
+  </div>
+
+  <!-- ARKE Direction Sprites -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:10px 0;">
+    <h3 style="font-size:9pt; margin-bottom:8px;">ARKE Directional Sprites</h3>
+    <div style="display:flex; justify-content:space-around; align-items:center;">
+      <!-- Up -->
+      <div style="text-align:center;">
+        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
+          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+          <rect x="7" y="5" width="2" height="2" fill="#4aeaff" opacity="0.4"/>
+          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <!-- Up arrow indicator -->
+          <rect x="7" y="1" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        </svg>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">UP</div>
+      </div>
+      <!-- Down -->
+      <div style="text-align:center;">
+        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
+          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+          <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+          <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <rect x="7" y="13" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        </svg>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">DOWN</div>
+      </div>
+      <!-- Left -->
+      <div style="text-align:center;">
+        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
+          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+          <rect x="5" y="5" width="3" height="3" fill="#1a1a3a"/>
+          <rect x="5" y="6" width="1" height="1" fill="#4aeaff"/>
+          <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <rect x="3" y="7" width="1" height="1" fill="#1a6a6a"/>
+          <rect x="2" y="8" width="1" height="1" fill="#1a6a6a"/>
+          <rect x="1" y="7" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        </svg>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">LEFT</div>
+      </div>
+      <!-- Right -->
+      <div style="text-align:center;">
+        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
+          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+          <rect x="8" y="5" width="3" height="3" fill="#1a1a3a"/>
+          <rect x="8" y="6" width="1" height="1" fill="#4aeaff"/>
+          <rect x="10" y="6" width="1" height="1" fill="#4aeaff"/>
+          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <rect x="12" y="7" width="1" height="1" fill="#1a6a6a"/>
+          <rect x="13" y="8" width="1" height="1" fill="#1a6a6a"/>
+          <rect x="13" y="7" width="2" height="2" fill="#4aeaff" opacity="0.5"/>
+        </svg>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">RIGHT</div>
+      </div>
+      <!-- Eating -->
+      <div style="text-align:center;">
+        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
+          <rect x="5" y="4" width="6" height="8" fill="#3aaa3a"/>
+          <rect x="6" y="3" width="4" height="1" fill="#3aaa3a"/>
+          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+          <rect x="7" y="6" width="1" height="1" fill="#7fff7f"/>
+          <rect x="9" y="6" width="1" height="1" fill="#7fff7f"/>
+          <rect x="4" y="6" width="1" height="4" fill="#2a7a2a"/>
+          <rect x="11" y="6" width="1" height="4" fill="#2a7a2a"/>
+          <!-- Sparkle particles -->
+          <rect x="3" y="3" width="1" height="1" fill="#ffff00" opacity="0.8"/>
+          <rect x="12" y="4" width="1" height="1" fill="#ffff00" opacity="0.8"/>
+          <rect x="2" y="9" width="1" height="1" fill="#ffff00" opacity="0.6"/>
+          <rect x="13" y="10" width="1" height="1" fill="#ffff00" opacity="0.6"/>
+        </svg>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#888;">EATING</div>
+      </div>
+      <!-- Glowing (ready to divide) -->
+      <div style="text-align:center;">
+        <svg width="48" height="48" viewBox="0 0 16 16" class="pixel-art">
+          <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+          <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+          <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+          <rect x="7" y="6" width="1" height="1" fill="#ffff00"/>
+          <rect x="9" y="6" width="1" height="1" fill="#ffff00"/>
+          <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+          <!-- Glow ring -->
+          <rect x="3" y="3" width="10" height="1" fill="#ffff00" opacity="0.3"/>
+          <rect x="3" y="12" width="10" height="1" fill="#ffff00" opacity="0.3"/>
+          <rect x="3" y="3" width="1" height="10" fill="#ffff00" opacity="0.3"/>
+          <rect x="12" y="3" width="1" height="10" fill="#ffff00" opacity="0.3"/>
+        </svg>
+        <div style="font-family:'Press Start 2P',monospace;font-size:6pt;color:#4a4;">DIVIDE!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARKE Stats Detail -->
+  <h2>ARKE's Vital Stats</h2>
+  <div style="background:white; padding:12px 16px; border:2px solid #3a3a4a; border-radius:4px;">
+    <div class="bar-display">
+      <span class="bar-label" style="color:#44df5f;">HP</span>
+      <div class="bar-track"><div class="bar-fill hp" style="width:100%"></div></div>
+      <span style="font-family:'Space Mono',monospace;font-size:8pt;width:40px;text-align:right;">100</span>
+    </div>
+    <p style="font-size:9pt;margin:2px 0 8px 36px;color:#666;">
+      <strong>Health</strong> &mdash; Drains at 1.5/sec (starvation). Restored by eating. Death at 0.
+    </p>
+    <div class="bar-display">
+      <span class="bar-label" style="color:#5fa0f0;">EN</span>
+      <div class="bar-track"><div class="bar-fill en" style="width:100%"></div></div>
+      <span style="font-family:'Space Mono',monospace;font-size:8pt;width:40px;text-align:right;">100</span>
+    </div>
+    <p style="font-size:9pt;margin:2px 0 8px 36px;color:#666;">
+      <strong>Energy</strong> &mdash; Drains at 0.8/sec. Powers planktonic flow-riding (SHIFT). Restored by eating.
+    </p>
+    <div class="bar-display">
+      <span class="bar-label" style="color:#5ff050;">GR</span>
+      <div class="bar-track"><div class="bar-fill gr" style="width:100%"></div></div>
+      <span style="font-family:'Space Mono',monospace;font-size:8pt;width:40px;text-align:right;">100</span>
+    </div>
+    <p style="font-size:9pt;margin:2px 0 0 36px;color:#666;">
+      <strong>Growth</strong> &mdash; Does NOT decay! Accumulates as you eat. Press SPACE to divide at 100.
+    </p>
+  </div>
+
+  <p class="page-number left">3</p>
+</div>
+
+<!-- Characters page 2: Elder, Rivals, Colonies -->
+<div class="page" id="characters2">
+  <h2>Elder Archaeon Prime</h2>
+
+  <!-- Elder -->
+  <div class="char-card">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Body (golden/ancient) -->
+        <rect x="5" y="3" width="6" height="10" fill="#8a6a2a"/>
+        <rect x="6" y="2" width="4" height="1" fill="#8a6a2a"/>
+        <rect x="6" y="13" width="4" height="1" fill="#8a6a2a"/>
+        <!-- Visor -->
+        <rect x="6" y="4" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="4" width="2" height="1" fill="#ffd700" opacity="0.6"/>
+        <rect x="7" y="5" width="1" height="1" fill="#ffd700"/>
+        <rect x="9" y="5" width="1" height="1" fill="#ffd700"/>
+        <!-- Ancient patterns -->
+        <rect x="6" y="8" width="1" height="1" fill="#aa8a3a"/>
+        <rect x="7" y="9" width="2" height="1" fill="#aa8a3a"/>
+        <rect x="9" y="8" width="1" height="1" fill="#aa8a3a"/>
+        <!-- Side appendages (larger, ancient) -->
+        <rect x="4" y="5" width="1" height="6" fill="#6a4a1a"/>
+        <rect x="11" y="5" width="1" height="6" fill="#6a4a1a"/>
+        <rect x="3" y="6" width="1" height="2" fill="#6a4a1a"/>
+        <rect x="12" y="6" width="1" height="2" fill="#6a4a1a"/>
+        <!-- Glow -->
+        <rect x="4" y="2" width="1" height="1" fill="#ffd700" opacity="0.3"/>
+        <rect x="11" y="2" width="1" height="1" fill="#ffd700" opacity="0.3"/>
+        <rect x="4" y="13" width="1" height="1" fill="#ffd700" opacity="0.3"/>
+        <rect x="11" y="13" width="1" height="1" fill="#ffd700" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#8a6a2a;">ELDER ARCHAEON PRIME</div>
+      <div class="char-desc">
+        An ancient archaeon who has guarded the subsurface for eons. The Elder serves
+        as your mentor, providing mission briefings before each level and teaching you
+        the science behind your abilities. Appears during cutscenes and narrative sequences.
+      </div>
+      <div class="char-stats">
+        TYPE: Mentor / NPC &bull; APPEARS: Cutscenes &amp; Briefings
+      </div>
+    </div>
+  </div>
+
+  <h2>Rival Microbes</h2>
+
+  <!-- Rival -->
+  <div class="char-card">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Body (red bacterium) -->
+        <rect x="6" y="5" width="4" height="6" fill="#8a2a2a"/>
+        <rect x="7" y="4" width="2" height="1" fill="#8a2a2a"/>
+        <rect x="7" y="11" width="2" height="1" fill="#8a2a2a"/>
+        <!-- Highlight -->
+        <rect x="7" y="5" width="1" height="4" fill="#aa4a4a" opacity="0.5"/>
+        <!-- Eyes -->
+        <rect x="7" y="6" width="1" height="1" fill="#ff6666"/>
+        <rect x="9" y="6" width="1" height="1" fill="#ff6666"/>
+        <!-- Alert indicator -->
+        <rect x="7" y="2" width="2" height="2" fill="#ff4444" opacity="0.7"/>
+        <rect x="7.5" y="2.2" width="1" height="1.2" fill="#ffffff" opacity="0.8"/>
+        <!-- Glow ring -->
+        <rect x="5" y="4" width="6" height="1" fill="#ff0000" opacity="0.15"/>
+        <rect x="5" y="11" width="6" height="1" fill="#ff0000" opacity="0.15"/>
+        <rect x="5" y="4" width="1" height="8" fill="#ff0000" opacity="0.15"/>
+        <rect x="10" y="4" width="1" height="8" fill="#ff0000" opacity="0.15"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#cc3333;">RIVAL MICROBE</div>
+      <div class="char-desc">
+        Competing bacteria that hunt for the same substrates as you. Rivals are
+        <strong>invulnerable</strong>&mdash;you cannot kill or damage them. They don't
+        attack you directly, but they consume food aggressively, creating deadly
+        scarcity. The more rivals in a level, the harder it becomes to survive.
+      </div>
+      <div class="char-stats">
+        TYPE: Enemy (Competitor) &bull; SIZE: 10&times;10px &bull;
+        SPEED: 2.5 tiles/sec &bull; SENSE: 12 tiles
+      </div>
+    </div>
+  </div>
+
+  <!-- Rival behavior diagram -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; margin:10px 0;">
+    <h3 style="font-size:9pt; margin-bottom:10px;">Rival Decision Tree</h3>
+    <svg width="100%" height="130" viewBox="0 0 520 130">
+      <!-- Decision boxes -->
+      <rect x="200" y="5" width="120" height="28" rx="4" fill="#8a2a2a" stroke="#cc3333" stroke-width="1.5"/>
+      <text x="260" y="23" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">RIVAL TURN</text>
+
+      <!-- Branch 1: Seek Food -->
+      <line x1="220" y1="33" x2="80" y2="55" stroke="#666" stroke-width="1"/>
+      <rect x="10" y="55" width="140" height="24" rx="4" fill="#f0ece0" stroke="#666"/>
+      <text x="80" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">SEEK FOOD (45-75%)</text>
+      <text x="80" y="95" text-anchor="middle" font-size="7" fill="#666">Senses substrates within</text>
+      <text x="80" y="107" text-anchor="middle" font-size="7" fill="#666">12 tiles, moves toward</text>
+      <text x="80" y="119" text-anchor="middle" font-size="7" fill="#666">nearest one</text>
+
+      <!-- Branch 2: Hunt Player -->
+      <line x1="240" y1="33" x2="220" y2="55" stroke="#666" stroke-width="1"/>
+      <rect x="160" y="55" width="120" height="24" rx="4" fill="#f0ddd0" stroke="#d08060"/>
+      <text x="220" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">TRACK ARKE (15%)</text>
+      <text x="220" y="95" text-anchor="middle" font-size="7" fill="#666">Senses player within</text>
+      <text x="220" y="107" text-anchor="middle" font-size="7" fill="#666">10 tiles, moves to</text>
+      <text x="220" y="119" text-anchor="middle" font-size="7" fill="#666">compete for food zone</text>
+
+      <!-- Branch 3: Follow Flow -->
+      <line x1="280" y1="33" x2="360" y2="55" stroke="#666" stroke-width="1"/>
+      <rect x="300" y="55" width="120" height="24" rx="4" fill="#d0d8f0" stroke="#6070a0"/>
+      <text x="360" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">RIDE FLOW (40%)</text>
+      <text x="360" y="95" text-anchor="middle" font-size="7" fill="#666">Follows water current</text>
+      <text x="360" y="107" text-anchor="middle" font-size="7" fill="#666">to find flow-carried</text>
+      <text x="360" y="119" text-anchor="middle" font-size="7" fill="#666">substrates</text>
+
+      <!-- Branch 4: Wander -->
+      <line x1="300" y1="33" x2="480" y2="55" stroke="#666" stroke-width="1"/>
+      <rect x="420" y="55" width="95" height="24" rx="4" fill="#f0f0f0" stroke="#aaa"/>
+      <text x="467" y="71" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#333">WANDER</text>
+      <text x="467" y="95" text-anchor="middle" font-size="7" fill="#666">Random direction</text>
+      <text x="467" y="107" text-anchor="middle" font-size="7" fill="#666">with preference,</text>
+      <text x="467" y="119" text-anchor="middle" font-size="7" fill="#666">exploring the map</text>
+    </svg>
+  </div>
+
+  <h2>Biofilm Colonies</h2>
+
+  <!-- Colony -->
+  <div class="char-card">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Colony cell body -->
+        <rect x="5" y="5" width="6" height="6" fill="#3a7a5a"/>
+        <rect x="6" y="4" width="4" height="1" fill="#3a7a5a"/>
+        <rect x="6" y="11" width="4" height="1" fill="#3a7a5a"/>
+        <rect x="4" y="6" width="1" height="4" fill="#3a7a5a"/>
+        <rect x="11" y="6" width="1" height="4" fill="#3a7a5a"/>
+        <!-- Highlight -->
+        <rect x="6" y="5" width="2" height="2" fill="#5aaa7a" opacity="0.6"/>
+        <rect x="8" y="7" width="2" height="2" fill="#5aaa7a" opacity="0.4"/>
+        <!-- Glow pulse -->
+        <rect x="3" y="4" width="10" height="1" fill="#4fdf6f" opacity="0.2"/>
+        <rect x="3" y="11" width="10" height="1" fill="#4fdf6f" opacity="0.2"/>
+        <rect x="3" y="4" width="1" height="8" fill="#4fdf6f" opacity="0.2"/>
+        <rect x="12" y="4" width="1" height="8" fill="#4fdf6f" opacity="0.2"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#3a7a5a;">BIOFILM COLONY</div>
+      <div class="char-desc">
+        When ARKE divides, a permanent biofilm colony is placed on the map. Colonies
+        are stationary sentinels that <strong>passively consume</strong> nearby substrates
+        (within 1.5 tiles). They cannot be destroyed. Each colony placed earns
+        <strong>+100 points</strong> and counts toward the level goal.
+      </div>
+      <div class="char-stats">
+        TYPE: Stationary Ally &bull; SIZE: 12&times;12px &bull;
+        FEED RANGE: 1.5 tiles &bull; PERMANENT
+      </div>
+    </div>
+  </div>
+
+  <p class="page-number right">4</p>
+</div>
+
+<!-- Section 04: Controls & Movement -->
+<div class="page" id="controls">
+  <h1 class="section-number">SECTION 3</h1>
+  <h1 class="section-title">Controls & Movement</h1>
+
+  <!-- Keyboard layout diagram -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:20px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:16px;">Keyboard Controls</h3>
+
+    <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:20px;">
+      <!-- WASD Group -->
+      <div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#888;margin-bottom:10px;">MOVEMENT (Option A)</div>
+        <svg width="140" height="100" viewBox="0 0 140 100">
+          <!-- W key -->
+          <rect x="45" y="5" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <text x="60" y="24" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">W</text>
+          <!-- A key -->
+          <rect x="5" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <text x="20" y="57" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">A</text>
+          <!-- S key -->
+          <rect x="45" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <text x="60" y="57" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">S</text>
+          <!-- D key -->
+          <rect x="85" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <text x="100" y="57" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="10" fill="#333">D</text>
+          <!-- Direction arrows -->
+          <text x="60" y="82" text-anchor="middle" font-size="7" fill="#888">Up/Left/Down/Right</text>
+        </svg>
+      </div>
+
+      <!-- Arrow Keys Group -->
+      <div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#888;margin-bottom:10px;">MOVEMENT (Option B)</div>
+        <svg width="140" height="100" viewBox="0 0 140 100">
+          <!-- Up -->
+          <rect x="45" y="5" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <polygon points="60,12 54,24 66,24" fill="#333"/>
+          <!-- Left -->
+          <rect x="5" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <polygon points="13,52 25,46 25,58" fill="#333"/>
+          <!-- Down -->
+          <rect x="45" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <polygon points="60,58 54,46 66,46" fill="#333"/>
+          <!-- Right -->
+          <rect x="85" y="38" width="30" height="28" rx="4" fill="#f0ece0" stroke="#666" stroke-width="1.5"/>
+          <polygon points="107,52 95,46 95,58" fill="#333"/>
+          <text x="60" y="82" text-anchor="middle" font-size="7" fill="#888">Arrow Keys</text>
+        </svg>
+      </div>
+
+      <!-- Action Keys -->
+      <div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#888;margin-bottom:10px;">ACTION KEYS</div>
+        <svg width="160" height="100" viewBox="0 0 160 100">
+          <!-- SPACE bar -->
+          <rect x="5" y="5" width="100" height="28" rx="4" fill="#d0e8d8" stroke="#3a7a5a" stroke-width="1.5"/>
+          <text x="55" y="23" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a7a5a">SPACE</text>
+          <text x="130" y="23" font-size="7" fill="#666">Divide!</text>
+
+          <!-- SHIFT -->
+          <rect x="5" y="38" width="60" height="28" rx="4" fill="#d0d8f0" stroke="#4fa4ff" stroke-width="1.5"/>
+          <text x="35" y="56" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3060a0">SHIFT</text>
+          <text x="75" y="56" font-size="7" fill="#666">Ride Flow</text>
+
+          <!-- Q -->
+          <rect x="5" y="71" width="30" height="24" rx="4" fill="#f0f0d0" stroke="#aa9a30" stroke-width="1.5"/>
+          <text x="20" y="87" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="8" fill="#666">Q</text>
+          <text x="45" y="87" font-size="7" fill="#666">Science Mode</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Keys -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px 16px; margin:12px 0;">
+    <h3 style="font-size:9pt; margin-bottom:8px;">System Keys</h3>
+    <table style="font-size:10pt;">
+      <tr>
+        <th width="120">Key</th>
+        <th>Function</th>
+      </tr>
+      <tr>
+        <td><strong>ESC / P</strong></td>
+        <td>Pause game &mdash; opens pause menu (Resume / Mute / Quit)</td>
+      </tr>
+      <tr>
+        <td><strong>M</strong></td>
+        <td>Toggle sound on/off (mute all audio)</td>
+      </tr>
+      <tr>
+        <td><strong>ENTER</strong></td>
+        <td>Advance dialogue, confirm menu selection, start level</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>How ARKE Moves</h2>
+
+  <div class="two-col">
+    <div>
+      <h3>Normal Movement</h3>
+      <ul style="font-size:10pt; margin-left:16px;">
+        <li><strong>Speed:</strong> 2.5 tiles per second</li>
+        <li><strong>Direction:</strong> 4-directional (no diagonals)</li>
+        <li>Move through <strong>pore space</strong> (dark blue tiles)</li>
+        <li>Cannot pass through <strong>grains</strong> (brown tiles)</li>
+        <li>Can walk through your own <strong>colonies</strong></li>
+        <li>Smooth animation between tiles</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Planktonic Mode (SHIFT)</h3>
+      <ul style="font-size:10pt; margin-left:16px;">
+        <li><strong>Speed:</strong> 5.0 tiles per second (2&times;!)</li>
+        <li>Hold SHIFT on tiles with <strong>water flow</strong></li>
+        <li>Automatically follow flow direction</li>
+        <li><strong>Costs:</strong> 0.5 Energy per move</li>
+        <li>Blue glow shows when active</li>
+        <li>Essential for fast-flow levels!</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Movement diagram -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:14px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:10px;">Movement Through Pore Space</h3>
+    <svg width="420" height="160" viewBox="0 0 420 160" class="pixel-art">
+      <!-- Grid background -->
+      <rect x="10" y="10" width="400" height="140" fill="#0c1420"/>
+
+      <!-- Grain particles -->
+      <circle cx="50" cy="30" r="22" fill="#7a5a2a"/>
+      <circle cx="130" cy="140" r="25" fill="#8a6a3a"/>
+      <circle cx="220" cy="25" r="20" fill="#7a5a2a"/>
+      <circle cx="310" cy="140" r="22" fill="#6a4a1a"/>
+      <circle cx="380" cy="35" r="18" fill="#7a5a2a"/>
+
+      <!-- Walkable path highlight -->
+      <rect x="80" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="112" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="144" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="176" y="50" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="176" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="208" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="240" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+      <rect x="272" y="82" width="32" height="32" fill="#0c1420" stroke="#3060a0" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- ARKE on the path -->
+      <g transform="translate(96,66)">
+        <rect x="-6" y="-8" width="12" height="16" fill="#2a8a8a"/>
+        <rect x="-4" y="-6" width="8" height="4" fill="#1a1a3a"/>
+        <rect x="-3" y="-5" width="2" height="2" fill="#4aeaff"/>
+        <rect x="2" y="-5" width="2" height="2" fill="#4aeaff"/>
+      </g>
+
+      <!-- Movement arrow -->
+      <line x1="110" y1="66" x2="168" y2="66" stroke="#4aeaff" stroke-width="2" marker-end="url(#arrowCyan)"/>
+      <line x1="192" y1="82" x2="192" y2="100" stroke="#4aeaff" stroke-width="2"/>
+      <line x1="192" y1="100" x2="260" y2="100" stroke="#4aeaff" stroke-width="2" marker-end="url(#arrowCyan)"/>
+
+      <!-- Arrow marker -->
+      <defs>
+        <marker id="arrowCyan" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+          <polygon points="0,0 6,2 0,4" fill="#4aeaff"/>
+        </marker>
+        <marker id="arrowBlue" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+          <polygon points="0,0 6,2 0,4" fill="#3060a0"/>
+        </marker>
+      </defs>
+
+      <!-- Labels -->
+      <text x="50" y="30" text-anchor="middle" font-size="6" fill="#a08040" font-weight="bold">GRAIN</text>
+      <text x="100" y="46" text-anchor="middle" font-size="5" fill="#4aeaff">ARKE</text>
+      <text x="150" y="46" text-anchor="middle" font-size="5" fill="#3060a0">walkable pore</text>
+
+      <!-- Blocked path indicator -->
+      <line x1="80" y1="66" x2="65" y2="66" stroke="#ff4444" stroke-width="2"/>
+      <text x="60" y="62" text-anchor="middle" font-size="5" fill="#ff4444">BLOCKED</text>
+
+      <!-- Substrate on path -->
+      <circle cx="256" cy="98" r="4" fill="#4fdf6f"/>
+      <text x="256" y="80" text-anchor="middle" font-size="5" fill="#4fdf6f">NO3</text>
+    </svg>
+    <p style="font-size:8pt; color:#888; margin-top:6px;">
+      ARKE navigates tile-by-tile through pore space. Grains block movement. Substrates are consumed on contact.
+    </p>
+  </div>
+
+  <p class="page-number left">5</p>
+</div>
+
+<!-- Controls page 2: Flow Riding -->
+<div class="page" id="controls2">
+  <h2>Planktonic Flow-Riding</h2>
+
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:10px;">How Flow Riding Works</h3>
+    <svg width="440" height="130" viewBox="0 0 440 130">
+      <!-- Flow channel -->
+      <rect x="20" y="30" width="400" height="50" fill="#0c1420" rx="4"/>
+
+      <!-- Flow arrows background -->
+      <g fill="none" stroke="#3060a0" stroke-width="1" opacity="0.4">
+        <path d="M40,55 L65,55 M60,50 L65,55 L60,60"/>
+        <path d="M90,55 L115,55 M110,50 L115,55 L110,60"/>
+        <path d="M140,55 L165,55 M160,50 L165,55 L160,60"/>
+        <path d="M190,55 L215,55 M210,50 L215,55 L210,60"/>
+        <path d="M240,55 L265,55 M260,50 L265,55 L260,60"/>
+        <path d="M290,55 L315,55 M310,50 L315,55 L310,60"/>
+        <path d="M340,55 L365,55 M360,50 L365,55 L360,60"/>
+      </g>
+
+      <!-- ARKE riding flow (with blue glow) -->
+      <circle cx="200" cy="55" r="18" fill="#3060a0" opacity="0.2"/>
+      <circle cx="200" cy="55" r="14" fill="#3060a0" opacity="0.15"/>
+      <g transform="translate(200,55)">
+        <rect x="-6" y="-8" width="12" height="16" fill="#2a8a8a"/>
+        <rect x="-4" y="-6" width="8" height="4" fill="#1a1a3a"/>
+        <rect x="-3" y="-5" width="2" height="2" fill="#4aeaff"/>
+        <rect x="2" y="-5" width="2" height="2" fill="#4aeaff"/>
+      </g>
+
+      <!-- Speed comparison -->
+      <text x="200" y="20" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">[RIDING FLOW] 5.0 tiles/sec</text>
+
+      <!-- Inlet label -->
+      <rect x="5" y="40" width="15" height="30" fill="#3060a0" rx="2"/>
+      <text x="12" y="58" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">IN</text>
+
+      <!-- Outlet label -->
+      <rect x="420" y="40" width="15" height="30" fill="#4fdf6f" rx="2"/>
+      <text x="427" y="58" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">OUT</text>
+
+      <!-- Energy cost -->
+      <text x="200" y="100" text-anchor="middle" font-size="8" fill="#5fa0f0">Energy Cost: -0.5 EN per move</text>
+      <text x="200" y="115" text-anchor="middle" font-size="7" fill="#888">Hold SHIFT to activate on flow tiles</text>
+    </svg>
+  </div>
+
+  <div class="info-box tip">
+    <div class="info-box-title" style="color:#3a8a4a;">FLOW RIDING TIPS</div>
+    <ul style="font-size:10pt; margin-left:16px;">
+      <li>Flow moves from <strong>INLET</strong> (left, blue) to <strong>OUTLET</strong> (right, green)</li>
+      <li>Not all tiles have flow&mdash;check the <strong>Science Mode (Q)</strong> overlay to see flow directions</li>
+      <li>Flow speed varies: some channels are <strong>FAST FLOW</strong> (2.5&times; speed bonus)</li>
+      <li>Essential in Chapters 4-5 where substrates move very quickly</li>
+      <li>Watch your Energy bar! Running out strands you at normal speed</li>
+    </ul>
+  </div>
+
+  <h2>Tile Types You'll Encounter</h2>
+
+  <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin:10px 0;">
+    <!-- PORE -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#0c1420"/>
+        <rect x="2" y="2" width="1" height="1" fill="#142038" opacity="0.5"/>
+        <rect x="5" y="5" width="1" height="1" fill="#142038" opacity="0.5"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#3060a0;">PORE</div>
+      <div style="font-size:7pt;color:#888;">Walkable water</div>
+    </div>
+    <!-- SOLID -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#7a5a2a"/>
+        <rect x="1" y="1" width="2" height="2" fill="#a48a5a" opacity="0.4"/>
+        <rect x="5" y="4" width="2" height="2" fill="#6a4a1a" opacity="0.4"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#7a5a2a;">GRAIN</div>
+      <div style="font-size:7pt;color:#888;">Impassable rock</div>
+    </div>
+    <!-- BIOFILM -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#3a7a5a"/>
+        <rect x="2" y="2" width="2" height="2" fill="#5aaa7a" opacity="0.5"/>
+        <rect x="4" y="4" width="2" height="2" fill="#5aaa7a" opacity="0.3"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#3a7a5a;">BIOFILM</div>
+      <div style="font-size:7pt;color:#888;">Your colonies</div>
+    </div>
+    <!-- TOXIC -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#2a0a2a"/>
+        <rect x="1" y="1" width="2" height="2" fill="#c060c0" opacity="0.5"/>
+        <rect x="4" y="4" width="2" height="2" fill="#c060c0" opacity="0.3"/>
+        <rect x="3" y="2" width="1" height="1" fill="#ff80ff" opacity="0.6"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#c060c0;">TOXIC</div>
+      <div style="font-size:7pt;color:#ff4444;">-20 HP/sec!</div>
+    </div>
+    <!-- FLOW_FAST -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#0c1830"/>
+        <rect x="1" y="3" width="2" height="1" fill="#4fa4ff" opacity="0.5"/>
+        <rect x="4" y="4" width="2" height="1" fill="#4fa4ff" opacity="0.5"/>
+        <rect x="6" y="3" width="1" height="1" fill="#4fa4ff" opacity="0.3"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#4fa4ff;">FAST FLOW</div>
+      <div style="font-size:7pt;color:#888;">2.5&times; speed</div>
+    </div>
+    <!-- INLET -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#1a3060"/>
+        <polygon points="2,2 6,4 2,6" fill="#4fa4ff" opacity="0.6"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#3060a0;">INLET</div>
+      <div style="font-size:7pt;color:#888;">Water enters</div>
+    </div>
+    <!-- OUTLET -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#1a3020"/>
+        <polygon points="2,2 6,4 2,6" fill="#4fdf6f" opacity="0.6"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#4fdf6f;">OUTLET</div>
+      <div style="font-size:7pt;color:#888;">Water exits</div>
+    </div>
+    <!-- VOID -->
+    <div style="text-align:center; background:white; border:2px solid #3a3a4a; border-radius:4px; padding:8px;">
+      <svg width="48" height="48" viewBox="0 0 8 8" class="pixel-art">
+        <rect width="8" height="8" fill="#000000"/>
+      </svg>
+      <div style="font-family:'Press Start 2P',monospace;font-size:6pt;margin-top:4px;color:#444;">VOID</div>
+      <div style="font-size:7pt;color:#888;">Map boundary</div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <div class="info-box-title">EATING IS AUTOMATIC</div>
+    <p style="font-size:10pt;">
+      You don't need to press a button to eat! Simply <strong>move over a substrate particle</strong>
+      and ARKE will consume it automatically. You'll hear a chiptune sound effect and see
+      your HP, EN, and GR bars update instantly.
+    </p>
+  </div>
+
+  <p class="page-number right">6</p>
+</div>
+
+<!-- Section 05: Substrates & The Redox Ladder -->
+<div class="page" id="substrates">
+  <h1 class="section-number">SECTION 4</h1>
+  <h1 class="section-title">Substrates &mdash; Your Food</h1>
+
+  <p>
+    Substrates are dissolved chemicals carried by water flow through the pore space.
+    They are your food, energy, and building material. Each substrate provides different
+    amounts of <strong>Health</strong>, <strong>Energy</strong>, and <strong>Growth</strong>.
+  </p>
+
+  <div class="info-box science">
+    <div class="info-box-title" style="color:#4060a0;">THE REDOX LADDER (Real Science!)</div>
+    <p style="font-size:10pt;">
+      In real microbiology, organisms use chemicals in a specific thermodynamic order called the
+      <strong>Redox Ladder</strong>. Oxygen provides the most energy; methane provides the least.
+      The game faithfully represents this hierarchy!
+    </p>
+  </div>
+
+  <!-- The Redox Ladder Visual -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:12px;">The Redox Ladder &mdash; Energy Hierarchy</h3>
+    <svg width="440" height="310" viewBox="0 0 440 310">
+      <!-- Ladder background -->
+      <rect x="60" y="10" width="320" height="290" fill="#f8f4ea" rx="6" stroke="#ccc"/>
+
+      <!-- Gradient bar (high energy top, low energy bottom) -->
+      <defs>
+        <linearGradient id="energyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4fa4ff"/>
+          <stop offset="20%" stop-color="#4fdf6f"/>
+          <stop offset="40%" stop-color="#cf6fff"/>
+          <stop offset="60%" stop-color="#ef8f3f"/>
+          <stop offset="80%" stop-color="#dfdf3f"/>
+          <stop offset="100%" stop-color="#ff4f4f"/>
+        </linearGradient>
+      </defs>
+      <rect x="70" y="20" width="16" height="270" fill="url(#energyGrad)" rx="3"/>
+      <text x="78" y="14" text-anchor="middle" font-size="6" fill="#666">HIGH</text>
+      <text x="78" y="300" text-anchor="middle" font-size="6" fill="#666">LOW</text>
+
+      <!-- Energy label -->
+      <text x="30" y="155" text-anchor="middle" font-size="6" fill="#888" transform="rotate(-90,30,155)">ENERGY YIELD</text>
+
+      <!-- Growth label -->
+      <text x="420" y="155" text-anchor="middle" font-size="6" fill="#888" transform="rotate(90,420,155)">GROWTH YIELD</text>
+
+      <!-- O2 - Oxygen (top) -->
+      <g transform="translate(100, 25)">
+        <circle cx="12" cy="12" r="10" fill="#4fa4ff" stroke="#2a6aaa" stroke-width="1.5"/>
+        <text x="12" y="15" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">O2</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fa4ff">OXYGEN</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +20 | EN +10 | GR +15</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-818 kJ/mol</text>
+        <text x="260" y="22" text-anchor="end" font-size="6" fill="#4fa4ff">MOST ENERGY</text>
+        <!-- Growth bar -->
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="22" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- NO3 - Nitrate -->
+      <g transform="translate(100, 70)">
+        <circle cx="12" cy="12" r="10" fill="#4fdf6f" stroke="#2a8a3a" stroke-width="1.5"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">NO3</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#4fdf6f">NITRATE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +15 | EN +7.5 | GR +18</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-649 kJ/mol</text>
+        <text x="260" y="22" text-anchor="end" font-size="6" fill="#4fdf6f">PREVENTS N2O!</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="27" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- Mn(IV) - Manganese -->
+      <g transform="translate(100, 115)">
+        <rect x="2" y="2" width="20" height="20" fill="#cf6fff" stroke="#8a3aaa" stroke-width="1.5" rx="2"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">Mn</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#cf6fff">MANGANESE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +12 | EN +6 | GR +12</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-558 kJ/mol</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="18" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- Fe(III) - Iron -->
+      <g transform="translate(100, 160)">
+        <circle cx="12" cy="12" r="10" fill="#ef8f3f" stroke="#aa5a1a" stroke-width="1.5"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="white">Fe</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#ef8f3f">IRON</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +10 | EN +5 | GR +10</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-334 kJ/mol</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="15" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- SO4 - Sulfate -->
+      <g transform="translate(100, 205)">
+        <rect x="2" y="2" width="20" height="20" fill="#dfdf3f" stroke="#8a8a1a" stroke-width="1.5" rx="1"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="#333">SO4</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#dfdf3f">SULFATE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +6  | EN +3 | GR +8</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-152 kJ/mol</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="12" height="8" fill="#5ff050" rx="2"/>
+      </g>
+
+      <!-- CH4 - Methane -->
+      <g transform="translate(100, 250)">
+        <circle cx="12" cy="12" r="10" fill="#ff4f4f" stroke="#aa1a1a" stroke-width="1.5"/>
+        <circle cx="12" cy="12" r="7" fill="#ff6f2f" opacity="0.4"/>
+        <text x="12" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="4" fill="white">CH4</text>
+        <text x="35" y="10" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">METHANE</text>
+        <text x="35" y="22" font-family="'Space Mono',monospace" font-size="6" fill="#555">HP +5  | EN +2.5 | GR +25</text>
+        <text x="260" y="10" text-anchor="end" font-size="6" fill="#888">-31 kJ/mol</text>
+        <text x="260" y="22" text-anchor="end" font-size="6" fill="#ff4f4f">MOST GROWTH!</text>
+        <rect x="270" y="6" width="50" height="8" fill="#eee" rx="2"/>
+        <rect x="270" y="6" width="38" height="8" fill="#5ff050" rx="2"/>
+      </g>
+    </svg>
+  </div>
+
+  <p class="page-number left">7</p>
+</div>
+
+<!-- Substrates page 2: Detailed cards -->
+<div class="page" id="substrates2">
+  <h2>Substrate Details</h2>
+
+  <div class="substrate-grid">
+    <!-- O2 -->
+    <div class="sub-card" style="border-left: 4px solid #4fa4ff;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#4fa4ff"/>
+          <circle cx="6" cy="6" r="3.5" fill="#7ac4ff" opacity="0.4"/>
+          <circle cx="4" cy="4" r="1" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#4fa4ff;">O2 &mdash; OXYGEN</div>
+        <p style="font-size:9pt;">Aerobic respiration. Highest energy yield in nature.
+        Available in surface soils and thawing permafrost.</p>
+        <div class="sub-values">+20 HP | +10 EN | +15 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#4fa4ff;">Levels: 1, 2, 7</div>
+      </div>
+    </div>
+    <!-- NO3 -->
+    <div class="sub-card" style="border-left: 4px solid #4fdf6f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#4fdf6f"/>
+          <circle cx="6" cy="6" r="3.5" fill="#7fff9f" opacity="0.4"/>
+          <circle cx="4" cy="4" r="1" fill="white" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#4fdf6f;">NO3 &mdash; NITRATE</div>
+        <p style="font-size:9pt;">Denitrification. Prevents N<sub>2</sub>O (300&times; CO<sub>2</sub>)
+        from forming. Best all-around substrate.</p>
+        <div class="sub-values">+15 HP | +7.5 EN | +18 GR | +25 PTS</div>
+        <div class="sub-values" style="color:#4fdf6f;">Levels: 1-4, 7-10 | CLIMATE BONUS!</div>
+      </div>
+    </div>
+    <!-- Mn(IV) -->
+    <div class="sub-card" style="border-left: 4px solid #cf6fff;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <rect x="1" y="1" width="10" height="10" fill="#cf6fff" rx="2"/>
+          <rect x="3" y="3" width="6" height="6" fill="#df9fff" opacity="0.4" rx="1"/>
+          <rect x="2" y="2" width="2" height="2" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#cf6fff;">Mn(IV) &mdash; MANGANESE</div>
+        <p style="font-size:9pt;">Manganese reduction. Angular purple particles.
+        Mid-range energy and growth.</p>
+        <div class="sub-values">+12 HP | +6 EN | +12 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#cf6fff;">Levels: 4, 9, 10</div>
+      </div>
+    </div>
+    <!-- Fe(III) -->
+    <div class="sub-card" style="border-left: 4px solid #ef8f3f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#ef8f3f"/>
+          <circle cx="6" cy="6" r="3.5" fill="#ffaf6f" opacity="0.4"/>
+          <circle cx="4" cy="4" r="1" fill="white" opacity="0.4"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#ef8f3f;">Fe(III) &mdash; IRON</div>
+        <p style="font-size:9pt;">Iron reduction. Moderate energy and growth.
+        Found in deep sediments and vents.</p>
+        <div class="sub-values">+10 HP | +5 EN | +10 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#ef8f3f;">Levels: 3, 4, 6, 9, 10</div>
+      </div>
+    </div>
+    <!-- SO4 -->
+    <div class="sub-card" style="border-left: 4px solid #dfdf3f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <rect x="1" y="1" width="10" height="10" fill="#dfdf3f" rx="1"/>
+          <rect x="3" y="3" width="6" height="6" fill="#ffff7f" opacity="0.4"/>
+          <rect x="2" y="2" width="2" height="2" fill="white" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#c0c020;">SO4 &mdash; SULFATE</div>
+        <p style="font-size:9pt;">Sulfate reduction. Produces H<sub>2</sub>S (toxic zones!).
+        Low energy but necessary in anaerobic zones.</p>
+        <div class="sub-values">+6 HP | +3 EN | +8 GR | +10 PTS</div>
+        <div class="sub-values" style="color:#c0c020;">Levels: 5-10</div>
+      </div>
+    </div>
+    <!-- CH4 -->
+    <div class="sub-card" style="border-left: 4px solid #ff4f4f;">
+      <div class="sub-icon">
+        <svg width="48" height="48" viewBox="0 0 12 12" class="pixel-art">
+          <circle cx="6" cy="6" r="5" fill="#ff4f4f"/>
+          <circle cx="6" cy="6" r="3" fill="#ff6f2f" opacity="0.5"/>
+          <circle cx="4" cy="4" r="1.5" fill="#ffaa00" opacity="0.4"/>
+          <circle cx="7" cy="7" r="1" fill="#ff2020" opacity="0.3"/>
+        </svg>
+      </div>
+      <div class="sub-info">
+        <div class="sub-name" style="color:#ff4f4f;">CH4 &mdash; METHANE</div>
+        <p style="font-size:9pt;">Methanotrophy! Lowest energy but <strong>HIGHEST GROWTH</strong>.
+        Prevents greenhouse warming (80&times; CO<sub>2</sub>). Your signature food!</p>
+        <div class="sub-values">+5 HP | +2.5 EN | +25 GR | +35 PTS</div>
+        <div class="sub-values" style="color:#ff4f4f;">ALL LEVELS | CLIMATE BONUS!</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box warning">
+    <div class="info-box-title" style="color:#c05030;">FEEDING STRATEGY</div>
+    <p style="font-size:10pt;">
+      <strong>When Health is high (&gt;50):</strong> Prioritize CH<sub>4</sub> for maximum growth (fastest path to division).<br>
+      <strong>When Health is moderate (30-50):</strong> Eat NO<sub>3</sub> for balanced recovery.<br>
+      <strong>When Health is critical (&lt;30):</strong> Eat O<sub>2</sub> or NO<sub>3</sub> immediately&mdash;survival first!<br>
+      <strong>Remember:</strong> Substrates spawn near the INLET and drift with the flow.
+    </p>
+  </div>
+
+  <!-- Substrate spawn info -->
+  <h2>How Substrates Appear</h2>
+  <p style="font-size:10pt;">
+    New substrates spawn every <strong>1.2 seconds</strong> near the INLET (left side). They drift
+    with the water flow, moving right across the map. Each level has a <strong>spawn density</strong>
+    (2-6 per cycle) that determines food abundance. Substrates have limited lifetimes&mdash;if
+    nobody eats them, they eventually disappear.
+  </p>
+
+  <p class="page-number right">8</p>
+</div>
+
+<!-- Section 06: Growth & Division -->
+<div class="page" id="growth">
+  <h1 class="section-number">SECTION 5</h1>
+  <h1 class="section-title">Growth & Division</h1>
+
+  <p>
+    Growth is the core mechanic of ARKE. Every substrate you eat adds to your Growth bar (GR).
+    When GR reaches <strong>100</strong>, you can <strong>divide</strong>&mdash;placing a permanent
+    biofilm colony on the map. This is how you win each level!
+  </p>
+
+  <!-- Power-up progression diagram -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:14px;">The Growth Cycle</h3>
+    <svg width="460" height="170" viewBox="0 0 460 170">
+      <!-- Step 1: Eat -->
+      <g transform="translate(20,20)">
+        <rect x="0" y="0" width="90" height="70" rx="6" fill="#f0ece0" stroke="#3a3a4a" stroke-width="1.5"/>
+        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#333">1. EAT</text>
+        <!-- ARKE + substrate -->
+        <g transform="translate(25,30)">
+          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
+          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
+          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
+        </g>
+        <text x="45" y="42" text-anchor="middle" font-size="8" fill="#666">+</text>
+        <circle cx="60" cy="40" r="6" fill="#ff4f4f"/>
+        <text x="60" y="43" text-anchor="middle" font-size="4" fill="white">CH4</text>
+        <text x="45" y="62" text-anchor="middle" font-size="6" fill="#888">Move over food</text>
+      </g>
+
+      <!-- Arrow 1 -->
+      <g transform="translate(115, 45)">
+        <line x1="0" y1="10" x2="25" y2="10" stroke="#4aeaff" stroke-width="2"/>
+        <polygon points="22,5 30,10 22,15" fill="#4aeaff"/>
+      </g>
+
+      <!-- Step 2: Grow -->
+      <g transform="translate(150,20)">
+        <rect x="0" y="0" width="90" height="70" rx="6" fill="#d0e8d8" stroke="#3a7a5a" stroke-width="1.5"/>
+        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#3a7a5a">2. GROW</text>
+        <!-- GR bar filling -->
+        <rect x="10" y="28" width="70" height="12" fill="#1a1a2b" rx="2"/>
+        <rect x="10" y="28" width="50" height="12" fill="#5ff050" rx="2"/>
+        <text x="45" y="36" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="white">GR: 75/100</text>
+        <text x="45" y="55" text-anchor="middle" font-size="6" fill="#3a7a5a">GR bar fills up</text>
+        <text x="45" y="64" text-anchor="middle" font-size="6" fill="#888">Does NOT decay!</text>
+      </g>
+
+      <!-- Arrow 2 -->
+      <g transform="translate(245, 45)">
+        <line x1="0" y1="10" x2="25" y2="10" stroke="#5ff050" stroke-width="2"/>
+        <polygon points="22,5 30,10 22,15" fill="#5ff050"/>
+      </g>
+
+      <!-- Step 3: GR = 100 -->
+      <g transform="translate(280,20)">
+        <rect x="0" y="0" width="90" height="70" rx="6" fill="#ffffd0" stroke="#c0c020" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#8a8a00">3. READY!</text>
+        <!-- Full GR bar flashing -->
+        <rect x="10" y="28" width="70" height="12" fill="#1a1a2b" rx="2"/>
+        <rect x="10" y="28" width="70" height="12" fill="#ffff00" rx="2" opacity="0.8"/>
+        <text x="45" y="36" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#333">SPACE!</text>
+        <text x="45" y="55" text-anchor="middle" font-size="6" fill="#8a8a00">GR hits 100!</text>
+        <text x="45" y="64" text-anchor="middle" font-size="6" fill="#888">Press SPACE</text>
+      </g>
+
+      <!-- Arrow 3 -->
+      <g transform="translate(375, 45)">
+        <line x1="0" y1="10" x2="25" y2="10" stroke="#ffff00" stroke-width="2"/>
+        <polygon points="22,5 30,10 22,15" fill="#ffff00"/>
+      </g>
+
+      <!-- Step 4: Divide -->
+      <g transform="translate(20,100)">
+        <rect x="0" y="0" width="420" height="60" rx="6" fill="#f0ece0" stroke="#3a3a4a" stroke-width="1.5"/>
+        <text x="210" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a7a5a">4. DIVIDE &mdash; COLONY PLACED!</text>
+
+        <!-- Division diagram -->
+        <!-- ARKE -->
+        <g transform="translate(60,30)">
+          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
+          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
+          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
+        </g>
+
+        <!-- Arrow -->
+        <line x1="80" y1="37" x2="120" y2="37" stroke="#4aeaff" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+        <!-- ARKE stays -->
+        <g transform="translate(130,30)">
+          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
+          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
+          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
+        </g>
+        <text x="135" y="55" text-anchor="middle" font-size="6" fill="#2a8a8a">ARKE (GR=0)</text>
+
+        <text x="165" y="38" text-anchor="middle" font-size="14" fill="#888">+</text>
+
+        <!-- Colony placed -->
+        <g transform="translate(185,30)">
+          <rect x="0" y="0" width="14" height="14" fill="#3a7a5a" rx="2"/>
+          <rect x="2" y="2" width="4" height="4" fill="#5aaa7a" opacity="0.5"/>
+          <rect x="6" y="6" width="4" height="4" fill="#5aaa7a" opacity="0.3"/>
+          <!-- Glow -->
+          <circle cx="7" cy="7" r="10" fill="#4fdf6f" opacity="0.1"/>
+        </g>
+        <text x="192" y="55" text-anchor="middle" font-size="6" fill="#3a7a5a">NEW COLONY</text>
+
+        <!-- Score -->
+        <text x="290" y="34" font-family="'Press Start 2P',monospace" font-size="6" fill="#ffd700">+100 POINTS</text>
+        <text x="290" y="48" font-size="7" fill="#666">Colony counts toward level goal</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Growth per substrate table -->
+  <h2>Substrates Needed to Divide</h2>
+  <table>
+    <tr>
+      <th>Substrate</th>
+      <th>Growth/Eat</th>
+      <th>Eats to Divide</th>
+      <th>Efficiency Rating</th>
+    </tr>
+    <tr>
+      <td style="color:#ff4f4f;font-weight:bold;">CH4 (Methane)</td>
+      <td>+25 GR</td>
+      <td style="font-weight:bold;">4 eats</td>
+      <td><span style="color:#3a7a5a;">BEST for growth</span></td>
+    </tr>
+    <tr>
+      <td style="color:#4fdf6f;font-weight:bold;">NO3 (Nitrate)</td>
+      <td>+18 GR</td>
+      <td>6 eats</td>
+      <td><span style="color:#4fdf6f;">Great balanced option</span></td>
+    </tr>
+    <tr>
+      <td style="color:#4fa4ff;font-weight:bold;">O2 (Oxygen)</td>
+      <td>+15 GR</td>
+      <td>7 eats</td>
+      <td>Good energy, decent growth</td>
+    </tr>
+    <tr>
+      <td style="color:#cf6fff;font-weight:bold;">Mn(IV)</td>
+      <td>+12 GR</td>
+      <td>9 eats</td>
+      <td>Mid-range</td>
+    </tr>
+    <tr>
+      <td style="color:#ef8f3f;font-weight:bold;">Fe(III) (Iron)</td>
+      <td>+10 GR</td>
+      <td>10 eats</td>
+      <td>Mid-range</td>
+    </tr>
+    <tr>
+      <td style="color:#c0c020;font-weight:bold;">SO4 (Sulfate)</td>
+      <td>+8 GR</td>
+      <td>13 eats</td>
+      <td><span style="color:#cc3333;">Slowest growth</span></td>
+    </tr>
+  </table>
+
+  <div class="info-box tip">
+    <div class="info-box-title" style="color:#3a8a4a;">PRO TIP</div>
+    <p style="font-size:10pt;">
+      The fastest way to divide is to eat <strong>4 methane particles (CH<sub>4</sub>)</strong>.
+      But methane only gives +5 HP&mdash;if your health is low, you'll die before you can divide!
+      Mix in NO<sub>3</sub> or O<sub>2</sub> to keep your health up while building growth.
+    </p>
+  </div>
+
+  <p class="page-number left">9</p>
+</div>
+
+<!-- Growth page 2: Colony placement mechanics -->
+<div class="page" id="growth2">
+
+  <h2>Colony Placement Mechanics</h2>
+
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:10px;">Where Does the Colony Go?</h3>
+    <svg width="360" height="200" viewBox="0 0 360 200">
+      <!-- Grid -->
+      <rect x="80" y="10" width="200" height="180" fill="#0c1420"/>
+
+      <!-- Grid lines -->
+      <g stroke="#1a2a3a" stroke-width="0.5">
+        <line x1="120" y1="10" x2="120" y2="190"/>
+        <line x1="160" y1="10" x2="160" y2="190"/>
+        <line x1="200" y1="10" x2="200" y2="190"/>
+        <line x1="240" y1="10" x2="240" y2="190"/>
+        <line x1="80" y1="50" x2="280" y2="50"/>
+        <line x1="80" y1="90" x2="280" y2="90"/>
+        <line x1="80" y1="130" x2="280" y2="130"/>
+        <line x1="80" y1="170" x2="280" y2="170"/>
+      </g>
+
+      <!-- Grain tiles -->
+      <rect x="80" y="10" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="240" y="10" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="80" y="90" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="80" y="130" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="240" y="130" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="240" y="90" width="40" height="40" fill="#7a5a2a"/>
+
+      <!-- ARKE in center -->
+      <g transform="translate(180,110)">
+        <rect x="-8" y="-10" width="16" height="20" fill="#2a8a8a" rx="1"/>
+        <rect x="-6" y="-8" width="12" height="6" fill="#1a1a3a"/>
+        <rect x="-4" y="-6" width="3" height="2" fill="#4aeaff"/>
+        <rect x="2" y="-6" width="3" height="2" fill="#4aeaff"/>
+        <!-- Glow (ready) -->
+        <circle cx="0" cy="0" r="16" fill="#ffff00" opacity="0.1"/>
+      </g>
+      <text x="180" y="128" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4aeaff">ARKE</text>
+
+      <!-- Candidate tiles (highlighted) -->
+      <!-- Up -->
+      <rect x="160" y="50" width="40" height="40" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="180" y="75" text-anchor="middle" font-size="6" fill="#4fdf6f">?</text>
+
+      <!-- Right (best - furthest from walls) -->
+      <rect x="200" y="90" width="40" height="40" fill="#3a7a5a" opacity="0.4" stroke="#4fdf6f" stroke-width="2"/>
+      <text x="220" y="115" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4fdf6f">BEST</text>
+
+      <!-- Down -->
+      <rect x="160" y="130" width="40" height="40" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="180" y="155" text-anchor="middle" font-size="6" fill="#4fdf6f">?</text>
+
+      <!-- Left blocked by grain -->
+      <rect x="120" y="90" width="40" height="40" fill="#0c1420"/>
+      <text x="140" y="115" text-anchor="middle" font-size="6" fill="#3060a0">open</text>
+
+      <!-- Labels -->
+      <text x="40" y="30" text-anchor="middle" font-size="7" fill="#7a5a2a" font-weight="bold">GRAIN</text>
+      <text x="320" y="115" font-size="7" fill="#4fdf6f">Colony goes to tile</text>
+      <text x="320" y="127" font-size="7" fill="#4fdf6f">furthest from walls</text>
+    </svg>
+    <p style="font-size:8pt; color:#888; margin-top:6px;">
+      The game automatically selects the best adjacent pore tile &mdash; preferring open space far from grain walls.
+    </p>
+  </div>
+
+  <h2>Colony Passive Feeding</h2>
+
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <svg width="280" height="140" viewBox="0 0 280 140">
+      <rect x="10" y="10" width="260" height="120" fill="#0c1420" rx="4"/>
+
+      <!-- Colony in center -->
+      <g transform="translate(140,70)">
+        <rect x="-8" y="-8" width="16" height="16" fill="#3a7a5a" rx="2"/>
+        <rect x="-5" y="-5" width="5" height="5" fill="#5aaa7a" opacity="0.5"/>
+        <!-- Feed radius circle -->
+        <circle cx="0" cy="0" r="45" fill="none" stroke="#4fdf6f" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      </g>
+
+      <!-- Substrates being pulled in -->
+      <circle cx="100" cy="50" r="4" fill="#ff4f4f"/>
+      <line x1="104" y1="52" x2="130" y2="65" stroke="#ff4f4f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+
+      <circle cx="180" cy="45" r="4" fill="#4fdf6f"/>
+      <line x1="177" y1="48" x2="148" y2="64" stroke="#4fdf6f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+
+      <circle cx="160" cy="105" r="4" fill="#dfdf3f"/>
+      <line x1="157" y1="102" x2="145" y2="78" stroke="#dfdf3f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+
+      <!-- Out of range substrate -->
+      <circle cx="50" cy="110" r="4" fill="#4fa4ff" opacity="0.4"/>
+      <text x="50" y="125" text-anchor="middle" font-size="5" fill="#888">out of range</text>
+
+      <!-- Labels -->
+      <text x="140" y="25" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#4fdf6f">Feed Radius: 1.5 tiles</text>
+      <text x="140" y="36" text-anchor="middle" font-size="6" fill="#888">2% chance per frame to consume</text>
+    </svg>
+  </div>
+
+  <h2>Level Completion</h2>
+
+  <div class="flow-diagram">
+    <div class="flow-step" style="border-color:#ff4f4f;">EAT</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#5ff050;">GROW</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#ffff00;">DIVIDE</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#3a7a5a;">COLONY</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#ffd700; background:#ffd700; color:white;">REPEAT &times;N</div>
+  </div>
+
+  <table style="margin-top:12px;">
+    <tr>
+      <th>Level</th>
+      <th>Goal</th>
+      <th>Level</th>
+      <th>Goal</th>
+    </tr>
+    <tr>
+      <td>1. First Breath</td><td><strong>3</strong> colonies</td>
+      <td>6. Vent Guardians</td><td><strong>8</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>2. Roots of Life</td><td><strong>5</strong> colonies</td>
+      <td>7. Thawing Grounds</td><td><strong>6</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>3. Into the Depths</td><td><strong>4</strong> colonies</td>
+      <td>8. The Great Thaw</td><td><strong>8</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>4. The Hungry Dark</td><td><strong>6</strong> colonies</td>
+      <td>9. The Abyss</td><td><strong>8</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>5. The Methane Vents</td><td><strong>5</strong> colonies</td>
+      <td>10. Earth's Last Stand</td><td><strong>12</strong> colonies</td>
+    </tr>
+  </table>
+
+  <div class="info-box" style="margin-top: 10px;">
+    <div class="info-box-title">SCORING</div>
+    <p style="font-size:10pt;">
+      <strong>+10 pts</strong> per substrate eaten &bull;
+      <strong>+25 bonus</strong> for CH<sub>4</sub> &bull;
+      <strong>+15 bonus</strong> for NO<sub>3</sub> &bull;
+      <strong>+100 pts</strong> per colony placed &bull;
+      <strong>+1,000 pts</strong> per level completed
+    </p>
+  </div>
+
+  <p class="page-number right">10</p>
+</div>
+
+<!-- Section 07: Worlds & Environments -->
+<div class="page" id="worlds">
+  <h1 class="section-number">SECTION 6</h1>
+  <h1 class="section-title">Worlds & Environments</h1>
+
+  <p>
+    ARKE's journey spans <strong>5 unique environments</strong> across <strong>10 levels</strong>,
+    each inspired by real subsurface ecosystems studied by the CompLaB3D research team.
+    Each environment has its own color palette, pore geometry, and challenges.
+  </p>
+
+  <!-- World 1: Soil Frontier -->
+  <div style="background:white; border:2px solid #7a5a2a; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <!-- Environment preview -->
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#060c18"/>
+          <!-- Soil grains -->
+          <circle cx="4" cy="4" r="3" fill="#7a5a2a"/>
+          <circle cx="4" cy="4" r="2" fill="#a48a5a" opacity="0.3"/>
+          <circle cx="14" cy="20" r="4" fill="#7a5a2a"/>
+          <circle cx="14" cy="20" r="2.5" fill="#a48a5a" opacity="0.3"/>
+          <circle cx="26" cy="6" r="3.5" fill="#7a5a2a"/>
+          <circle cx="26" cy="6" r="2" fill="#a48a5a" opacity="0.3"/>
+          <circle cx="22" cy="18" r="2.5" fill="#7a5a2a"/>
+          <circle cx="8" cy="14" r="2" fill="#7a5a2a"/>
+          <!-- Water/pore -->
+          <rect x="8" y="8" width="8" height="6" fill="#3060a0" opacity="0.2" rx="1"/>
+          <!-- Substrates -->
+          <circle cx="10" cy="10" r="0.8" fill="#4fa4ff"/>
+          <circle cx="18" cy="12" r="0.8" fill="#4fdf6f"/>
+          <circle cx="14" cy="8" r="0.8" fill="#ff4f4f"/>
+          <!-- Inlet -->
+          <rect x="0" y="10" width="2" height="4" fill="#3060a0"/>
+          <!-- Outlet -->
+          <rect x="30" y="10" width="2" height="4" fill="#4fdf6f"/>
+          <!-- ARKE -->
+          <rect x="16" y="10" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#7a5a2a; margin-bottom:4px;">
+          CHAPTER 1: THE SOIL FRONTIER
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 1-2 &bull; Environment 0</div>
+        <p style="font-size:10pt;">
+          Shallow soil with wide-open pore spaces between rounded rock grains. Water flows gently,
+          carrying abundant nutrients including <strong>oxygen</strong>. The safest environment&mdash;
+          perfect for learning the basics.
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Brown grains, tan highlights, blue water<br>
+          <strong>Geometry:</strong> Circular grains, ~65-70% porosity (lots of space)<br>
+          <strong>Substrates:</strong> O<sub>2</sub>, NO<sub>3</sub>, CH<sub>4</sub><br>
+          <strong>Hazards:</strong> None (Level 1) / 1 rival (Level 2)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World 2: Deep Sediment -->
+  <div style="background:white; border:2px solid #4a3a2a; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#030306"/>
+          <!-- Maze-like sediment walls -->
+          <rect x="0" y="0" width="4" height="24" fill="#4a3a2a"/>
+          <rect x="6" y="0" width="2" height="10" fill="#4a3a2a"/>
+          <rect x="6" y="14" width="2" height="10" fill="#4a3a2a"/>
+          <rect x="10" y="4" width="2" height="16" fill="#4a3a2a"/>
+          <rect x="14" y="0" width="2" height="8" fill="#4a3a2a"/>
+          <rect x="14" y="12" width="2" height="12" fill="#4a3a2a"/>
+          <rect x="18" y="6" width="2" height="12" fill="#4a3a2a"/>
+          <rect x="22" y="0" width="2" height="14" fill="#4a3a2a"/>
+          <rect x="22" y="18" width="2" height="6" fill="#4a3a2a"/>
+          <rect x="26" y="4" width="2" height="10" fill="#4a3a2a"/>
+          <rect x="28" y="0" width="4" height="24" fill="#4a3a2a"/>
+          <!-- Dark corridors -->
+          <rect x="4" y="10" width="2" height="4" fill="#142038" opacity="0.3"/>
+          <rect x="12" y="8" width="2" height="4" fill="#142038" opacity="0.3"/>
+          <!-- Substrates -->
+          <circle cx="5" cy="12" r="0.8" fill="#4fdf6f"/>
+          <circle cx="13" cy="10" r="0.8" fill="#ef8f3f"/>
+          <circle cx="21" cy="16" r="0.8" fill="#ff4f4f"/>
+          <!-- ARKE -->
+          <rect x="8" y="11" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#4a3a2a; margin-bottom:4px;">
+          CHAPTER 2: THE DEEP SEDIMENT
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 3-4 &bull; Environment 1</div>
+        <p style="font-size:10pt;">
+          Deep beneath the ocean floor. No oxygen here! Narrow, maze-like corridors carved through
+          compacted sediment. Flow is sluggish and food is scarce. <strong>Navigation skill</strong>
+          becomes critical.
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Very dark brown, nearly black water<br>
+          <strong>Geometry:</strong> Recursive maze algorithm, ~45-50% porosity (tight!)<br>
+          <strong>Substrates:</strong> NO<sub>3</sub>, Fe(III), Mn(IV), CH<sub>4</sub> (no O<sub>2</sub>!)<br>
+          <strong>Hazards:</strong> 2-3 rivals, slow flow, tight corridors
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World 3: Methane Seeps -->
+  <div style="background:white; border:2px solid #3a3040; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#06040a"/>
+          <!-- Purple grains -->
+          <circle cx="5" cy="5" r="3" fill="#3a3040"/>
+          <circle cx="25" cy="4" r="3.5" fill="#3a3040"/>
+          <circle cx="8" cy="19" r="3" fill="#3a3040"/>
+          <circle cx="27" cy="20" r="2.5" fill="#3a3040"/>
+          <!-- Vent channels (vertical) -->
+          <rect x="12" y="12" width="2" height="12" fill="#2a1a48" opacity="0.5"/>
+          <rect x="20" y="8" width="2" height="16" fill="#2a1a48" opacity="0.5"/>
+          <!-- Toxic zones -->
+          <rect x="14" y="6" width="4" height="3" fill="#b040a0" opacity="0.3"/>
+          <rect x="6" y="12" width="3" height="4" fill="#b040a0" opacity="0.3"/>
+          <!-- Rising CH4 -->
+          <circle cx="13" cy="18" r="0.8" fill="#ff4f4f"/>
+          <circle cx="13" cy="14" r="0.8" fill="#ff4f4f" opacity="0.7"/>
+          <circle cx="21" cy="20" r="0.8" fill="#ff4f4f"/>
+          <circle cx="21" cy="16" r="0.8" fill="#ff4f4f" opacity="0.7"/>
+          <!-- SO4 -->
+          <rect x="16" y="10" width="1.5" height="1.5" fill="#dfdf3f"/>
+          <!-- ARKE -->
+          <rect x="16" y="14" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#b040a0; margin-bottom:4px;">
+          CHAPTER 3: THE METHANE SEEPS
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 5-6 &bull; Environment 2</div>
+        <p style="font-size:10pt;">
+          Methane bubbles up through vertical vent channels. <strong>Toxic H<sub>2</sub>S zones</strong>
+          appear for the first time! Purple-tinted world with abundant CH<sub>4</sub> but
+          dangerous terrain. This is where ARKE truly becomes Earth's climate shield.
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Dark purple grains, violet water, magenta toxins<br>
+          <strong>Geometry:</strong> Soil + vertical vent channels, ~55-60% porosity<br>
+          <strong>Substrates:</strong> SO<sub>4</sub>, CH<sub>4</sub>, Fe(III)<br>
+          <strong>Hazards:</strong> 15-20% toxic zones, 2-3 rivals
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="page-number left">11</p>
+</div>
+
+<!-- Worlds page 2 -->
+<div class="page" id="worlds2">
+
+  <!-- World 4: Permafrost Edge -->
+  <div style="background:white; border:2px solid #5a6a7a; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#040810"/>
+          <!-- Layered ice/sediment -->
+          <rect x="0" y="0" width="32" height="3" fill="#5a6a7a"/>
+          <rect x="0" y="7" width="32" height="3" fill="#5a6a7a"/>
+          <rect x="0" y="14" width="32" height="3" fill="#5a6a7a"/>
+          <rect x="0" y="21" width="32" height="3" fill="#5a6a7a"/>
+          <!-- Flow channels between layers -->
+          <rect x="0" y="3" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
+          <rect x="0" y="10" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
+          <rect x="0" y="17" width="32" height="4" fill="#3a5a8a" opacity="0.15"/>
+          <!-- Vertical connectors -->
+          <rect x="8" y="3" width="2" height="4" fill="#3a5a8a" opacity="0.1"/>
+          <rect x="20" y="10" width="2" height="4" fill="#3a5a8a" opacity="0.1"/>
+          <!-- Fast flow arrows -->
+          <g fill="none" stroke="#3a5a8a" stroke-width="0.5" opacity="0.5">
+            <path d="M4,5 L10,5"/>
+            <path d="M14,5 L20,5"/>
+            <path d="M24,5 L30,5"/>
+            <path d="M4,12 L10,12"/>
+            <path d="M14,12 L20,12"/>
+          </g>
+          <!-- Substrates racing by -->
+          <circle cx="6" cy="5" r="0.8" fill="#4fa4ff"/>
+          <circle cx="16" cy="12" r="0.8" fill="#4fdf6f"/>
+          <circle cx="26" cy="5" r="0.8" fill="#ff4f4f"/>
+          <!-- Toxic -->
+          <rect x="10" y="17" width="3" height="4" fill="#70b050" opacity="0.3"/>
+          <!-- ARKE -->
+          <rect x="12" y="4" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#5a6a7a; margin-bottom:4px;">
+          CHAPTER 4: THE PERMAFROST EDGE
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 7-8 &bull; Environment 3</div>
+        <p style="font-size:10pt;">
+          Thawing permafrost releases ancient carbon. <strong>Fast horizontal flow channels</strong>
+          between ice layers demand mastery of <strong>SHIFT (flow riding)</strong>. Substrates
+          race past at high speed. Oxygen returns briefly in Level 7!
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Gray-blue grains, icy blue water, green toxins<br>
+          <strong>Geometry:</strong> Horizontal layers + vertical connectors, ~50-55% porosity<br>
+          <strong>Substrates:</strong> O<sub>2</sub> (Lv7), NO<sub>3</sub>, SO<sub>4</sub>, CH<sub>4</sub><br>
+          <strong>Hazards:</strong> 10-15% toxic zones, 3-4 rivals, fast flow (0.8-1.0&times;)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World 5: Hydrothermal Realm -->
+  <div style="background:white; border:2px solid #cc3333; border-radius:6px; padding:16px; margin:14px 0;">
+    <div style="display:flex; gap:16px; align-items:flex-start;">
+      <div style="flex-shrink:0;">
+        <svg width="160" height="120" viewBox="0 0 32 24" class="pixel-art">
+          <rect width="32" height="24" fill="#060304"/>
+          <!-- Dark chambers -->
+          <circle cx="8" cy="8" r="5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+          <circle cx="22" cy="10" r="4" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+          <circle cx="14" cy="19" r="4.5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.5"/>
+          <!-- Connecting tunnels -->
+          <rect x="12" y="7" width="7" height="2" fill="#0a0608"/>
+          <rect x="13" y="12" width="2" height="5" fill="#0a0608"/>
+          <!-- Vent columns (red glow) -->
+          <rect x="6" y="12" width="2" height="12" fill="#3a1a20" opacity="0.4"/>
+          <rect x="24" y="14" width="2" height="10" fill="#3a1a20" opacity="0.4"/>
+          <!-- Toxic zones (orange heat) -->
+          <rect x="18" y="16" width="4" height="4" fill="#c07030" opacity="0.3"/>
+          <rect x="2" y="4" width="3" height="3" fill="#c07030" opacity="0.3"/>
+          <!-- Substrates -->
+          <rect x="7" y="7" width="1.5" height="1.5" fill="#dfdf3f"/>
+          <circle cx="22" cy="10" r="0.8" fill="#ef8f3f"/>
+          <circle cx="14" cy="18" r="0.8" fill="#ff4f4f"/>
+          <rect x="9" y="18" width="1.5" height="1.5" fill="#cf6fff"/>
+          <!-- ARKE -->
+          <rect x="15" y="7" width="2" height="3" fill="#2a8a8a"/>
+        </svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#cc3333; margin-bottom:4px;">
+          CHAPTER 5: THE HYDROTHERMAL REALM
+        </div>
+        <div style="font-size:9pt; color:#888; margin-bottom:8px;">Levels 9-10 &bull; Environment 4</div>
+        <p style="font-size:10pt;">
+          The deepest, most extreme environment. Chaotic chamber-and-tunnel geology near
+          hydrothermal vents. <strong>Maximum toxic coverage (25%)</strong>, extreme flow speeds,
+          and <strong>5 rivals</strong>. The full redox ladder (minus O<sub>2</sub>) is available.
+          <strong>This is the final challenge.</strong>
+        </p>
+        <div style="font-size:9pt; color:#666; margin-top:6px;">
+          <strong>Palette:</strong> Nearly black grains, dark red water, orange heat toxins<br>
+          <strong>Geometry:</strong> Circular chambers + random tunnels + vent columns<br>
+          <strong>Substrates:</strong> SO<sub>4</sub>, Fe(III), Mn(IV), CH<sub>4</sub>, NO<sub>3</sub> (Lv10)<br>
+          <strong>Hazards:</strong> 20-25% toxic, 4-5 rivals, extreme flow (1.2-1.5&times;)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World map overview -->
+  <h2>Journey Overview</h2>
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:12px; text-align:center;">
+    <svg width="100%" height="70" viewBox="0 0 500 70">
+      <!-- Path line -->
+      <line x1="30" y1="35" x2="470" y2="35" stroke="#ccc" stroke-width="2"/>
+
+      <!-- Chapter nodes -->
+      <!-- Ch1 -->
+      <circle cx="50" cy="35" r="16" fill="#7a5a2a" stroke="#a48a5a" stroke-width="2"/>
+      <text x="50" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">1</text>
+      <text x="50" y="62" text-anchor="middle" font-size="6" fill="#7a5a2a" font-weight="bold">SOIL</text>
+      <text x="50" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 1-2</text>
+
+      <!-- Ch2 -->
+      <circle cx="155" cy="35" r="16" fill="#4a3a2a" stroke="#6a5a3a" stroke-width="2"/>
+      <text x="155" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">2</text>
+      <text x="155" y="62" text-anchor="middle" font-size="6" fill="#4a3a2a" font-weight="bold">DEEP</text>
+      <text x="155" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 3-4</text>
+
+      <!-- Ch3 -->
+      <circle cx="260" cy="35" r="16" fill="#3a3040" stroke="#b040a0" stroke-width="2"/>
+      <text x="260" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">3</text>
+      <text x="260" y="62" text-anchor="middle" font-size="6" fill="#b040a0" font-weight="bold">METHANE</text>
+      <text x="260" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 5-6</text>
+
+      <!-- Ch4 -->
+      <circle cx="365" cy="35" r="16" fill="#5a6a7a" stroke="#8a9aaa" stroke-width="2"/>
+      <text x="365" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="white">4</text>
+      <text x="365" y="62" text-anchor="middle" font-size="6" fill="#5a6a7a" font-weight="bold">PERMAFROST</text>
+      <text x="365" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 7-8</text>
+
+      <!-- Ch5 -->
+      <circle cx="450" cy="35" r="16" fill="#2a2a3a" stroke="#cc3333" stroke-width="2"/>
+      <text x="450" y="39" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#ff4f4f">5</text>
+      <text x="450" y="62" text-anchor="middle" font-size="6" fill="#cc3333" font-weight="bold">HYDRO</text>
+      <text x="450" y="14" text-anchor="middle" font-size="5" fill="#888">Lv 9-10</text>
+
+      <!-- Difficulty arrow -->
+      <text x="250" y="8" text-anchor="middle" font-size="5" fill="#aaa">DIFFICULTY &rarr;</text>
+    </svg>
+  </div>
+
+  <p class="page-number right">12</p>
+</div>
+
+<!-- Section 08: Level-by-Level Guide -->
+<div class="page" id="levels">
+  <h1 class="section-number">SECTION 7</h1>
+  <h1 class="section-title">Level Guide</h1>
+
+  <!-- Level 1 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#7a5a2a;">LEVEL 1: FIRST BREATH</div>
+      <div class="level-chapter">Chapter 1 &mdash; The Soil Frontier</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 60 20" class="pixel-art">
+        <rect width="60" height="20" fill="#060c18"/>
+        <!-- Grains -->
+        <circle cx="6" cy="4" r="3" fill="#7a5a2a"/><circle cx="18" cy="17" r="4" fill="#7a5a2a"/>
+        <circle cx="30" cy="3" r="2.5" fill="#7a5a2a"/><circle cx="42" cy="16" r="3" fill="#7a5a2a"/>
+        <circle cx="54" cy="5" r="3" fill="#7a5a2a"/><circle cx="10" cy="12" r="2" fill="#7a5a2a"/>
+        <circle cx="48" cy="11" r="2.5" fill="#7a5a2a"/>
+        <!-- Inlet/Outlet -->
+        <rect x="0" y="8" width="1.5" height="4" fill="#3060a0"/>
+        <rect x="58.5" y="8" width="1.5" height="4" fill="#4fdf6f"/>
+        <!-- Substrates -->
+        <circle cx="14" cy="8" r="0.8" fill="#4fa4ff"/><circle cx="24" cy="10" r="0.8" fill="#4fdf6f"/>
+        <circle cx="34" cy="8" r="0.8" fill="#ff4f4f"/><circle cx="44" cy="10" r="0.8" fill="#4fa4ff"/>
+        <!-- ARKE -->
+        <rect x="3" y="8" width="2" height="3" fill="#2a8a8a"/>
+        <!-- "Tutorial" label -->
+        <text x="30" y="1.5" text-anchor="middle" font-size="1.5" fill="#4aeaff" font-family="'Press Start 2P',monospace">TUTORIAL</text>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">3 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">30&times;20</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#3a8a4a;">0</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> Pure tutorial. No enemies, no hazards. Learn to move (WASD/Arrows),
+      eat substrates (auto on contact), watch your Growth bar fill, and press SPACE to divide.
+      Wide open pores with 70% porosity. Take your time.
+    </div>
+  </div>
+
+  <!-- Level 2 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#7a5a2a;">LEVEL 2: ROOTS OF LIFE</div>
+      <div class="level-chapter">Chapter 1 &mdash; The Soil Frontier</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="100" viewBox="0 0 70 22" class="pixel-art">
+        <rect width="70" height="22" fill="#060c18"/>
+        <circle cx="8" cy="4" r="3.5" fill="#7a5a2a"/><circle cx="22" cy="18" r="4" fill="#7a5a2a"/>
+        <circle cx="35" cy="5" r="3" fill="#7a5a2a"/><circle cx="50" cy="17" r="3.5" fill="#7a5a2a"/>
+        <circle cx="62" cy="6" r="3" fill="#7a5a2a"/><circle cx="14" cy="12" r="2.5" fill="#7a5a2a"/>
+        <circle cx="42" cy="10" r="2" fill="#7a5a2a"/>
+        <rect x="0" y="9" width="1.5" height="4" fill="#3060a0"/>
+        <rect x="68.5" y="9" width="1.5" height="4" fill="#4fdf6f"/>
+        <!-- Rival -->
+        <rect x="55" y="10" width="1.5" height="2" fill="#8a2a2a"/>
+        <text x="55" y="9" text-anchor="middle" font-size="1.2" fill="#ff4444">!</text>
+        <!-- ARKE -->
+        <rect x="5" y="9" width="2" height="3" fill="#2a8a8a"/>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">5 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">35&times;22</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">1</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> Your first rival appears! It wanders seeking food.
+      Move quickly to eat substrates before it does. Larger map requires navigation.
+      Try using SHIFT on flow tiles to outpace the rival. Still O<sub>2</sub>-rich.
+    </div>
+  </div>
+
+  <!-- Level 3 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#4a3a2a;">LEVEL 3: INTO THE DEPTHS</div>
+      <div class="level-chapter">Chapter 2 &mdash; The Deep Sediment</div>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">4 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">35&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">2</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#3a8a4a;">None</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> <span style="color:#cc3333;">No oxygen!</span> Tight maze corridors (50% porosity).
+      Slow flow (0.3&times;). Food is scarce (density 3). NO<sub>3</sub> is your best friend (+15 HP, +18 GR).
+      Two rivals compete. Navigate carefully&mdash;dead ends waste time.
+    </div>
+  </div>
+
+  <p class="page-number left">13</p>
+</div>
+
+<!-- Levels page 2 -->
+<div class="page" id="levels2">
+
+  <!-- Level 4 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#4a3a2a;">LEVEL 4: THE HUNGRY DARK</div>
+      <div class="level-chapter">Chapter 2 &mdash; The Deep Sediment</div>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">6 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;28</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
+      <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value">0.25&times; (crawl)</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> Survival test. Very scarce food (density 2), tightest porosity (45%),
+      three rivals. Manganese (Mn<sup>IV</sup>, purple) appears. Must be extremely efficient with every
+      substrate. Eat CH<sub>4</sub> for growth when safe, NO<sub>3</sub>/Fe when desperate.
+    </div>
+  </div>
+
+  <!-- Level 5 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#b040a0;">LEVEL 5: THE METHANE VENTS</div>
+      <div class="level-chapter">Chapter 3 &mdash; The Methane Seeps</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="80" viewBox="0 0 70 22" class="pixel-art">
+        <rect width="70" height="22" fill="#06040a"/>
+        <!-- Purple grains -->
+        <circle cx="8" cy="4" r="3" fill="#3a3040"/><circle cx="25" cy="3" r="3.5" fill="#3a3040"/>
+        <circle cx="45" cy="4" r="2.5" fill="#3a3040"/><circle cx="60" cy="3" r="3" fill="#3a3040"/>
+        <circle cx="8" cy="19" r="3" fill="#3a3040"/><circle cx="30" cy="19" r="4" fill="#3a3040"/>
+        <circle cx="55" cy="20" r="3" fill="#3a3040"/>
+        <!-- Vent channels -->
+        <rect x="16" y="10" width="2" height="12" fill="#2a1a48" opacity="0.3"/>
+        <rect x="38" y="8" width="2" height="14" fill="#2a1a48" opacity="0.3"/>
+        <!-- Toxic zones! -->
+        <rect x="20" y="8" width="4" height="3" fill="#b040a0" opacity="0.4"/>
+        <rect x="48" y="12" width="3" height="4" fill="#b040a0" opacity="0.4"/>
+        <rect x="10" y="14" width="3" height="3" fill="#b040a0" opacity="0.4"/>
+        <!-- CH4 rising -->
+        <circle cx="17" cy="16" r="0.8" fill="#ff4f4f"/><circle cx="39" cy="14" r="0.8" fill="#ff4f4f"/>
+        <circle cx="17" cy="12" r="0.8" fill="#ff4f4f" opacity="0.6"/>
+        <!-- SO4 -->
+        <rect x="32" y="10" width="1.2" height="1.2" fill="#dfdf3f"/>
+        <!-- ARKE -->
+        <rect x="28" y="10" width="2" height="3" fill="#2a8a8a"/>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">5 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">35&times;22</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">2</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c060c0;">15%</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> <span style="color:#c060c0;">Toxic zones appear!</span>
+      Only SO<sub>4</sub> and CH<sub>4</sub> available. Abundant food (density 5) compensates.
+      Check minimap for purple dots (toxic). Avoid or cross quickly (&minus;20 HP/sec!).
+      CH<sub>4</sub> = primary growth source. Sulfate for energy maintenance.
+    </div>
+  </div>
+
+  <!-- Level 6 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#b040a0;">LEVEL 6: VENT GUARDIANS</div>
+      <div class="level-chapter">Chapter 3 &mdash; The Methane Seeps</div>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">8 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c060c0;">20%</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> 8 colonies needed (double Level 5). Fe(III) now available for
+      better energy (+10). Toxic zones cover 1 in 5 tiles. Three rivals. Balance avoiding toxins
+      while maintaining food access. Plan colony locations near rich food zones.
+    </div>
+  </div>
+
+  <!-- Level 7 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#5a6a7a;">LEVEL 7: THAWING GROUNDS</div>
+      <div class="level-chapter">Chapter 4 &mdash; The Permafrost Edge</div>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">6 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">40&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">3</span></div>
+      <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value" style="color:#4fa4ff;">0.8&times; (fast!)</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> <span style="color:#4fa4ff;">Oxygen returns!</span> Fast flow (0.8&times;)
+      makes SHIFT essential. Abundant food (density 6). O<sub>2</sub> provides strongest HP recovery (+20).
+      Use flow riding to cover distance and intercept fast-moving substrates.
+      Only 10% toxic&mdash;manageable.
+    </div>
+  </div>
+
+  <p class="page-number right">14</p>
+</div>
+
+<!-- Levels page 3 -->
+<div class="page" id="levels3">
+
+  <!-- Level 8 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#5a6a7a;">LEVEL 8: THE GREAT THAW</div>
+      <div class="level-chapter">Chapter 4 &mdash; The Permafrost Edge</div>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">8 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">45&times;28</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">4</span></div>
+      <div class="stat"><span class="stat-label">FLOW</span><span class="stat-value" style="color:#cc3333;">1.0&times; (very fast!)</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> No oxygen again&mdash;thaw accelerates. Fastest flow yet (1.0&times;).
+      Largest map so far. Four rivals! Must ride flow constantly with SHIFT. NO<sub>3</sub> is critical
+      (+15 HP, +18 GR). Very difficult&mdash;requires expert navigation.
+    </div>
+  </div>
+
+  <!-- Level 9 -->
+  <div class="level-card">
+    <div class="level-header">
+      <div class="level-name" style="color:#cc3333;">LEVEL 9: THE ABYSS</div>
+      <div class="level-chapter">Chapter 5 &mdash; The Hydrothermal Realm</div>
+    </div>
+    <div class="level-map">
+      <svg width="300" height="80" viewBox="0 0 90 25" class="pixel-art">
+        <rect width="90" height="25" fill="#060304"/>
+        <!-- Chambers -->
+        <circle cx="15" cy="10" r="6" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
+        <circle cx="40" cy="14" r="5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
+        <circle cx="65" cy="8" r="5.5" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
+        <circle cx="80" cy="18" r="4" fill="#0a0608" stroke="#2a2a3a" stroke-width="0.3"/>
+        <!-- Tunnels -->
+        <rect x="20" y="10" width="16" height="2" fill="#0a0608"/>
+        <rect x="44" y="9" width="17" height="2" fill="#0a0608"/>
+        <rect x="38" y="14" width="2" height="7" fill="#0a0608"/>
+        <!-- Vent glow -->
+        <rect x="10" y="16" width="2" height="9" fill="#3a1a20" opacity="0.5"/>
+        <rect x="60" y="14" width="2" height="11" fill="#3a1a20" opacity="0.5"/>
+        <!-- Toxic -->
+        <rect x="25" y="4" width="4" height="3" fill="#c07030" opacity="0.4"/>
+        <rect x="50" y="16" width="5" height="4" fill="#c07030" opacity="0.4"/>
+        <rect x="72" y="6" width="3" height="3" fill="#c07030" opacity="0.4"/>
+        <!-- Substrates -->
+        <rect x="14" y="9" width="1" height="1" fill="#dfdf3f"/><circle cx="40" cy="13" r="0.8" fill="#ef8f3f"/>
+        <circle cx="65" cy="8" r="0.8" fill="#ff4f4f"/><rect x="79" y="17" width="1" height="1" fill="#cf6fff"/>
+        <!-- ARKE -->
+        <rect x="30" y="10" width="2" height="3" fill="#2a8a8a"/>
+        <!-- Rivals -->
+        <rect x="17" y="8" width="1.5" height="2" fill="#8a2a2a"/>
+        <rect x="42" y="12" width="1.5" height="2" fill="#8a2a2a"/>
+        <rect x="67" cy="7" width="1.5" height="2" fill="#8a2a2a"/>
+        <rect x="78" y="16" width="1.5" height="2" fill="#8a2a2a"/>
+      </svg>
+    </div>
+    <div class="level-stats">
+      <div class="stat"><span class="stat-label">GOAL</span><span class="stat-value">8 colonies</span></div>
+      <div class="stat"><span class="stat-label">MAP</span><span class="stat-value">45&times;25</span></div>
+      <div class="stat"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">4</span></div>
+      <div class="stat"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#c07030;">20%</span></div>
+    </div>
+    <div class="level-strategy">
+      <strong>Strategy:</strong> Deep-sea vents. Full redox ladder (minus O<sub>2</sub>). Extreme flow
+      (1.2&times;). Toxic everywhere (20%). Scarce food (density 4). Four rivals. Chamber-based
+      topology. Master all mechanics. Requires expert planktonic riding and efficient foraging.
+    </div>
+  </div>
+
+  <!-- Level 10 (FINAL) -->
+  <div class="level-card" style="border-color:#cc3333; border-width:3px;">
+    <div class="level-header" style="border-bottom-color:#cc3333;">
+      <div class="level-name" style="color:#cc3333;">LEVEL 10: EARTH'S LAST STAND</div>
+      <div class="level-chapter" style="color:#cc3333; font-weight:bold;">FINAL LEVEL</div>
+    </div>
+    <div class="level-stats">
+      <div class="stat" style="background:#fff0f0;"><span class="stat-label">GOAL</span><span class="stat-value" style="color:#cc3333;">12 colonies!</span></div>
+      <div class="stat" style="background:#fff0f0;"><span class="stat-label">MAP</span><span class="stat-value">50&times;30</span></div>
+      <div class="stat" style="background:#fff0f0;"><span class="stat-label">RIVALS</span><span class="stat-value" style="color:#cc3333;">5 (MAX)</span></div>
+      <div class="stat" style="background:#fff0f0;"><span class="stat-label">TOXIC</span><span class="stat-value" style="color:#cc3333;">25% (MAX)</span></div>
+    </div>
+    <div class="level-strategy" style="border-color:#cc3333; background:#fff8f4;">
+      <strong style="color:#cc3333;">THE ULTIMATE TEST.</strong> Everything at maximum. Largest map (50&times;30 = 1,500 tiles).
+      Most colonies needed (12). Fastest flow (1.5&times;). Most toxic (1 in 4 tiles!). Most rivals (5).
+      All substrates available except O<sub>2</sub>. Victory requires complete mastery of all mechanics.
+      <strong>Completing this level triggers the VICTORY screen showing your total score and
+      climate impact!</strong>
+    </div>
+  </div>
+
+  <div class="info-box warning" style="margin-top: 10px;">
+    <div class="info-box-title" style="color:#c05030;">GAME OVER</div>
+    <p style="font-size:10pt;">
+      If your Health reaches 0, you die. Don't panic! Press <strong>ENTER</strong> after 2 seconds
+      to retry the same level. Your score for that level resets, but you keep your global progress.
+    </p>
+  </div>
+
+  <p class="page-number left">15</p>
+</div>
+
+<!-- Section 09: HUD, Hazards, Tips & Science -->
+<div class="page" id="hud">
+  <h1 class="section-number">SECTION 8</h1>
+  <h1 class="section-title">The HUD &amp; Interface</h1>
+
+  <p>
+    The Heads-Up Display (HUD) shows everything you need to survive. Learn to read it at a glance!
+  </p>
+
+  <!-- HUD Mockup -->
+  <div class="hud-mockup">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 8px;">
+      <!-- Left: Status bars -->
+      <div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <span style="color:#aaa;font-size:8pt;width:20px;">HP</span>
+          <div style="width:120px;height:10px;background:#1a1a2b;border-radius:2px;">
+            <div style="width:75%;height:100%;background:#44df5f;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:7pt;color:#aaa;">75</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px;">
+          <span style="color:#aaa;font-size:8pt;width:20px;">EN</span>
+          <div style="width:120px;height:10px;background:#1a1a2b;border-radius:2px;">
+            <div style="width:60%;height:100%;background:#5fa0f0;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:7pt;color:#aaa;">60</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="color:#aaa;font-size:8pt;width:20px;">GR</span>
+          <div style="width:120px;height:10px;background:#1a1a2b;border-radius:2px;">
+            <div style="width:88%;height:100%;background:#5ff050;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:7pt;color:#aaa;">88</span>
+        </div>
+      </div>
+
+      <!-- Center: Colony progress -->
+      <div style="text-align:center;">
+        <div style="font-size:8pt;color:#aaa;">Colony</div>
+        <div style="font-size:10pt;color:white;font-weight:bold;">3 / 5</div>
+        <div style="font-size:7pt;color:#4fdf6f;margin-top:4px;">IN &rarr;&rarr;&rarr; OUT</div>
+      </div>
+
+      <!-- Center: Redox info -->
+      <div style="font-size:7pt;">
+        <div style="color:#aaa;margin-bottom:2px;">Available:</div>
+        <div style="color:#4fa4ff;">O2 +20</div>
+        <div style="color:#4fdf6f;">NO3 +15</div>
+        <div style="color:#ff4f4f;">CH4 +5</div>
+      </div>
+
+      <!-- Right: Score -->
+      <div style="text-align:right;">
+        <div style="font-size:8pt;color:#ffd700;">Score: 1,250</div>
+        <div style="font-size:7pt;color:#ff4f4f;">CH4: 8</div>
+        <div style="font-size:7pt;color:#aaa;">Lv2</div>
+      </div>
+    </div>
+
+    <!-- Bottom separator -->
+    <div style="border-top:1px solid #3a3a6a; padding-top:4px; font-size:7pt; color:#888; display:flex; justify-content:space-between;">
+      <span>SHIFT: ride flow</span>
+      <span>Q: science mode</span>
+      <span>ESC: pause</span>
+    </div>
+  </div>
+
+  <table style="font-size:9pt;">
+    <tr><th>Element</th><th>Location</th><th>What It Shows</th></tr>
+    <tr><td><strong style="color:#44df5f;">HP Bar</strong></td><td>Bottom-left</td><td>Health. Green &gt;60, Yellow 35-60, Orange 15-35, <span style="color:red;">Red &lt;15 (flashing!)</span></td></tr>
+    <tr><td><strong style="color:#5fa0f0;">EN Bar</strong></td><td>Bottom-left</td><td>Energy for flow riding. Drains at 0.8/sec.</td></tr>
+    <tr><td><strong style="color:#5ff050;">GR Bar</strong></td><td>Bottom-left</td><td>Growth toward division. <span style="color:#c0c020;">Flashes yellow when full (SPACE!)</span></td></tr>
+    <tr><td><strong>Colony X/Y</strong></td><td>Center-left</td><td>Current colonies placed / goal needed to win</td></tr>
+    <tr><td><strong>Flow Compass</strong></td><td>Center</td><td>IN &rarr; OUT shows flow direction; TOXIC warning if present</td></tr>
+    <tr><td><strong>Redox List</strong></td><td>Center-right</td><td>Available substrates and their energy values</td></tr>
+    <tr><td><strong style="color:#ffd700;">Score</strong></td><td>Top-right</td><td>Accumulated points this level</td></tr>
+    <tr><td><strong style="color:#ff4f4f;">CH4 Count</strong></td><td>Right</td><td>Methane consumed (climate impact tracker)</td></tr>
+    <tr><td><strong>Level #</strong></td><td>Right</td><td>Current level number</td></tr>
+  </table>
+
+  <h2>The Minimap</h2>
+
+  <div style="display:flex; gap:16px; align-items:flex-start; margin:10px 0;">
+    <div style="flex-shrink:0;">
+      <!-- Minimap mockup -->
+      <svg width="140" height="90" viewBox="0 0 84 52" style="border:2px solid #3a3a6a; border-radius:4px; background:#0a0a1a;">
+        <!-- Grains -->
+        <circle cx="10" cy="8" r="6" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="30" cy="44" r="8" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="55" cy="10" r="7" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="75" cy="40" r="5" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="20" cy="30" r="4" fill="#7a5a2a" opacity="0.8"/>
+        <circle cx="65" cy="28" r="6" fill="#7a5a2a" opacity="0.8"/>
+        <!-- Toxic zones -->
+        <rect x="35" y="15" width="8" height="6" fill="#c060c0" opacity="0.5"/>
+        <rect x="45" y="35" width="6" height="5" fill="#c060c0" opacity="0.5"/>
+        <!-- Colonies (green dots) -->
+        <circle cx="25" cy="18" r="2" fill="#4fdf6f"/>
+        <circle cx="42" cy="28" r="2" fill="#4fdf6f"/>
+        <!-- Player (white blinking) -->
+        <circle cx="38" cy="22" r="2" fill="white"/>
+        <!-- Outlet -->
+        <rect x="82" y="22" width="2" height="8" fill="#4fdf6f" opacity="0.5"/>
+      </svg>
+    </div>
+    <div style="font-size:10pt;">
+      <p>The minimap appears in the <strong>top-right corner</strong> during gameplay. It shows:</p>
+      <ul style="margin-left:16px; font-size:9pt;">
+        <li><span style="color:#7a5a2a;font-weight:bold;">Brown</span> = Rock grains (impassable)</li>
+        <li><span style="color:#c060c0;font-weight:bold;">Purple</span> = Toxic zones (danger!)</li>
+        <li><span style="color:#4fdf6f;font-weight:bold;">Green dots</span> = Your colonies</li>
+        <li><span style="font-weight:bold;">White dot</span> = ARKE (you, blinking)</li>
+        <li><span style="color:#4fdf6f;font-weight:bold;">Green edge</span> = Outlet</li>
+      </ul>
+      <p style="font-size:9pt; margin-top:4px; color:#888;">
+        Use the minimap to plan routes, avoid toxic zones, and find open pore space for colonies.
+      </p>
+    </div>
+  </div>
+
+  <h2>Science Mode (Press Q)</h2>
+  <div class="info-box science">
+    <div class="info-box-title" style="color:#4060a0;">SCIENCE OVERLAY</div>
+    <p style="font-size:10pt;">
+      Press <strong>Q</strong> to toggle the science overlay. It shows:
+    </p>
+    <ul style="margin-left:16px; font-size:9pt;">
+      <li><strong>Flow direction arrows</strong> on every tile with water current</li>
+      <li><strong>Heat map</strong>: Blue (slow) &rarr; Cyan &rarr; Green &rarr; Yellow (fast)</li>
+      <li><strong>Speed labels</strong> showing numeric flow values</li>
+      <li><strong>Tile type labels</strong> (PORE, FAST, TOXIC, INLET, etc.)</li>
+    </ul>
+    <p style="font-size:9pt; margin-top:4px;">
+      Use this to plan flow-riding routes and understand substrate delivery patterns!
+    </p>
+  </div>
+
+  <p class="page-number right">16</p>
+</div>
+
+<!-- Hazards & Dangers -->
+<div class="page" id="hazards">
+  <h1 class="section-number">SECTION 9</h1>
+  <h1 class="section-title">Hazards &amp; Dangers</h1>
+
+  <h2 style="color:#cc3333;">Beware! The Following Are Deadly:</h2>
+
+  <!-- Starvation -->
+  <div class="char-card" style="border-color:#cc3333;">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Dying ARKE -->
+        <rect x="5" y="4" width="6" height="8" fill="#1a4a4a" opacity="0.6"/>
+        <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+        <rect x="7" y="6" width="1" height="1" fill="#ff4444" opacity="0.7"/>
+        <rect x="9" y="6" width="1" height="1" fill="#ff4444" opacity="0.7"/>
+        <!-- Red flashing edge -->
+        <rect x="0" y="0" width="16" height="1" fill="#ff0000" opacity="0.4"/>
+        <rect x="0" y="15" width="16" height="1" fill="#ff0000" opacity="0.4"/>
+        <rect x="0" y="0" width="1" height="16" fill="#ff0000" opacity="0.4"/>
+        <rect x="15" y="0" width="1" height="16" fill="#ff0000" opacity="0.4"/>
+        <!-- Skull icon -->
+        <rect x="6" y="10" width="4" height="3" fill="#ff4444" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#cc3333;">STARVATION</div>
+      <div class="char-desc">
+        Your Health drains at <strong>1.5 HP per second</strong>, always. If you stop eating,
+        you die in about 67 seconds. Screen edges flash red when HP drops below 30.
+        <strong>"STARVING!"</strong> text appears as a warning.
+      </div>
+      <div class="char-stats" style="color:#cc3333;">
+        DAMAGE: -1.5 HP/sec (constant) &bull; SCREEN: Red flash when HP &lt; 30
+      </div>
+    </div>
+  </div>
+
+  <!-- Toxic Zones -->
+  <div class="char-card" style="border-color:#c060c0;">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <rect width="16" height="16" fill="#2a0a2a"/>
+        <!-- Toxic particles rising -->
+        <rect x="3" y="12" width="1" height="1" fill="#ff80ff" opacity="0.8"/>
+        <rect x="7" y="9" width="1" height="1" fill="#ff80ff" opacity="0.6"/>
+        <rect x="11" y="11" width="1" height="1" fill="#ff80ff" opacity="0.7"/>
+        <rect x="5" y="6" width="1" height="1" fill="#ff80ff" opacity="0.4"/>
+        <rect x="9" y="4" width="1" height="1" fill="#ff80ff" opacity="0.3"/>
+        <!-- Toxic border pulse -->
+        <rect x="0" y="0" width="16" height="1" fill="#c060c0" opacity="0.6"/>
+        <rect x="0" y="15" width="16" height="1" fill="#c060c0" opacity="0.6"/>
+        <rect x="0" y="0" width="1" height="16" fill="#c060c0" opacity="0.6"/>
+        <rect x="15" y="0" width="1" height="16" fill="#c060c0" opacity="0.6"/>
+        <!-- H2S label -->
+        <text x="8" y="10" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="2.5" fill="#ff80ff">H2S</text>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#c060c0;">TOXIC ZONES (H<sub>2</sub>S)</div>
+      <div class="char-desc">
+        Purple/magenta tiles that deal <strong>20 HP per second</strong> while standing on them.
+        Combined with starvation, that's <strong>21.5 HP/sec total</strong>! Visible on the minimap
+        as purple dots. Cross quickly or find alternate routes.
+      </div>
+      <div class="char-stats" style="color:#c060c0;">
+        DAMAGE: -20 HP/sec &bull; LEVELS: 5-10 &bull; COVERAGE: 10-25%
+      </div>
+    </div>
+  </div>
+
+  <!-- Rivals (food competition) -->
+  <div class="char-card" style="border-color:#cc3333;">
+    <div class="char-sprite">
+      <svg width="96" height="96" viewBox="0 0 16 16" class="pixel-art">
+        <!-- Multiple rivals eating -->
+        <rect x="3" y="6" width="3" height="4" fill="#8a2a2a"/>
+        <rect x="4" y="7" width="1" height="1" fill="#ff6666"/>
+        <rect x="7" y="4" width="3" height="4" fill="#8a2a2a"/>
+        <rect x="8" y="5" width="1" height="1" fill="#ff6666"/>
+        <rect x="11" y="7" width="3" height="4" fill="#8a2a2a"/>
+        <rect x="12" y="8" width="1" height="1" fill="#ff6666"/>
+        <!-- Food being consumed -->
+        <circle cx="4" cy="12" r="1.5" fill="#4fdf6f" opacity="0.3"/>
+        <line x1="4" y1="12" x2="4" y2="10" stroke="#ff0000" stroke-width="0.3"/>
+        <circle cx="8" cy="11" r="1.5" fill="#ff4f4f" opacity="0.3"/>
+        <line x1="8" y1="11" x2="8" y2="8" stroke="#ff0000" stroke-width="0.3"/>
+      </svg>
+    </div>
+    <div class="char-info">
+      <div class="char-name" style="color:#cc3333;">FOOD COMPETITION (RIVALS)</div>
+      <div class="char-desc">
+        Rivals consume substrates <strong>instantly on contact</strong>, just like you. They can't
+        be killed or stopped. They sense food from 12 tiles away and become more aggressive when
+        hungry. More rivals = less food = faster starvation.
+      </div>
+      <div class="char-stats" style="color:#cc3333;">
+        INDIRECT KILL &bull; RIVALS: 0-5 per level &bull; INVULNERABLE
+      </div>
+    </div>
+  </div>
+
+  <!-- Dead-end pores -->
+  <div class="info-box warning" style="margin-top:12px;">
+    <div class="info-box-title" style="color:#c05030;">DEAD-END PORES</div>
+    <p style="font-size:10pt;">
+      Some corridors lead nowhere! If you wander into a dead end, you waste precious time
+      backtracking while starvation continues. <strong>Use the minimap and Science Mode (Q)</strong>
+      to identify dead ends before entering. Tiles with no flow arrows are likely dead ends.
+    </p>
+  </div>
+
+  <p class="page-number left">17</p>
+</div>
+
+<!-- Tips, Scoring & Science -->
+<div class="page" id="tips">
+  <h1 class="section-number">SECTION 10</h1>
+  <h1 class="section-title">Tips &amp; Strategies</h1>
+
+  <div class="deco-border">
+    <h2 style="margin-top:0;">Survival Tips</h2>
+    <div class="two-col">
+      <div>
+        <h3>Early Game (Levels 1-4)</h3>
+        <ul style="font-size:9pt; margin-left:16px; line-height:1.6;">
+          <li>Learn the controls in Level 1 with no pressure</li>
+          <li>Always keep HP above 50 as a safety margin</li>
+          <li>Eat O<sub>2</sub> when available&mdash;it's the best energy source</li>
+          <li>Mix CH<sub>4</sub> (growth) with NO<sub>3</sub> (balanced)</li>
+          <li>Follow the flow arrows to find substrate-rich zones</li>
+          <li>Use the minimap to plan your route</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Late Game (Levels 5-10)</h3>
+        <ul style="font-size:9pt; margin-left:16px; line-height:1.6;">
+          <li>Master SHIFT (flow riding)&mdash;it's essential!</li>
+          <li>Check minimap for toxic zones BEFORE moving</li>
+          <li>Use Science Mode (Q) to see flow patterns</li>
+          <li>Race rivals to substrate spawn points near INLET</li>
+          <li>Place colonies strategically near food-rich areas</li>
+          <li>Cross toxic zones only when HP is high (&gt;70)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2>The Art of Efficient Eating</h2>
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:10px 0;">
+    <svg width="100%" height="100" viewBox="0 0 480 100">
+      <!-- Strategy 1 -->
+      <g transform="translate(0,5)">
+        <rect x="5" y="0" width="145" height="85" rx="4" fill="#f8f4ea" stroke="#3a3a4a"/>
+        <text x="77" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#cc3333">HP CRITICAL (&lt;30)</text>
+        <text x="77" y="32" text-anchor="middle" font-size="7" fill="#333">Eat ANYTHING nearby!</text>
+        <text x="77" y="44" text-anchor="middle" font-size="7" fill="#333">Prioritize: O2 &gt; NO3 &gt; Fe</text>
+        <text x="77" y="60" text-anchor="middle" font-size="6" fill="#888">Survival first.</text>
+        <text x="77" y="72" text-anchor="middle" font-size="6" fill="#888">Growth can wait.</text>
+      </g>
+      <!-- Strategy 2 -->
+      <g transform="translate(165,5)">
+        <rect x="5" y="0" width="145" height="85" rx="4" fill="#f8f8ea" stroke="#3a3a4a"/>
+        <text x="77" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#c0c020">HP SAFE (30-60)</text>
+        <text x="77" y="32" text-anchor="middle" font-size="7" fill="#333">Balanced approach:</text>
+        <text x="77" y="44" text-anchor="middle" font-size="7" fill="#333">NO3 for HP + Growth</text>
+        <text x="77" y="60" text-anchor="middle" font-size="6" fill="#888">CH4 when HP &gt; 50</text>
+        <text x="77" y="72" text-anchor="middle" font-size="6" fill="#888">Keep building GR bar.</text>
+      </g>
+      <!-- Strategy 3 -->
+      <g transform="translate(325,5)">
+        <rect x="5" y="0" width="145" height="85" rx="4" fill="#eaf8ea" stroke="#3a7a5a"/>
+        <text x="77" y="16" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#3a7a5a">HP HIGH (&gt;60)</text>
+        <text x="77" y="32" text-anchor="middle" font-size="7" fill="#333">CH4 for MAX growth!</text>
+        <text x="77" y="44" text-anchor="middle" font-size="7" fill="#333">4 CH4 = full GR bar</text>
+        <text x="77" y="60" text-anchor="middle" font-size="6" fill="#888">Sprint for division.</text>
+        <text x="77" y="72" text-anchor="middle" font-size="6" fill="#888">Fastest colony path.</text>
+      </g>
+    </svg>
+  </div>
+
+  <h2>Scoring Guide</h2>
+  <table>
+    <tr><th>Action</th><th>Points</th><th>Notes</th></tr>
+    <tr><td>Eat any substrate</td><td>+10</td><td>Base score for all types</td></tr>
+    <tr><td style="color:#ff4f4f;">Eat CH<sub>4</sub> (methane)</td><td style="color:#ff4f4f;">+35</td><td>+10 base +25 climate bonus</td></tr>
+    <tr><td style="color:#4fdf6f;">Eat NO<sub>3</sub> (nitrate)</td><td style="color:#4fdf6f;">+25</td><td>+10 base +15 climate bonus</td></tr>
+    <tr><td style="color:#3a7a5a;">Place colony</td><td style="color:#3a7a5a;">+100</td><td>Each division</td></tr>
+    <tr><td style="color:#ffd700;">Complete level</td><td style="color:#ffd700;">+1,000</td><td>Reach colony goal</td></tr>
+  </table>
+
+  <div class="info-box tip">
+    <div class="info-box-title" style="color:#3a8a4a;">MAXIMIZE YOUR SCORE</div>
+    <p style="font-size:10pt;">
+      CH<sub>4</sub> gives the most points per eat (35 pts) AND the most growth (+25 GR).
+      Eating 4 methane to divide gives 140 pts from eating + 100 pts from colony = <strong>240 pts
+      per division cycle</strong>. That's the fastest score per cycle in the game!
+    </p>
+  </div>
+
+  <p class="page-number right">18</p>
+</div>
+
+<!-- Science Facts -->
+<div class="page" id="science">
+  <h1 class="section-number">SECTION 11</h1>
+  <h1 class="section-title">The Science Behind ARKE</h1>
+
+  <div class="info-box science" style="margin-bottom:14px;">
+    <div class="info-box-title" style="color:#4060a0;">REAL SCIENCE, REAL IMPACT</div>
+    <p style="font-size:10pt;">
+      Every mechanic in ARKE is based on real biogeochemistry studied by the CompLaB3D
+      research team at the University of Georgia. Here are the science facts you unlock
+      after completing each level:
+    </p>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1fr; gap:8px;">
+
+    <div style="background:white; border-left:4px solid #4fa4ff; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#4fa4ff;">LEVEL 1: THE REDOX LADDER</div>
+      <p style="font-size:9pt;margin-top:4px;">Microbes use chemicals in a strict thermodynamic order:
+      O<sub>2</sub> &rarr; NO<sub>3</sub> &rarr; Mn(IV) &rarr; Fe(III) &rarr; SO<sub>4</sub> &rarr; CH<sub>4</sub>.
+      Each step yields less energy. This "redox ladder" governs all subsurface life.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #4fdf6f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#4fdf6f;">LEVEL 2: METHANOTROPHY</div>
+      <p style="font-size:9pt;margin-top:4px;">Methanotrophic archaea like ARKE consume methane (CH<sub>4</sub>)
+      before it reaches the atmosphere. They prevent ~90% of ocean methane from escaping.
+      Without them, Earth would be 3-5&deg;C warmer.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #4fdf6f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#3a7a5a;">LEVEL 3: DENITRIFICATION</div>
+      <p style="font-size:9pt;margin-top:4px;">Denitrifying microbes convert NO<sub>3</sub>&rarr;N<sub>2</sub> (harmless gas).
+      Without them, nitrate becomes N<sub>2</sub>O (nitrous oxide), a greenhouse gas 300&times; more
+      potent than CO<sub>2</sub> that also destroys the ozone layer.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #ef8f3f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#ef8f3f;">LEVEL 4: DIFFUSION vs ADVECTION</div>
+      <p style="font-size:9pt;margin-top:4px;">The P&eacute;clet number (Pe) determines whether chemicals
+      move by diffusion (random molecular motion) or advection (bulk water flow). In tight pores,
+      diffusion dominates. In wide channels, flow carries everything.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #c060c0; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#c060c0;">LEVEL 5: MONOD KINETICS</div>
+      <p style="font-size:9pt;margin-top:4px;">Growth rate = &mu;<sub>max</sub> &times; S/(K<sub>s</sub>+S).
+      When substrate S is abundant, growth is maximum. When S is scarce, growth slows.
+      The half-saturation constant K<sub>s</sub> determines how efficiently a microbe captures food.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #3a7a5a; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#3a7a5a;">LEVEL 6: BIOFILM FORMATION</div>
+      <p style="font-size:9pt;margin-top:4px;">Biofilms are communities of microbes embedded in a protective matrix.
+      CompLaB3D models biofilm spreading using Cellular Automata (CA): when local biomass exceeds a
+      threshold, it spreads to adjacent cells&mdash;just like ARKE's colony placement!</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #ff4f4f; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#ff4f4f;">LEVEL 7: ANAEROBIC METHANE OXIDATION</div>
+      <p style="font-size:9pt;margin-top:4px;">AOM (Anaerobic Oxidation of Methane) is performed by
+      archaea + sulfate-reducing bacteria working together. They consume CH<sub>4</sub> using SO<sub>4</sub>
+      as the oxidant, without needing any oxygen. A critical climate process.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #5a6a7a; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#5a6a7a;">LEVEL 8: PERMAFROST CARBON FEEDBACK</div>
+      <p style="font-size:9pt;margin-top:4px;">Arctic permafrost stores ~1,500 gigatons of carbon.
+      As it thaws, microbes decompose this ancient organic matter, releasing CH<sub>4</sub> and CO<sub>2</sub>.
+      Methanotrophs are the last line of defense against this carbon escaping.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #cc3333; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#cc3333;">LEVEL 9: HYDROTHERMAL CHEMISTRY</div>
+      <p style="font-size:9pt;margin-top:4px;">At ocean-floor hydrothermal vents, superheated water
+      carries dissolved metals (Fe, Mn) and gases (H<sub>2</sub>S, CH<sub>4</sub>). Chemosynthetic
+      microbes thrive here without sunlight&mdash;powered entirely by redox chemistry.</p>
+    </div>
+
+    <div style="background:white; border-left:4px solid #ffd700; padding:8px 12px; border-radius:0 4px 4px 0;">
+      <div style="font-family:'Press Start 2P',monospace;font-size:7pt;color:#ffd700;">LEVEL 10: YOU ARE EARTH'S CLIMATE SHIELD</div>
+      <p style="font-size:9pt;margin-top:4px;">Earth's subsurface contains more microbial biomass than
+      all surface life combined. These invisible organisms regulate our atmosphere, filter our water,
+      and cycle nutrients. You played as one of them&mdash;and now you understand their vital role.</p>
+    </div>
+  </div>
+
+  <p class="page-number left">19</p>
+</div>
+
+<!-- Back cover -->
+<div class="page cover-page" id="back-cover" style="justify-content:flex-end; padding-bottom:1.5in;">
+  <div class="stars">
+    <div class="star" style="top:10%;left:20%;animation-delay:0s"></div>
+    <div class="star" style="top:25%;left:50%;animation-delay:0.8s"></div>
+    <div class="star" style="top:15%;left:75%;animation-delay:1.5s"></div>
+    <div class="star" style="top:40%;left:35%;animation-delay:0.3s"></div>
+    <div class="star" style="top:55%;left:65%;animation-delay:2.0s"></div>
+    <div class="star" style="top:70%;left:15%;animation-delay:1.2s"></div>
+    <div class="star" style="top:80%;left:80%;animation-delay:0.6s"></div>
+  </div>
+
+  <svg width="120" height="120" viewBox="0 0 16 16" class="pixel-art" style="z-index:2; margin-bottom:30px;">
+    <rect x="5" y="4" width="6" height="8" fill="#2a8a8a"/>
+    <rect x="6" y="3" width="4" height="1" fill="#2a8a8a"/>
+    <rect x="6" y="5" width="4" height="3" fill="#1a1a3a"/>
+    <rect x="7" y="6" width="1" height="1" fill="#4aeaff"/>
+    <rect x="9" y="6" width="1" height="1" fill="#4aeaff"/>
+    <rect x="4" y="6" width="1" height="4" fill="#1a6a6a"/>
+    <rect x="11" y="6" width="1" height="4" fill="#1a6a6a"/>
+    <rect x="3" y="7" width="1" height="1" fill="#1a6a6a"/>
+    <rect x="12" y="7" width="1" height="1" fill="#1a6a6a"/>
+  </svg>
+
+  <div style="z-index:2; text-align:center;">
+    <p style="font-family:'Press Start 2P',monospace; font-size:10pt; color:#4aeaff; letter-spacing:2px;">
+      "One microbe can become billions."
+    </p>
+    <p style="font-size:9pt; color:#888; margin-top:8px; font-style:italic;">
+      &mdash; Elder Archaeon Prime
+    </p>
+
+    <div style="margin-top:40px; padding:12px 24px; border:1px solid #3a3a6a;">
+      <p style="font-family:'Press Start 2P',monospace; font-size:7pt; color:#8888aa; letter-spacing:2px;">
+        CompLaB3D
+      </p>
+      <p style="font-size:8pt; color:#666; margin-top:4px;">
+        University of Georgia &bull; Pore-Scale Reactive Transport
+      </p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

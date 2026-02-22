@@ -1,0 +1,334 @@
+<!-- Section 06: Growth & Division -->
+<div class="page" id="growth">
+  <h1 class="section-number">SECTION 5</h1>
+  <h1 class="section-title">Growth & Division</h1>
+
+  <p>
+    Growth is the core mechanic of ARKE. Every substrate you eat adds to your Growth bar (GR).
+    When GR reaches <strong>100</strong>, you can <strong>divide</strong>&mdash;placing a permanent
+    biofilm colony on the map. This is how you win each level!
+  </p>
+
+  <!-- Power-up progression diagram -->
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:14px;">The Growth Cycle</h3>
+    <svg width="460" height="170" viewBox="0 0 460 170">
+      <!-- Step 1: Eat -->
+      <g transform="translate(20,20)">
+        <rect x="0" y="0" width="90" height="70" rx="6" fill="#f0ece0" stroke="#3a3a4a" stroke-width="1.5"/>
+        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#333">1. EAT</text>
+        <!-- ARKE + substrate -->
+        <g transform="translate(25,30)">
+          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
+          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
+          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
+        </g>
+        <text x="45" y="42" text-anchor="middle" font-size="8" fill="#666">+</text>
+        <circle cx="60" cy="40" r="6" fill="#ff4f4f"/>
+        <text x="60" y="43" text-anchor="middle" font-size="4" fill="white">CH4</text>
+        <text x="45" y="62" text-anchor="middle" font-size="6" fill="#888">Move over food</text>
+      </g>
+
+      <!-- Arrow 1 -->
+      <g transform="translate(115, 45)">
+        <line x1="0" y1="10" x2="25" y2="10" stroke="#4aeaff" stroke-width="2"/>
+        <polygon points="22,5 30,10 22,15" fill="#4aeaff"/>
+      </g>
+
+      <!-- Step 2: Grow -->
+      <g transform="translate(150,20)">
+        <rect x="0" y="0" width="90" height="70" rx="6" fill="#d0e8d8" stroke="#3a7a5a" stroke-width="1.5"/>
+        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#3a7a5a">2. GROW</text>
+        <!-- GR bar filling -->
+        <rect x="10" y="28" width="70" height="12" fill="#1a1a2b" rx="2"/>
+        <rect x="10" y="28" width="50" height="12" fill="#5ff050" rx="2"/>
+        <text x="45" y="36" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="white">GR: 75/100</text>
+        <text x="45" y="55" text-anchor="middle" font-size="6" fill="#3a7a5a">GR bar fills up</text>
+        <text x="45" y="64" text-anchor="middle" font-size="6" fill="#888">Does NOT decay!</text>
+      </g>
+
+      <!-- Arrow 2 -->
+      <g transform="translate(245, 45)">
+        <line x1="0" y1="10" x2="25" y2="10" stroke="#5ff050" stroke-width="2"/>
+        <polygon points="22,5 30,10 22,15" fill="#5ff050"/>
+      </g>
+
+      <!-- Step 3: GR = 100 -->
+      <g transform="translate(280,20)">
+        <rect x="0" y="0" width="90" height="70" rx="6" fill="#ffffd0" stroke="#c0c020" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="45" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="6" fill="#8a8a00">3. READY!</text>
+        <!-- Full GR bar flashing -->
+        <rect x="10" y="28" width="70" height="12" fill="#1a1a2b" rx="2"/>
+        <rect x="10" y="28" width="70" height="12" fill="#ffff00" rx="2" opacity="0.8"/>
+        <text x="45" y="36" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#333">SPACE!</text>
+        <text x="45" y="55" text-anchor="middle" font-size="6" fill="#8a8a00">GR hits 100!</text>
+        <text x="45" y="64" text-anchor="middle" font-size="6" fill="#888">Press SPACE</text>
+      </g>
+
+      <!-- Arrow 3 -->
+      <g transform="translate(375, 45)">
+        <line x1="0" y1="10" x2="25" y2="10" stroke="#ffff00" stroke-width="2"/>
+        <polygon points="22,5 30,10 22,15" fill="#ffff00"/>
+      </g>
+
+      <!-- Step 4: Divide -->
+      <g transform="translate(20,100)">
+        <rect x="0" y="0" width="420" height="60" rx="6" fill="#f0ece0" stroke="#3a3a4a" stroke-width="1.5"/>
+        <text x="210" y="18" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="7" fill="#3a7a5a">4. DIVIDE &mdash; COLONY PLACED!</text>
+
+        <!-- Division diagram -->
+        <!-- ARKE -->
+        <g transform="translate(60,30)">
+          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
+          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
+          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
+        </g>
+
+        <!-- Arrow -->
+        <line x1="80" y1="37" x2="120" y2="37" stroke="#4aeaff" stroke-width="1.5" stroke-dasharray="3,2"/>
+
+        <!-- ARKE stays -->
+        <g transform="translate(130,30)">
+          <rect x="0" y="0" width="10" height="14" fill="#2a8a8a" rx="1"/>
+          <rect x="1" y="2" width="8" height="4" fill="#1a1a3a"/>
+          <rect x="3" y="3" width="2" height="2" fill="#4aeaff"/>
+        </g>
+        <text x="135" y="55" text-anchor="middle" font-size="6" fill="#2a8a8a">ARKE (GR=0)</text>
+
+        <text x="165" y="38" text-anchor="middle" font-size="14" fill="#888">+</text>
+
+        <!-- Colony placed -->
+        <g transform="translate(185,30)">
+          <rect x="0" y="0" width="14" height="14" fill="#3a7a5a" rx="2"/>
+          <rect x="2" y="2" width="4" height="4" fill="#5aaa7a" opacity="0.5"/>
+          <rect x="6" y="6" width="4" height="4" fill="#5aaa7a" opacity="0.3"/>
+          <!-- Glow -->
+          <circle cx="7" cy="7" r="10" fill="#4fdf6f" opacity="0.1"/>
+        </g>
+        <text x="192" y="55" text-anchor="middle" font-size="6" fill="#3a7a5a">NEW COLONY</text>
+
+        <!-- Score -->
+        <text x="290" y="34" font-family="'Press Start 2P',monospace" font-size="6" fill="#ffd700">+100 POINTS</text>
+        <text x="290" y="48" font-size="7" fill="#666">Colony counts toward level goal</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Growth per substrate table -->
+  <h2>Substrates Needed to Divide</h2>
+  <table>
+    <tr>
+      <th>Substrate</th>
+      <th>Growth/Eat</th>
+      <th>Eats to Divide</th>
+      <th>Efficiency Rating</th>
+    </tr>
+    <tr>
+      <td style="color:#ff4f4f;font-weight:bold;">CH4 (Methane)</td>
+      <td>+25 GR</td>
+      <td style="font-weight:bold;">4 eats</td>
+      <td><span style="color:#3a7a5a;">BEST for growth</span></td>
+    </tr>
+    <tr>
+      <td style="color:#4fdf6f;font-weight:bold;">NO3 (Nitrate)</td>
+      <td>+18 GR</td>
+      <td>6 eats</td>
+      <td><span style="color:#4fdf6f;">Great balanced option</span></td>
+    </tr>
+    <tr>
+      <td style="color:#4fa4ff;font-weight:bold;">O2 (Oxygen)</td>
+      <td>+15 GR</td>
+      <td>7 eats</td>
+      <td>Good energy, decent growth</td>
+    </tr>
+    <tr>
+      <td style="color:#cf6fff;font-weight:bold;">Mn(IV)</td>
+      <td>+12 GR</td>
+      <td>9 eats</td>
+      <td>Mid-range</td>
+    </tr>
+    <tr>
+      <td style="color:#ef8f3f;font-weight:bold;">Fe(III) (Iron)</td>
+      <td>+10 GR</td>
+      <td>10 eats</td>
+      <td>Mid-range</td>
+    </tr>
+    <tr>
+      <td style="color:#c0c020;font-weight:bold;">SO4 (Sulfate)</td>
+      <td>+8 GR</td>
+      <td>13 eats</td>
+      <td><span style="color:#cc3333;">Slowest growth</span></td>
+    </tr>
+  </table>
+
+  <div class="info-box tip">
+    <div class="info-box-title" style="color:#3a8a4a;">PRO TIP</div>
+    <p style="font-size:10pt;">
+      The fastest way to divide is to eat <strong>4 methane particles (CH<sub>4</sub>)</strong>.
+      But methane only gives +5 HP&mdash;if your health is low, you'll die before you can divide!
+      Mix in NO<sub>3</sub> or O<sub>2</sub> to keep your health up while building growth.
+    </p>
+  </div>
+
+  <p class="page-number left">9</p>
+</div>
+
+<!-- Growth page 2: Colony placement mechanics -->
+<div class="page" id="growth2">
+
+  <h2>Colony Placement Mechanics</h2>
+
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <h3 style="font-size:9pt; margin-bottom:10px;">Where Does the Colony Go?</h3>
+    <svg width="360" height="200" viewBox="0 0 360 200">
+      <!-- Grid -->
+      <rect x="80" y="10" width="200" height="180" fill="#0c1420"/>
+
+      <!-- Grid lines -->
+      <g stroke="#1a2a3a" stroke-width="0.5">
+        <line x1="120" y1="10" x2="120" y2="190"/>
+        <line x1="160" y1="10" x2="160" y2="190"/>
+        <line x1="200" y1="10" x2="200" y2="190"/>
+        <line x1="240" y1="10" x2="240" y2="190"/>
+        <line x1="80" y1="50" x2="280" y2="50"/>
+        <line x1="80" y1="90" x2="280" y2="90"/>
+        <line x1="80" y1="130" x2="280" y2="130"/>
+        <line x1="80" y1="170" x2="280" y2="170"/>
+      </g>
+
+      <!-- Grain tiles -->
+      <rect x="80" y="10" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="240" y="10" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="80" y="90" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="80" y="130" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="240" y="130" width="40" height="40" fill="#7a5a2a"/>
+      <rect x="240" y="90" width="40" height="40" fill="#7a5a2a"/>
+
+      <!-- ARKE in center -->
+      <g transform="translate(180,110)">
+        <rect x="-8" y="-10" width="16" height="20" fill="#2a8a8a" rx="1"/>
+        <rect x="-6" y="-8" width="12" height="6" fill="#1a1a3a"/>
+        <rect x="-4" y="-6" width="3" height="2" fill="#4aeaff"/>
+        <rect x="2" y="-6" width="3" height="2" fill="#4aeaff"/>
+        <!-- Glow (ready) -->
+        <circle cx="0" cy="0" r="16" fill="#ffff00" opacity="0.1"/>
+      </g>
+      <text x="180" y="128" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4aeaff">ARKE</text>
+
+      <!-- Candidate tiles (highlighted) -->
+      <!-- Up -->
+      <rect x="160" y="50" width="40" height="40" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="180" y="75" text-anchor="middle" font-size="6" fill="#4fdf6f">?</text>
+
+      <!-- Right (best - furthest from walls) -->
+      <rect x="200" y="90" width="40" height="40" fill="#3a7a5a" opacity="0.4" stroke="#4fdf6f" stroke-width="2"/>
+      <text x="220" y="115" text-anchor="middle" font-family="'Press Start 2P',monospace" font-size="5" fill="#4fdf6f">BEST</text>
+
+      <!-- Down -->
+      <rect x="160" y="130" width="40" height="40" fill="#3a7a5a" opacity="0.2" stroke="#4fdf6f" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="180" y="155" text-anchor="middle" font-size="6" fill="#4fdf6f">?</text>
+
+      <!-- Left blocked by grain -->
+      <rect x="120" y="90" width="40" height="40" fill="#0c1420"/>
+      <text x="140" y="115" text-anchor="middle" font-size="6" fill="#3060a0">open</text>
+
+      <!-- Labels -->
+      <text x="40" y="30" text-anchor="middle" font-size="7" fill="#7a5a2a" font-weight="bold">GRAIN</text>
+      <text x="320" y="115" font-size="7" fill="#4fdf6f">Colony goes to tile</text>
+      <text x="320" y="127" font-size="7" fill="#4fdf6f">furthest from walls</text>
+    </svg>
+    <p style="font-size:8pt; color:#888; margin-top:6px;">
+      The game automatically selects the best adjacent pore tile &mdash; preferring open space far from grain walls.
+    </p>
+  </div>
+
+  <h2>Colony Passive Feeding</h2>
+
+  <div style="background:white; border:2px solid #3a3a4a; border-radius:4px; padding:16px; margin:12px 0; text-align:center;">
+    <svg width="280" height="140" viewBox="0 0 280 140">
+      <rect x="10" y="10" width="260" height="120" fill="#0c1420" rx="4"/>
+
+      <!-- Colony in center -->
+      <g transform="translate(140,70)">
+        <rect x="-8" y="-8" width="16" height="16" fill="#3a7a5a" rx="2"/>
+        <rect x="-5" y="-5" width="5" height="5" fill="#5aaa7a" opacity="0.5"/>
+        <!-- Feed radius circle -->
+        <circle cx="0" cy="0" r="45" fill="none" stroke="#4fdf6f" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      </g>
+
+      <!-- Substrates being pulled in -->
+      <circle cx="100" cy="50" r="4" fill="#ff4f4f"/>
+      <line x1="104" y1="52" x2="130" y2="65" stroke="#ff4f4f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+
+      <circle cx="180" cy="45" r="4" fill="#4fdf6f"/>
+      <line x1="177" y1="48" x2="148" y2="64" stroke="#4fdf6f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+
+      <circle cx="160" cy="105" r="4" fill="#dfdf3f"/>
+      <line x1="157" y1="102" x2="145" y2="78" stroke="#dfdf3f" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.5"/>
+
+      <!-- Out of range substrate -->
+      <circle cx="50" cy="110" r="4" fill="#4fa4ff" opacity="0.4"/>
+      <text x="50" y="125" text-anchor="middle" font-size="5" fill="#888">out of range</text>
+
+      <!-- Labels -->
+      <text x="140" y="25" text-anchor="middle" font-family="'Space Mono',monospace" font-size="6" fill="#4fdf6f">Feed Radius: 1.5 tiles</text>
+      <text x="140" y="36" text-anchor="middle" font-size="6" fill="#888">2% chance per frame to consume</text>
+    </svg>
+  </div>
+
+  <h2>Level Completion</h2>
+
+  <div class="flow-diagram">
+    <div class="flow-step" style="border-color:#ff4f4f;">EAT</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#5ff050;">GROW</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#ffff00;">DIVIDE</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#3a7a5a;">COLONY</div>
+    <span class="flow-arrow">&rarr;</span>
+    <div class="flow-step" style="border-color:#ffd700; background:#ffd700; color:white;">REPEAT &times;N</div>
+  </div>
+
+  <table style="margin-top:12px;">
+    <tr>
+      <th>Level</th>
+      <th>Goal</th>
+      <th>Level</th>
+      <th>Goal</th>
+    </tr>
+    <tr>
+      <td>1. First Breath</td><td><strong>3</strong> colonies</td>
+      <td>6. Vent Guardians</td><td><strong>8</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>2. Roots of Life</td><td><strong>5</strong> colonies</td>
+      <td>7. Thawing Grounds</td><td><strong>6</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>3. Into the Depths</td><td><strong>4</strong> colonies</td>
+      <td>8. The Great Thaw</td><td><strong>8</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>4. The Hungry Dark</td><td><strong>6</strong> colonies</td>
+      <td>9. The Abyss</td><td><strong>8</strong> colonies</td>
+    </tr>
+    <tr>
+      <td>5. The Methane Vents</td><td><strong>5</strong> colonies</td>
+      <td>10. Earth's Last Stand</td><td><strong>12</strong> colonies</td>
+    </tr>
+  </table>
+
+  <div class="info-box" style="margin-top: 10px;">
+    <div class="info-box-title">SCORING</div>
+    <p style="font-size:10pt;">
+      <strong>+10 pts</strong> per substrate eaten &bull;
+      <strong>+25 bonus</strong> for CH<sub>4</sub> &bull;
+      <strong>+15 bonus</strong> for NO<sub>3</sub> &bull;
+      <strong>+100 pts</strong> per colony placed &bull;
+      <strong>+1,000 pts</strong> per level completed
+    </p>
+  </div>
+
+  <p class="page-number right">10</p>
+</div>
