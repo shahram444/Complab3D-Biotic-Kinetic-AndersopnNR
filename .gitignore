@@ -5,6 +5,9 @@
 # Export builds (large binaries, don't commit)
 game/builds/
 
+# Python cache
+__pycache__/
+
 # OS files
 .DS_Store
 Thumbs.db
