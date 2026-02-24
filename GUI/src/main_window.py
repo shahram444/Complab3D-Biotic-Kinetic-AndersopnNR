@@ -8,6 +8,7 @@
 """
 
 import os
+import logging
 from pathlib import Path
 
 from PySide6.QtWidgets import (
@@ -16,6 +17,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QKeySequence
+
+log = logging.getLogger("complab.mainwindow")
 
 from .config import AppConfig
 from .core.project import CompLaBProject
@@ -665,6 +668,15 @@ class CompLaBMainWindow(QMainWindow):
         return ""
 
     def _run_simulation(self):
+        # ── Guard: prevent starting a second simulation ────────────
+        if self._runner and self._runner.isRunning():
+            log.warning("[MAIN] _run_simulation called while runner is "
+                        "still active – ignoring")
+            self._console.log_warning(
+                "A simulation is already running. Stop it first.")
+            return
+
+        log.info("[MAIN] _run_simulation() entered")
         self._save_panels_to_project()
 
         # Determine working directory
@@ -733,12 +745,20 @@ class CompLaBMainWindow(QMainWindow):
         # Get MPI config from run panel
         mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
 
+        # ── Clean up previous runner if it finished ────────────────
+        if self._runner is not None:
+            log.info("[MAIN] Cleaning up previous runner id=%s", id(self._runner))
+            self._runner.wait(2000)
+            self._runner.deleteLater()
+            self._runner = None
+
         self._runner = SimulationRunner(
             exe, work_dir, self,
             mpi_enabled=mpi_enabled,
             mpi_nprocs=mpi_nprocs,
             mpi_command=mpi_command,
         )
+        log.info("[MAIN] New SimulationRunner id=%s created", id(self._runner))
         self._runner.output_line.connect(self._console.append)
         self._runner.output_line.connect(self._run_panel.on_output_line)
         self._runner.progress.connect(self._run_panel.on_progress)
@@ -747,13 +767,16 @@ class CompLaBMainWindow(QMainWindow):
         self._runner.finished_signal.connect(self._on_sim_finished)
         self._runner.diagnostic_report.connect(self._on_diagnostic_report)
         self._runner.start()
+        log.info("[MAIN] Runner thread started")
         self._console.set_status("Running...")
 
     def _stop_simulation(self):
+        log.info("[MAIN] _stop_simulation() called  runner=%s", self._runner)
         if self._runner:
             self._runner.cancel()
 
     def _on_sim_finished(self, code, msg):
+        log.info("[MAIN] _on_sim_finished  code=%d  msg=%s", code, msg)
         self._run_panel.on_finished(code, msg)
         self._console.set_status("Ready")
         self._console.set_progress(0, 0)
