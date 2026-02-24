@@ -122,7 +122,7 @@ class SimulationRunner(QThread):
             os.makedirs(output_dir, exist_ok=True)
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             self._log_path = os.path.join(output_dir, f"simulation_{ts}.out")
-            log_file = open(self._log_path, "w", buffering=1)
+            log_file = open(self._log_path, "w", encoding="utf-8", buffering=1)
             self.output_line.emit(f"Log file: {self._log_path}")
         except Exception as e:
             self.output_line.emit(f"WARNING: Could not create log file: {e}")
@@ -141,6 +141,8 @@ class SimulationRunner(QThread):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 bufsize=1,
                 # Put child into its own process group so we can kill the
                 # whole MPI tree with os.killpg() instead of just the
