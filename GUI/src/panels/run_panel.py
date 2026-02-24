@@ -13,6 +13,7 @@ Completely rebuilt to provide:
 import os
 import re
 import time
+import logging
 from collections import deque
 from pathlib import Path
 
@@ -27,6 +28,13 @@ from PySide6.QtCore import Signal, QTimer, Qt
 from PySide6.QtGui import QFont, QTextCursor, QColor
 
 from .base_panel import BasePanel
+
+log = logging.getLogger("complab.run_panel")
+
+# Maximum lines kept in the RunPanel output QTextEdit to prevent
+# unbounded memory growth and event-loop stalls when the solver
+# produces millions of output lines.
+_OUTPUT_MAX_LINES = 50000
 
 
 class RunPanel(BasePanel):
@@ -413,6 +421,19 @@ class RunPanel(BasePanel):
         self._output_text.append(
             f'<span style="color:{color};">{_escape_html(line)}</span>')
 
+        # ── Trim old lines to prevent unbounded memory growth ──────
+        doc = self._output_text.document()
+        overflow = doc.blockCount() - _OUTPUT_MAX_LINES
+        if overflow > 0:
+            cursor = QTextCursor(doc)
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+            cursor.movePosition(
+                QTextCursor.MoveOperation.Down,
+                QTextCursor.MoveMode.KeepAnchor,
+                overflow,
+            )
+            cursor.removeSelectedText()
+
         if self._auto_scroll_check.isChecked():
             sb = self._output_text.verticalScrollBar()
             sb.setValue(sb.maximum())
@@ -477,6 +498,7 @@ class RunPanel(BasePanel):
 
     def on_finished(self, return_code: int, message: str):
         """Called when simulation finishes."""
+        log.info("[RUNPANEL] on_finished  rc=%d  msg=%s", return_code, message)
         self._running = False
         self._timer.stop()
         self._run_btn.setEnabled(True)
