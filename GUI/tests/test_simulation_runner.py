@@ -71,21 +71,28 @@ def work_dir(tmp_path, _setup_logging):
 def _write_fake_solver(tmp_path: Path, script_body: str) -> str:
     """Write a Python helper script that acts as a fake C++ solver.
 
-    Returns the path to the executable script.
-    Uses the current sys.executable for the shebang so it works in any
-    Python environment.
+    Returns the path to the executable.
+    On Windows, creates a .bat wrapper that invokes ``python script.py``
+    because Windows cannot execute scripts via shebang lines.
+    On Unix, uses the standard shebang approach.
     """
-    exe = tmp_path / "complab"
-    python = sys.executable  # e.g. /usr/local/bin/python3
-    # Build the script without textwrap.dedent to avoid shebang corruption
+    python = sys.executable
+    script = tmp_path / "complab.py"
     lines = [
         f"#!{python}",
         "import sys, time",
         textwrap.dedent(script_body),
     ]
-    exe.write_text("\n".join(lines))
-    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
-    return str(exe)
+    script.write_text("\n".join(lines))
+    script.chmod(script.stat().st_mode | stat.S_IEXEC)
+
+    if os.name == "nt":
+        # Windows: create a .bat wrapper that calls python on the script
+        bat = tmp_path / "complab.bat"
+        bat.write_text(f'@"{python}" "{script}"\n')
+        return str(bat)
+    else:
+        return str(script)
 
 
 # ---------------------------------------------------------------------------
@@ -323,9 +330,11 @@ for i in range(1, 10000):
 
         runner.cancel()
 
-        # Wait for finished
-        with qtbot.waitSignal(runner.finished_signal, timeout=15_000):
-            pass  # already running, just wait
+        # Wait for finished (signal may already have fired before we get here)
+        qtbot.waitUntil(
+            lambda: len(collector.finished) >= 1,
+            timeout=15_000,
+        )
 
         rc, msg = collector.finished[0]
         assert "cancelled" in msg.lower() or rc != 0
@@ -334,6 +343,8 @@ for i in range(1, 10000):
             "Subprocess still alive after cancel()!"
         )
 
+    @pytest.mark.skipif(os.name == "nt",
+                        reason="SIGTERM trapping not supported on Windows")
     def test_cancel_sigterm_ignored(self, qtbot, work_dir):
         """Solver that traps SIGTERM — we should escalate to SIGKILL."""
         script = """\
@@ -445,8 +456,17 @@ sys.exit(42)
         assert "42" in msg
 
     def test_segfault_exit_code(self, qtbot, work_dir):
-        """Simulate segfault (exit -11 / signal 11)."""
-        script = """\
+        """Simulate segfault (exit -11 / signal 11).
+
+        On Windows, os.kill with SIGSEGV is not supported the same way,
+        so we use sys.exit(139) to simulate the crash exit code instead.
+        """
+        if os.name == "nt":
+            script = """\
+sys.exit(139)
+"""
+        else:
+            script = """\
 import os, signal
 os.kill(os.getpid(), signal.SIGSEGV)
 """
@@ -460,8 +480,11 @@ os.kill(os.getpid(), signal.SIGSEGV)
             runner.start()
 
         rc, _ = collector.finished[0]
-        # On Linux, death by signal N gives rc = -N
-        assert rc == -11 or rc == 139, f"Expected SIGSEGV code, got {rc}"
+        if os.name == "nt":
+            assert rc == 139, f"Expected rc=139, got {rc}"
+        else:
+            # On Linux, death by signal N gives rc = -N
+            assert rc == -11 or rc == 139, f"Expected SIGSEGV code, got {rc}"
 
 
 # ===================================================================

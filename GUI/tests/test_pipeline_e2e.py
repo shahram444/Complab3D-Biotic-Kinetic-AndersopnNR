@@ -96,17 +96,28 @@ def _make_geometry_file(directory: Path, nx: int, ny: int, nz: int,
 
 
 def _write_fake_solver(tmp_path: Path, script_body: str) -> str:
-    """Write a Python script that acts as a fake C++ solver."""
-    exe = tmp_path / "complab"
+    """Write a Python script that acts as a fake C++ solver.
+
+    On Windows, creates a .bat wrapper that invokes ``python script.py``
+    because Windows cannot execute scripts via shebang lines.
+    On Unix, uses the standard shebang approach.
+    """
     python = sys.executable
+    script = tmp_path / "complab.py"
     lines = [
         f"#!{python}",
         "import sys, time, os",
         textwrap.dedent(script_body),
     ]
-    exe.write_text("\n".join(lines))
-    exe.chmod(exe.stat().st_mode | stat.S_IEXEC)
-    return str(exe)
+    script.write_text("\n".join(lines))
+    script.chmod(script.stat().st_mode | stat.S_IEXEC)
+
+    if os.name == "nt":
+        bat = tmp_path / "complab.bat"
+        bat.write_text(f'@"{python}" "{script}"\n')
+        return str(bat)
+    else:
+        return str(script)
 
 
 class SignalCollector:
