@@ -155,7 +155,45 @@ def _draw_credits(splash):
     splash.setPixmap(pm)
 
 
+def _setup_logging():
+    """Configure the complab.* diagnostic logger.
+
+    Logs go to ``~/.complab_studio/complab_gui.log`` (rotated at 5 MB)
+    and, when the ``COMPLAB_DEBUG`` env-var is set, also to stderr.
+    """
+    import logging
+    from logging.handlers import RotatingFileHandler
+
+    log_dir = Path.home() / ".complab_studio"
+    log_dir.mkdir(exist_ok=True)
+    log_file = log_dir / "complab_gui.log"
+
+    root = logging.getLogger("complab")
+    root.setLevel(logging.DEBUG)
+
+    fmt = logging.Formatter(
+        "%(asctime)s.%(msecs)03d [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    fh = RotatingFileHandler(str(log_file), maxBytes=5_000_000, backupCount=3)
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(fmt)
+    root.addHandler(fh)
+
+    if os.environ.get("COMPLAB_DEBUG"):
+        import sys as _sys
+        sh = logging.StreamHandler(_sys.stderr)
+        sh.setLevel(logging.DEBUG)
+        sh.setFormatter(fmt)
+        root.addHandler(sh)
+
+    root.info("===== CompLaB Studio %s  logging started =====", VERSION)
+
+
 def main():
+    _setup_logging()
+
     app = QApplication(sys.argv)
     app.setApplicationName("CompLaB Studio")
     app.setApplicationVersion(VERSION)
