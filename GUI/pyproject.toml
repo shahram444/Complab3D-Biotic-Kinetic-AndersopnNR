@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "complab-studio"
+version = "2.1.0"
+description = "CompLaB Studio - GUI for pore-scale reactive transport modeling"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Shahram Asgari"},
+]
+dependencies = [
+    "PySide6>=6.5.0",
+    "numpy>=1.24.0",
+    "vtk>=9.2.0",
+    "matplotlib>=3.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-qt>=4.2.0",
+]
+
+[project.scripts]
+complab-studio = "main:main"
+
+[tool.setuptools]
+packages = ["src", "src.core", "src.dialogs", "src.panels", "src.widgets"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+qt_api = "pyside6"
