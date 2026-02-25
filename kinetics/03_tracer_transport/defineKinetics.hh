@@ -1,16 +1,22 @@
 /* ============================================================================
- * defineKinetics.hh - NO-OP STUB (Flow Only)
+ * defineKinetics.hh - NO-OP STUB (Tracer Transport)
  * CompLaB3D - University of Georgia
  *
- * Scenario: 01_flow_only
- *   Pure fluid flow with no substrates, no biomass, and no reactions.
+ * Scenario: 03_tracer_transport
+ *   Conservative tracer transport with flow and diffusion but no reactions.
+ *   A single tracer substrate is advected by fluid flow and spreads by
+ *   molecular diffusion. No biomass is present and no reactions occur.
  *   This file is a no-op stub required because the solver unconditionally
  *   #includes defineKinetics.hh. All reaction rates are set to zero and
  *   the function returns immediately.
  *
+ * Substrates: 1 (Tracer)
+ * Biomass species: 0
+ * Reactions: None (conservative transport)
+ *
  * Usage:
  *   Copy this file to your simulation src/ directory when running a
- *   flow-only simulation with no biotic kinetics.
+ *   tracer transport simulation with no biotic kinetics.
  * ============================================================================
  */
 #ifndef DEFINE_KINETICS_HH
@@ -67,9 +73,10 @@ namespace KineticsStats {
 }
 
 // ============================================================================
-// MAIN KINETICS FUNCTION - NO-OP (Flow Only)
+// MAIN KINETICS FUNCTION - NO-OP (Tracer Transport)
 // ============================================================================
-// No substrates, no biomass, no reactions. Zero all rates and return.
+// Conservative tracer is transported by flow and diffusion but does not react.
+// No biomass present. Zero all rates and return.
 void defineRxnKinetics(
     std::vector<double> B,
     std::vector<double> C,
@@ -81,7 +88,7 @@ void defineRxnKinetics(
     for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
     // Zero all biomass reaction rates
     for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
-    // No reactions in flow-only scenario
+    // No reactions in tracer transport scenario
     return;
 }
 

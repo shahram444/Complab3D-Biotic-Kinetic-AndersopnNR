@@ -1,0 +1,176 @@
+# Scenario 05: Abiotic Equilibrium-Only Carbonate Speciation
+
+## Overview
+
+This scenario tests the **equilibrium chemistry solver** in isolation by running a 5-substrate carbonate system with **no kinetic reactions**. The abiotic kinetics function is present but sets all rates to zero. Instead, the equilibrium solver (Newton-Raphson with Anderson acceleration) redistributes CO2, HCO3-, CO3^2-, and H+ according to thermodynamic equilibrium constants (log-K values) at every iteration. This validates that the speciation solver converges to the correct pH and carbonate ratios without interference from kinetic source/sink terms.
+
+## Reactions
+
+**Kinetic reactions:** None. All rates are set to zero in `defineAbioticKinetics.hh`.
+
+**Equilibrium reactions** (handled by the equilibrium solver):
+
+```
+Reaction 1 (carbonic acid first dissociation):
+   CO2(aq) + H2O  <-->  HCO3-  +  H+
+   pKa1 = 6.35       (log K1 = -6.35)
+
+Reaction 2 (bicarbonate second dissociation):
+   HCO3-  <-->  CO3^2-  +  H+
+   pKa2 = 10.33      (log K2 = -10.33)
+```
+
+## Input Parameters
+
+| Parameter | Value | Units | Description |
+|-----------|-------|-------|-------------|
+| `delta_P` | 2.0e-3 | (lattice) | Pressure drop driving flow |
+| `tau` | 0.8 | (lattice) | LBM relaxation time |
+| `dx` | 1 | um | Voxel size |
+| `biotic_mode` | false | -- | No microbes |
+| `enable_kinetics` | false | -- | No biotic kinetics |
+| `enable_abiotic_kinetics` | true | -- | Abiotic kinetics enabled (but rates are zero) |
+| `equilibrium.enabled` | true | -- | Equilibrium solver active |
+| `number_of_substrates` | 5 | -- | DOC, CO2, HCO3, CO3, H+ |
+
+### Substrate Initial Concentrations
+
+| Index | Name | C0 (mol/L) | D (m^2/s) |
+|-------|------|------------|-----------|
+| 0 | DOC | 0.1 | 1.0e-9 |
+| 1 | CO2 | 1.0e-5 | 1.9e-9 |
+| 2 | HCO3 | 2.0e-3 | 1.2e-9 |
+| 3 | CO3 | 1.0e-5 | 9.0e-10 |
+| 4 | H+ | 1.0e-7 | 9.3e-9 |
+
+### Equilibrium Solver Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| Components | HCO3, H+ |
+| Stoichiometry (DOC) | [0.0, 0.0] -- not in equilibrium |
+| Stoichiometry (CO2) | [1.0, 1.0] |
+| Stoichiometry (HCO3) | [1.0, 0.0] -- component |
+| Stoichiometry (CO3) | [1.0, -1.0] |
+| Stoichiometry (H+) | [0.0, 1.0] -- component |
+| log K (DOC) | 0.0 |
+| log K (CO2) | 6.35 |
+| log K (HCO3) | 0.0 |
+| log K (CO3) | -10.33 |
+| log K (H+) | 0.0 |
+
+## Domain
+
+| Property | Value |
+|----------|-------|
+| Dimensions (nx x ny x nz) | 20 x 10 x 10 |
+| Geometry type | Open pore space |
+| Description | Entirely open domain with no internal obstacles. Flow in x-direction. |
+| Material numbers | 2 = pore space throughout |
+
+## Boundary Conditions
+
+| Boundary | Species | Type | Value |
+|----------|---------|------|-------|
+| Left (x = 0) | DOC | Dirichlet | 0.1 mol/L |
+| Left (x = 0) | CO2 | Dirichlet | 1.0e-5 mol/L |
+| Left (x = 0) | HCO3 | Dirichlet | 2.0e-3 mol/L |
+| Left (x = 0) | CO3 | Dirichlet | 1.0e-5 mol/L |
+| Left (x = 0) | H+ | Dirichlet | 1.0e-7 mol/L |
+| Right (x = nx) | All species | Neumann | 0 (zero-flux) |
+
+## Validation Criteria
+
+The reviewer should check the following:
+
+1. **pH consistency.** The equilibrium solver should produce H+ concentrations consistent with the carbonate system. For the given initial conditions (dominated by HCO3- at 2.0e-3 mol/L), the pH should settle near **pH 8.3** (typical of bicarbonate-buffered water). Verify:
+   ```
+   pH = -log10([H+])
+   ```
+
+2. **Carbonate ratio consistency with log-K values.** At equilibrium, the speciation ratios must satisfy the mass action laws:
+   ```
+   [HCO3-][H+] / [CO2] = 10^(-6.35) = K1
+   [CO3^2-][H+] / [HCO3-] = 10^(-10.33) = K2
+   ```
+   Extract concentrations from the output and verify these relationships hold.
+
+3. **DOC is unaffected by equilibrium.** DOC has stoichiometry [0.0, 0.0] and should not be modified by the equilibrium solver. Its profile should reflect pure advection-diffusion only.
+
+4. **Total dissolved inorganic carbon (DIC) is conserved.** The sum [CO2] + [HCO3-] + [CO3^2-] should remain constant at any given point (equilibrium redistributes species but does not create or destroy carbon).
+
+5. **No kinetic consumption or production.** Since all kinetic rates are zero, concentrations should change only due to transport (advection-diffusion) and equilibrium speciation -- not from reaction source terms.
+
+6. **Convergence of the equilibrium solver.** The Newton-Raphson solver should converge within its iteration limit without producing NaN or negative concentrations.
+
+7. **Spatial uniformity at steady state.** Given Dirichlet inlet and zero-flux outlet, all species should eventually reach spatially uniform concentrations throughout the domain equal to their inlet (equilibrium) values.
+
+## Expected Runtime
+
+Approximately **2 minutes** on a standard workstation (single core).
+
+## Files in This Folder
+
+| File | Description |
+|------|-------------|
+| `README.md` | This file |
+| `CompLaB.xml` | XML configuration (generated by the GUI or copied from a template) |
+| `input/geometry.dat` | Open pore geometry file (generated by the geometry generator) |
+| `defineAbioticKinetics.hh` | Abiotic kinetics file with all rates set to zero (no-op for kinetics, equilibrium handles speciation) |
+| `defineKinetics.hh` | No-op stub (biotic kinetics not used in this scenario) |
+
+### About the kinetics files
+
+- **`defineAbioticKinetics.hh`** contains the `defineAbioticRxnKinetics()` function but initializes all rates in `subsR` to 0.0 and returns immediately. No kinetic reactions occur; the equilibrium solver alone is responsible for adjusting carbonate speciation.
+
+- **`defineKinetics.hh`** is a no-op stub required for compilation. It provides the `defineRxnKinetics()` function and `KineticsStats` namespace with zero rates.
+
+## How to Use
+
+### Using the CompLaB3D GUI
+
+1. **Launch the GUI:**
+   ```bash
+   cd GUI
+   python main.py
+   ```
+
+2. **Create a new project:**
+   - Click **File > New Project**.
+   - Select the **"Abiotic + Equilibrium Solver"** template from the template list.
+   - Choose a project name and output directory.
+
+3. **Generate geometry:**
+   - Go to the **Domain** panel.
+   - Set dimensions to **nx=20, ny=10, nz=10** and **dx=1 um**.
+   - Click **Generate Geometry** and select **Rectangular Channel** (option 1) to create a fully open pore domain.
+
+4. **Verify settings:**
+   - In the **General** panel, confirm `biotic_mode = false` and `enable_abiotic_kinetics = true`.
+   - In the **Chemistry** panel, confirm all 5 substrates are present with the correct names, initial concentrations, and diffusion coefficients (see the table above).
+   - In the **Equilibrium** panel, confirm:
+     - Equilibrium is **enabled**.
+     - Components are **HCO3** and **H+**.
+     - The stoichiometry matrix and log-K values match the tables above.
+   - Optionally, click the **Kinetics Editor** to confirm that `defineAbioticKinetics.hh` sets all rates to zero.
+
+5. **Export and compile:**
+   - Click **File > Export Project** to write `CompLaB.xml` and both kinetics header files.
+   - Open a terminal, navigate to the `src/` directory, and run:
+     ```bash
+     make clean && make
+     ```
+
+6. **Run the simulation:**
+   - Return to the GUI and go to the **Run** panel.
+   - Click **Run Simulation**, or run from the terminal:
+     ```bash
+     ./complab3d ../path/to/your/CompLaB.xml
+     ```
+
+7. **Inspect results:**
+   - Open the output VTK files in **ParaView**.
+   - **pH check:** Extract the H+ concentration field, compute `pH = -log10([H+])`, and verify it is approximately 8.3.
+   - **Mass action check:** At any point, compute `[HCO3-]*[H+]/[CO2]` and verify it equals 10^(-6.35) = 4.47e-7. Similarly, compute `[CO3^2-]*[H+]/[HCO3-]` and verify it equals 10^(-10.33) = 4.68e-11.
+   - **DIC conservation:** Compute `[CO2] + [HCO3-] + [CO3^2-]` at several points and verify the sum is constant.
+   - **DOC unchanged:** Confirm the DOC field shows only advection-diffusion behavior (no consumption or production).

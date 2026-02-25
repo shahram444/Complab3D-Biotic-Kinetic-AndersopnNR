@@ -14,6 +14,7 @@ from pathlib import Path
 from PySide6.QtWidgets import (
     QMainWindow, QSplitter, QStackedWidget, QMenuBar, QMenu,
     QToolBar, QStatusBar, QFileDialog, QMessageBox, QLabel,
+    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QKeySequence
@@ -1107,117 +1108,233 @@ class CompLaBMainWindow(QMainWindow):
 
     def _show_workflow_guide(self):
         """Show the complete CompLaB Studio workflow guide."""
-        sm = self._project.simulation_mode
-        needs_kinetics = (
-            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+        from PySide6.QtWidgets import QTextBrowser
 
-        guide = (
-            "========================================\n"
-            "   CompLaB Studio -- Quick Start Guide\n"
-            "========================================\n\n"
+        dlg = QDialog(self)
+        dlg.setWindowTitle("CompLaB Studio - Quick Start Guide")
+        dlg.resize(820, 700)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(8, 8, 8, 8)
 
-            "STEP 1  Create a Project\n"
-            "   File > New Project\n"
-            "   Pick a template:\n"
-            "     - Flow Only: pure Navier-Stokes\n"
-            "     - Diffusion Only: 1 tracer, no flow\n"
-            "     - Transport: flow + tracer\n"
-            "     - Abiotic - First Order: decay reaction\n"
-            "     - Biofilm Sessile: 1-substrate Monod\n"
-            "     - Planktonic: 1-substrate Monod (LBM)\n"
-            "   Choose a directory. The project folder is created there.\n\n"
+        browser = QTextBrowser()
+        browser.setOpenExternalLinks(False)
+        browser.setStyleSheet(
+            "QTextBrowser { background: #1a1a2e; color: #e0e0e0; "
+            "border: none; padding: 12px; }")
 
-            "STEP 2  Set Parameters\n"
-            "   Domain:  nx, ny, nz (grid size)\n"
-            "   Fluid:   delta_P, tau (flow driving force)\n"
-            "   Chemistry: add substrates, set BCs and diffusion\n"
-            "   Microbes: (if biotic) add microbes, set Ks/mu\n"
-            "   Solver:   iteration limits, convergence\n\n"
+        html = (
+            "<style>"
+            "body { font-family: Segoe UI, Arial, sans-serif; font-size: 13pt; "
+            "       line-height: 1.5; color: #e0e0e0; }"
+            "h1 { color: #64b5f6; font-size: 18pt; text-align: center; "
+            "     border-bottom: 2px solid #334155; padding-bottom: 8px; }"
+            "h2 { color: #81c784; font-size: 15pt; margin-top: 18px; }"
+            "h3 { color: #ffb74d; font-size: 13pt; margin-top: 14px; }"
+            "code { background: #263238; color: #80cbc4; padding: 2px 5px; "
+            "       border-radius: 3px; font-size: 12pt; }"
+            "pre { background: #1e293b; color: #94a3b8; padding: 10px; "
+            "      border: 1px solid #334155; border-radius: 4px; "
+            "      font-size: 11pt; }"
+            "table { border-collapse: collapse; width: 100%%; margin: 8px 0; }"
+            "th { background: #263238; color: #81c784; padding: 8px; "
+            "     text-align: left; border: 1px solid #334155; }"
+            "td { padding: 6px 8px; border: 1px solid #334155; }"
+            "tr:nth-child(even) { background: #1e293b; }"
+            ".step { background: #1e293b; border-left: 4px solid #64b5f6; "
+            "        padding: 10px 14px; margin: 10px 0; border-radius: 4px; }"
+            ".warn { background: #3e2723; border-left: 4px solid #ff8a65; "
+            "        padding: 10px 14px; margin: 10px 0; border-radius: 4px; }"
+            "ul, ol { margin: 6px 0; padding-left: 24px; }"
+            "li { margin: 4px 0; }"
+            "</style>"
 
-            "STEP 3  Generate Geometry\n"
-            "   Tools > Geometry Generator\n"
-            "   The file MUST have exactly nx * ny * nz bytes\n"
-            "   (1 byte per voxel: 0=solid, 1=bounce-back, 2=pore).\n"
-            "   Or browse an existing geometry.dat file.\n"
-            "   The GUI auto-copies it to input/ when you click Run.\n\n"
+            "<h1>CompLaB Studio - Quick Start Guide</h1>"
 
-            "STEP 4  Validate\n"
-            "   Click 'Validate' in the Run panel.\n"
-            "   Fix all errors (red). Warnings (yellow) are non-blocking.\n\n"
+            # ── Available Templates ──
+            "<h2>Available Project Templates</h2>"
+            "<p>Each template is a complete, ready-to-run scenario. "
+            "Use <b>File &gt; New Project</b> to select one:</p>"
+            "<table>"
+            "<tr><th>#</th><th>Template</th><th>Type</th><th>What It Demonstrates</th></tr>"
+            "<tr><td>1</td><td>Flow Only</td><td>Abiotic</td>"
+            "    <td>Pure Navier-Stokes flow, no chemistry</td></tr>"
+            "<tr><td>2</td><td>Diffusion Only</td><td>Abiotic</td>"
+            "    <td>Pure diffusion (Pe=0), no flow or reactions</td></tr>"
+            "<tr><td>3</td><td>Tracer Transport</td><td>Abiotic</td>"
+            "    <td>Flow + advection-diffusion of a passive tracer</td></tr>"
+            "<tr><td>4</td><td>Abiotic Reaction</td><td>Abiotic</td>"
+            "    <td>First-order decay: A &rarr; P</td></tr>"
+            "<tr><td>5</td><td>Abiotic Equilibrium</td><td>Abiotic</td>"
+            "    <td>Equilibrium-only carbonate speciation (no kinetic rxn)</td></tr>"
+            "<tr><td>6</td><td>Biofilm Sessile</td><td>Biotic</td>"
+            "    <td>Single-species sessile biofilm (CA solver)</td></tr>"
+            "<tr><td>7</td><td>Planktonic Bacteria</td><td>Biotic</td>"
+            "    <td>Single-species planktonic bacteria (LBM solver)</td></tr>"
+            "<tr><td>8</td><td>Sessile + Planktonic</td><td>Biotic</td>"
+            "    <td>Both sessile and planktonic microbes together</td></tr>"
+            "<tr><td>9</td><td>Coupled Biotic-Abiotic</td><td>Coupled</td>"
+            "    <td>Biofilm + abiotic reaction running simultaneously</td></tr>"
+            "</table>"
+
+            # ── Step-by-step workflow ──
+            "<h2>Step-by-Step Workflow</h2>"
+
+            "<div class='step'>"
+            "<h3>Step 1 - Create a Project</h3>"
+            "<ol>"
+            "<li><b>File &gt; New Project</b></li>"
+            "<li>Pick a template from the list above</li>"
+            "<li>Choose a save directory - the project folder is created there</li>"
+            "<li>Each template comes with pre-configured parameters and "
+            "matching <code>.hh</code> kinetics files</li>"
+            "</ol>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 2 - Review / Set Parameters</h3>"
+            "<p>Use the panels on the right side of the main window:</p>"
+            "<ul>"
+            "<li><b>Domain</b> - Grid dimensions (nx, ny, nz), voxel size (dx)</li>"
+            "<li><b>Fluid</b> - Pressure gradient (delta_P), relaxation (tau)</li>"
+            "<li><b>Chemistry</b> - Substrates, initial concentrations, "
+            "boundary conditions, diffusion coefficients</li>"
+            "<li><b>Microbiology</b> (biotic only) - Microbe species, "
+            "Monod parameters (Ks, mu_max), solver type (CA or LBM)</li>"
+            "<li><b>Solver</b> - Iteration limits, convergence criteria</li>"
+            "</ul>"
+            "<p>Templates come with sensible defaults - you can run them as-is.</p>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 3 - Generate Geometry</h3>"
+            "<ul>"
+            "<li><b>Tools &gt; Geometry Generator</b> to create a new geometry</li>"
+            "<li>Or browse an existing <code>geometry.dat</code> file</li>"
+            "<li>The file must have exactly <code>nx * ny * nz</code> bytes "
+            "(1 byte per voxel)</li>"
+            "<li>Material codes: 0 = solid, 1 = bounce-back interface, 2 = pore</li>"
+            "<li>For sessile biofilm: additional codes 3-8 for biofilm regions</li>"
+            "<li>The GUI auto-copies the geometry file to <code>input/</code> "
+            "when you click Run</li>"
+            "</ul>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 4 - Validate</h3>"
+            "<ul>"
+            "<li>Click <b>Validate</b> in the Run panel</li>"
+            "<li>Fix all <span style='color:#ef5350;'>errors</span> (red) - "
+            "these block the simulation</li>"
+            "<li><span style='color:#ffa726;'>Warnings</span> (yellow) are "
+            "informational - they don't block</li>"
+            "</ul>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 5 - Kinetics Files (if using reactions)</h3>"
+            "<p>The C++ solver compiles kinetics equations from two header files:</p>"
+            "<ul>"
+            "<li><code>defineKinetics.hh</code> - biotic (Monod) reactions</li>"
+            "<li><code>defineAbioticKinetics.hh</code> - abiotic reactions</li>"
+            "</ul>"
+            "<p><b>BOTH</b> files must always be present (unused ones are no-op stubs).</p>"
+            "<p><b>Option A</b>: Templates auto-generate matching .hh files on export.</p>"
+            "<p><b>Option B</b>: Copy a pre-made pair from the <code>kinetics/</code> "
+            "folder to the source root (next to <code>CMakeLists.txt</code>).</p>"
+            "<p><b>Option C</b>: Edit code via <b>Tools &gt; Kinetics Editor</b>.</p>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 6 - Recompile the Solver</h3>"
+            "<p>Required when you change kinetics code, template, or "
+            "number of substrates/microbes.</p>"
+            "<pre>"
+            "# Linux / Mac:\n"
+            "cd build && cmake .. && make -j$(nproc)\n\n"
+            "# Windows (Visual Studio):\n"
+            "cd build\n"
+            "cmake ..\n"
+            "cmake --build . --config Release\n\n"
+            "# MSYS2 / MinGW:\n"
+            "cd build && cmake .. -G \"MinGW Makefiles\" && mingw32-make"
+            "</pre>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 7 - Run the Simulation</h3>"
+            "<ul>"
+            "<li>Click the <b>Run</b> button in the GUI, or from terminal:</li>"
+            "</ul>"
+            "<pre>"
+            "Linux/Mac:  ./complab\n"
+            "Windows:    complab.exe"
+            "</pre>"
+            "<ul>"
+            "<li>Output goes to the <code>output/</code> folder</li>"
+            "<li>A <code>.out</code> log file is auto-saved there</li>"
+            "<li>VTK files can be opened with ParaView for 3D visualization</li>"
+            "</ul>"
+            "</div>"
+
+            # ── When to Recompile ──
+            "<h2>When to Recompile</h2>"
+            "<table>"
+            "<tr><th>Must Recompile</th><th>No Recompile Needed</th></tr>"
+            "<tr><td>"
+            "<ul>"
+            "<li>Kinetics equations (.hh code)</li>"
+            "<li>Switching template</li>"
+            "<li>Adding/removing substrates or microbes</li>"
+            "</ul>"
+            "</td><td>"
+            "<ul>"
+            "<li>Concentrations, BCs, diffusion coefficients</li>"
+            "<li>Domain dimensions (regenerate geometry)</li>"
+            "<li>Iteration count, output settings</li>"
+            "<li>Fluid properties (delta_P, tau)</li>"
+            "</ul>"
+            "<p><i>These are in CompLaB.xml, read at runtime.</i></p>"
+            "</td></tr>"
+            "</table>"
+
+            # ── Material Codes ──
+            "<h2>Material Codes (Geometry File)</h2>"
+            "<table>"
+            "<tr><th>Code</th><th>Material</th><th>Description</th></tr>"
+            "<tr><td>0</td><td>Solid</td><td>Impermeable grain</td></tr>"
+            "<tr><td>1</td><td>Bounce-back</td><td>Fluid-solid interface</td></tr>"
+            "<tr><td>2</td><td>Pore</td><td>Open pore space (fluid)</td></tr>"
+            "<tr><td>3</td><td>Biofilm core (sp.1)</td><td>Microbe species 1</td></tr>"
+            "<tr><td>4</td><td>Biofilm core (sp.2)</td><td>Microbe species 2</td></tr>"
+            "<tr><td>5</td><td>Biofilm core (sp.3)</td><td>Microbe species 3</td></tr>"
+            "<tr><td>6</td><td>Biofilm fringe (sp.1)</td><td>Outer edge of species 1</td></tr>"
+            "<tr><td>7</td><td>Biofilm fringe (sp.2)</td><td>Outer edge of species 2</td></tr>"
+            "<tr><td>8</td><td>Biofilm fringe (sp.3)</td><td>Outer edge of species 3</td></tr>"
+            "</table>"
+
+            # ── Executable ──
+            "<h2>Executable</h2>"
+            "<p>The build target is <code>complab</code> (not complab3d).</p>"
+            "<ul>"
+            "<li>Linux: <code>./complab</code></li>"
+            "<li>Windows: <code>GUI/bin/complab.exe</code> or "
+            "<code>build/Release/complab.exe</code></li>"
+            "</ul>"
+            "<p>Set the path in <b>Edit &gt; Preferences</b> if auto-detect fails.</p>"
         )
 
-        if needs_kinetics:
-            guide += (
-                "STEP 5  Kinetics .hh Files\n"
-                "   The C++ solver compiles kinetics equations from:\n"
-                "     defineKinetics.hh       (biotic reactions)\n"
-                "     defineAbioticKinetics.hh (abiotic reactions)\n"
-                "   BOTH files must always exist (use no-op stubs).\n\n"
-                "   Option A: Use a pre-made pair from kinetics/ folder\n"
-                "     Copy both .hh files from one of:\n"
-                "       kinetics/01_flow_only/\n"
-                "       kinetics/03_abiotic_first_order/\n"
-                "       kinetics/05_biofilm_single_substrate/\n"
-                "       kinetics/06_planktonic_single_substrate/\n"
-                "     to the repository root (next to CMakeLists.txt)\n\n"
-                "   Option B: Use the GUI Kinetics Editor\n"
-                "     Tools > Kinetics Editor to edit code\n"
-                "     File > Export XML deploys .hh files automatically\n"
-                "     Then copy .hh from project folder to source root\n\n"
+        browser.setHtml(html)
+        lay.addWidget(browser, 1)
 
-                "STEP 6  Recompile the Solver\n"
-                "   Windows:\n"
-                "     cd build\n"
-                "     cmake ..\n"
-                "     cmake --build . --config Release\n"
-                "   Linux/Mac:\n"
-                "     cd build && cmake .. && make -j$(nproc)\n"
-                "   MSYS2/MinGW:\n"
-                "     cd build && cmake .. -G \"MinGW Makefiles\"\n"
-                "     mingw32-make\n\n"
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        close_btn = QPushButton("Close")
+        close_btn.setFixedWidth(100)
+        close_btn.clicked.connect(dlg.accept)
+        btn_row.addWidget(close_btn)
+        lay.addLayout(btn_row)
 
-                "STEP 7  Run\n"
-                "   Click the Run button, or from terminal:\n"
-                "     ./complab     (Linux/Mac)\n"
-                "     complab.exe   (Windows)\n"
-                "   Output goes to output/ folder.\n"
-                "   A .out log file is auto-saved there.\n\n"
-
-                "=== WHEN TO RECOMPILE ===\n"
-                "MUST recompile when you change:\n"
-                "  * Kinetics equations (.hh code)\n"
-                "  * Template (switches .hh code)\n"
-                "  * Number of substrates or microbes\n\n"
-                "NO recompile needed for:\n"
-                "  * Concentrations, BCs, diffusion coefficients\n"
-                "  * Domain dimensions (regenerate geometry!)\n"
-                "  * Iteration count, output settings\n"
-                "  * Fluid properties (delta_P, tau)\n"
-                "  These are in CompLaB.xml, read at runtime.\n\n"
-
-                "=== EXECUTABLE ===\n"
-                "The build target is 'complab' (not complab3d).\n"
-                "  Linux:   ./complab\n"
-                "  Windows: GUI/bin/complab.exe  or  build/Release/complab.exe\n"
-                "Set the path in Edit > Preferences if auto-detect fails.\n"
-            )
-        else:
-            guide += (
-                "STEP 5  Run\n"
-                "   Click the Run button.\n"
-                "   No recompilation needed for non-kinetics simulations.\n"
-                "   The solver reads all parameters from CompLaB.xml.\n"
-                "   Output goes to output/ folder.\n"
-                "   A .out log file is auto-saved there.\n\n"
-
-                "=== EXECUTABLE ===\n"
-                "The build target is 'complab' (not complab3d).\n"
-                "  Linux:   ./complab\n"
-                "  Windows: GUI/bin/complab.exe  or  build/Release/complab.exe\n"
-                "Set the path in Edit > Preferences if auto-detect fails.\n"
-            )
-
-        QMessageBox.information(self, "CompLaB Studio -- Quick Start Guide", guide)
+        dlg.exec()
 
     # ── Helpers ─────────────────────────────────────────────────────
 

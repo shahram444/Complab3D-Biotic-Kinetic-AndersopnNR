@@ -1,16 +1,11 @@
 /* ============================================================================
- * defineAbioticKinetics.hh - NO-OP STUB (Flow Only)
+ * defineAbioticKinetics.hh - Scenario 08: Sessile + Planktonic (CA + LBM)
  * CompLaB3D - University of Georgia
  *
- * Scenario: 01_flow_only
- *   Pure fluid flow with no substrates and no abiotic reactions.
- *   This file is a no-op stub required because the solver unconditionally
- *   #includes defineAbioticKinetics.hh. All reaction rates are set to zero
- *   and the function returns immediately.
- *
- * Usage:
- *   Copy this file to your simulation src/ directory when running a
- *   flow-only simulation with no abiotic kinetics.
+ * NO-OP STUB: This scenario has no abiotic reactions.
+ * All substrate transformations are handled by biotic kinetics
+ * (defineKinetics.hh). This file is included unconditionally by the solver
+ * and must provide the required function signature and statistics namespace.
  * ============================================================================
  */
 #ifndef DEFINE_ABIOTIC_KINETICS_HH
@@ -39,18 +34,17 @@ namespace AbioticKineticsStats {
 }
 
 // ============================================================================
-// MAIN ABIOTIC KINETICS FUNCTION - NO-OP (Flow Only)
+// ABIOTIC KINETICS FUNCTION (no-op stub)
 // ============================================================================
-// No substrates, no reactions. Zero all rates and return.
 void defineAbioticRxnKinetics(
     std::vector<double> C,
     std::vector<double>& subsR,
     plb::plint mask
 ) {
-    // Zero all substrate reaction rates
-    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
-    // No abiotic reactions in flow-only scenario
-    return;
+    // Zero all rates -- no abiotic reactions in this scenario
+    for (size_t i = 0; i < subsR.size(); ++i) {
+        subsR[i] = 0.0;
+    }
 }
 
 #endif // DEFINE_ABIOTIC_KINETICS_HH
