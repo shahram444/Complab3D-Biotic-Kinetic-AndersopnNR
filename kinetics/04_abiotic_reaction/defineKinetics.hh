@@ -1,16 +1,21 @@
 /* ============================================================================
- * defineKinetics.hh - NO-OP STUB (Flow Only)
+ * defineKinetics.hh - NO-OP STUB (Abiotic Reaction)
  * CompLaB3D - University of Georgia
  *
- * Scenario: 01_flow_only
- *   Pure fluid flow with no substrates, no biomass, and no reactions.
+ * Scenario: 04_abiotic_reaction
+ *   Abiotic first-order decay reaction A -> P. No biomass is involved;
+ *   all chemistry is handled by the abiotic kinetics file.
  *   This file is a no-op stub required because the solver unconditionally
  *   #includes defineKinetics.hh. All reaction rates are set to zero and
  *   the function returns immediately.
  *
+ * Substrates: 2 (Reactant A, Product P) -- handled by abiotic kinetics
+ * Biomass species: 0
+ * Biotic reactions: None
+ *
  * Usage:
- *   Copy this file to your simulation src/ directory when running a
- *   flow-only simulation with no biotic kinetics.
+ *   Copy this file to your simulation src/ directory when running an
+ *   abiotic-only reaction simulation with no biotic kinetics.
  * ============================================================================
  */
 #ifndef DEFINE_KINETICS_HH
@@ -67,9 +72,10 @@ namespace KineticsStats {
 }
 
 // ============================================================================
-// MAIN KINETICS FUNCTION - NO-OP (Flow Only)
+// MAIN KINETICS FUNCTION - NO-OP (Abiotic Reaction)
 // ============================================================================
-// No substrates, no biomass, no reactions. Zero all rates and return.
+// No biomass, no biotic reactions. All chemistry handled by abiotic kinetics.
+// Zero all rates and return.
 void defineRxnKinetics(
     std::vector<double> B,
     std::vector<double> C,
@@ -81,7 +87,7 @@ void defineRxnKinetics(
     for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
     // Zero all biomass reaction rates
     for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
-    // No reactions in flow-only scenario
+    // Biotic kinetics not used in this scenario
     return;
 }
 
