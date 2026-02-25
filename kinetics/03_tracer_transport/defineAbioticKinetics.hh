@@ -1,16 +1,20 @@
 /* ============================================================================
- * defineAbioticKinetics.hh - NO-OP STUB (Flow Only)
+ * defineAbioticKinetics.hh - NO-OP STUB (Tracer Transport)
  * CompLaB3D - University of Georgia
  *
- * Scenario: 01_flow_only
- *   Pure fluid flow with no substrates and no abiotic reactions.
+ * Scenario: 03_tracer_transport
+ *   Conservative tracer transport with flow and diffusion but no abiotic
+ *   reactions. The tracer is advected and diffuses without reacting.
  *   This file is a no-op stub required because the solver unconditionally
  *   #includes defineAbioticKinetics.hh. All reaction rates are set to zero
  *   and the function returns immediately.
  *
+ * Substrates: 1 (Tracer)
+ * Reactions: None (conservative transport)
+ *
  * Usage:
  *   Copy this file to your simulation src/ directory when running a
- *   flow-only simulation with no abiotic kinetics.
+ *   tracer transport simulation with no abiotic kinetics.
  * ============================================================================
  */
 #ifndef DEFINE_ABIOTIC_KINETICS_HH
@@ -39,9 +43,9 @@ namespace AbioticKineticsStats {
 }
 
 // ============================================================================
-// MAIN ABIOTIC KINETICS FUNCTION - NO-OP (Flow Only)
+// MAIN ABIOTIC KINETICS FUNCTION - NO-OP (Tracer Transport)
 // ============================================================================
-// No substrates, no reactions. Zero all rates and return.
+// Conservative tracer transport only. Zero all rates and return.
 void defineAbioticRxnKinetics(
     std::vector<double> C,
     std::vector<double>& subsR,
@@ -49,7 +53,7 @@ void defineAbioticRxnKinetics(
 ) {
     // Zero all substrate reaction rates
     for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
-    // No abiotic reactions in flow-only scenario
+    // No abiotic reactions in tracer transport scenario
     return;
 }
 
