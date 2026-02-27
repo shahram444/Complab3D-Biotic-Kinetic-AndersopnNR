@@ -1,16 +1,21 @@
 /* ============================================================================
- * defineKinetics.hh - NO-OP STUB (Flow Only)
+ * defineKinetics.hh - NO-OP STUB (Diffusion Only)
  * CompLaB3D - University of Georgia
  *
- * Scenario: 01_flow_only
- *   Pure fluid flow with no substrates, no biomass, and no reactions.
+ * Scenario: 02_diffusion_only
+ *   Pure diffusion of a single tracer substrate with no flow, no biomass,
+ *   and no reactions. The tracer spreads by molecular diffusion alone.
  *   This file is a no-op stub required because the solver unconditionally
  *   #includes defineKinetics.hh. All reaction rates are set to zero and
  *   the function returns immediately.
  *
+ * Substrates: 1 (Tracer)
+ * Biomass species: 0
+ * Reactions: None
+ *
  * Usage:
  *   Copy this file to your simulation src/ directory when running a
- *   flow-only simulation with no biotic kinetics.
+ *   diffusion-only simulation with no biotic kinetics.
  * ============================================================================
  */
 #ifndef DEFINE_KINETICS_HH
@@ -67,9 +72,10 @@ namespace KineticsStats {
 }
 
 // ============================================================================
-// MAIN KINETICS FUNCTION - NO-OP (Flow Only)
+// MAIN KINETICS FUNCTION - NO-OP (Diffusion Only)
 // ============================================================================
-// No substrates, no biomass, no reactions. Zero all rates and return.
+// Tracer diffuses but does not react. No biomass present.
+// Zero all rates and return.
 void defineRxnKinetics(
     std::vector<double> B,
     std::vector<double> C,
@@ -81,7 +87,7 @@ void defineRxnKinetics(
     for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
     // Zero all biomass reaction rates
     for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
-    // No reactions in flow-only scenario
+    // No reactions in diffusion-only scenario
     return;
 }
 
