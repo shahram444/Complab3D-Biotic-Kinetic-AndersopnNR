@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: >-
+  CompLaB3D: A 3D Pore-Scale Biogeochemical Reactive Transport
+  Simulator
+message: >-
+  If you use this software, please cite it using the metadata
+  from this file.
+type: software
+authors:
+  - given-names: Shahram
+    family-names: Asgari
+    affiliation: University of Georgia
+repository-code: >-
+  https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR
+license: GPL-3.0
+version: "2.1.0"
+date-released: "2025-01-01"
+keywords:
+  - lattice-boltzmann
+  - reactive-transport
+  - biofilm
+  - pore-scale
+  - biogeochemistry
+  - computational-fluid-dynamics
+abstract: >-
+  CompLaB3D is a 3D pore-scale biogeochemical reactive transport
+  simulator coupling Lattice Boltzmann Method (LBM) advection-diffusion
+  with Monod biotic kinetics, abiotic chemical reactions, cellular
+  automata biofilm growth, and Newton-Raphson/Anderson equilibrium
+  solving. It includes CompLaB Studio, a Python GUI for scenario
+  configuration, 3D visualization, and solver management.
