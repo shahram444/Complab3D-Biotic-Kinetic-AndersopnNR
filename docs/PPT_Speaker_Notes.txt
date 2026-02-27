@@ -1,0 +1,189 @@
+══════════════════════════════════════════════════════════════════
+ POWERPOINT SPEAKER NOTES — Flow Ride, Divide, & Biofilm Colonies
+ Copy-paste these into the Notes section under your slides.
+══════════════════════════════════════════════════════════════════
+
+
+───────────────────────────────────────────────────────────────────
+ NOTE 1:  FLOW RIDE  —  SHIFT for 2× speed on flow tiles
+───────────────────────────────────────────────────────────────────
+
+What it does:
+  When the player holds SHIFT on a tile that has a water current,
+  the microbe (ARKE) "rides" the flow — moving in the direction
+  of the current at DOUBLE the normal speed.
+
+How it works in the code (player.gd, lines 108–127):
+  1. The player presses and holds the SHIFT key.
+  2. The game checks: "Does the tile I'm standing on have a flow?"
+     → It calls  world_ref.get_flow(tile_x, tile_y)
+     → This returns two things: a direction (N/S/E/W) and a speed (0.0–1.0).
+  3. If the flow speed is greater than 0.05 (i.e. the current is
+     strong enough to carry the microbe), the player moves one tile
+     in the flow direction.
+  4. The movement timer is cut in half:
+       Normal movement = 0.4 seconds per tile
+       Flow riding     = 0.2 seconds per tile  (2× faster)
+     This is done by dividing by "flow_ride_mult" which equals 2.0
+     (set in game_data.gd, line 53).
+  5. Each flow-ride step costs 0.5 energy — so it is fast but not free.
+
+Why it matters for the game:
+  Flow tiles simulate real water currents in porous soil.
+  The player can use them as "highways" to travel quickly across
+  the map — but they must plan their route because the current
+  only goes in ONE direction per tile. Riding against the current
+  is not possible.
+
+The science behind it:
+  In real subsurface environments, dissolved microbes travel through
+  porous media via advection — they are carried along by groundwater
+  flow. CompLaB3D models this using a pressure-driven flow field
+  computed from Darcy's Law. The game simplifies this into discrete
+  flow directions per tile.
+
+
+───────────────────────────────────────────────────────────────────
+ NOTE 2:  DIVIDE  —  SPACE at GR=100 → biofilm colony
+───────────────────────────────────────────────────────────────────
+
+What it does:
+  When the player's Growth (GR) bar reaches 100, they can press
+  SPACE to divide — placing a permanent biofilm colony on the map.
+  Growth then resets to 0, and you start filling the bar again.
+
+How GR (Growth) fills up:
+  Every time ARKE eats a substrate, growth increases. Different
+  substrates give different amounts:
+    CH4 (methane)    → +25 growth   (highest — the "jackpot" food)
+    NO3 (nitrate)    → +18 growth
+    O2  (oxygen)     → +15 growth
+    MN4 (manganese)  → +12 growth
+    FE3 (iron)       → +10 growth
+    SO4 (sulfate)    → +8  growth   (lowest)
+  Growth is capped at 100. Once it hits 100 the HUD flashes
+  "SPACE!" in yellow to tell the player they can divide.
+
+How division works in the code (player.gd, lines 202–233):
+  1. Player presses SPACE → game calls  try_divide()
+  2. The game looks for an open pore tile next to the player.
+     If no neighbors are open, it searches 2 tiles away.
+  3. Among all open spots, it picks the one FURTHEST from solid
+     walls (using a distance field). This mimics real biofilm: it
+     grows toward open space, not into walls.
+  4. growth is reset to 0.
+  5. The player earns +100 points (score_colony).
+  6. A signal is emitted → main.gd places the colony on the map.
+
+What happens on the map (main.gd, lines 543–557):
+  - The tile is changed to  GameData.Tile.BIOFILM
+  - A new colony_cell node is spawned at that position.
+  - A placement sound effect plays.
+  - The camera shakes briefly (screen shake = 2 intensity, 0.15s).
+
+The science behind it:
+  In real microbiology, when a bacterium accumulates enough biomass
+  it divides (binary fission). In CompLaB3D the threshold is
+  B_max = 100 kg/m³. The game translates this into GR=100. The
+  Cellular Automata model pushes excess biomass into neighboring
+  pore cells, which is exactly what the "find best adjacent pore"
+  logic does in the code.
+
+
+───────────────────────────────────────────────────────────────────
+ NOTE 3:  BIOFILM COLONY  —  Why we call them "SENTINELS"
+───────────────────────────────────────────────────────────────────
+
+ *** This is the key point your advisor asked about. ***
+
+What is a sentinel?
+  A sentinel is a guard who is posted at a fixed location and
+  stays there permanently to watch over and protect an area.
+  We use this word deliberately — here is why it fits:
+
+The colony has THREE sentinel-like properties:
+
+  1. PERMANENT  (it never leaves its post)
+     Once placed, a colony exists forever. There is no timer,
+     no lifespan, no decay. The code (colony_cell.gd) tracks
+     age but never uses it to destroy the colony. The tile is
+     permanently changed to BIOFILM. There is no function
+     anywhere in the codebase that removes or destroys a colony.
+
+  2. INDESTRUCTIBLE  (it cannot be killed)
+     There is no damage system, no health bar, no way for rival
+     microbes or any game event to destroy a colony. Rivals can
+     walk THROUGH biofilm tiles (they are walkable), but they
+     cannot remove them. The colony simply cannot die.
+
+  3. PASSIVE AREA DENIAL  (it guards its zone by consuming resources)
+     This is the most sentinel-like behavior. The code in main.gd
+     (lines 485–498) runs every frame:
+
+       for each colony on the map:
+         for each substrate (food) on the map:
+           if the food is within 1.5 tiles of the colony:
+             there is a 2% chance PER FRAME to consume it
+
+     At 60 frames per second, that 2% per frame means a substrate
+     sitting 1.5 tiles from a colony has roughly:
+       1 - (0.98)^60 ≈ 70% chance of being eaten within 1 second.
+
+     The colony does not "attack." It does not move. It simply
+     sits there and passively absorbs any food that appears
+     nearby — starving out rival microbes in that area.
+
+     This is EXACTLY what a sentinel does: it holds its position
+     and controls the surrounding territory.
+
+How this connects to real science:
+  In real microbiology, established biofilms are:
+    - Extremely difficult to remove (often 1000× more resistant
+      to antibiotics than free-floating bacteria)
+    - Permanently attached to surfaces
+    - Dominant consumers of local nutrients — they create
+      "nutrient depletion zones" around themselves where other
+      organisms cannot compete
+
+  The game's "sentinel" behavior directly models this:
+    Permanent attachment  →  colony never moves or disappears
+    Antibiotic resistance →  colony is indestructible
+    Nutrient depletion    →  colony passively eats nearby substrates
+
+  This is supported by the CompLaB3D research model, which uses
+  Cellular Automata to simulate biofilm formation and nutrient
+  competition in subsurface porous media.
+
+Why sentinels matter for gameplay:
+  - Each colony is worth +100 points.
+  - Colonies deny food to rivals in a 1.5-tile radius.
+  - Strategic placement creates a "defensive network" — if you
+    place colonies near food-rich areas, rivals starve.
+  - The level goal is to place enough colonies (typically 5).
+  - This makes colony placement the CORE STRATEGY of the game:
+    where you place your sentinels determines whether you win.
+
+Summary (one sentence you can say to the audience):
+  "We call them sentinels because, just like real biofilms, once
+   they attach to a surface they are permanent, indestructible,
+   and they dominate the local nutrient supply — effectively
+   guarding that area of the map for the rest of the game."
+
+
+───────────────────────────────────────────────────────────────────
+ QUICK REFERENCE TABLE  (you can put this on a slide if needed)
+───────────────────────────────────────────────────────────────────
+
+ ┌─────────────┬────────────────────┬──────────────────────────────┐
+ │ Mechanic    │ Input & Threshold  │ What Happens                 │
+ ├─────────────┼────────────────────┼──────────────────────────────┤
+ │ Flow Ride   │ Hold SHIFT         │ Move 2× faster along water   │
+ │             │ flow speed > 0.05  │ current. Costs 0.5 energy.   │
+ ├─────────────┼────────────────────┼──────────────────────────────┤
+ │ Divide      │ Press SPACE        │ Place a biofilm colony on    │
+ │             │ GR >= 100          │ nearest open pore. GR → 0.   │
+ ├─────────────┼────────────────────┼──────────────────────────────┤
+ │ Colony      │ Automatic          │ Permanent sentinel. Eats     │
+ │ (Sentinel)  │ (after divide)     │ substrates within 1.5 tiles. │
+ │             │                    │ +100 pts. Indestructible.    │
+ └─────────────┴────────────────────┴──────────────────────────────┘
