@@ -1,0 +1,6 @@
+# Runtime dependencies
+-r requirements.txt
+
+# Testing
+pytest>=7.4.0
+pytest-qt>=4.2.0
