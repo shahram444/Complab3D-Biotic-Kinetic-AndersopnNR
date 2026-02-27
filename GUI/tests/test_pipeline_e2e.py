@@ -269,7 +269,7 @@ class TestProjectDataModel:
 
     def test_biofilm_sessile_template(self):
         """Biofilm sessile: 1 substrate, 1 CA microbe."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         assert proj.simulation_mode.biotic_mode is True
         assert proj.simulation_mode.enable_kinetics is True
         assert len(proj.substrates) == 1
@@ -282,7 +282,7 @@ class TestProjectDataModel:
 
     def test_abiotic_first_order_template(self):
         """Abiotic first order: 2 substrates, no microbes."""
-        proj = create_from_template("abiotic_first_order")
+        proj = create_from_template("abiotic_reaction")
         assert proj.simulation_mode.biotic_mode is False
         assert proj.simulation_mode.enable_abiotic_kinetics is True
         assert len(proj.substrates) == 2
@@ -291,21 +291,16 @@ class TestProjectDataModel:
         assert len(proj.microbiology.microbes) == 0
 
     def test_full_coupled_template(self):
-        """Full coupled: 5 substrates, 2 microbes (CA + LBM), equilibrium."""
-        proj = create_from_template("full_coupled")
+        """Coupled biotic-abiotic: 2 substrates (DOC+Byproduct), 1 CA microbe."""
+        proj = create_from_template("coupled_biotic_abiotic")
         assert proj.simulation_mode.biotic_mode is True
         assert proj.simulation_mode.enable_kinetics is True
-        assert len(proj.substrates) == 5
-        assert len(proj.microbiology.microbes) == 2
-        # First microbe is CA (sessile)
+        assert proj.simulation_mode.enable_abiotic_kinetics is True
+        assert len(proj.substrates) == 2
+        assert proj.substrates[0].name == "DOC"
+        assert proj.substrates[1].name == "Byproduct"
+        assert len(proj.microbiology.microbes) == 1
         assert proj.microbiology.microbes[0].solver_type == "CA"
-        # Second is LBM (planktonic)
-        assert proj.microbiology.microbes[1].solver_type == "LBM"
-        # Equilibrium enabled
-        assert proj.equilibrium.enabled is True
-        assert len(proj.equilibrium.component_names) == 2
-        assert len(proj.equilibrium.stoichiometry) == 5
-        assert len(proj.equilibrium.log_k) == 5
 
     def test_manual_project_construction(self):
         """Build a project manually (simulating raw user inputs)."""
@@ -347,7 +342,7 @@ class TestProjectDataModel:
 
     def test_deep_copy_independence(self):
         """deep_copy() must produce fully independent copy."""
-        orig = create_from_template("biofilm_sessile")
+        orig = create_from_template("biotic_sessile")
         copy = orig.deep_copy()
 
         # Modify the copy
@@ -379,7 +374,7 @@ class TestProjectValidation:
 
     def test_valid_biofilm_project_passes(self):
         """A well-formed biofilm project should have zero blocking errors."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         errors = proj.validate()
         # Filter out warnings (lines containing "Warning:")
         blocking = [e for e in errors if "Warning" not in e]
@@ -408,7 +403,7 @@ class TestProjectValidation:
 
     def test_substrate_index_mismatch(self):
         """Kinetics accessing C[5] with only 1 substrate must error."""
-        proj = create_from_template("full_coupled")
+        proj = create_from_template("coupled_biotic_abiotic")
         # Remove all substrates except one
         proj.substrates = [proj.substrates[0]]
         errors = proj.validate()
@@ -433,7 +428,7 @@ class TestProjectValidation:
 
     def test_equilibrium_stoichiometry_size(self):
         """Stoichiometry matrix row count must match substrate count."""
-        proj = create_from_template("biofilm_equilibrium")
+        proj = create_from_template("abiotic_equilibrium")
         # Add an extra substrate without updating stoichiometry
         proj.substrates.append(Substrate(name="ExtraS"))
         errors = proj.validate()
@@ -452,7 +447,7 @@ class TestXMLGeneration:
 
     def test_xml_structure_biofilm(self, work_dir):
         """Biofilm template -> XML has correct top-level elements."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(proj, xml_path)
 
@@ -471,7 +466,7 @@ class TestXMLGeneration:
 
     def test_xml_substrate_count(self, work_dir):
         """number_of_substrates in XML matches project."""
-        proj = create_from_template("abiotic_bimolecular")
+        proj = create_from_template("abiotic_reaction")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(proj, xml_path)
 
@@ -479,15 +474,15 @@ class TestXMLGeneration:
         root = tree.getroot()
         chem = root.find("chemistry")
         nsubs = int(chem.find("number_of_substrates").text.strip())
-        assert nsubs == 3, f"Expected 3 substrates, got {nsubs}"
+        assert nsubs == 2, f"Expected 2 substrates, got {nsubs}"
 
         # Verify substrate elements exist
-        for i in range(3):
+        for i in range(2):
             assert chem.find(f"substrate{i}") is not None
 
     def test_xml_microbe_count(self, work_dir):
         """number_of_microbes in XML matches project."""
-        proj = create_from_template("full_coupled")
+        proj = create_from_template("biotic_sessile_planktonic")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(proj, xml_path)
 
@@ -514,7 +509,7 @@ class TestXMLGeneration:
 
     def test_xml_simulation_mode(self, work_dir):
         """biotic_mode, enable_kinetics, enable_abiotic_kinetics are correct."""
-        proj = create_from_template("abiotic_first_order")
+        proj = create_from_template("abiotic_reaction")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(proj, xml_path)
 
@@ -526,7 +521,7 @@ class TestXMLGeneration:
 
     def test_xml_round_trip_biofilm(self, work_dir):
         """Export → import → compare: all fields should survive."""
-        orig = create_from_template("biofilm_sessile")
+        orig = create_from_template("biotic_sessile")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(orig, xml_path)
 
@@ -554,15 +549,26 @@ class TestXMLGeneration:
             assert lo.solver_type == og.solver_type
 
     def test_xml_round_trip_full_coupled(self, work_dir):
-        """Round-trip for the most complex template: full_coupled."""
-        orig = create_from_template("full_coupled")
+        """Round-trip for the coupled biotic-abiotic template."""
+        orig = create_from_template("coupled_biotic_abiotic")
+        xml_path = str(work_dir / "CompLaB.xml")
+        ProjectManager.export_xml(orig, xml_path)
+
+        loaded = ProjectManager.import_xml(xml_path)
+
+        assert len(loaded.substrates) == 2
+        assert len(loaded.microbiology.microbes) == 1
+        assert loaded.simulation_mode.enable_abiotic_kinetics is True
+
+    def test_xml_round_trip_equilibrium(self, work_dir):
+        """Round-trip for the abiotic equilibrium template with stoichiometry."""
+        orig = create_from_template("abiotic_equilibrium")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(orig, xml_path)
 
         loaded = ProjectManager.import_xml(xml_path)
 
         assert len(loaded.substrates) == 5
-        assert len(loaded.microbiology.microbes) == 2
         assert loaded.equilibrium.enabled is True
         assert len(loaded.equilibrium.component_names) == 2
 
@@ -584,7 +590,7 @@ class TestXMLGeneration:
 
     def test_xml_material_numbers(self, work_dir):
         """Microbe material numbers appear in <domain><material_numbers>."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(proj, xml_path)
 
@@ -601,7 +607,7 @@ class TestXMLGeneration:
 
     def test_xml_equilibrium_section(self, work_dir):
         """Equilibrium section: components, stoichiometry, logK, solver params."""
-        proj = create_from_template("biofilm_equilibrium")
+        proj = create_from_template("abiotic_equilibrium")
         xml_path = str(work_dir / "CompLaB.xml")
         ProjectManager.export_xml(proj, xml_path)
 
@@ -648,7 +654,7 @@ class TestKineticsDeployment:
 
     def test_deploy_biotic_kinetics(self, work_dir):
         """Biotic template deploys defineKinetics.hh with correct content."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         deployed = ProjectManager.deploy_kinetics(proj, str(work_dir))
 
         biotic_path = work_dir / "defineKinetics.hh"
@@ -663,7 +669,7 @@ class TestKineticsDeployment:
 
     def test_deploy_abiotic_kinetics(self, work_dir):
         """Abiotic template deploys defineAbioticKinetics.hh."""
-        proj = create_from_template("abiotic_first_order")
+        proj = create_from_template("abiotic_reaction")
         deployed = ProjectManager.deploy_kinetics(proj, str(work_dir))
 
         abiotic_path = work_dir / "defineAbioticKinetics.hh"
@@ -676,7 +682,7 @@ class TestKineticsDeployment:
 
     def test_deploy_both_files(self, work_dir):
         """Every template deploys BOTH .hh files (solver needs both)."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         deployed = ProjectManager.deploy_kinetics(proj, str(work_dir))
 
         assert (work_dir / "defineKinetics.hh").exists()
@@ -685,7 +691,7 @@ class TestKineticsDeployment:
 
     def test_noop_stubs_compile(self):
         """No-op stubs have required function signatures."""
-        for key in ["flow_only", "diffusion_only", "transport_only"]:
+        for key in ["flow_only", "diffusion_only", "tracer_transport"]:
             info = get_kinetics_info(key)
             assert info is not None, f"No kinetics info for {key}"
 
@@ -716,34 +722,31 @@ class TestKineticsDeployment:
 
     def test_parse_hh_indices_biotic(self):
         """parse_hh_indices extracts correct array indices from biotic code."""
-        info = get_kinetics_info("biofilm_sessile")
+        info = get_kinetics_info("biotic_sessile")
         idx = parse_hh_indices(info.biotic_hh)
 
-        # Monod 1-substrate 1-microbe: C[0], B[0], subsR[0], bioR[0]
+        # Monod 1-substrate 1-microbe: C[0], B[0]
+        # subsR[0]/bioR[0] are guarded by .size() checks and thus skipped
         assert "C" in idx
         assert 0 in idx["C"]
         assert "B" in idx
         assert 0 in idx["B"]
-        assert "subsR" in idx
-        assert 0 in idx["subsR"]
-        assert "bioR" in idx
-        assert 0 in idx["bioR"]
 
     def test_parse_hh_indices_abiotic(self):
         """parse_hh_indices extracts indices from abiotic code."""
-        info = get_kinetics_info("abiotic_bimolecular")
+        info = get_kinetics_info("abiotic_reaction")
         idx = parse_hh_indices(info.abiotic_hh)
 
-        # Bimolecular: rate = k * C[0] * C[1]; subsR[0], subsR[1], subsR[2]
-        # (C[2] is not read, only subsR[2] is written)
+        # First-order decay: rate = k * C[0]; subsR[0], subsR[1]
         assert "C" in idx
-        assert set(idx["C"]) == {0, 1}
+        assert 0 in idx["C"]
         assert "subsR" in idx
-        assert set(idx["subsR"]) == {0, 1, 2}
+        assert 0 in idx["subsR"]
+        assert 1 in idx["subsR"]
 
     def test_cross_validation_correct(self):
         """Correct project-kinetics pairing: zero errors."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         errors = validate_kinetics_vs_project(
             biotic_source=proj.kinetics_source,
             abiotic_source=proj.abiotic_kinetics_source,
@@ -757,9 +760,9 @@ class TestKineticsDeployment:
 
     def test_cross_validation_too_few_substrates(self):
         """Kinetics accessing more substrates than defined → error."""
-        # abiotic_bimolecular accesses C[0], C[1] and writes subsR[0..2]
-        # With only 1 substrate, C[1] and subsR[1..2] are out-of-bounds
-        info = get_kinetics_info("abiotic_bimolecular")
+        # abiotic_reaction accesses C[0] and writes subsR[0], subsR[1]
+        # With only 1 substrate, subsR[1] is out-of-bounds
+        info = get_kinetics_info("abiotic_reaction")
         errors = validate_kinetics_vs_project(
             biotic_source=info.biotic_hh,
             abiotic_source=info.abiotic_hh,
@@ -776,12 +779,12 @@ class TestKineticsDeployment:
 
     def test_cross_validation_too_few_microbes(self):
         """Kinetics accessing B[1] with only 1 microbe → error."""
-        info = get_kinetics_info("full_coupled")
+        info = get_kinetics_info("biotic_sessile_planktonic")
         errors = validate_kinetics_vs_project(
             biotic_source=info.biotic_hh,
             abiotic_source=info.abiotic_hh,
-            num_substrates=5,
-            num_microbes=1,  # full_coupled needs B[0] and B[1]
+            num_substrates=1,
+            num_microbes=1,  # sessile_planktonic needs B[0] and B[1]
             biotic_mode=True,
             enable_kinetics=True,
             enable_abiotic=False,
@@ -800,13 +803,13 @@ class TestJSONRoundTrip:
 
     def test_save_load_biofilm(self, work_dir):
         """Save and load a biofilm project: all fields survive."""
-        orig = create_from_template("biofilm_sessile")
+        orig = create_from_template("biotic_sessile")
         json_path = str(work_dir / "test.complab")
         ProjectManager.save_project(orig, json_path)
         loaded = ProjectManager.load_project(json_path)
 
         assert loaded.name == orig.name
-        assert loaded.template_key == "biofilm_sessile"
+        assert loaded.template_key == "biotic_sessile"
         assert len(loaded.substrates) == len(orig.substrates)
         assert len(loaded.microbiology.microbes) == len(orig.microbiology.microbes)
         assert loaded.simulation_mode.biotic_mode is True
@@ -814,22 +817,21 @@ class TestJSONRoundTrip:
         assert loaded.abiotic_kinetics_source == orig.abiotic_kinetics_source
 
     def test_save_load_full_coupled(self, work_dir):
-        """Full coupled project: equilibrium, kinetics source, all survive."""
-        orig = create_from_template("full_coupled")
+        """Coupled biotic-abiotic project: kinetics source survives round-trip."""
+        orig = create_from_template("coupled_biotic_abiotic")
         json_path = str(work_dir / "full.complab")
         ProjectManager.save_project(orig, json_path)
         loaded = ProjectManager.load_project(json_path)
 
-        assert loaded.equilibrium.enabled is True
-        assert loaded.equilibrium.component_names == orig.equilibrium.component_names
-        assert len(loaded.equilibrium.stoichiometry) == 5
-        assert len(loaded.equilibrium.log_k) == 5
+        assert len(loaded.substrates) == 2
+        assert len(loaded.microbiology.microbes) == 1
+        assert loaded.simulation_mode.enable_abiotic_kinetics is True
         assert loaded.kinetics_source == orig.kinetics_source
-        assert loaded.template_key == "full_coupled"
+        assert loaded.template_key == "coupled_biotic_abiotic"
 
     def test_save_load_preserves_kinetics_source(self, work_dir):
         """Kinetics .hh source code round-trips through JSON."""
-        orig = create_from_template("abiotic_first_order")
+        orig = create_from_template("abiotic_reaction")
         assert len(orig.abiotic_kinetics_source) > 100, (
             "Template should have abiotic kinetics source code")
 
@@ -855,11 +857,6 @@ class TestTemplateConsistency:
     _KNOWN_TEMPLATE_ISSUES = {
         # flow_only: ade_max_iT=0 makes VTK interval > max iter
         "flow_only": ["VTK save interval"],
-        # biofilm_equilibrium: inherits 1 substrate from biofilm_sessile
-        # but adds 5-row equilibrium stoichiometry (needs 5 substrates)
-        "biofilm_equilibrium": ["Stoichiometry", "logK", "Template"],
-        # planktonic_equilibrium: same issue — 1 substrate + 5-row eq
-        "planktonic_equilibrium": ["Stoichiometry", "logK", "Template"],
     }
 
     @pytest.mark.parametrize("key", list(TEMPLATES.keys()))
@@ -880,20 +877,6 @@ class TestTemplateConsistency:
         assert len(blocking) == 0, (
             f"Template '{key}' has validation errors:\n"
             + "\n".join(blocking))
-
-    @pytest.mark.parametrize("key,expected_issues", [
-        ("biofilm_equilibrium", ["Stoichiometry"]),
-        ("planktonic_equilibrium", ["Stoichiometry"]),
-    ])
-    def test_template_known_issues_documented(self, key, expected_issues):
-        """Templates with known validation issues: verify they are real."""
-        proj = create_from_template(key)
-        errors = proj.validate()
-        for issue in expected_issues:
-            matching = [e for e in errors if issue in e]
-            assert len(matching) >= 1, (
-                f"Expected known issue '{issue}' in template '{key}' "
-                f"but it's gone — template may have been fixed")
 
     @pytest.mark.parametrize("key", list(TEMPLATES.keys()))
     def test_template_kinetics_match(self, key):
@@ -937,7 +920,7 @@ class TestFullSimulationRun:
     def test_full_pipeline_biofilm(self, qtbot, work_dir, _setup_logging):
         """Complete pipeline for a biofilm simulation."""
         # Step 1: Create project from template
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         proj.domain = DomainSettings(
             nx=10, ny=5, nz=5, dx=1.0,
             geometry_filename="geometry.dat")
@@ -1032,7 +1015,7 @@ print(f"Total time: 0h 0m 3s")
 
     def test_full_pipeline_abiotic(self, qtbot, work_dir, _setup_logging):
         """Complete pipeline for an abiotic simulation."""
-        proj = create_from_template("abiotic_first_order")
+        proj = create_from_template("abiotic_reaction")
         proj.domain = DomainSettings(
             nx=8, ny=4, nz=4, dx=1.0,
             geometry_filename="geometry.dat")
@@ -1191,7 +1174,7 @@ class TestXMLFileSystemSync:
 
     def test_xml_sync_matching(self, work_dir):
         """On-disk XML that matches project config: no errors."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         proj.domain = DomainSettings(
             nx=10, ny=5, nz=5, geometry_filename="geometry.dat")
         _make_geometry_file(work_dir / "input", 10, 5, 5)
@@ -1205,7 +1188,7 @@ class TestXMLFileSystemSync:
 
     def test_xml_sync_dimension_mismatch(self, work_dir):
         """XML on disk has different nx than GUI project → sync error."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         proj.domain = DomainSettings(
             nx=10, ny=5, nz=5, geometry_filename="geometry.dat")
         _make_geometry_file(work_dir / "input", 10, 5, 5)
@@ -1224,7 +1207,7 @@ class TestXMLFileSystemSync:
 
     def test_missing_kinetics_file_detected(self, work_dir):
         """Missing defineKinetics.hh when biotic mode is on."""
-        proj = create_from_template("biofilm_sessile")
+        proj = create_from_template("biotic_sessile")
         proj.domain = DomainSettings(
             nx=10, ny=5, nz=5, geometry_filename="geometry.dat")
         _make_geometry_file(work_dir / "input", 10, 5, 5)
