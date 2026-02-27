@@ -1,14 +1,46 @@
-__pycache__/
-*.pyc
-*.pyo
-
-# Build artifacts
+# ── Build artifacts ──────────────────────────────────────────────
 build/
 complab
 complab.exe
+*.o
+*.a
+*.lib
+CMakeCache.txt
+CMakeFiles/
 
-# Solver output artifacts
+# ── Solver output ───────────────────────────────────────────────
 *.vti
 *.chk
 *.out
+output/
+output_planktonic/
 GUI/output/
+
+# ── Python ──────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+*.eggs
+
+# ── Qt / GUI ────────────────────────────────────────────────────
+*.qmlc
+*.jsc
+
+# ── IDE / OS ────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── pytest ──────────────────────────────────────────────────────
+.pytest_cache/
+htmlcov/
+.coverage
+
+# ── Logs ────────────────────────────────────────────────────────
+*.log
