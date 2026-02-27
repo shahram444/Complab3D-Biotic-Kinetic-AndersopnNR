@@ -32,11 +32,13 @@ from PySide6.QtGui import QFont
 # ── Constants ──────────────────────────────────────────────────────────
 
 MEDIUM_TYPES = [
-    ("Rectangular Channel",  "channel"),
-    ("Parallel Plates",      "plates"),
-    ("Overlapping Spheres",  "spheres"),
-    ("Reaction Chamber",     "chamber"),
-    ("Hollow Box",           "hollow_box"),
+    ("Rectangular Channel",    "channel"),
+    ("Parallel Plates",        "plates"),
+    ("Overlapping Spheres",    "spheres"),
+    ("Reaction Chamber",       "chamber"),
+    ("Hollow Box",             "hollow_box"),
+    ("Gaussian Random Field",  "gaussian"),
+    ("Fibrous Medium",         "fibrous"),
 ]
 
 SESSILE_SCENARIOS = [
@@ -186,12 +188,68 @@ def create_hollow_box(nx, ny, nz, target_porosity=0.7, **_):
     return _add_interface(geom)
 
 
+def create_gaussian(nx, ny, nz, target_porosity=0.5, feature_size=2, **_):
+    """Generate porous medium using Gaussian random field thresholding."""
+    try:
+        from scipy.ndimage import gaussian_filter, binary_dilation, generate_binary_structure
+    except ImportError:
+        return create_spheres(nx, ny, nz, target_porosity=target_porosity)
+    rng = np.random.default_rng(42)
+    noise = rng.random((nx, ny, nz))
+    noise = gaussian_filter(noise, sigma=(feature_size, feature_size, feature_size))
+    threshold_val = np.percentile(noise, (1 - target_porosity) * 100)
+    pore_mask = noise > threshold_val
+    solid_mask = ~pore_mask
+    struct_elem = generate_binary_structure(3, 1)
+    solid_mask = binary_dilation(solid_mask, structure=struct_elem)
+    pore_mask = ~solid_mask
+    geom = np.where(pore_mask, PORE, SOLID).astype(np.uint8)
+    geom[0, :, :][geom[0, :, :] == SOLID] = PORE
+    geom[-1, :, :][geom[-1, :, :] == SOLID] = PORE
+    return _add_interface(geom)
+
+
+def create_fibrous(nx, ny, nz, target_porosity=0.5, **_):
+    """Generate fibrous porous medium with random cylindrical fibers."""
+    rng = np.random.default_rng(42)
+    geom = np.full((nx, ny, nz), PORE, dtype=np.uint8)
+    thickness = 1 if target_porosity >= 0.6 else 2
+    num_fibers = max(100, int(500 * (1 - target_porosity)))
+    fiber_length = min(50, max(nx, ny, nz))
+    for fib_idx in range(num_fibers):
+        x = rng.integers(0, nx)
+        y = rng.integers(0, ny)
+        z = rng.integers(0, nz)
+        direction = rng.integers(0, 3)
+        for step in range(fiber_length):
+            if direction == 0:
+                x = (x + 1) % nx
+            elif direction == 1:
+                y = (y + 1) % ny
+            else:
+                z = (z + 1) % nz
+            for di in range(-thickness, thickness + 1):
+                for dj in range(-thickness, thickness + 1):
+                    for dk in range(-thickness, thickness + 1):
+                        xi, yj, zk = x + di, y + dj, z + dk
+                        if 0 <= xi < nx and 0 <= yj < ny and 0 <= zk < nz:
+                            geom[xi, yj, zk] = SOLID
+        current_porosity = np.sum(geom == PORE) / geom.size
+        if current_porosity <= target_porosity:
+            break
+    geom[0, :, :][geom[0, :, :] == SOLID] = PORE
+    geom[-1, :, :][geom[-1, :, :] == SOLID] = PORE
+    return _add_interface(geom)
+
+
 MEDIUM_FUNCS = {
     "channel": create_channel,
     "plates": create_plates,
     "spheres": create_spheres,
     "chamber": create_chamber,
     "hollow_box": create_hollow_box,
+    "gaussian": create_gaussian,
+    "fibrous": create_fibrous,
 }
 
 
@@ -678,6 +736,39 @@ def save_color_slice_images(geometry, folder, prefix="color_slice"):
     return nx
 
 
+def save_2d_slice_stacks(geometry, folder, prefix="slice"):
+    """Save 2D Z-slices (XY planes) as BMP stacks for 2D simulations.
+
+    Saves all slices and separately saves only connected slices
+    (verified pore connectivity from left to right).
+    """
+    try:
+        from PIL import Image as PILImage
+        from scipy.ndimage import label as ndimage_label
+    except ImportError:
+        return 0, 0
+    nx, ny, nz = geometry.shape
+    all_dir = os.path.join(folder, "2D_slices")
+    conn_dir = os.path.join(folder, "2D_slices_connected")
+    os.makedirs(all_dir, exist_ok=True)
+    os.makedirs(conn_dir, exist_ok=True)
+    connected_count = 0
+    for z in range(nz):
+        slice_z = geometry[:, :, z].T
+        bw = np.where(slice_z >= PORE, np.uint8(255), np.uint8(0))
+        fname = f"{prefix}_S{z+1:04d}.bmp"
+        img = PILImage.fromarray(bw, mode='L')
+        img.save(os.path.join(all_dir, fname))
+        pore_field = (slice_z >= PORE).astype(np.int32)
+        labeled, _ = ndimage_label(pore_field)
+        left_labels = set(np.unique(labeled[:, 0])) - {0}
+        right_labels = set(np.unique(labeled[:, -1])) - {0}
+        if left_labels & right_labels:
+            img.save(os.path.join(conn_dir, fname))
+            connected_count += 1
+    return nz, connected_count
+
+
 def create_geometry_figure(geometry, filepath_base, title="Geometry"):
     """Create publication-quality geometry visualization (PNG + PDF)."""
     try:
@@ -690,7 +781,7 @@ def create_geometry_figure(geometry, filepath_base, title="Geometry"):
         return
 
     nx, ny, nz = geometry.shape
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 3))
+    fig, axes = plt.subplots(1, 3, figsize=(10, 3.5))
 
     unique_vals = np.unique(geometry)
     colors_list = [COLORS_HEX.get(v, '#888888') for v in unique_vals]
@@ -722,10 +813,13 @@ def create_geometry_figure(geometry, filepath_base, title="Geometry"):
     patches = [mpatches.Patch(color=COLORS_HEX.get(v, '#888888'),
                label=MATERIAL_NAMES.get(v, f'Mat {v}'))
                for v in unique_vals]
-    fig.legend(handles=patches, loc='center right', bbox_to_anchor=(1.15, 0.5))
+    fig.legend(handles=patches, loc='upper center',
+               bbox_to_anchor=(0.5, 0.02),
+               ncol=min(len(patches), 5), fontsize=7,
+               framealpha=0.9)
 
     plt.suptitle(title, fontsize=9, fontweight='bold')
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.12, 1, 0.95])
 
     for ext in ['png', 'pdf']:
         plt.savefig(f"{filepath_base}.{ext}", dpi=600, bbox_inches='tight')
@@ -794,11 +888,19 @@ class GeometryWorker(QThread):
 
         # Optional: Publication figure
         if p.get("save_pub_figure", False):
-            self.progress.emit(94, "Creating publication figure...")
+            self.progress.emit(90, "Creating publication figure...")
             fig_base = os.path.join(output_dir, label)
             create_geometry_figure(geom, fig_base, title=label)
             files_created.append(f"{fig_base}.png")
             files_created.append(f"{fig_base}.pdf")
+
+        # Optional: 2D slice stacks (BMP)
+        if p.get("save_2d_stacks", False):
+            self.progress.emit(95, "Saving 2D slice stacks (BMP)...")
+            stacks_dir = os.path.join(output_dir, "stacks")
+            n_total, n_conn = save_2d_slice_stacks(geom, stacks_dir, label)
+            files_created.append(f"{stacks_dir}/2D_slices/ ({n_total} BMP files)")
+            files_created.append(f"{stacks_dir}/2D_slices_connected/ ({n_conn} connected)")
 
         return dat_path, n, files_created
 
@@ -806,10 +908,11 @@ class GeometryWorker(QThread):
         nx, ny, nz = p["nx"], p["ny"], p["nz"]
         medium = p["medium_func"]
         porosity = p["target_porosity"]
+        feature_size = p.get("feature_size", 2)
 
         self.progress.emit(10, f"Creating {medium} medium {nx}x{ny}x{nz}...")
         func = MEDIUM_FUNCS[medium]
-        geom = func(nx, ny, nz, target_porosity=porosity)
+        geom = func(nx, ny, nz, target_porosity=porosity, feature_size=feature_size)
 
         self.progress.emit(70, "Saving outputs...")
         readme = build_readme(geom, f"Abiotic - {medium}", f"Target porosity: {porosity:.2f}")
@@ -827,6 +930,7 @@ class GeometryWorker(QThread):
         nx, ny, nz = p["nx"], p["ny"], p["nz"]
         medium = p["medium_func"]
         porosity = p["target_porosity"]
+        feature_size = p.get("feature_size", 2)
         scenario_idx = p["scenario_idx"]
         thickness = p["biofilm_thickness"]
         coverage = p["biofilm_coverage"]
@@ -836,7 +940,7 @@ class GeometryWorker(QThread):
 
         self.progress.emit(10, f"Creating {medium} medium {nx}x{ny}x{nz}...")
         func = MEDIUM_FUNCS[medium]
-        geom = func(nx, ny, nz, target_porosity=porosity)
+        geom = func(nx, ny, nz, target_porosity=porosity, feature_size=feature_size)
 
         self.progress.emit(40, f"Placing biofilm: {sname}...")
         bio_func = BIOFILM_FUNCS[location]
@@ -863,7 +967,6 @@ class GeometryWorker(QThread):
 
     def _run_image(self, p, output_dir):
         folder = p["image_folder"]
-        threshold = p.get("threshold", 128)
         bio_species = p.get("biofilm_species", 0)
         bio_location = p.get("biofilm_location", 1)
         bio_thickness = p.get("biofilm_thickness", 2)
@@ -899,7 +1002,7 @@ class GeometryWorker(QThread):
             img = np.array(Image.open(filepath).convert('L'))
             for y in range(min(ny, img.shape[1])):
                 for z in range(min(nz, img.shape[0])):
-                    geom[x, y, z] = PORE if img[z, y] < threshold else SOLID
+                    geom[x, y, z] = PORE if img[z, y] == 0 else SOLID
             if (x + 1) % max(1, n_slices // 10) == 0:
                 pct = 10 + int(40 * (x + 1) / n_slices)
                 self.progress.emit(pct, f"Processed {x+1}/{n_slices} slices...")
@@ -995,6 +1098,9 @@ class GeometryCreatorDialog(QDialog):
         # ── Tab 3: Image Converter ─────────────────────────────
         self._main_tabs.addTab(self._build_image_tab(), "Image Converter")
 
+        # ── Tab 4: Help ───────────────────────────────────────
+        self._main_tabs.addTab(self._build_help_tab(), "Help")
+
         layout.addWidget(self._main_tabs)
 
         # ── Shared output/progress section ─────────────────────
@@ -1034,6 +1140,14 @@ class GeometryCreatorDialog(QDialog):
         self._opt_pub_figure.setChecked(True)
         self._opt_pub_figure.setToolTip("Save publication-quality XY/XZ/YZ cross-section figure (PNG + PDF)")
         opts_row.addWidget(self._opt_pub_figure)
+
+        self._opt_2d_stacks = QCheckBox("2D slice stacks (BMP)")
+        self._opt_2d_stacks.setChecked(False)
+        self._opt_2d_stacks.setToolTip(
+            "Save 2D Z-slices as BMP image stacks for 2D simulations.\n"
+            "Creates: 2D_slices/ (all) + 2D_slices_connected/ (flow-connected only)\n"
+            "WHITE=Pore, BLACK=Solid")
+        opts_row.addWidget(self._opt_2d_stacks)
 
         opts_row.addStretch()
         out_layout.addLayout(opts_row)
@@ -1146,6 +1260,24 @@ class GeometryCreatorDialog(QDialog):
         por_group.setLayout(por_form)
         lay.addWidget(por_group)
 
+        # Gaussian-specific parameters (shown only for Gaussian medium)
+        self._abio_gaussian_group = QGroupBox("Gaussian Parameters")
+        gau_form = QFormLayout()
+        self._abio_feature_size = QSpinBox()
+        self._abio_feature_size.setRange(1, 20)
+        self._abio_feature_size.setValue(2)
+        self._abio_feature_size.setToolTip(
+            "Controls grain/pore feature size.\n"
+            "Larger values = bigger pores and grains.\n"
+            "Typical range: 1-5")
+        gau_form.addRow("Feature size:", self._abio_feature_size)
+        self._abio_gaussian_group.setLayout(gau_form)
+        self._abio_gaussian_group.setVisible(False)
+        lay.addWidget(self._abio_gaussian_group)
+
+        # Connect medium selector to show/hide Gaussian params
+        self._abio_medium.currentIndexChanged.connect(self._on_abio_medium_changed)
+
         lay.addStretch()
         scroll.setWidget(w)
         return scroll
@@ -1229,6 +1361,36 @@ class GeometryCreatorDialog(QDialog):
         bf_group.setLayout(bf_form)
         lay.addWidget(bf_group)
 
+        # Material number info for biofilm (core + fringe IDs)
+        mat_group = QGroupBox("Biofilm Material Numbers")
+        mat_lay = QVBoxLayout()
+        self._bio_material_info = QLabel()
+        self._bio_material_info.setWordWrap(True)
+        self._bio_material_info.setStyleSheet(
+            "color: #8ac; padding: 6px; font-family: Consolas, monospace; font-size: 11px;")
+        self._bio_material_info.setText(
+            "Microbe 1:  core = 3,  fringe = 6")
+        mat_lay.addWidget(self._bio_material_info)
+        mat_group.setLayout(mat_lay)
+        lay.addWidget(mat_group)
+
+        # Gaussian-specific parameters (shown only for Gaussian medium)
+        self._bio_gaussian_group = QGroupBox("Gaussian Parameters")
+        gau_form = QFormLayout()
+        self._bio_feature_size = QSpinBox()
+        self._bio_feature_size.setRange(1, 20)
+        self._bio_feature_size.setValue(2)
+        self._bio_feature_size.setToolTip(
+            "Controls grain/pore feature size for Gaussian medium.\n"
+            "Larger values = bigger pores and grains.")
+        gau_form.addRow("Feature size:", self._bio_feature_size)
+        self._bio_gaussian_group.setLayout(gau_form)
+        self._bio_gaussian_group.setVisible(False)
+        lay.addWidget(self._bio_gaussian_group)
+
+        # Connect medium selector to show/hide Gaussian params
+        self._bio_medium.currentIndexChanged.connect(self._on_bio_medium_changed)
+
         lay.addStretch()
         scroll.setWidget(w)
         return scroll
@@ -1256,15 +1418,6 @@ class GeometryCreatorDialog(QDialog):
         browse_btn.clicked.connect(self._browse_img_folder)
         folder_row.addWidget(browse_btn)
         folder_form.addRow("Image folder:", folder_row)
-
-        self._img_threshold = QSpinBox()
-        self._img_threshold.setRange(0, 255)
-        self._img_threshold.setValue(128)
-        self._img_threshold.setToolTip(
-            "Pixel intensity threshold:\n"
-            "  Below threshold -> Pore (fluid)\n"
-            "  Above threshold -> Solid")
-        folder_form.addRow("Threshold:", self._img_threshold)
 
         folder_group.setLayout(folder_form)
         lay.addWidget(folder_group)
@@ -1310,6 +1463,14 @@ class GeometryCreatorDialog(QDialog):
         self._img_bio_coverage.setEnabled(False)
         bio_form.addRow("Coverage:", self._img_bio_coverage)
 
+        # Material number info
+        self._img_material_info = QLabel("")
+        self._img_material_info.setWordWrap(True)
+        self._img_material_info.setStyleSheet(
+            "color: #8ac; padding: 4px; font-family: Consolas, monospace; font-size: 11px;")
+        self._img_material_info.setVisible(False)
+        bio_form.addRow("Material IDs:", self._img_material_info)
+
         bio_group.setLayout(bio_form)
         lay.addWidget(bio_group)
 
@@ -1317,11 +1478,161 @@ class GeometryCreatorDialog(QDialog):
         scroll.setWidget(w)
         return scroll
 
+    def _build_help_tab(self):
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        w = QWidget()
+        lay = QVBoxLayout(w)
+
+        help_text = QTextEdit()
+        help_text.setReadOnly(True)
+        help_text.setFont(QFont("Segoe UI", 10))
+        help_text.setStyleSheet(
+            "QTextEdit { background: #1e1e1e; color: #d4d4d4; border: none; }")
+        help_text.setHtml(
+            "<h2 style='color:#4fc3f7;'>CompLaB3D Geometry Generator - Help</h2>"
+            "<p>This tool creates geometry files (<code>.dat</code>) for CompLaB3D simulations. "
+            "Three generator modes are available, plus this help page.</p>"
+
+            "<hr><h3 style='color:#81c784;'>Material ID System</h3>"
+            "<table cellpadding='4' style='border-collapse:collapse; color:#d4d4d4;'>"
+            "<tr style='background:#333;'><th>ID</th><th>Material</th><th>Description</th></tr>"
+            "<tr><td><b>0</b></td><td>Solid</td><td>Impermeable solid phase</td></tr>"
+            "<tr><td><b>1</b></td><td>Interface</td><td>Bounce-back boundary between solid and fluid</td></tr>"
+            "<tr><td><b>2</b></td><td>Pore</td><td>Open fluid space</td></tr>"
+            "<tr><td><b>3</b></td><td>Microbe-1 core</td><td>Dense biofilm for species 1</td></tr>"
+            "<tr><td><b>4</b></td><td>Microbe-2 core</td><td>Dense biofilm for species 2</td></tr>"
+            "<tr><td><b>5</b></td><td>Microbe-3 core</td><td>Dense biofilm for species 3</td></tr>"
+            "<tr><td><b>6</b></td><td>Microbe-1 fringe</td><td>Active growth zone for species 1</td></tr>"
+            "<tr><td><b>7</b></td><td>Microbe-2 fringe</td><td>Active growth zone for species 2</td></tr>"
+            "<tr><td><b>8</b></td><td>Microbe-3 fringe</td><td>Active growth zone for species 3</td></tr>"
+            "</table>"
+            "<p><i>Core</i> = interior of biofilm colony. <i>Fringe</i> = outermost layer adjacent to pore space (active growth zone).</p>"
+
+            "<hr><h3 style='color:#81c784;'>Medium Types (7 available)</h3>"
+            "<p>All medium types are available in both <b>Abiotic</b> and <b>Sessile Biofilm</b> tabs.</p>"
+            "<ol>"
+            "<li><b>Rectangular Channel</b> - Simple rectangular duct with solid walls. Good for basic flow tests.</li>"
+            "<li><b>Parallel Plates</b> - Two parallel plates along Z-axis. Porosity controls gap width.</li>"
+            "<li><b>Overlapping Spheres</b> - Random sphere packing. Most realistic porous medium. "
+            "Porosity controls number of spheres placed.</li>"
+            "<li><b>Reaction Chamber</b> - Wide central chamber with narrow inlet/outlet channels. "
+            "Good for studying reactions in confined spaces.</li>"
+            "<li><b>Hollow Box</b> - Box with solid walls and hollow interior. Porosity controls wall thickness.</li>"
+            "<li><b>Gaussian Random Field</b> - Porous medium generated by "
+            "thresholding a Gaussian-filtered random noise field. <b>Feature size</b> controls grain/pore "
+            "dimensions (1=fine, 5=coarse). Requires <code>scipy</code>.</li>"
+            "<li><b>Fibrous Medium</b> - Random cylindrical fibers in 3D. Simulates fibrous materials like "
+            "filter media or biofilm support structures. Fiber thickness auto-adjusts from porosity.</li>"
+            "</ol>"
+
+            "<hr><h3 style='color:#81c784;'>Abiotic Domain Tab</h3>"
+            "<p>Creates porous media <b>without biofilm</b>. Choose a medium type, set domain "
+            "dimensions (nx, ny, nz), and target porosity. Flow direction is always X-axis "
+            "(inlet at x=0, outlet at x=nx-1).</p>"
+
+            "<hr><h3 style='color:#81c784;'>Sessile Biofilm Tab</h3>"
+            "<p>Creates a base porous medium then places biofilm in one of <b>14 spatial scenarios</b>:</p>"
+            "<table cellpadding='3' style='border-collapse:collapse; color:#d4d4d4;'>"
+            "<tr style='background:#333;'><th>#</th><th>Scenario</th><th>Species</th><th>Description</th></tr>"
+            "<tr><td>1</td><td>Bottom Wall</td><td>1</td><td>Biofilm on bottom Y wall</td></tr>"
+            "<tr><td>2</td><td>Top Wall</td><td>1</td><td>Biofilm on top Y wall</td></tr>"
+            "<tr><td>3</td><td>Both Walls</td><td>1</td><td>Biofilm on top and bottom Y walls</td></tr>"
+            "<tr><td>4</td><td>All Walls</td><td>1</td><td>Biofilm coating all 6 wall surfaces</td></tr>"
+            "<tr><td>5</td><td>Inlet Region</td><td>1</td><td>Biofilm near inlet (first 20% of X)</td></tr>"
+            "<tr><td>6</td><td>Outlet Region</td><td>1</td><td>Biofilm near outlet (last 20% of X)</td></tr>"
+            "<tr><td>7</td><td>Center Region</td><td>1</td><td>Biofilm in center (30-70% of X)</td></tr>"
+            "<tr><td>8</td><td>Random Patches</td><td>1</td><td>Random spherical biofilm bumps on surfaces</td></tr>"
+            "<tr><td>9</td><td>Hemispheres</td><td>1</td><td>Hemispherical colonies on bottom wall</td></tr>"
+            "<tr><td>10</td><td>Two-Zone SMTZ</td><td>2</td><td>Two species in separate zones (left/right)</td></tr>"
+            "<tr><td>11</td><td>Competing</td><td>2</td><td>Two species on same wall (checkerboard)</td></tr>"
+            "<tr><td>12</td><td>Layered</td><td>2</td><td>Two species in vertical layers</td></tr>"
+            "<tr><td>13</td><td>Three Zones</td><td>3</td><td>Three species along X in thirds</td></tr>"
+            "<tr><td>14</td><td>Grain Coating</td><td>1</td><td>Biofilm on all grain surfaces (spheres medium)</td></tr>"
+            "</table>"
+            "<p><b>Parameters:</b> Thickness = biofilm thickness in voxels (1-20). "
+            "Coverage = fraction of surface covered (0.0-1.0).</p>"
+            "<p><b>Material IDs</b> are shown in the 'Biofilm Material Numbers' box and update "
+            "based on the selected scenario's species count.</p>"
+
+            "<hr><h3 style='color:#81c784;'>Image Stack Converter Tab</h3>"
+            "<p>Converts image stacks (BMP, PNG, TIF, JPG) to CompLaB3D <code>.dat</code> format.</p>"
+            "<ul>"
+            "<li>Each image = one X-slice (flow direction)</li>"
+            "<li><b>Black pixels</b> (0) = Pore (fluid)</li>"
+            "<li><b>White pixels</b> (255) = Solid</li>"
+            "<li>Optional: add 1-3 species of biofilm to converted geometry</li>"
+            "<li>Biofilm material IDs shown when species &gt; 0</li>"
+            "</ul>"
+
+            "<hr><h3 style='color:#81c784;'>Output Options</h3>"
+            "<ul>"
+            "<li><b>B/W slice images</b> - Black/white YZ cross-sections (one PNG per X position)</li>"
+            "<li><b>Color slice images</b> - Color-coded YZ cross-sections showing all material types</li>"
+            "<li><b>Publication figure</b> - Three-panel XY/XZ/YZ figure (PNG + PDF, 600 DPI)</li>"
+            "<li><b>2D Slice Stacks (BMP)</b> - Z-slices as BMP images for 2D simulations. "
+            "Creates two folders:<br>"
+            "&nbsp;&nbsp;<code>2D_slices/</code> - all Z-slices<br>"
+            "&nbsp;&nbsp;<code>2D_slices_connected/</code> - only slices with verified left-to-right "
+            "pore connectivity (use these for 2D simulations!)</li>"
+            "</ul>"
+            "<p>All outputs go into the specified output folder with this structure:</p>"
+            "<pre style='color:#b0bec5;'>"
+            "output_folder/\n"
+            "  input/geometry.dat      (main geometry file)\n"
+            "  README.txt              (metadata and statistics)\n"
+            "  images/slice_*.png      (B/W slices)\n"
+            "  images/color_slice_*.png (color slices)\n"
+            "  geometry_figure.png/pdf (publication figure)\n"
+            "  stacks/2D_slices/       (BMP stacks - all)\n"
+            "  stacks/2D_slices_connected/ (BMP stacks - connected)\n"
+            "</pre>"
+
+            "<hr><h3 style='color:#81c784;'>File Format</h3>"
+            "<p>The <code>.dat</code> file is a text file with one integer per line. "
+            "Total lines = nx * ny * nz. Loop order: x &rarr; y &rarr; z. "
+            "The C++ solver reads this via the Palabos <code>&gt;&gt;</code> operator.</p>"
+
+            "<hr><h3 style='color:#81c784;'>Tips</h3>"
+            "<ul>"
+            "<li>For 2D simulations, use <b>2D Slice Stacks</b> with the <code>_connected</code> folder</li>"
+            "<li>For Gaussian medium, feature_size=2 gives realistic pore structure</li>"
+            "<li>Grain Coating scenario (14) automatically selects Overlapping Spheres medium</li>"
+            "<li>All 7 medium types work in both Abiotic and Sessile Biofilm modes</li>"
+            "<li>Porosity range: 0.1 (very tight) to 0.95 (very open)</li>"
+            "<li>The generated geometry.dat can be loaded directly in the Domain panel</li>"
+            "</ul>"
+        )
+        lay.addWidget(help_text)
+        scroll.setWidget(w)
+        return scroll
+
+    def _on_abio_medium_changed(self, idx):
+        """Show/hide Gaussian parameters in abiotic tab."""
+        if idx < len(MEDIUM_TYPES):
+            medium_key = MEDIUM_TYPES[idx][1]
+            self._abio_gaussian_group.setVisible(medium_key == "gaussian")
+
+    def _on_bio_medium_changed(self, idx):
+        """Show/hide Gaussian parameters in sessile tab."""
+        if idx < len(MEDIUM_TYPES):
+            medium_key = MEDIUM_TYPES[idx][1]
+            self._bio_gaussian_group.setVisible(medium_key == "gaussian")
+
     def _on_img_biofilm_changed(self, idx):
         enabled = idx > 0
         self._img_bio_location.setEnabled(enabled)
         self._img_bio_thickness.setEnabled(enabled)
         self._img_bio_coverage.setEnabled(enabled)
+        self._img_material_info.setVisible(enabled)
+        # Update material number display
+        if idx > 0:
+            lines = []
+            for i in range(idx):
+                lines.append(
+                    f"Microbe {i+1}:  core = {MICROBE_CORES[i]},  fringe = {MICROBE_FRINGES[i]}")
+            self._img_material_info.setText("\n".join(lines))
         # Zone option only for 2+ species
         if idx < 2:
             if self._img_bio_location.currentIndex() == 5:
@@ -1339,8 +1650,15 @@ class GeometryCreatorDialog(QDialog):
     def _on_scenario_changed(self, idx):
         if 0 <= idx < len(SESSILE_SCENARIOS):
             scenario = SESSILE_SCENARIOS[idx]
+            n_species = scenario[3]
             self._bio_scenario_desc.setText(
-                f"{scenario[2]}\n({scenario[3]} microbe species)")
+                f"{scenario[2]}\n({n_species} microbe species)")
+            # Update material number display
+            lines = []
+            for i in range(n_species):
+                lines.append(
+                    f"Microbe {i+1}:  core = {MICROBE_CORES[i]},  fringe = {MICROBE_FRINGES[i]}")
+            self._bio_material_info.setText("\n".join(lines))
             # Force spheres medium for grain coating
             if scenario[4] == "grain_coating":
                 self._bio_medium.setCurrentIndex(2)
@@ -1371,6 +1689,7 @@ class GeometryCreatorDialog(QDialog):
             "save_bw_slices": self._opt_bw_slices.isChecked(),
             "save_color_slices": self._opt_color_slices.isChecked(),
             "save_pub_figure": self._opt_pub_figure.isChecked(),
+            "save_2d_stacks": self._opt_2d_stacks.isChecked(),
         }
 
         if tab_idx == 0:  # Abiotic
@@ -1382,6 +1701,7 @@ class GeometryCreatorDialog(QDialog):
                 "ny": self._abio_ny.value(),
                 "nz": self._abio_nz.value(),
                 "target_porosity": self._abio_porosity.value(),
+                "feature_size": self._abio_feature_size.value(),
                 "output_dir": output_dir,
                 **output_opts,
             }
@@ -1397,6 +1717,7 @@ class GeometryCreatorDialog(QDialog):
                 "ny": self._bio_ny.value(),
                 "nz": self._bio_nz.value(),
                 "target_porosity": self._bio_porosity.value(),
+                "feature_size": self._bio_feature_size.value(),
                 "biofilm_thickness": self._bio_thickness.value(),
                 "biofilm_coverage": self._bio_coverage.value(),
                 "output_dir": output_dir,
@@ -1411,7 +1732,6 @@ class GeometryCreatorDialog(QDialog):
             params = {
                 "generator": "image",
                 "image_folder": folder,
-                "threshold": self._img_threshold.value(),
                 "biofilm_species": self._img_biofilm_species.currentIndex(),
                 "biofilm_location": self._img_bio_location.currentIndex() + 1,
                 "biofilm_thickness": self._img_bio_thickness.value(),
