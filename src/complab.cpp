@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
     T nsLatticeTau = tau;
     T nsLatticeOmega = 1 / nsLatticeTau;
     T nsLatticeNu = NSDES<T>::cs2*(nsLatticeTau-0.5);
-    char *ns_read_filename = strcat(strdup(str_inputDir.c_str()),ns_filename);
+    std::string ns_read_filename = str_inputDir + ns_filename;
 
     pcout << "  [GEOM] Reading " << geom_filename << "...\n";
     MultiScalarField3D<int> geometry(nx,ny,nz);
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
         pcout << "  [NS] tau=" << nsLatticeTau << ", omega=" << nsLatticeOmega << ", nu=" << nsLatticeNu << "\n";
         if (read_NS_file == 1 && track_performance == 0) {
             pcout << "  [NS] Loading checkpoint...\n";
-            try { loadBinaryBlock(nsLattice, strcat(ns_read_filename,".chk")); }
+            try { loadBinaryBlock(nsLattice, ns_read_filename+".chk"); }
             catch (PlbIOException& exception) { pcout << "  [NS] ERROR: " << exception.what() << "\n"; return -1; }
             if (ns_rerun_iT0 > 0) {
                 iT = ns_rerun_iT0;
