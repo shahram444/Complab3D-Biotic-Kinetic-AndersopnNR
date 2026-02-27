@@ -2,6 +2,17 @@
 
 Each template returns a fully configured CompLaBProject with
 sensible defaults for the given simulation type.
+
+Templates (9 scenarios, each demonstrating one capability):
+  1. Flow Only          - Pure Navier-Stokes (no chemistry)
+  2. Diffusion Only     - Pure diffusion (Pe=0, no flow/reactions)
+  3. Tracer Transport   - Flow + advection-diffusion (no reactions)
+  4. Abiotic Reaction   - First-order decay A -> Product
+  5. Abiotic Equilibrium- Carbonate speciation (no kinetic reactions)
+  6. Biotic Sessile     - Single sessile biofilm (CA solver)
+  7. Biotic Planktonic  - Single planktonic bacteria (LBM solver)
+  8. Sessile+Planktonic - Both sessile and planktonic together
+  9. Coupled Biotic-Abiotic - Biofilm + abiotic reaction simultaneously
 """
 
 from .project import (
@@ -67,34 +78,39 @@ def _default_substrates_5():
     ]
 
 
-# ── Templates ───────────────────────────────────────────────────────────
+# ── 1. Flow Only ────────────────────────────────────────────────────────
 
 @_register("flow_only", "Flow Only",
-           "Navier-Stokes flow simulation only (no substrates defined).")
+           "Pure Navier-Stokes flow (no substrates, no reactions). "
+           "Validates Poiseuille parabolic velocity profile.")
 def _flow_only():
     p = CompLaBProject(name="Flow Only")
     p.simulation_mode = SimulationMode(
         biotic_mode=False, enable_kinetics=False,
         enable_abiotic_kinetics=False)
+    p.domain = DomainSettings(
+        nx=30, ny=15, nz=15, dx=1.0, unit="um",
+        characteristic_length=15.0, geometry_filename="geometry.dat")
     p.fluid = FluidSettings(
         delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.iteration = IterationSettings(
         ns_max_iT1=100000, ns_max_iT2=100000,
         ns_converge_iT1=1e-8, ns_converge_iT2=1e-6,
-        ade_max_iT=0)  # No ADE (no substrates)
-    # No substrates, no microbes → solver runs NS then exits (pure flow mode)
+        ade_max_iT=0)
     return p
 
 
+# ── 2. Diffusion Only ───────────────────────────────────────────────────
+
 @_register("diffusion_only", "Diffusion Only",
-           "Pure diffusion transport with Pe=0 (no advection/flow).")
+           "Pure diffusion (Pe=0, no flow, no reactions). "
+           "Validates linear steady-state concentration profile.")
 def _diffusion_only():
     p = CompLaBProject(name="Diffusion Only")
     p.simulation_mode = SimulationMode(
         biotic_mode=False, enable_kinetics=False,
         enable_abiotic_kinetics=False,
         enable_validation_diagnostics=True)
-    p.path_settings.output_path = "output_diffusion"
     p.domain = DomainSettings(
         nx=30, ny=10, nz=10, dx=1.0, unit="um",
         characteristic_length=10.0, geometry_filename="geometry.dat")
@@ -113,13 +129,19 @@ def _diffusion_only():
     return p
 
 
-@_register("transport_only", "Transport (Flow + Diffusion)",
-           "Flow + advection-diffusion transport, no reactions.")
-def _transport_only():
-    p = CompLaBProject(name="Transport")
+# ── 3. Tracer Transport ─────────────────────────────────────────────────
+
+@_register("tracer_transport", "Tracer Transport (Flow + Diffusion)",
+           "Flow + advection-diffusion of a passive tracer, no reactions. "
+           "Validates tracer front propagation and steady-state uniformity.")
+def _tracer_transport():
+    p = CompLaBProject(name="Tracer Transport")
     p.simulation_mode = SimulationMode(
         biotic_mode=False, enable_kinetics=False,
         enable_abiotic_kinetics=False)
+    p.domain = DomainSettings(
+        nx=40, ny=15, nz=15, dx=1.0, unit="um",
+        characteristic_length=15.0, geometry_filename="geometry.dat")
     p.fluid = FluidSettings(
         delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
@@ -131,13 +153,21 @@ def _transport_only():
     return p
 
 
-@_register("abiotic_first_order", "Abiotic - First Order Decay",
-           "Transport with first-order abiotic decay kinetics.")
-def _abiotic_first_order():
-    p = CompLaBProject(name="Abiotic First Order")
+# ── 4. Abiotic Reaction ─────────────────────────────────────────────────
+
+@_register("abiotic_reaction", "Abiotic Reaction (First-Order Decay)",
+           "First-order abiotic decay: A -> Product. "
+           "Validates exponential decay and mass balance A+P=const.")
+def _abiotic_reaction():
+    p = CompLaBProject(name="Abiotic Reaction")
     p.simulation_mode = SimulationMode(
         biotic_mode=False, enable_kinetics=False,
         enable_abiotic_kinetics=True)
+    p.domain = DomainSettings(
+        nx=30, ny=10, nz=10, dx=1.0, unit="um",
+        characteristic_length=10.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
         Substrate(name="Reactant", initial_concentration=1.0,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
@@ -145,63 +175,59 @@ def _abiotic_first_order():
                   left_boundary_condition=1.0, right_boundary_condition=0.0),
         Substrate(name="Product", initial_concentration=0.0,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
-                  left_boundary_condition=0.0, right_boundary_condition=0.0),
-    ]
-    return p
-
-
-@_register("abiotic_bimolecular", "Abiotic - Bimolecular Reaction",
-           "Transport with bimolecular abiotic kinetics (A + B -> C).")
-def _abiotic_bimolecular():
-    p = CompLaBProject(name="Abiotic Bimolecular")
-    p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=True)
-    p.substrates = [
-        Substrate(name="A", initial_concentration=1.0,
-                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
-                  left_boundary_condition=1.0, right_boundary_condition=0.0),
-        Substrate(name="B", initial_concentration=0.5,
-                  diffusion_in_pore=1.2e-9, diffusion_in_biofilm=1.2e-9,
-                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
-                  left_boundary_condition=0.5, right_boundary_condition=0.0),
-        Substrate(name="C", initial_concentration=0.0,
-                  diffusion_in_pore=0.8e-9, diffusion_in_biofilm=0.8e-9,
                   left_boundary_type="Neumann", right_boundary_type="Neumann",
                   left_boundary_condition=0.0, right_boundary_condition=0.0),
     ]
     return p
 
 
-@_register("abiotic_reversible", "Abiotic - Reversible Reaction",
-           "Transport with reversible abiotic kinetics (A <-> B).")
-def _abiotic_reversible():
-    p = CompLaBProject(name="Abiotic Reversible")
+# ── 5. Abiotic Equilibrium ──────────────────────────────────────────────
+
+@_register("abiotic_equilibrium", "Abiotic Equilibrium (Carbonate)",
+           "Carbonate equilibrium speciation only (no kinetic reactions). "
+           "Validates pH and carbonate ratios from log-K values.")
+def _abiotic_equilibrium():
+    p = CompLaBProject(name="Abiotic Equilibrium")
     p.simulation_mode = SimulationMode(
         biotic_mode=False, enable_kinetics=False,
         enable_abiotic_kinetics=True)
-    p.substrates = [
-        Substrate(name="A", initial_concentration=1.0,
-                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
-                  left_boundary_condition=1.0, right_boundary_condition=0.0),
-        Substrate(name="B", initial_concentration=0.0,
-                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Neumann", right_boundary_type="Neumann",
-                  left_boundary_condition=0.0, right_boundary_condition=0.0),
-    ]
+    p.domain = DomainSettings(
+        nx=20, ny=10, nz=10, dx=1.0, unit="um",
+        characteristic_length=10.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
+    p.substrates = _default_substrates_5()
+    for s in p.substrates:
+        s.diffusion_in_biofilm = s.diffusion_in_pore
+    p.equilibrium = EquilibriumSettings(
+        enabled=True,
+        component_names=["HCO3-", "H+"],
+        stoichiometry=[
+            [0.0, 0.0],    # DOC (not in equilibrium)
+            [1.0, 1.0],    # CO2 -> H2CO3
+            [1.0, 0.0],    # HCO3-
+            [1.0, -1.0],   # CO3--
+            [0.0, 1.0],    # H+
+        ],
+        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
+    )
     return p
 
 
-@_register("biofilm_sessile", "Biofilm - Sessile (CA)",
-           "Simple biofilm: 1 substrate (DOC), 1 microbe (CA). "
-           "Matches kinetics/05_biofilm_single_substrate/.")
-def _biofilm_sessile():
+# ── 6. Biotic Sessile ───────────────────────────────────────────────────
+
+@_register("biotic_sessile", "Biofilm - Sessile (CA Solver)",
+           "Single-species sessile biofilm with Monod kinetics. "
+           "CA solver grows biofilm on solid surfaces.")
+def _biotic_sessile():
     p = CompLaBProject(name="Biofilm Sessile")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True)
+    p.domain = DomainSettings(
+        nx=30, ny=15, nz=15, dx=1.0, unit="um",
+        characteristic_length=15.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
         Substrate(name="DOC", initial_concentration=0.1,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
@@ -233,14 +259,20 @@ def _biofilm_sessile():
     return p
 
 
-@_register("planktonic", "Planktonic Bacteria (LBM)",
-           "Simple planktonic: 1 substrate (DOC), 1 microbe (LBM). "
-           "Matches kinetics/06_planktonic_single_substrate/.")
-def _planktonic():
+# ── 7. Biotic Planktonic ────────────────────────────────────────────────
+
+@_register("biotic_planktonic", "Planktonic Bacteria (LBM Solver)",
+           "Single-species planktonic bacteria with Monod kinetics. "
+           "LBM solver transports bacteria as a dissolved field.")
+def _biotic_planktonic():
     p = CompLaBProject(name="Planktonic")
     p.simulation_mode = SimulationMode(
         biotic_mode=True, enable_kinetics=True)
-    p.path_settings.output_path = "output_planktonic"
+    p.domain = DomainSettings(
+        nx=30, ny=15, nz=15, dx=1.0, unit="um",
+        characteristic_length=15.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
         Substrate(name="DOC", initial_concentration=0.1,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
@@ -270,105 +302,29 @@ def _planktonic():
     return p
 
 
-@_register("biofilm_equilibrium", "Biofilm + Equilibrium Chemistry",
-           "CA biofilm with Monod kinetics coupled to equilibrium solver.")
-def _biofilm_equilibrium():
-    p = _biofilm_sessile()
-    p.name = "Biofilm + Equilibrium"
-    p.equilibrium = EquilibriumSettings(
-        enabled=True,
-        component_names=["HCO3-", "H+"],
-        stoichiometry=[
-            [0.0, 0.0],    # DOC
-            [1.0, 1.0],    # CO2 -> H2CO3
-            [1.0, 0.0],    # HCO3-
-            [1.0, -1.0],   # CO3--
-            [0.0, 1.0],    # H+
-        ],
-        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
-    )
-    return p
+# ── 8. Sessile + Planktonic ─────────────────────────────────────────────
 
-
-@_register("abiotic_decay_chain", "Abiotic - Sequential Decay Chain",
-           "Sequential decay A -> B -> C (Bateman equations).")
-def _abiotic_decay_chain():
-    p = CompLaBProject(name="Abiotic Decay Chain")
+@_register("biotic_sessile_planktonic", "Sessile + Planktonic (Dual Microbe)",
+           "Both sessile (CA) and planktonic (LBM) bacteria competing for DOC. "
+           "Demonstrates dual-solver coupling.")
+def _biotic_sessile_planktonic():
+    p = CompLaBProject(name="Sessile + Planktonic")
     p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=True)
+        biotic_mode=True, enable_kinetics=True)
     p.domain = DomainSettings(
-        nx=20, ny=10, nz=10, dx=1.0,
-        geometry_filename="geometry_open.dat")
-    p.iteration.ade_max_iT = 50000
+        nx=30, ny=15, nz=15, dx=1.0, unit="um",
+        characteristic_length=15.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
-        Substrate(name="Parent_A", initial_concentration=1.0,
-                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Neumann", right_boundary_type="Neumann",
-                  left_boundary_condition=0.0, right_boundary_condition=0.0),
-        Substrate(name="Daughter_B", initial_concentration=0.0,
-                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Neumann", right_boundary_type="Neumann",
-                  left_boundary_condition=0.0, right_boundary_condition=0.0),
-        Substrate(name="GrandDaughter_C", initial_concentration=0.0,
-                  diffusion_in_pore=1e-9, diffusion_in_biofilm=1e-9,
-                  left_boundary_type="Neumann", right_boundary_type="Neumann",
-                  left_boundary_condition=0.0, right_boundary_condition=0.0),
+        Substrate(name="DOC", initial_concentration=0.1,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
+                  left_boundary_type="Dirichlet", right_boundary_type="Neumann",
+                  left_boundary_condition=0.1, right_boundary_condition=0.0),
     ]
-    p.io_settings.save_vtk_interval = 10000
-    return p
-
-
-@_register("abiotic_equilibrium", "Abiotic + Equilibrium Solver",
-           "Abiotic kinetics coupled with equilibrium chemistry solver.")
-def _abiotic_equilibrium():
-    p = CompLaBProject(name="Abiotic + Equilibrium")
-    p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=True)
-    p.substrates = _default_substrates_5()
-    # No biofilm diffusion needed for abiotic
-    for s in p.substrates:
-        s.diffusion_in_biofilm = s.diffusion_in_pore
-    p.equilibrium = EquilibriumSettings(
-        enabled=True,
-        component_names=["HCO3-", "H+"],
-        stoichiometry=[
-            [0.0, 0.0],    # DOC (not in equilibrium)
-            [1.0, 1.0],    # CO2 -> H2CO3
-            [1.0, 0.0],    # HCO3-
-            [1.0, -1.0],   # CO3--
-            [0.0, 1.0],    # H+
-        ],
-        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
-    )
-    return p
-
-
-@_register("planktonic_equilibrium", "Planktonic + Equilibrium",
-           "Planktonic bacteria with LBM solver coupled to equilibrium chemistry.")
-def _planktonic_equilibrium():
-    p = _planktonic()
-    p.name = "Planktonic + Equilibrium"
-    p.equilibrium = EquilibriumSettings(
-        enabled=True,
-        component_names=["HCO3-", "H+"],
-        stoichiometry=[
-            [0.0, 0.0], [1.0, 1.0], [1.0, 0.0], [1.0, -1.0], [0.0, 1.0],
-        ],
-        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
-    )
-    return p
-
-
-@_register("full_coupled", "Full Coupled System",
-           "Biofilm (CA) + planktonic (LBM) with Monod kinetics + equilibrium.")
-def _full_coupled():
-    p = CompLaBProject(name="Full Coupled")
-    p.simulation_mode = SimulationMode(
-        biotic_mode=True, enable_kinetics=True,
-        enable_abiotic_kinetics=False)
-    p.substrates = _default_substrates_5()
+    p.domain.pore = "2"
+    p.domain.solid = "0"
+    p.domain.bounce_back = "1"
     p.microbiology = MicrobiologySettings(
         maximum_biomass_density=100.0,
         thrd_biofilm_fraction=0.1,
@@ -379,48 +335,77 @@ def _full_coupled():
                 reaction_type="kinetics",
                 material_number="3 6",
                 initial_densities="99.0 99.0",
-                decay_coefficient=1e-9,
+                decay_coefficient=1e-7,
                 viscosity_ratio_in_biofilm=10.0,
-                half_saturation_constants="1e-5 0.0 0.0 0.0 0.0",
-                maximum_uptake_flux="2.5 0.0 0.0 0.0 0.0",
+                half_saturation_constants="1e-5",
+                maximum_uptake_flux="2.5",
+                left_boundary_type="Neumann",
+                right_boundary_type="Neumann",
             ),
             Microbe(
                 name="Planktonic_Heterotroph", solver_type="LBM",
                 reaction_type="kinetics",
                 material_number="",
                 initial_densities="5.0",
-                decay_coefficient=1e-9,
+                decay_coefficient=1e-7,
                 viscosity_ratio_in_biofilm=1.0,
-                half_saturation_constants="1e-5 0.0 0.0 0.0 0.0",
-                maximum_uptake_flux="1.5 0.0 0.0 0.0 0.0",
+                half_saturation_constants="1e-5",
+                maximum_uptake_flux="1.5",
                 left_boundary_type="Dirichlet",
+                right_boundary_type="Neumann",
                 left_boundary_condition=5.0,
             ),
         ],
     )
-    p.equilibrium = EquilibriumSettings(
-        enabled=True,
-        component_names=["HCO3-", "H+"],
-        stoichiometry=[
-            [0.0, 0.0], [1.0, 1.0], [1.0, 0.0], [1.0, -1.0], [0.0, 1.0],
-        ],
-        log_k=[0.0, 6.35, 0.0, -10.33, 0.0],
-    )
     return p
 
 
-@_register("scratch", "Start from Scratch",
-           "Blank project with empty kinetics templates. "
-           "Configure everything yourself from the ground up.")
-def _scratch():
-    p = CompLaBProject(name="Custom Project")
+# ── 9. Coupled Biotic-Abiotic ───────────────────────────────────────────
+
+@_register("coupled_biotic_abiotic",
+           "Coupled Biotic-Abiotic",
+           "Biofilm (CA) consumes DOC -> produces Byproduct; "
+           "Byproduct decays abiotically. Both kinetics active simultaneously.")
+def _coupled_biotic_abiotic():
+    p = CompLaBProject(name="Coupled Biotic-Abiotic")
     p.simulation_mode = SimulationMode(
-        biotic_mode=False, enable_kinetics=False,
-        enable_abiotic_kinetics=False)
+        biotic_mode=True, enable_kinetics=True,
+        enable_abiotic_kinetics=True)
+    p.domain = DomainSettings(
+        nx=30, ny=15, nz=15, dx=1.0, unit="um",
+        characteristic_length=15.0, geometry_filename="geometry.dat")
+    p.fluid = FluidSettings(
+        delta_P=2e-3, peclet=1.0, tau=0.8, track_performance=False)
     p.substrates = [
-        Substrate(name="substrate_0", initial_concentration=0.0,
+        Substrate(name="DOC", initial_concentration=0.1,
                   diffusion_in_pore=1e-9, diffusion_in_biofilm=2e-10,
                   left_boundary_type="Dirichlet", right_boundary_type="Neumann",
-                  left_boundary_condition=1.0, right_boundary_condition=0.0),
+                  left_boundary_condition=0.1, right_boundary_condition=0.0),
+        Substrate(name="Byproduct", initial_concentration=0.0,
+                  diffusion_in_pore=1e-9, diffusion_in_biofilm=5e-10,
+                  left_boundary_type="Neumann", right_boundary_type="Neumann",
+                  left_boundary_condition=0.0, right_boundary_condition=0.0),
     ]
+    p.domain.pore = "2"
+    p.domain.solid = "0"
+    p.domain.bounce_back = "1"
+    p.microbiology = MicrobiologySettings(
+        maximum_biomass_density=100.0,
+        thrd_biofilm_fraction=0.1,
+        ca_method="half",
+        microbes=[
+            Microbe(
+                name="Heterotroph", solver_type="CA",
+                reaction_type="kinetics",
+                material_number="3 6",
+                initial_densities="99.0 99.0",
+                decay_coefficient=1e-7,
+                viscosity_ratio_in_biofilm=10.0,
+                half_saturation_constants="1e-5 0.0",
+                maximum_uptake_flux="2.5 0.0",
+                left_boundary_type="Neumann",
+                right_boundary_type="Neumann",
+            ),
+        ],
+    )
     return p
