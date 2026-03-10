@@ -10,7 +10,7 @@ authors:
   - given-names: Shahram
     family-names: Asgari
     affiliation: University of Georgia
-    orcid: "https://orcid.org/0000-0000-0000-0000"
+    orcid: "https://orcid.org/0009-0004-3810-2739"
 repository-code: >-
   https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR
 url: >-
@@ -41,6 +41,6 @@ preferred-citation:
     - given-names: Shahram
       family-names: Asgari
       affiliation: University of Georgia
-      orcid: "https://orcid.org/0000-0000-0000-0000"
+      orcid: "https://orcid.org/0009-0004-3810-2739"
   journal: Journal of Open Source Software
   year: 2026
