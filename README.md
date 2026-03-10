@@ -34,7 +34,7 @@ CompLaB3D/
   GUI/              CompLaB Studio 2.1 (Python/PySide6)
     src/core/       Template engine, XML builder, kinetics code-gen
     src/panels/     GUI panels (substrate, microbe, solver, geometry, ...)
-    tests/          93 automated tests (pytest + pytest-qt)
+    tests/          275 automated tests (pytest + pytest-qt)
   docs/             Technical guide, user tutorial, geometry tutorial
   tools/            geometry_generator.py utility
   test_cases/       Abiotic and biotic example configurations
@@ -108,9 +108,9 @@ cd GUI
 python -m pytest tests/ -v
 ```
 
-All 93 tests run without the C++ binary (mocked solver). They cover template
+All 275 tests run without the C++ binary (mocked solver). They cover template
 generation, XML building/parsing, kinetics code generation, cross-validation,
-and end-to-end pipeline flows.
+project data model validation, and end-to-end pipeline flows.
 
 ## Documentation
 

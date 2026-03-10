@@ -7,7 +7,7 @@ name = "complab-studio"
 version = "2.1.0"
 description = "CompLaB Studio - GUI for pore-scale reactive transport modeling"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "GPL-3.0"}
 requires-python = ">=3.10"
 authors = [
     {name = "Shahram Asgari"},
