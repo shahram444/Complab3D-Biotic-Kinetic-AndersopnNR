@@ -1,0 +1,304 @@
+================================================================================
+JOSS SUBMISSION CHECKLIST FOR CompLaB3D
+================================================================================
+Based on: https://joss.readthedocs.io/en/latest/submitting.html
+          https://joss.readthedocs.io/en/latest/review_criteria.html
+          https://joss.readthedocs.io/en/latest/review_checklist.html
+
+Last updated: 2026-03-10
+Status:       READY FOR SUBMISSION
+
+================================================================================
+A. SUBMISSION REQUIREMENTS
+================================================================================
+
+[x] A1. Software is open source (OSI-approved license)
+         -> GPL-3.0 (see LICENSE)
+
+[x] A2. Software hosted where users can browse source, open issues, propose
+         changes without manual approval
+         -> GitHub: github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR
+
+[x] A3. Software has obvious research application
+         -> Pore-scale biogeochemical reactive transport simulation
+
+[x] A4. Author is a major contributor with a GitHub account
+         -> shahram444
+
+[x] A5. Paper does NOT focus on new research results
+         -> Paper describes the software architecture and capabilities
+
+[x] A6. Paper (paper.md + paper.bib) hosted in Git repo with software
+         -> paper/paper.md, paper/paper.bib
+
+[x] A7. Repository can be cloned without registration
+         -> Public GitHub repository
+
+[x] A8. Source files browsable online without registration
+         -> GitHub web interface
+
+[x] A9. Issue tracker readable without registration
+         -> GitHub Issues (public)
+
+[x] A10. Individuals can create issues without special approval
+          -> GitHub Issues (open)
+
+================================================================================
+B. PAPER FORMAT (paper.md)
+================================================================================
+
+[x] B1. YAML front matter with title, tags, authors, affiliations, date,
+         bibliography
+         -> Present in paper/paper.md header
+
+[x] B2. Author ORCID(s)
+         -> 0009-0004-3810-2739
+
+[x] B3. Author affiliations with index
+         -> "Department of Marine Sciences, University of Georgia, Athens, GA, USA"
+
+[x] B4. Summary section
+         -> Present (describes LBM solver + CompLaB Studio GUI)
+
+[x] B5. Statement of Need section
+         -> Present (explains gaps in existing tools)
+
+[x] B6. Key references with DOIs
+         -> 9 references in paper.bib, all with DOIs where available
+         -> Latt 2021, Anderson 1965, Succi 2001, Monod 1949,
+            Rittmann 2001, Steefel 2015, Kang 2006, Molins 2012,
+            Krause 2021
+
+[x] B7. Paper word count appropriate (typically 250-1000 words)
+         -> 732 words (within range)
+
+[x] B8. At least one figure
+         -> paper/architecture.png (architecture diagram)
+         -> Figure has caption and \autoref label
+
+[x] B9. Acknowledgements section
+         -> Acknowledges Palabos team and advisor Dr. Christof Meile
+
+[x] B10. References section
+          -> Present, populated from paper.bib
+
+[x] B11. bibliography field points to paper.bib
+          -> "bibliography: paper.bib" in YAML header
+
+================================================================================
+C. REVIEW CRITERIA - DOCUMENTATION
+================================================================================
+
+[x] C1. Installation instructions
+         -> INSTALL.md (detailed, platform-specific)
+         -> README.md Quick Start section
+         -> GUI/README.md (Python GUI setup)
+
+[x] C2. Example usage documentation
+         -> docs/CompLaB3D_User_Tutorial.md (step-by-step GUI walkthrough)
+         -> docs/Geometry_Generator_Tutorial.md (geometry creation)
+         -> 9 simulation templates with descriptions in README
+
+[x] C3. API documentation or function-level docs
+         -> docs/CompLaB3D_Technical_Guide.md (solver internals)
+         -> kinetics/README.md (kinetics API for all 9 templates)
+         -> Source code docstrings in Python modules
+
+[x] C4. Community guidelines (how to contribute)
+         -> CONTRIBUTING.md (contribution workflow, code style, adding templates)
+
+[x] C5. Statement of need clearly explains research purpose
+         -> paper/paper.md "Statement of Need" section
+
+================================================================================
+D. REVIEW CRITERIA - FUNCTIONALITY
+================================================================================
+
+[x] D1. Software claims match actual functionality
+         -> 9 templates tested, XML round-trip verified, kinetics validated
+
+[x] D2. Software performs as described
+         -> 275 automated tests covering:
+            - All 9 simulation templates (creation + validation)
+            - XML export/import round-trip for all templates
+            - JSON save/load round-trip
+            - Kinetics .hh code generation and validation
+            - Project data model validation (domain, fluid, chemistry, etc.)
+            - Cross-validation (kinetics vs project config)
+            - Simulation runner subprocess lifecycle
+            - End-to-end pipeline flows
+
+[x] D3. Installation instructions work
+         -> CI runs on Python 3.10, 3.11, 3.12 (Ubuntu)
+         -> pip install -e ".[dev]" tested
+
+[x] D4. Automated tests
+         -> 275 tests in GUI/tests/
+         -> Files:
+            test_pipeline_e2e.py       (93 tests - end-to-end pipeline)
+            test_simulation_runner.py  (18 tests - subprocess lifecycle)
+            test_templates.py          (30 tests - all 9 templates)
+            test_project_model.py      (27 tests - data model validation)
+            test_xml_io.py             (21 tests - XML/JSON serialization)
+            test_kinetics.py           (86 tests - kinetics code + validation)
+         -> Run: cd GUI && python -m pytest tests/ -v
+         -> All tests pass without C++ binary (mocked solver)
+
+[x] D5. Continuous integration
+         -> .github/workflows/gui-tests.yml (Python 3.10/3.11/3.12)
+         -> .github/workflows/draft-pdf.yml (JOSS paper PDF)
+
+[x] D6. Example data for testing
+         -> GUI/DAT/ (pre-built geometry files)
+         -> GUI/*.complab (sample project files)
+         -> test_cases/abiotic/ (5 XML test configurations)
+         -> test_cases/biotic/ (biotic configuration)
+
+================================================================================
+E. REVIEW CRITERIA - SOFTWARE QUALITY
+================================================================================
+
+[x] E1. Feature-complete (not half-baked)
+         -> 9 complete scenario templates
+         -> Full GUI with 12 configuration panels
+         -> Working XML/kinetics export pipeline
+         -> MPI parallel solver execution
+
+[x] E2. Packaged appropriately for language community
+         -> Python: pyproject.toml with setuptools, entry point, dev extras
+         -> C++: CMakeLists.txt with CMake
+
+[x] E3. Designed for maintainable extension
+         -> Pluggable kinetics via .hh headers
+         -> Template registry pattern for adding new scenarios
+         -> Operator-splitting architecture separates concerns
+
+[x] E4. No proprietary dependencies
+         -> All open-source: Palabos (AGPL), PySide6 (LGPL), VTK (BSD),
+            NumPy (BSD), Matplotlib (PSF)
+
+================================================================================
+F. METADATA AND CITATION
+================================================================================
+
+[x] F1. CITATION.cff
+         -> Present with CFF 1.2.0, ORCID, keywords, abstract,
+            preferred-citation block
+
+[x] F2. codemeta.json
+         -> Present with full schema.org metadata, ORCID @id included
+
+[x] F3. Version tag
+         -> Version 2.1.0 in CITATION.cff, pyproject.toml, codemeta.json
+
+[x] F4. OSI-approved license file
+         -> LICENSE (GPL-3.0, full text)
+
+[x] F5. License consistent across all metadata
+         -> GPL-3.0 in: LICENSE, pyproject.toml, CITATION.cff, codemeta.json,
+            README.md
+
+================================================================================
+G. REPOSITORY HEALTH
+================================================================================
+
+[x] G1. README with project description
+         -> README.md (comprehensive, with features, layout, quick start)
+
+[x] G2. Code of Conduct
+         -> CODE_OF_CONDUCT.md (Contributor Covenant 2.0)
+
+[x] G3. Contributing guidelines
+         -> CONTRIBUTING.md (bug reports, PRs, code style, adding templates)
+
+[x] G4. Issue templates
+         -> .github/ISSUE_TEMPLATE/bug_report.md
+         -> .github/ISSUE_TEMPLATE/feature_request.md
+
+[x] G5. PR template
+         -> .github/pull_request_template.md
+
+[x] G6. Changelog
+         -> CHANGELOG.md (Keep a Changelog format)
+
+[x] G7. .gitignore
+         -> Present, covers build artifacts, __pycache__, .out files, etc.
+
+================================================================================
+H. PRE-SUBMISSION ACTION ITEMS
+================================================================================
+
+[x] H1. Replace ORCID placeholder with real ORCID
+         -> Updated in paper/paper.md, CITATION.cff (both occurrences)
+
+[ ] H2. Create tagged release (e.g., v2.1.0) on GitHub
+
+[ ] H3. Archive to Zenodo and obtain DOI
+
+[ ] H4. Submit at https://joss.theoj.org/papers/new
+         Required info:
+         - Repository URL
+         - Software version tag
+         - Zenodo DOI
+         - Confirm license is OSI-approved
+
+[ ] H5. (Optional) Disclose any AI usage in an "AI usage disclosure" per
+         JOSS policy if applicable
+
+================================================================================
+FILE INVENTORY
+================================================================================
+
+Root:
+  LICENSE                 GPL-3.0 full text
+  README.md               Project overview, features, quick start
+  INSTALL.md              Platform-specific installation guide
+  CONTRIBUTING.md         Contribution guidelines
+  CODE_OF_CONDUCT.md      Contributor Covenant 2.0
+  CHANGELOG.md            Version history (Keep a Changelog format)
+  CITATION.cff            Machine-readable citation metadata
+  codemeta.json           CodeMeta software metadata
+  CMakeLists.txt          C++ build configuration
+  .gitignore              Git ignore rules
+  JOSS_CHECKLIST.txt      This file
+
+Paper:
+  paper/paper.md          JOSS paper (Markdown)
+  paper/paper.bib         Bibliography (9 entries with DOIs)
+  paper/architecture.png  Architecture figure
+  paper/architecture.pdf  Architecture figure (PDF)
+  paper/generate_figure.py Script to regenerate figure
+
+CI/CD:
+  .github/workflows/gui-tests.yml    GUI test suite (Python 3.10-3.12)
+  .github/workflows/draft-pdf.yml    JOSS paper PDF build
+
+GitHub Templates:
+  .github/ISSUE_TEMPLATE/bug_report.md       Bug report template
+  .github/ISSUE_TEMPLATE/feature_request.md  Feature request template
+  .github/pull_request_template.md           PR template
+
+Tests (275 total):
+  GUI/tests/conftest.py               Test configuration
+  GUI/tests/test_pipeline_e2e.py      End-to-end pipeline (93 tests)
+  GUI/tests/test_simulation_runner.py Subprocess lifecycle (18 tests)
+  GUI/tests/test_templates.py         Template creation/validation (30 tests)
+  GUI/tests/test_project_model.py     Data model validation (27 tests)
+  GUI/tests/test_xml_io.py            XML/JSON round-trip (21 tests)
+  GUI/tests/test_kinetics.py          Kinetics code validation (86 tests)
+
+Source:
+  src/complab.cpp                     C++ solver (1170 lines)
+  GUI/src/                            Python GUI (11,618 lines)
+  kinetics/                           9 scenario template folders
+
+Documentation:
+  docs/CompLaB3D_Technical_Guide.md   Solver internals
+  docs/CompLaB3D_User_Tutorial.md     GUI walkthrough
+  docs/Geometry_Generator_Tutorial.md Geometry creation
+  GUI/README.md                       GUI quick-start for reviewers
+  kinetics/README.md                  Kinetics template reference
+
+================================================================================
+END OF CHECKLIST
+================================================================================

@@ -1,0 +1,57 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "CompLaB3D",
+  "name": "CompLaB3D: A 3D Pore-Scale Biogeochemical Reactive Transport Simulator",
+  "description": "CompLaB3D is a 3D pore-scale biogeochemical reactive transport simulator coupling Lattice Boltzmann Method (LBM) advection-diffusion with Monod biotic kinetics, abiotic chemical reactions, cellular automata biofilm growth, and Newton-Raphson/Anderson equilibrium solving. It includes CompLaB Studio, a Python GUI for scenario configuration, 3D visualization, and solver management.",
+  "version": "2.1.0",
+  "dateCreated": "2024-01-01",
+  "dateModified": "2026-03-10",
+  "license": "https://spdx.org/licenses/GPL-3.0",
+  "codeRepository": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR",
+  "issueTracker": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/issues",
+  "programmingLanguage": [
+    "C++",
+    "Python"
+  ],
+  "operatingSystem": [
+    "Linux",
+    "macOS",
+    "Windows"
+  ],
+  "runtimePlatform": "Python >= 3.10",
+  "softwareRequirements": [
+    "CMake >= 3.5",
+    "MPI (OpenMPI or MPICH)",
+    "Palabos 2.3.0",
+    "PySide6 >= 6.5.0",
+    "NumPy >= 1.24.0",
+    "VTK >= 9.2.0",
+    "Matplotlib >= 3.7.0"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "@id": "https://orcid.org/0009-0004-3810-2739",
+      "givenName": "Shahram",
+      "familyName": "Asgari",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "University of Georgia"
+      }
+    }
+  ],
+  "keywords": [
+    "lattice Boltzmann method",
+    "reactive transport",
+    "biofilm",
+    "pore-scale modelling",
+    "biogeochemistry",
+    "computational fluid dynamics",
+    "subsurface hydrology"
+  ],
+  "developmentStatus": "active",
+  "referencePublication": "https://doi.org/10.21105/joss.XXXXX",
+  "readme": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/blob/main/README.md",
+  "contIntegration": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/actions"
+}

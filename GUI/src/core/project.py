@@ -189,16 +189,19 @@ class CompLaBProject:
             errors.append("[Path] output_path is empty.")
 
         # ── 2. Simulation mode consistency ──────────────────────────
+        # The C++ solver auto-disables biotic kinetics and skips microbes
+        # in abiotic mode (with a warning, not a hard fail).  Match that
+        # permissive behavior here: warn instead of block.
         sm = self.simulation_mode
         if not sm.biotic_mode and sm.enable_kinetics:
             errors.append(
-                "[Mode] enable_kinetics=true but biotic_mode=false. "
-                "Kinetics requires biotic_mode=true (for Monod kinetics). "
-                "Use enable_abiotic_kinetics for abiotic reactions.")
+                "[Mode] Warning: enable_kinetics=true but biotic_mode=false. "
+                "The solver will ignore biotic kinetics in abiotic mode. "
+                "Consider using enable_abiotic_kinetics instead.")
         if not sm.biotic_mode and len(self.microbiology.microbes) > 0:
             errors.append(
-                "[Mode] biotic_mode=false but microbes are defined. "
-                "Set biotic_mode=true or remove microbes.")
+                "[Mode] Warning: biotic_mode=false but microbes are defined. "
+                "The solver will skip microbe processing in abiotic mode.")
 
         # Flow-only: no substrates is fine (solver only runs NS)
         # Diffusion-only: Pe=0 is fine (pure diffusion, no advection)
@@ -650,9 +653,10 @@ class CompLaBProject:
                     f"Tools > Geometry Generator.")
         else:
             # Check file size vs nx*ny*nz
-            # geometry.dat can be binary (1 byte/voxel) or text (one digit
-            # per line, so 2 bytes/voxel on Unix "\n" or 3 bytes on
-            # Windows "\r\n").
+            # geometry.dat is text (one integer per line).  For single-digit
+            # material numbers: 2 bytes/voxel on Unix ("\n") or 3 bytes
+            # on Windows ("\r\n").  Also accept binary (1 byte/voxel)
+            # from external tools; the GUI auto-converts to text at runtime.
             try:
                 file_size = os.path.getsize(found_geom)
                 expected = d.nx * d.ny * d.nz

@@ -8,14 +8,18 @@
 """
 
 import os
+import logging
 from pathlib import Path
 
 from PySide6.QtWidgets import (
     QMainWindow, QSplitter, QStackedWidget, QMenuBar, QMenu,
     QToolBar, QStatusBar, QFileDialog, QMessageBox, QLabel,
+    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QKeySequence
+
+log = logging.getLogger("complab.mainwindow")
 
 from .config import AppConfig
 from .core.project import CompLaBProject
@@ -428,7 +432,16 @@ class CompLaBMainWindow(QMainWindow):
             self._config.get("default_project_dir", ""), self)
         if dlg.exec():
             self._project = dlg.get_project()
-            self._project_file = ""
+            # Use the selected directory as the working base so that
+            # run/export targets the right folder even before Save.
+            chosen_dir = dlg.get_directory()
+            if chosen_dir and os.path.isdir(chosen_dir):
+                proj_dir = os.path.join(chosen_dir, self._project.name)
+                os.makedirs(proj_dir, exist_ok=True)
+                self._project_file = os.path.join(
+                    proj_dir, self._project.name + ".complab")
+            else:
+                self._project_file = ""
             self._load_project_to_panels()
             self._console.log_info(f"New project: {self._project.name}")
 
@@ -536,52 +549,92 @@ class CompLaBMainWindow(QMainWindow):
 
     # ── Simulation ──────────────────────────────────────────────────
 
-    def _ensure_binary_geometry(self, work_dir: str):
-        """Convert text-format geometry.dat to binary if needed.
+    def _ensure_text_geometry(self, work_dir: str):
+        """Ensure geometry.dat is in TEXT format (one integer per line).
 
-        The C++ solver expects raw bytes (1 byte per voxel).  Geometry
-        files created by older versions or external tools may be in text
-        format (one ASCII digit per line).  Detect and convert in-place.
+        The C++ solver reads geometry via Palabos ``>>`` operator which
+        expects whitespace-separated integers (text), NOT raw bytes.
+        If a binary file is detected, convert it to text in-place.
         """
         import numpy as np
 
         d = self._project.domain
         geom_name = d.geometry_filename or "geometry.dat"
         for candidate in [
-            os.path.join(work_dir, geom_name),
             os.path.join(work_dir, "input", geom_name),
+            os.path.join(work_dir, geom_name),
         ]:
-            if os.path.isfile(candidate):
-                expected = d.nx * d.ny * d.nz
-                file_size = os.path.getsize(candidate)
-                if file_size == expected:
-                    return  # already binary
-                # Text format: try to convert
+            if not os.path.isfile(candidate):
+                continue
+            expected = d.nx * d.ny * d.nz
+            file_size = os.path.getsize(candidate)
+
+            # If file size == expected, it is likely raw binary (1 byte/voxel).
+            # Text format would be larger (at least 2 bytes per value: digit + newline).
+            if file_size == expected:
                 try:
-                    raw = np.loadtxt(candidate, dtype=np.uint8).flatten()
-                    if raw.size == expected:
-                        raw.tofile(candidate)
+                    raw = np.fromfile(candidate, dtype=np.uint8)
+                    if raw.max() <= 10 and raw.size == expected:
+                        np.savetxt(candidate, raw, fmt="%d")
                         self._console.log_info(
-                            f"Converted {geom_name} from text to binary "
-                            f"({file_size} -> {expected} bytes)")
-                    else:
-                        self._console.log_warning(
-                            f"Geometry has {raw.size} values but expected "
-                            f"{expected} (nx*ny*nz). Cannot auto-convert.")
+                            f"Converted {geom_name} from binary to text "
+                            f"({file_size} -> {os.path.getsize(candidate)} bytes)")
                 except Exception as e:
                     self._console.log_warning(
                         f"Could not auto-convert geometry: {e}")
-                return
+            return
+
+    def _deploy_geometry(self, work_dir: str):
+        """Ensure geometry file exists in the input/ subdirectory.
+
+        The C++ solver reads geometry from <input_path>/<filename>
+        (typically input/geometry.dat).  The domain panel may have browsed
+        a file from an arbitrary location; copy it into the right place.
+        Also copies from work_dir root into input/ if only found at root.
+        """
+        import shutil
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        input_subdir = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(work_dir, input_subdir)
+        dest = os.path.join(input_dir, geom_name)
+
+        # Already in place?
+        if os.path.isfile(dest):
+            return
+
+        # Try the domain panel's browsed file first
+        copied = self._domain_panel.copy_geometry_to_input(input_dir)
+        if copied:
+            self._console.log_info(
+                f"Copied geometry to {copied}")
+            return
+
+        # Fall back: if file exists at work_dir root, copy to input/
+        root_geom = os.path.join(work_dir, geom_name)
+        if os.path.isfile(root_geom):
+            os.makedirs(input_dir, exist_ok=True)
+            shutil.copy2(root_geom, dest)
+            self._console.log_info(
+                f"Copied {geom_name} from project root to {input_subdir}/")
 
     def _find_executable(self, work_dir: str) -> str:
         """Auto-detect the complab executable in common locations."""
         import sys
         exe_name = "complab.exe" if sys.platform == "win32" else "complab"
 
-        # 1. Check user-configured path first
+        import shutil as _shutil
+
+        # 1. Check user-configured path first (file path or command name)
         configured = self._config.get("complab_executable", "")
-        if configured and os.path.isfile(configured):
-            return configured
+        if configured:
+            if os.path.isfile(configured):
+                return configured
+            # Try resolving as a command name on PATH
+            resolved = _shutil.which(configured)
+            if resolved:
+                return resolved
 
         # 2. Search common locations relative to the working directory
         search_dirs = [
@@ -608,9 +661,23 @@ class CompLaBMainWindow(QMainWindow):
             if os.path.isfile(candidate):
                 return candidate
 
+        # 3. Last resort: check system PATH
+        on_path = _shutil.which(exe_name)
+        if on_path:
+            return on_path
+
         return ""
 
     def _run_simulation(self):
+        # ── Guard: prevent starting a second simulation ────────────
+        if self._runner and self._runner.isRunning():
+            log.warning("[MAIN] _run_simulation called while runner is "
+                        "still active – ignoring")
+            self._console.log_warning(
+                "A simulation is already running. Stop it first.")
+            return
+
+        log.info("[MAIN] _run_simulation() entered")
         self._save_panels_to_project()
 
         # Determine working directory
@@ -644,14 +711,22 @@ class CompLaBMainWindow(QMainWindow):
             self._console.log_error(f"XML export failed: {e}")
             return
 
-        # Auto-convert text-format geometry.dat to binary if needed
-        self._ensure_binary_geometry(work_dir)
+        # Ensure geometry file is in the input/ subdirectory where C++ expects it
+        self._deploy_geometry(work_dir)
+
+        # Ensure geometry is in text format (the C++ solver reads text, not binary)
+        self._ensure_text_geometry(work_dir)
 
         # Pre-run validation gate: data-model + file-system checks
         self._load_kinetics_from_disk_if_empty()
-        errors = self._project.validate()
+        all_issues = self._project.validate()
         file_errors = self._project.validate_files(work_dir)
-        errors.extend(file_errors)
+        all_issues.extend(file_errors)
+        # Separate warnings (non-blocking) from errors (blocking)
+        warnings = [e for e in all_issues if "Warning:" in e]
+        errors = [e for e in all_issues if "Warning:" not in e]
+        for w in warnings:
+            self._console.log_warning(f"  {w}")
         if errors:
             self._run_panel.show_validation(errors)
             self._console.log_error(
@@ -671,12 +746,20 @@ class CompLaBMainWindow(QMainWindow):
         # Get MPI config from run panel
         mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
 
+        # ── Clean up previous runner if it finished ────────────────
+        if self._runner is not None:
+            log.info("[MAIN] Cleaning up previous runner id=%s", id(self._runner))
+            self._runner.wait(2000)
+            self._runner.deleteLater()
+            self._runner = None
+
         self._runner = SimulationRunner(
             exe, work_dir, self,
             mpi_enabled=mpi_enabled,
             mpi_nprocs=mpi_nprocs,
             mpi_command=mpi_command,
         )
+        log.info("[MAIN] New SimulationRunner id=%s created", id(self._runner))
         self._runner.output_line.connect(self._console.append)
         self._runner.output_line.connect(self._run_panel.on_output_line)
         self._runner.progress.connect(self._run_panel.on_progress)
@@ -685,13 +768,16 @@ class CompLaBMainWindow(QMainWindow):
         self._runner.finished_signal.connect(self._on_sim_finished)
         self._runner.diagnostic_report.connect(self._on_diagnostic_report)
         self._runner.start()
+        log.info("[MAIN] Runner thread started")
         self._console.set_status("Running...")
 
     def _stop_simulation(self):
+        log.info("[MAIN] _stop_simulation() called  runner=%s", self._runner)
         if self._runner:
             self._runner.cancel()
 
     def _on_sim_finished(self, code, msg):
+        log.info("[MAIN] _on_sim_finished  code=%d  msg=%s", code, msg)
         self._run_panel.on_finished(code, msg)
         self._console.set_status("Ready")
         self._console.set_progress(0, 0)
@@ -782,12 +868,23 @@ class CompLaBMainWindow(QMainWindow):
                 self._console.log_error(f"Sweep run {i+1}: XML export failed: {e}")
                 continue
 
-            # Copy geometry file if it exists in base_dir
-            geom_src = os.path.join(base_dir, "geometry.dat")
-            geom_dst = os.path.join(run_dir, "geometry.dat")
-            if os.path.isfile(geom_src) and not os.path.isfile(geom_dst):
-                import shutil
-                shutil.copy2(geom_src, geom_dst)
+            # Copy geometry file into input/ subdirectory (where C++ expects it)
+            import shutil
+            geom_name = self._project.domain.geometry_filename or "geometry.dat"
+            input_subdir = self._project.path_settings.input_path or "input"
+            input_dir = os.path.join(run_dir, input_subdir)
+            geom_dst = os.path.join(input_dir, geom_name)
+            if not os.path.isfile(geom_dst):
+                # Search source geometry in order: base_dir/input/, base_dir/
+                for src_dir in [
+                    os.path.join(base_dir, input_subdir),
+                    base_dir,
+                ]:
+                    geom_src = os.path.join(src_dir, geom_name)
+                    if os.path.isfile(geom_src):
+                        os.makedirs(input_dir, exist_ok=True)
+                        shutil.copy2(geom_src, geom_dst)
+                        break
 
             self._console.log_info(
                 f"  Run {i+1}/{len(runs)}: {param_name} = {value} -> {run_dir}")
@@ -1011,83 +1108,233 @@ class CompLaBMainWindow(QMainWindow):
 
     def _show_workflow_guide(self):
         """Show the complete CompLaB Studio workflow guide."""
-        sm = self._project.simulation_mode
-        needs_kinetics = (
-            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+        from PySide6.QtWidgets import QTextBrowser
 
-        guide = (
-            "═══════════════════════════════════════════════\n"
-            "       CompLaB Studio — Complete Workflow\n"
-            "═══════════════════════════════════════════════\n\n"
-            "STEP 1: Create or Open a Project\n"
-            "   File > New Project — pick a template that matches\n"
-            "   your simulation type. Each template comes with matching\n"
-            "   defineKinetics.hh / defineAbioticKinetics.hh code.\n\n"
-            "STEP 2: Configure Parameters\n"
-            "   Use the panels on the right to set:\n"
-            "   - Domain dimensions (nx, ny, nz)\n"
-            "   - Fluid properties\n"
-            "   - Substrates (concentrations, BCs, diffusion)\n"
-            "   - Microbes (if biotic mode)\n"
-            "   - Iteration settings\n\n"
-            "STEP 3: Generate or Import Geometry\n"
-            "   Tools > Geometry Generator\n"
-            "   The geometry file must match nx×ny×nz voxels\n"
-            "   (binary: 1 byte/voxel, or text: one digit per line).\n"
-            "   This is the #1 cause of crashes if wrong!\n\n"
-            "STEP 4: Validate\n"
-            "   Click 'Validate' in the Run panel.\n"
-            "   Fix ALL errors before proceeding.\n\n"
+        dlg = QDialog(self)
+        dlg.setWindowTitle("CompLaB Studio - Quick Start Guide")
+        dlg.resize(820, 700)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(8, 8, 8, 8)
+
+        browser = QTextBrowser()
+        browser.setOpenExternalLinks(False)
+        browser.setStyleSheet(
+            "QTextBrowser { background: #1a1a2e; color: #e0e0e0; "
+            "border: none; padding: 12px; }")
+
+        html = (
+            "<style>"
+            "body { font-family: Segoe UI, Arial, sans-serif; font-size: 13pt; "
+            "       line-height: 1.5; color: #e0e0e0; }"
+            "h1 { color: #64b5f6; font-size: 18pt; text-align: center; "
+            "     border-bottom: 2px solid #334155; padding-bottom: 8px; }"
+            "h2 { color: #81c784; font-size: 15pt; margin-top: 18px; }"
+            "h3 { color: #ffb74d; font-size: 13pt; margin-top: 14px; }"
+            "code { background: #263238; color: #80cbc4; padding: 2px 5px; "
+            "       border-radius: 3px; font-size: 12pt; }"
+            "pre { background: #1e293b; color: #94a3b8; padding: 10px; "
+            "      border: 1px solid #334155; border-radius: 4px; "
+            "      font-size: 11pt; }"
+            "table { border-collapse: collapse; width: 100%%; margin: 8px 0; }"
+            "th { background: #263238; color: #81c784; padding: 8px; "
+            "     text-align: left; border: 1px solid #334155; }"
+            "td { padding: 6px 8px; border: 1px solid #334155; }"
+            "tr:nth-child(even) { background: #1e293b; }"
+            ".step { background: #1e293b; border-left: 4px solid #64b5f6; "
+            "        padding: 10px 14px; margin: 10px 0; border-radius: 4px; }"
+            ".warn { background: #3e2723; border-left: 4px solid #ff8a65; "
+            "        padding: 10px 14px; margin: 10px 0; border-radius: 4px; }"
+            "ul, ol { margin: 6px 0; padding-left: 24px; }"
+            "li { margin: 4px 0; }"
+            "</style>"
+
+            "<h1>CompLaB Studio - Quick Start Guide</h1>"
+
+            # ── Available Templates ──
+            "<h2>Available Project Templates</h2>"
+            "<p>Each template is a complete, ready-to-run scenario. "
+            "Use <b>File &gt; New Project</b> to select one:</p>"
+            "<table>"
+            "<tr><th>#</th><th>Template</th><th>Type</th><th>What It Demonstrates</th></tr>"
+            "<tr><td>1</td><td>Flow Only</td><td>Abiotic</td>"
+            "    <td>Pure Navier-Stokes flow, no chemistry</td></tr>"
+            "<tr><td>2</td><td>Diffusion Only</td><td>Abiotic</td>"
+            "    <td>Pure diffusion (Pe=0), no flow or reactions</td></tr>"
+            "<tr><td>3</td><td>Tracer Transport</td><td>Abiotic</td>"
+            "    <td>Flow + advection-diffusion of a passive tracer</td></tr>"
+            "<tr><td>4</td><td>Abiotic Reaction</td><td>Abiotic</td>"
+            "    <td>First-order decay: A &rarr; P</td></tr>"
+            "<tr><td>5</td><td>Abiotic Equilibrium</td><td>Abiotic</td>"
+            "    <td>Equilibrium-only carbonate speciation (no kinetic rxn)</td></tr>"
+            "<tr><td>6</td><td>Biofilm Sessile</td><td>Biotic</td>"
+            "    <td>Single-species sessile biofilm (CA solver)</td></tr>"
+            "<tr><td>7</td><td>Planktonic Bacteria</td><td>Biotic</td>"
+            "    <td>Single-species planktonic bacteria (LBM solver)</td></tr>"
+            "<tr><td>8</td><td>Sessile + Planktonic</td><td>Biotic</td>"
+            "    <td>Both sessile and planktonic microbes together</td></tr>"
+            "<tr><td>9</td><td>Coupled Biotic-Abiotic</td><td>Coupled</td>"
+            "    <td>Biofilm + abiotic reaction running simultaneously</td></tr>"
+            "</table>"
+
+            # ── Step-by-step workflow ──
+            "<h2>Step-by-Step Workflow</h2>"
+
+            "<div class='step'>"
+            "<h3>Step 1 - Create a Project</h3>"
+            "<ol>"
+            "<li><b>File &gt; New Project</b></li>"
+            "<li>Pick a template from the list above</li>"
+            "<li>Choose a save directory - the project folder is created there</li>"
+            "<li>Each template comes with pre-configured parameters and "
+            "matching <code>.hh</code> kinetics files</li>"
+            "</ol>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 2 - Review / Set Parameters</h3>"
+            "<p>Use the panels on the right side of the main window:</p>"
+            "<ul>"
+            "<li><b>Domain</b> - Grid dimensions (nx, ny, nz), voxel size (dx)</li>"
+            "<li><b>Fluid</b> - Pressure gradient (delta_P), relaxation (tau)</li>"
+            "<li><b>Chemistry</b> - Substrates, initial concentrations, "
+            "boundary conditions, diffusion coefficients</li>"
+            "<li><b>Microbiology</b> (biotic only) - Microbe species, "
+            "Monod parameters (Ks, mu_max), solver type (CA or LBM)</li>"
+            "<li><b>Solver</b> - Iteration limits, convergence criteria</li>"
+            "</ul>"
+            "<p>Templates come with sensible defaults - you can run them as-is.</p>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 3 - Generate Geometry</h3>"
+            "<ul>"
+            "<li><b>Tools &gt; Geometry Generator</b> to create a new geometry</li>"
+            "<li>Or browse an existing <code>geometry.dat</code> file</li>"
+            "<li>The file must have exactly <code>nx * ny * nz</code> bytes "
+            "(1 byte per voxel)</li>"
+            "<li>Material codes: 0 = solid, 1 = bounce-back interface, 2 = pore</li>"
+            "<li>For sessile biofilm: additional codes 3-8 for biofilm regions</li>"
+            "<li>The GUI auto-copies the geometry file to <code>input/</code> "
+            "when you click Run</li>"
+            "</ul>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 4 - Validate</h3>"
+            "<ul>"
+            "<li>Click <b>Validate</b> in the Run panel</li>"
+            "<li>Fix all <span style='color:#ef5350;'>errors</span> (red) - "
+            "these block the simulation</li>"
+            "<li><span style='color:#ffa726;'>Warnings</span> (yellow) are "
+            "informational - they don't block</li>"
+            "</ul>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 5 - Kinetics Files (if using reactions)</h3>"
+            "<p>The C++ solver compiles kinetics equations from two header files:</p>"
+            "<ul>"
+            "<li><code>defineKinetics.hh</code> - biotic (Monod) reactions</li>"
+            "<li><code>defineAbioticKinetics.hh</code> - abiotic reactions</li>"
+            "</ul>"
+            "<p><b>BOTH</b> files must always be present (unused ones are no-op stubs).</p>"
+            "<p><b>Option A</b>: Templates auto-generate matching .hh files on export.</p>"
+            "<p><b>Option B</b>: Copy a pre-made pair from the <code>kinetics/</code> "
+            "folder to the source root (next to <code>CMakeLists.txt</code>).</p>"
+            "<p><b>Option C</b>: Edit code via <b>Tools &gt; Kinetics Editor</b>.</p>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 6 - Recompile the Solver</h3>"
+            "<p>Required when you change kinetics code, template, or "
+            "number of substrates/microbes.</p>"
+            "<pre>"
+            "# Linux / Mac:\n"
+            "cd build && cmake .. && make -j$(nproc)\n\n"
+            "# Windows (Visual Studio):\n"
+            "cd build\n"
+            "cmake ..\n"
+            "cmake --build . --config Release\n\n"
+            "# MSYS2 / MinGW:\n"
+            "cd build && cmake .. -G \"MinGW Makefiles\" && mingw32-make"
+            "</pre>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 7 - Run the Simulation</h3>"
+            "<ul>"
+            "<li>Click the <b>Run</b> button in the GUI, or from terminal:</li>"
+            "</ul>"
+            "<pre>"
+            "Linux/Mac:  ./complab\n"
+            "Windows:    complab.exe"
+            "</pre>"
+            "<ul>"
+            "<li>Output goes to the <code>output/</code> folder</li>"
+            "<li>A <code>.out</code> log file is auto-saved there</li>"
+            "<li>VTK files can be opened with ParaView for 3D visualization</li>"
+            "</ul>"
+            "</div>"
+
+            # ── When to Recompile ──
+            "<h2>When to Recompile</h2>"
+            "<table>"
+            "<tr><th>Must Recompile</th><th>No Recompile Needed</th></tr>"
+            "<tr><td>"
+            "<ul>"
+            "<li>Kinetics equations (.hh code)</li>"
+            "<li>Switching template</li>"
+            "<li>Adding/removing substrates or microbes</li>"
+            "</ul>"
+            "</td><td>"
+            "<ul>"
+            "<li>Concentrations, BCs, diffusion coefficients</li>"
+            "<li>Domain dimensions (regenerate geometry)</li>"
+            "<li>Iteration count, output settings</li>"
+            "<li>Fluid properties (delta_P, tau)</li>"
+            "</ul>"
+            "<p><i>These are in CompLaB.xml, read at runtime.</i></p>"
+            "</td></tr>"
+            "</table>"
+
+            # ── Material Codes ──
+            "<h2>Material Codes (Geometry File)</h2>"
+            "<table>"
+            "<tr><th>Code</th><th>Material</th><th>Description</th></tr>"
+            "<tr><td>0</td><td>Solid</td><td>Impermeable grain</td></tr>"
+            "<tr><td>1</td><td>Bounce-back</td><td>Fluid-solid interface</td></tr>"
+            "<tr><td>2</td><td>Pore</td><td>Open pore space (fluid)</td></tr>"
+            "<tr><td>3</td><td>Biofilm core (sp.1)</td><td>Microbe species 1</td></tr>"
+            "<tr><td>4</td><td>Biofilm core (sp.2)</td><td>Microbe species 2</td></tr>"
+            "<tr><td>5</td><td>Biofilm core (sp.3)</td><td>Microbe species 3</td></tr>"
+            "<tr><td>6</td><td>Biofilm fringe (sp.1)</td><td>Outer edge of species 1</td></tr>"
+            "<tr><td>7</td><td>Biofilm fringe (sp.2)</td><td>Outer edge of species 2</td></tr>"
+            "<tr><td>8</td><td>Biofilm fringe (sp.3)</td><td>Outer edge of species 3</td></tr>"
+            "</table>"
+
+            # ── Executable ──
+            "<h2>Executable</h2>"
+            "<p>The build target is <code>complab</code> (not complab3d).</p>"
+            "<ul>"
+            "<li>Linux: <code>./complab</code></li>"
+            "<li>Windows: <code>GUI/bin/complab.exe</code> or "
+            "<code>build/Release/complab.exe</code></li>"
+            "</ul>"
+            "<p>Set the path in <b>Edit &gt; Preferences</b> if auto-detect fails.</p>"
         )
 
-        if needs_kinetics:
-            guide += (
-                "STEP 5: Review / Edit Kinetics Code\n"
-                "   Tools > Kinetics Editor\n"
-                "   The .hh code defines the reaction equations.\n"
-                "   Make sure array indices (C[0], B[0], etc.) match\n"
-                "   the number of substrates/microbes you defined.\n\n"
-                "STEP 6: Export XML\n"
-                "   File > Export XML\n"
-                "   This saves CompLaB.xml AND the .hh files.\n\n"
-                "STEP 7: Copy .hh Files to Solver Source\n"
-                "   Copy defineKinetics.hh and/or defineAbioticKinetics.hh\n"
-                "   to the CompLaB3D source root (where CMakeLists.txt is).\n"
-                "   The C++ solver includes them at compile time:\n"
-                '     #include "../defineKinetics.hh"\n'
-                '     #include "../defineAbioticKinetics.hh"\n\n'
-                "STEP 8: Recompile the Solver\n"
-                "   Linux/Mac:   cd build && cmake .. && make -j$(nproc)\n"
-                "   Windows:     cd build && cmake .. && cmake --build . --config Release\n"
-                "   MSYS2/MinGW: cd build && cmake .. -G \"MinGW Makefiles\" && mingw32-make\n\n"
-                "STEP 9: Run Simulation\n"
-                "   Click 'Run' in CompLaB Studio, or run from terminal:\n"
-                "     ./complab  (Linux/Mac)\n"
-                "     complab.exe  (Windows)\n\n"
-                "═══ WHEN TO RECOMPILE ═══\n"
-                "You MUST recompile (repeat steps 6-9) when you:\n"
-                "  • Change kinetics equations in the editor\n"
-                "  • Switch to a different template\n"
-                "  • Add or remove substrates/microbes\n"
-                "    (changes array sizes in .hh code)\n\n"
-                "You do NOT need to recompile when you only change:\n"
-                "  • Concentrations, BCs, diffusion coefficients\n"
-                "  • Domain dimensions (but regenerate geometry!)\n"
-                "  • Iteration count or output settings\n"
-                "  • Fluid properties\n"
-                "  These are read from CompLaB.xml at runtime.\n"
-            )
-        else:
-            guide += (
-                "STEP 5: Export XML\n"
-                "   File > Export XML\n"
-                "   This saves CompLaB.xml.\n\n"
-                "STEP 6: Run Simulation\n"
-                "   Click 'Run' in CompLaB Studio, or run from terminal.\n"
-                "   No recompilation needed for non-kinetics simulations.\n"
-            )
+        browser.setHtml(html)
+        lay.addWidget(browser, 1)
 
-        QMessageBox.information(self, "CompLaB Studio — Workflow Guide", guide)
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        close_btn = QPushButton("Close")
+        close_btn.setFixedWidth(100)
+        close_btn.clicked.connect(dlg.accept)
+        btn_row.addWidget(close_btn)
+        lay.addLayout(btn_row)
+
+        dlg.exec()
 
     # ── Helpers ─────────────────────────────────────────────────────
 
