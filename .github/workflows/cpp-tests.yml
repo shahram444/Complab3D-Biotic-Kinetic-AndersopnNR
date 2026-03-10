@@ -1,0 +1,53 @@
+name: C++ Unit Tests
+
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'defineKinetics.hh'
+      - 'defineAbioticKinetics.hh'
+      - 'tests/cpp/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/cpp-tests.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'defineKinetics.hh'
+      - 'defineAbioticKinetics.hh'
+      - 'tests/cpp/**'
+      - 'CMakeLists.txt'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake g++
+
+      - name: Configure CTest build
+        run: |
+          cd tests/cpp
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build tests
+        run: cmake --build tests/cpp/build --parallel 2
+
+      - name: Run CTest
+        run: |
+          cd tests/cpp/build
+          ctest --output-on-failure --verbose
+
+  validation-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run analytical validation (dry-run)
+        run: python tests/run_validation.py --dry-run
