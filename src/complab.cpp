@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
     T nsLatticeTau = tau;
     T nsLatticeOmega = 1 / nsLatticeTau;
     T nsLatticeNu = NSDES<T>::cs2*(nsLatticeTau-0.5);
-    char *ns_read_filename = strcat(strdup(str_inputDir.c_str()),ns_filename);
+    std::string ns_read_filename = str_inputDir + ns_filename;
 
     pcout << "  [GEOM] Reading " << geom_filename << "...\n";
     MultiScalarField3D<int> geometry(nx,ny,nz);
@@ -348,7 +348,7 @@ int main(int argc, char **argv) {
         pcout << "  [NS] tau=" << nsLatticeTau << ", omega=" << nsLatticeOmega << ", nu=" << nsLatticeNu << "\n";
         if (read_NS_file == 1 && track_performance == 0) {
             pcout << "  [NS] Loading checkpoint...\n";
-            try { loadBinaryBlock(nsLattice, strcat(ns_read_filename,".chk")); }
+            try { loadBinaryBlock(nsLattice, ns_read_filename+".chk"); }
             catch (PlbIOException& exception) { pcout << "  [NS] ERROR: " << exception.what() << "\n"; return -1; }
             if (ns_rerun_iT0 > 0) {
                 iT = ns_rerun_iT0;
@@ -427,7 +427,22 @@ int main(int argc, char **argv) {
     global::timer("NS").stop();
     T nstime = global::timer("NS").getTime();
 
-    if (ade_maxiTer == 0) { pcout << "  [ADE] ade_maxiTer=0, done.\n"; return 0; }
+    // Pure-flow mode: no substrates/microbes or ade_maxiTer=0 → skip ADE entirely
+    if (ade_maxiTer == 0 || (num_of_substrates == 0 && num_of_microbes == 0)) {
+        if (num_of_substrates == 0 && num_of_microbes == 0)
+            pcout << "  [ADE] No substrates or microbes configured. Pure flow simulation.\n";
+        else
+            pcout << "  [ADE] ade_maxiTer=0, skipping transport.\n";
+        if (track_performance == 0 && Pe > thrd) {
+            writeNsVTI(nsLattice, 0, "nsLatticeFinal_");
+            saveBinaryBlock(nsLattice, str_outputDir+ns_filename+".chk");
+            pcout << "    [OK] Flow field saved\n";
+        }
+        T TET = global::timer("total").getTime(); global::timer("total").stop();
+        pcout << "\n  Wall time: " << TET << " s (" << TET/60 << " min)\n";
+        pcout << "  CompLaB3D finished successfully.\n";
+        return 0;
+    }
 
     // ════════════════════════════════════════════════════════════════════════════
     // PHASE 3: REACTIVE TRANSPORT SETUP
@@ -658,8 +673,8 @@ int main(int argc, char **argv) {
     plint new_totMask = util::roundToInt(computeAverage(*computeDensity(maskLattice))*nx*ny*nz);
     if (std::abs(old_totMask-new_totMask)>0) {
         old_totMask = new_totMask;
-        if (soluteDindex == 1) applyProcessingFunctional(new updateSoluteDynamics3D<T,RXNDES>(num_of_substrates, bounce_back, no_dynamics, pore_dynamics, substrOMEGAinbFilm, substrOMEGAinPore), vec_substr_lattices[0].getBoundingBox(), substrate_lattices);
-        if (bmassDindex == 1) applyProcessingFunctional(new updateBiomassDynamics3D<T,RXNDES>((plint)vec_bFree_lattices.size(), bounce_back, no_dynamics, pore_dynamics, bioOMEGAinbFilm, bioOMEGAinPore), vec_bFree_lattices[0].getBoundingBox(), planktonic_lattices);
+        if (soluteDindex == 1 && num_of_substrates > 0) applyProcessingFunctional(new updateSoluteDynamics3D<T,RXNDES>(num_of_substrates, bounce_back, no_dynamics, pore_dynamics, substrOMEGAinbFilm, substrOMEGAinPore), vec_substr_lattices[0].getBoundingBox(), substrate_lattices);
+        if (bmassDindex == 1 && bfree_count > 0) applyProcessingFunctional(new updateBiomassDynamics3D<T,RXNDES>((plint)vec_bFree_lattices.size(), bounce_back, no_dynamics, pore_dynamics, bioOMEGAinbFilm, bioOMEGAinPore), vec_bFree_lattices[0].getBoundingBox(), planktonic_lattices);
         applyProcessingFunctional(new updateNsLatticesDynamics3D<T,NSDES,T,RXNDES>(nsLatticeOmega, vec_permRatio[0], pore_dynamics, no_dynamics, bounce_back), nsLattice.getBoundingBox(), nsLattice, maskLattice);
         for (plint iT2 = 0; iT2 < ns_maxiTer_1; ++iT2) {
             nsLattice.collideAndStream();
@@ -682,7 +697,7 @@ int main(int argc, char **argv) {
             latticeToPassiveAdvDiff(nsLattice, vec_substr_lattices[iS], vec_substr_lattices[iS].getBoundingBox());
         }
         tmpIT0=0;
-        for (plint iM = 0; iM < num_of_substrates; ++iM) {
+        for (plint iM = 0; iM < num_of_microbes; ++iM) {
             if (solver_type[iM] == 3) {
                 latticeToPassiveAdvDiff(nsLattice, vec_bFree_lattices[tmpIT0], vec_bFree_lattices[tmpIT0].getBoundingBox());
                 ++tmpIT0;
@@ -993,8 +1008,8 @@ int main(int argc, char **argv) {
                 old_totMask = new_totMask;
                 applyProcessingFunctional(new updateAgeDistance3D<T,RXNDES>(max_bMassRho, nx, ny, nz), ageLattice.getBoundingBox(), ageNdistance_lattices);
                 if (iT % ade_update_interval == 0) {
-                    if (soluteDindex == 1) applyProcessingFunctional(new updateSoluteDynamics3D<T,RXNDES>(num_of_substrates, bounce_back, no_dynamics, pore_dynamics, substrOMEGAinbFilm, substrOMEGAinPore), vec_substr_lattices[0].getBoundingBox(), substrate_lattices);
-                    if (bmassDindex == 1) applyProcessingFunctional(new updateBiomassDynamics3D<T,RXNDES>((plint)vec_bFree_lattices.size(), bounce_back, no_dynamics, pore_dynamics, bioOMEGAinbFilm, bioOMEGAinPore), vec_bFree_lattices[0].getBoundingBox(), planktonic_lattices);
+                    if (soluteDindex == 1 && num_of_substrates > 0) applyProcessingFunctional(new updateSoluteDynamics3D<T,RXNDES>(num_of_substrates, bounce_back, no_dynamics, pore_dynamics, substrOMEGAinbFilm, substrOMEGAinPore), vec_substr_lattices[0].getBoundingBox(), substrate_lattices);
+                    if (bmassDindex == 1 && bfree_count > 0) applyProcessingFunctional(new updateBiomassDynamics3D<T,RXNDES>((plint)vec_bFree_lattices.size(), bounce_back, no_dynamics, pore_dynamics, bioOMEGAinbFilm, bioOMEGAinPore), vec_bFree_lattices[0].getBoundingBox(), planktonic_lattices);
                 }
                 if (track_performance == 1) { catime+=global::timer("ca").getTime(); global::timer("ca").stop(); }
                 if (iT % ns_update_interval == 0 && Pe > thrd && ns_saturate == 0) {

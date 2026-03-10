@@ -31,11 +31,11 @@
         <tau>0.8</tau>
         <track_performance>false</track_performance>
         <iteration>
-            <ns_max_iT1>100000</ns_max_iT1>
-            <ns_max_iT2>100000</ns_max_iT2>
+            <ns_max_iT1>10000</ns_max_iT1>
+            <ns_max_iT2>10000</ns_max_iT2>
             <ns_converge_iT1>1.000000e-08</ns_converge_iT1>
             <ns_converge_iT2>1.000000e-06</ns_converge_iT2>
-            <ade_max_iT>10000000</ade_max_iT>
+            <ade_max_iT>5000</ade_max_iT>
             <ade_converge_iT>1.000000e-08</ade_converge_iT>
             <ns_update_interval>1</ns_update_interval>
             <ade_update_interval>1</ade_update_interval>
