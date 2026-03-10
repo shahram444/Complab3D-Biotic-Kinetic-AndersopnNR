@@ -10,7 +10,7 @@ tags:
   - biogeochemistry
 authors:
   - name: Shahram Asgari
-    orcid: 0000-0000-0000-0000
+    orcid: 0009-0004-3810-2739
     affiliation: 1
     corresponding: true
 affiliations:

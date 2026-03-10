@@ -6,7 +6,7 @@ Based on: https://joss.readthedocs.io/en/latest/submitting.html
           https://joss.readthedocs.io/en/latest/review_checklist.html
 
 Last updated: 2026-03-10
-Status:       READY FOR SUBMISSION (pending ORCID update)
+Status:       READY FOR SUBMISSION
 
 ================================================================================
 A. SUBMISSION REQUIREMENTS
@@ -52,8 +52,7 @@ B. PAPER FORMAT (paper.md)
          -> Present in paper/paper.md header
 
 [x] B2. Author ORCID(s)
-         -> Placeholder 0000-0000-0000-0000
-         !! ACTION REQUIRED: Replace with real ORCID before submission
+         -> 0009-0004-3810-2739
 
 [x] B3. Author affiliations with index
          -> "Department of Marine Sciences, University of Georgia, Athens, GA, USA"
@@ -229,10 +228,8 @@ G. REPOSITORY HEALTH
 H. PRE-SUBMISSION ACTION ITEMS
 ================================================================================
 
-[ ] H1. Replace ORCID placeholder (0000-0000-0000-0000) with real ORCID
-         Files to update:
-         - paper/paper.md (line 12)
-         - CITATION.cff (orcid field, 2 occurrences)
+[x] H1. Replace ORCID placeholder with real ORCID
+         -> Updated in paper/paper.md, CITATION.cff (both occurrences)
 
 [ ] H2. Create tagged release (e.g., v2.1.0) on GitHub
 
