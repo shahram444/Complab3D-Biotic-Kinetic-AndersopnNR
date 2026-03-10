@@ -182,11 +182,11 @@ F. METADATA AND CITATION
 ================================================================================
 
 [x] F1. CITATION.cff
-         -> Present with CFF 1.2.0, ORCID placeholder, keywords, abstract,
+         -> Present with CFF 1.2.0, ORCID, keywords, abstract,
             preferred-citation block
 
 [x] F2. codemeta.json
-         -> Present with full schema.org metadata
+         -> Present with full schema.org metadata, ORCID @id included
 
 [x] F3. Version tag
          -> Version 2.1.0 in CITATION.cff, pyproject.toml, codemeta.json
