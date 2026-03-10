@@ -121,6 +121,8 @@ project data model validation, and end-to-end pipeline flows.
 | [Geometry Tutorial](docs/Geometry_Generator_Tutorial.md) | 3D pore geometry generation |
 | [GUI README](GUI/README.md) | Reviewer/tester quick-start for the Python GUI |
 | [Kinetics README](kinetics/README.md) | Details on each of the 9 scenario templates |
+| [Installation Guide](INSTALL.md) | Platform-specific build and install instructions |
+| [Changelog](CHANGELOG.md) | Version history and release notes |
 
 ## How to Cite
 
