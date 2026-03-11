@@ -1,0 +1,390 @@
+================================================================================
+          CompLaB3D — Complete Testing Guide (Step-by-Step)
+================================================================================
+
+This file explains every test in the project, what it does, how it works,
+and the exact commands to run on your Windows machine.
+
+Your local path:
+C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR
+
+
+================================================================================
+  STEP 0 — OPEN TERMINAL AND GO TO THE PROJECT FOLDER
+================================================================================
+
+Open PowerShell or Command Prompt (CMD) and type:
+
+    cd "C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR"
+
+This takes you into the main project folder. All commands below assume
+you are starting from this folder.
+
+
+================================================================================
+  STEP 1 — GUI TESTS  (Python / pytest)
+================================================================================
+
+WHAT ARE THESE TESTS?
+    These test the CompLaB Studio graphical interface (the Python GUI).
+    They check that the GUI creates correct XML files, generates correct
+    kinetics code, handles project data properly, and manages the solver
+    subprocess. The actual C++ solver is NOT needed — it is replaced by
+    a fake (mock) so the tests run on any machine with Python.
+
+WHAT YOU NEED:
+    - Python 3.10, 3.11, or 3.12 installed
+    - pip (comes with Python)
+    - No C++ compiler needed
+    - No MPI needed
+
+COMMANDS TO TYPE:
+
+    cd GUI
+    pip install -e ".[dev]"
+    set QT_QPA_PLATFORM=offscreen
+    python -m pytest tests/ -v
+    cd ..
+
+WHAT EACH COMMAND DOES:
+
+    cd GUI
+        Goes into the GUI folder where the Python code lives.
+
+    pip install -e ".[dev]"
+        Installs the GUI application and all its test dependencies
+        (pytest, PyQt6, etc.) in editable mode. You only need to run
+        this once, or again if dependencies change.
+
+    set QT_QPA_PLATFORM=offscreen
+        Tells Qt to run without opening actual windows on screen.
+        This is needed so the tests can create GUI widgets without
+        a real display. Without this, tests may crash.
+
+    python -m pytest tests/ -v
+        Runs ALL GUI tests. The -v flag means "verbose" so you see
+        each individual test name and whether it passed or failed.
+
+    cd ..
+        Goes back to the main project folder.
+
+WHAT EACH TEST FILE CHECKS (275 tests total):
+
+    test_pipeline_e2e.py (93 tests)
+        End-to-end pipeline tests. These simulate a user going through
+        the full workflow: creating a project, setting up domain and
+        fluid properties, configuring chemistry, generating kinetics
+        code, building XML configuration, and preparing to run.
+        They verify the entire pipeline produces correct output.
+
+    test_kinetics.py (86 tests)
+        Tests the kinetics code generator. CompLaB needs C++ header
+        files (.hh) that define reaction kinetics. The GUI generates
+        these files automatically. These tests verify that the generated
+        C++ code is correct for different reaction types: Monod kinetics,
+        first-order decay, bimolecular reactions, reversible reactions,
+        inhibition terms, etc.
+
+    test_templates.py (30 tests)
+        Tests all 9 simulation templates. CompLaB has predefined
+        templates for common simulation setups (e.g., biotic, abiotic,
+        planktonic). These tests verify that each template creates
+        valid configurations with correct default values.
+
+    test_project_model.py (27 tests)
+        Tests the internal data model. The GUI stores project data
+        (domain size, fluid properties, chemical species, etc.) in
+        Python objects. These tests check that validation works
+        correctly — for example, that negative domain sizes are
+        rejected, required fields cannot be empty, and species
+        names must be unique.
+
+    test_xml_io.py (21 tests)
+        Tests XML and JSON reading/writing. CompLaB uses XML files
+        for simulation configuration. These tests verify that:
+        - Saving a project to XML and loading it back gives identical data
+        - JSON project files round-trip correctly
+        - Corrupt or missing files are handled gracefully
+
+    test_simulation_runner.py (18 tests)
+        Tests the simulation runner component. This is the part of the
+        GUI that launches the C++ solver as a subprocess, monitors it,
+        and reports status. The actual solver is replaced by a mock
+        (fake) process. Tests verify that start, stop, pause, status
+        reporting, and error handling all work correctly.
+
+WHAT SUCCESS LOOKS LIKE:
+
+    You will see lines like:
+        tests/test_pipeline_e2e.py::test_create_project PASSED
+        tests/test_pipeline_e2e.py::test_set_domain PASSED
+        ...
+    At the end:
+        ====== 275 passed in XX.XXs ======
+
+    If a test fails, it shows FAILED with a traceback explaining why.
+
+
+================================================================================
+  STEP 2 — C++ UNIT TESTS  (Google Test / CTest)
+================================================================================
+
+WHAT ARE THESE TESTS?
+    These test the core C++ computation code directly — the math and
+    logic inside the solver. They use Google Test (a C++ testing
+    framework by Google) and run through CMake's CTest runner.
+    They do NOT need the full Palabos library or MPI. Google Test
+    is downloaded automatically the first time you build.
+
+WHAT YOU NEED:
+    - CMake 3.14 or newer
+    - A C++ compiler (on Windows: Visual Studio Build Tools, MinGW, or MSVC)
+    - Internet connection (first time only, to download Google Test)
+
+COMMANDS TO TYPE:
+
+    cd tests\cpp
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake --build . --parallel
+    ctest --output-on-failure
+    cd ..\..\..
+
+WHAT EACH COMMAND DOES:
+
+    cd tests\cpp
+        Goes into the C++ test folder.
+
+    mkdir build
+        Creates a build directory to keep compiled files separate
+        from source code. Skip this if the folder already exists.
+
+    cd build
+        Goes into the build directory.
+
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+        Configures the build. CMake reads the CMakeLists.txt file,
+        finds your compiler, and downloads Google Test automatically.
+        Release mode means optimized (faster) code.
+
+    cmake --build . --parallel
+        Compiles all the test programs. The --parallel flag uses
+        multiple CPU cores to build faster.
+
+    ctest --output-on-failure
+        Runs all compiled tests. If a test fails, it prints the
+        full output so you can see what went wrong. If all pass,
+        it just shows a summary.
+
+    cd ..\..\..
+        Goes back to the main project folder.
+
+WHAT EACH TEST FILE CHECKS:
+
+    test_stability.cpp
+        Tests the stability checking system. Before running a
+        simulation, CompLaB checks physical constraints:
+        - Mach number < threshold (flow not too fast for lattice)
+        - CFL condition satisfied (time step small enough)
+        - Tau values valid (relaxation parameter in range)
+        - Peclet number acceptable (advection vs diffusion balance)
+        If any check fails in a real simulation, it warns the user.
+        These tests verify the checks catch bad values and accept
+        good values correctly.
+
+    test_abiotic_kinetics.cpp
+        Tests abiotic (non-biological) chemical reaction calculations:
+        - Rate computation for different reaction types
+        - Rate clamping: ensures reaction rates don't produce
+          negative concentrations (a common numerical problem)
+        - Statistics accumulator: tracks min/max/mean rates
+        These are pure chemistry calculations without any biology.
+
+    test_biotic_kinetics.cpp
+        Tests biotic (biological) reaction calculations:
+        - Monod saturation kinetics: the standard model for how
+          microbes consume substrates (rate = Vmax * S / (Km + S))
+        - Substrate clamping: prevents concentrations going negative
+        - Mass balance: verifies that matter is conserved (what is
+          consumed equals what is produced)
+        These are the core biokinetic equations used in bioremediation
+        and biofilm simulations.
+
+WHAT SUCCESS LOOKS LIKE:
+
+    You will see:
+        Test project ...
+        Start 1: StabilityTests
+        1/3 Test #1: StabilityTests ....... Passed
+        Start 2: AbioticKineticsTests
+        2/3 Test #2: AbioticKineticsTests . Passed
+        Start 3: BioticKineticsTests
+        3/3 Test #3: BioticKineticsTests .. Passed
+
+        100% tests passed, 0 tests failed out of 3
+
+
+================================================================================
+  STEP 3 — VALIDATION DRY-RUN  (Analytical Solutions)
+================================================================================
+
+WHAT ARE THESE TESTS?
+    These verify analytical (mathematical) solutions for 5 standard
+    test problems. Each test has a known exact answer from mathematics.
+    The "dry-run" mode checks that the analytical solution code itself
+    is correct, without running the actual solver. This is useful to
+    verify the reference solutions before comparing simulation output.
+
+WHAT YOU NEED:
+    - Python (any version 3.8+)
+    - No C++ compiler needed
+    - No MPI needed
+
+COMMAND TO TYPE:
+
+    python tests\run_validation.py --dry-run
+
+WHAT THE COMMAND DOES:
+    Runs the validation script in dry-run mode. It computes the
+    analytical solutions and checks them against expected values.
+    No simulation is actually executed.
+
+WHAT EACH TEST CHECKS:
+
+    Test 1 — Pure Diffusion
+        A substance diffuses through a domain with fixed concentrations
+        at each end. The known solution is a straight line:
+        C(x) = 1 - x/L. The test verifies this linear profile is
+        computed correctly.
+
+    Test 2 — First-Order Decay
+        A substance decays at a rate proportional to its concentration.
+        The known solution is exponential decay: C(t) = C0 * exp(-k*t).
+        The test checks that the exponential curve matches expected values.
+
+    Test 3 — Bimolecular Reaction (A + B -> C)
+        Two substances react to form a third. The total mass must be
+        conserved: A + B + C = constant at all times. The test verifies
+        this mass balance holds exactly.
+
+    Test 4 — Reversible Reaction (A <-> B)
+        A substance converts to another and back. At equilibrium, the
+        ratio [B]/[A] equals the equilibrium constant K_eq. The test
+        checks that the equilibrium is reached and the ratio is correct.
+
+    Test 5 — Decay Chain (A -> B -> C)
+        Substance A decays to B, which decays to C. The solution follows
+        the Bateman equations (standard nuclear/chemical decay chain math).
+        B shows a transient peak — it builds up then decays. The test
+        verifies the peak location and shape match the equations.
+
+WHAT SUCCESS LOOKS LIKE:
+
+    Each test prints PASS or FAIL. All 5 should pass.
+
+
+================================================================================
+  STEP 4 (OPTIONAL) — FULL VALIDATION WITH SOLVER
+================================================================================
+
+WHAT IS THIS?
+    The same 5 tests as Step 3, but this time it actually runs the
+    CompLaB C++ solver with MPI and compares the simulation output
+    against the analytical solutions. This is the ultimate check that
+    the solver produces physically correct results.
+
+WHAT YOU NEED:
+    - The compiled CompLaB solver (the "complab" executable)
+    - MPI installed (e.g., MS-MPI on Windows, OpenMPI on Linux)
+    - The full Palabos library (used during compilation)
+
+COMMAND TO TYPE:
+
+    python tests\run_validation.py --np 4
+
+WHAT THE COMMAND DOES:
+
+    For each of the 5 test cases, the script:
+    1. Copies the test kinetics header file to the project root
+    2. Rebuilds the solver with that kinetics file
+    3. Runs the solver using MPI with 4 processes
+    4. Reads the simulation output
+    5. Compares it against the analytical solution
+    6. Reports PASS if the error is within tolerance, FAIL otherwise
+
+    The --np 4 flag means use 4 MPI processes. You can change this
+    number. Use --np 1 for a single-process run.
+
+OTHER OPTIONS:
+
+    --build-dir build/     Where the CMake build directory is (default: build/)
+    --skip-build           Don't recompile between tests (faster, but only
+                           works if the kinetics header hasn't changed)
+    --dry-run              Skip solver, just check analytical math (Step 3)
+
+
+================================================================================
+  COMPLETE COMMAND SEQUENCE (COPY-PASTE READY)
+================================================================================
+
+Open CMD or PowerShell and paste these blocks one at a time:
+
+--- Go to project ---
+
+    cd "C:\Users\shahr\OneDrive\Desktop\Shahram Files\Github-mirror\Complab3D-Biotic-Kinetic-AndersopnNR"
+
+--- Step 1: GUI tests ---
+
+    cd GUI
+    pip install -e ".[dev]"
+    set QT_QPA_PLATFORM=offscreen
+    python -m pytest tests/ -v
+    cd ..
+
+--- Step 2: C++ unit tests ---
+
+    cd tests\cpp
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    cmake --build . --parallel
+    ctest --output-on-failure
+    cd ..\..\..
+
+--- Step 3: Validation dry-run ---
+
+    python tests\run_validation.py --dry-run
+
+--- Step 4 (optional): Full validation ---
+
+    python tests\run_validation.py --np 4
+
+
+================================================================================
+  TROUBLESHOOTING
+================================================================================
+
+Problem: "python" is not recognized
+    Solution: Make sure Python is installed and added to PATH.
+    Download from https://python.org. During install, check
+    "Add Python to PATH".
+
+Problem: "cmake" is not recognized
+    Solution: Install CMake from https://cmake.org/download/
+    During install, choose "Add CMake to PATH".
+
+Problem: GUI tests crash with "no display" error
+    Solution: Make sure you ran: set QT_QPA_PLATFORM=offscreen
+
+Problem: "pip install" fails with permission error
+    Solution: Run: pip install --user -e ".[dev]"
+
+Problem: C++ tests fail to build
+    Solution: Make sure you have a C++ compiler installed.
+    On Windows, install Visual Studio Build Tools or MinGW-w64.
+
+Problem: mkdir build says "already exists"
+    Solution: That's fine, skip the mkdir command and continue.
+
+================================================================================
