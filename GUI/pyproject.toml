@@ -29,6 +29,7 @@ dev = [
 complab-studio = "main:main"
 
 [tool.setuptools]
+py-modules = ["main"]
 packages = ["src", "src.core", "src.dialogs", "src.panels", "src.widgets"]
 
 [tool.pytest.ini_options]
