@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "CompLaB3D"
+abstract: "Three-dimensional pore-scale biogeochemical reactive transport solver coupling Lattice Boltzmann methods with Monod kinetics, abiotic reactions, and equilibrium chemistry."
+version: 2.1.0
+date-released: 2026-03-11
+license: GPL-3.0
+repository-code: "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR"
+keywords:
+  - reactive transport
+  - lattice Boltzmann method
+  - biofilm
+  - pore-scale modeling
+  - biogeochemistry
+  - equilibrium chemistry
+authors:
+  - family-names: Asgari
+    given-names: Shahram
+    orcid: "https://orcid.org/0009-0004-3810-2739"
+    affiliation: "University of Georgia"
+  - family-names: Meile
+    given-names: Christof
+    affiliation: "University of Georgia"

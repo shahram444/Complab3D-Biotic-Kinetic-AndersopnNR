@@ -1,0 +1,46 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "CompLaB3D",
+  "description": "Three-dimensional pore-scale biogeochemical reactive transport solver coupling Lattice Boltzmann methods with Monod kinetics, abiotic reactions, and equilibrium chemistry.",
+  "version": "2.1.0",
+  "datePublished": "2026-03-11",
+  "license": "https://spdx.org/licenses/GPL-3.0",
+  "codeRepository": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR",
+  "issueTracker": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/issues",
+  "programmingLanguage": ["C++", "Python"],
+  "operatingSystem": ["Linux", "macOS", "Windows"],
+  "keywords": [
+    "reactive transport",
+    "lattice Boltzmann method",
+    "biofilm",
+    "pore-scale modeling",
+    "biogeochemistry",
+    "equilibrium chemistry",
+    "Monod kinetics"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Shahram",
+      "familyName": "Asgari",
+      "@id": "https://orcid.org/0009-0004-3810-2739",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "University of Georgia"
+      }
+    },
+    {
+      "@type": "Person",
+      "givenName": "Christof",
+      "familyName": "Meile",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "University of Georgia"
+      }
+    }
+  ],
+  "developmentStatus": "active",
+  "referencePublication": "https://doi.org/10.21105/joss.XXXXX",
+  "runtimePlatform": ["Palabos", "MPI", "PySide6"]
+}
