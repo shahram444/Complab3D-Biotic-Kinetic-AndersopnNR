@@ -1,0 +1,1371 @@
+"""CompLaB Studio 2.0 - COMSOL-Style Main Window.
+
+4-panel layout:
+  Left:   Model Builder tree (navigation)
+  Center: VTK 3D viewer (always visible)
+  Right:  Context-sensitive settings panel
+  Bottom: Console output + progress
+"""
+
+import os
+import logging
+from pathlib import Path
+
+from PySide6.QtWidgets import (
+    QMainWindow, QSplitter, QStackedWidget, QMenuBar, QMenu,
+    QToolBar, QStatusBar, QFileDialog, QMessageBox, QLabel,
+    QDialog, QVBoxLayout, QHBoxLayout, QPushButton,
+)
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QAction, QKeySequence
+
+log = logging.getLogger("complab.mainwindow")
+
+from .config import AppConfig
+from .core.project import CompLaBProject
+from .core.project_manager import ProjectManager
+from .core.simulation_runner import SimulationRunner
+
+from .widgets.model_tree import (
+    ModelTree, NODE_GENERAL, NODE_DOMAIN, NODE_FLUID,
+    NODE_CHEMISTRY, NODE_SUBSTRATE, NODE_EQUILIBRIUM,
+    NODE_MICROBIOLOGY, NODE_MICROBE, NODE_SOLVER,
+    NODE_IO, NODE_PARALLEL, NODE_SWEEP, NODE_RUN, NODE_POSTPROCESS,
+)
+from .widgets.console_widget import ConsoleWidget
+from .widgets.vtk_viewer import VTKViewer
+
+from .panels.general_panel import GeneralPanel
+from .panels.domain_panel import DomainPanel
+from .panels.fluid_panel import FluidPanel
+from .panels.chemistry_panel import ChemistryPanel
+from .panels.equilibrium_panel import EquilibriumPanel
+from .panels.microbiology_panel import MicrobiologyPanel
+from .panels.solver_panel import SolverPanel
+from .panels.io_panel import IOPanel
+from .panels.parallel_panel import ParallelPanel
+from .panels.sweep_panel import SweepPanel
+from .panels.run_panel import RunPanel
+from .panels.postprocess_panel import PostProcessPanel
+
+from .dialogs.new_project_dialog import NewProjectDialog
+from .dialogs.kinetics_editor_dialog import KineticsEditorDialog
+from .dialogs.preferences_dialog import PreferencesDialog
+from .dialogs.about_dialog import AboutDialog
+
+
+class CompLaBMainWindow(QMainWindow):
+    """Main application window with COMSOL-style 4-panel layout."""
+
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("CompLaB Studio 2.0")
+        self.setMinimumSize(1200, 800)
+        self.resize(1400, 900)
+
+        self._config = AppConfig()
+        self._project = CompLaBProject()
+        self._project_file = ""
+        self._runner = None
+        self._modified = False
+
+        self._setup_panels()
+        self._setup_layout()
+        self._setup_menus()
+        self._setup_toolbar()
+        self._setup_statusbar()
+        self._connect_signals()
+
+        # Auto-save timer
+        self._auto_save_timer = QTimer()
+        self._auto_save_timer.timeout.connect(self._auto_save)
+        if self._config.get("auto_save"):
+            interval = self._config.get("auto_save_interval", 300) * 1000
+            self._auto_save_timer.start(interval)
+
+        self._load_project_to_panels()
+        self._console.log_info("CompLaB Studio 2.0 ready.")
+
+    # ── Panel setup ─────────────────────────────────────────────────
+
+    def _setup_panels(self):
+        """Create all settings panels."""
+        self._general_panel = GeneralPanel()
+        self._domain_panel = DomainPanel()
+        self._fluid_panel = FluidPanel()
+        self._chemistry_panel = ChemistryPanel()
+        self._equilibrium_panel = EquilibriumPanel()
+        self._micro_panel = MicrobiologyPanel()
+        self._solver_panel = SolverPanel()
+        self._io_panel = IOPanel()
+        self._parallel_panel = ParallelPanel()
+        self._sweep_panel = SweepPanel()
+        self._run_panel = RunPanel()
+        self._post_panel = PostProcessPanel()
+
+        # Stacked widget for right panel
+        self._panel_stack = QStackedWidget()
+        self._panel_stack.addWidget(self._general_panel)    # 0
+        self._panel_stack.addWidget(self._domain_panel)     # 1
+        self._panel_stack.addWidget(self._fluid_panel)      # 2
+        self._panel_stack.addWidget(self._chemistry_panel)  # 3
+        self._panel_stack.addWidget(self._equilibrium_panel)  # 4
+        self._panel_stack.addWidget(self._micro_panel)      # 5
+        self._panel_stack.addWidget(self._solver_panel)     # 6
+        self._panel_stack.addWidget(self._io_panel)         # 7
+        self._panel_stack.addWidget(self._parallel_panel)   # 8
+        self._panel_stack.addWidget(self._sweep_panel)      # 9
+        self._panel_stack.addWidget(self._run_panel)        # 10
+        self._panel_stack.addWidget(self._post_panel)       # 11
+
+        self._panel_map = {
+            NODE_GENERAL: 0,
+            NODE_DOMAIN: 1,
+            NODE_FLUID: 2,
+            NODE_CHEMISTRY: 3,
+            NODE_SUBSTRATE: 3,
+            NODE_EQUILIBRIUM: 4,
+            NODE_MICROBIOLOGY: 5,
+            NODE_MICROBE: 5,
+            NODE_SOLVER: 6,
+            NODE_IO: 7,
+            NODE_PARALLEL: 8,
+            NODE_SWEEP: 9,
+            NODE_RUN: 10,
+            NODE_POSTPROCESS: 11,
+        }
+
+    def _setup_layout(self):
+        """Create the 4-panel COMSOL-style layout using splitters."""
+        # Left: Model tree
+        self._tree = ModelTree()
+        self._tree.setMinimumWidth(200)
+        self._tree.setMaximumWidth(350)
+
+        # Center: VTK viewer
+        self._viewer = VTKViewer()
+
+        # Right: Settings panels
+        self._panel_stack.setMinimumWidth(340)
+
+        # Bottom: Console
+        self._console = ConsoleWidget()
+        self._console.setMinimumHeight(100)
+        self._console.set_max_lines(
+            self._config.get("max_console_lines", 10000))
+
+        # Horizontal splitter: tree | viewer | settings
+        h_splitter = QSplitter(Qt.Orientation.Horizontal)
+        h_splitter.addWidget(self._tree)
+        h_splitter.addWidget(self._viewer)
+        h_splitter.addWidget(self._panel_stack)
+        h_splitter.setStretchFactor(0, 0)   # Tree: fixed
+        h_splitter.setStretchFactor(1, 3)   # Viewer: takes most space
+        h_splitter.setStretchFactor(2, 1)   # Settings: moderate
+        h_splitter.setSizes([220, 600, 380])
+
+        # Vertical splitter: [h_splitter] / console
+        v_splitter = QSplitter(Qt.Orientation.Vertical)
+        v_splitter.addWidget(h_splitter)
+        v_splitter.addWidget(self._console)
+        v_splitter.setStretchFactor(0, 4)
+        v_splitter.setStretchFactor(1, 1)
+        v_splitter.setSizes([650, 180])
+
+        self.setCentralWidget(v_splitter)
+
+    # ── Menus ───────────────────────────────────────────────────────
+
+    def _setup_menus(self):
+        mb = self.menuBar()
+
+        # ─── File ───
+        file_menu = mb.addMenu("&File")
+        self._act_new = file_menu.addAction("&New Project...")
+        self._act_new.setShortcut(QKeySequence.StandardKey.New)
+        self._act_new.triggered.connect(self._new_project)
+
+        self._act_open = file_menu.addAction("&Open Project...")
+        self._act_open.setShortcut(QKeySequence.StandardKey.Open)
+        self._act_open.triggered.connect(self._open_project)
+
+        self._act_save = file_menu.addAction("&Save Project")
+        self._act_save.setShortcut(QKeySequence.StandardKey.Save)
+        self._act_save.triggered.connect(self._save_project)
+
+        self._act_save_as = file_menu.addAction("Save Project &As...")
+        self._act_save_as.setShortcut(QKeySequence("Ctrl+Shift+S"))
+        self._act_save_as.triggered.connect(self._save_project_as)
+
+        file_menu.addSeparator()
+
+        self._act_import = file_menu.addAction("&Import CompLaB.xml...")
+        self._act_import.triggered.connect(self._import_xml)
+
+        self._act_export = file_menu.addAction("&Export CompLaB.xml...")
+        self._act_export.triggered.connect(self._export_xml)
+
+        file_menu.addSeparator()
+
+        # Recent projects submenu
+        self._recent_menu = file_menu.addMenu("Recent Projects")
+        self._update_recent_menu()
+
+        file_menu.addSeparator()
+
+        act_quit = file_menu.addAction("&Quit")
+        act_quit.setShortcut(QKeySequence.StandardKey.Quit)
+        act_quit.triggered.connect(self.close)
+
+        # ─── Edit ───
+        edit_menu = mb.addMenu("&Edit")
+        act_prefs = edit_menu.addAction("&Preferences...")
+        act_prefs.setShortcut(QKeySequence("Ctrl+,"))
+        act_prefs.triggered.connect(self._open_preferences)
+
+        # ─── Tools ───
+        tools_menu = mb.addMenu("&Tools")
+        self._act_validate = tools_menu.addAction("&Validate Configuration")
+        self._act_validate.setShortcut(QKeySequence("F5"))
+        self._act_validate.triggered.connect(self._validate)
+
+        tools_menu.addSeparator()
+
+        act_kinetics = tools_menu.addAction("Kinetics &Editor...")
+        act_kinetics.triggered.connect(self._open_kinetics_editor)
+
+        act_geom_gen = tools_menu.addAction("&Geometry Generator...")
+        act_geom_gen.setToolTip(
+            "Open the geometry generator tool for creating .dat files")
+        act_geom_gen.triggered.connect(self._open_geometry_generator)
+
+        tools_menu.addSeparator()
+
+        self._act_run = tools_menu.addAction("&Run Simulation")
+        self._act_run.setShortcut(QKeySequence("F6"))
+        self._act_run.triggered.connect(self._run_simulation)
+
+        self._act_stop = tools_menu.addAction("&Stop Simulation")
+        self._act_stop.setShortcut(QKeySequence("Shift+F6"))
+        self._act_stop.setEnabled(False)
+        self._act_stop.triggered.connect(self._stop_simulation)
+
+        # ─── View ───
+        view_menu = mb.addMenu("&View")
+        self._act_toggle_console = view_menu.addAction("Toggle Console")
+        self._act_toggle_console.setShortcut(QKeySequence("Ctrl+`"))
+        self._act_toggle_console.triggered.connect(self._toggle_console)
+
+        view_menu.addSeparator()
+
+        act_reset_view = view_menu.addAction("Reset 3D View")
+        act_reset_view.setShortcut(QKeySequence("Ctrl+R"))
+        act_reset_view.triggered.connect(
+            lambda: self._viewer.reset_view())
+
+        act_remove_vtk = view_menu.addAction("Remove Loaded VTK")
+        act_remove_vtk.setShortcut(QKeySequence("Ctrl+Shift+R"))
+        act_remove_vtk.triggered.connect(self._clear_3d_scene)
+
+        act_clear_scene = view_menu.addAction("Clear 3D Scene")
+        act_clear_scene.triggered.connect(self._clear_3d_scene)
+
+        view_menu.addSeparator()
+
+        act_open_vtk = view_menu.addAction("Open VTK in Viewer...")
+        act_open_vtk.triggered.connect(self._viewer._open_file_dialog)
+
+        # ─── Help ───
+        help_menu = mb.addMenu("&Help")
+        act_workflow = help_menu.addAction("&Workflow Guide")
+        act_workflow.triggered.connect(self._show_workflow_guide)
+        help_menu.addSeparator()
+        act_about = help_menu.addAction("&About CompLaB Studio")
+        act_about.triggered.connect(self._show_about)
+
+    def _setup_toolbar(self):
+        tb = QToolBar("Main")
+        tb.setMovable(False)
+        tb.setFloatable(False)
+        tb.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self.addToolBar(tb)
+
+        # Project section
+        self._act_new.setText("New")
+        self._act_open.setText("Open")
+        self._act_save.setText("Save")
+        tb.addAction(self._act_new)
+        tb.addAction(self._act_open)
+        tb.addAction(self._act_save)
+        tb.addSeparator()
+
+        # XML section
+        self._act_import.setText("Import XML")
+        self._act_export.setText("Export XML")
+        tb.addAction(self._act_import)
+        tb.addAction(self._act_export)
+        tb.addSeparator()
+
+        # Build section
+        self._act_validate.setText("Validate")
+        tb.addAction(self._act_validate)
+        tb.addSeparator()
+
+        # Run section
+        self._act_run.setText("Run")
+        self._act_stop.setText("Stop")
+        tb.addAction(self._act_run)
+        tb.addAction(self._act_stop)
+
+    def _setup_statusbar(self):
+        sb = QStatusBar()
+        self.setStatusBar(sb)
+        self._status_label = QLabel("Ready")
+        sb.addPermanentWidget(self._status_label)
+
+    # ── Signal connections ──────────────────────────────────────────
+
+    def _connect_signals(self):
+        # Tree navigation
+        self._tree.node_selected.connect(self._on_node_selected)
+
+        # Chemistry <-> tree sync
+        self._chemistry_panel.substrates_changed.connect(
+            self._on_substrates_changed)
+        self._micro_panel.microbes_changed.connect(
+            self._on_microbes_changed)
+
+        # Domain geometry preview
+        self._domain_panel.geometry_loaded.connect(
+            self._viewer.load_geometry_dat)
+
+        # Parallel panel -> sync MPI config to Run panel
+        self._parallel_panel.data_changed.connect(self._sync_mpi_from_parallel)
+
+        # Sweep panel
+        self._sweep_panel.sweep_requested.connect(self._run_sweep)
+
+        # Run panel
+        self._run_panel.run_requested.connect(self._run_simulation)
+        self._run_panel.stop_requested.connect(self._stop_simulation)
+        self._run_panel.validate_requested.connect(self._validate)
+        self._run_panel.export_xml_requested.connect(self._export_xml)
+
+        # Post-process file selection -> viewer
+        self._post_panel.file_selected.connect(self._viewer.load_vti)
+        self._post_panel.remove_vtk_requested.connect(self._clear_3d_scene)
+
+        # Data changed -> mark modified
+        for panel in [
+            self._general_panel, self._domain_panel, self._fluid_panel,
+            self._chemistry_panel, self._equilibrium_panel,
+            self._micro_panel, self._solver_panel, self._io_panel,
+        ]:
+            panel.data_changed.connect(self._on_data_changed)
+
+    def _on_node_selected(self, node_type: str, index: int):
+        """Switch right panel based on tree selection."""
+        panel_idx = self._panel_map.get(node_type, 0)
+        self._panel_stack.setCurrentIndex(panel_idx)
+
+        # Select specific substrate or microbe
+        if node_type == NODE_SUBSTRATE and index >= 0:
+            self._chemistry_panel.select_substrate(index)
+        elif node_type == NODE_MICROBE and index >= 0:
+            self._micro_panel.select_microbe(index)
+
+    def _on_substrates_changed(self, names: list):
+        self._tree.update_substrates(names)
+        self._equilibrium_panel.set_substrate_names(names)
+
+    def _on_microbes_changed(self, names: list):
+        self._tree.update_microbes(names)
+
+    def _on_data_changed(self):
+        self._modified = True
+        self._update_title()
+
+    # ── Project load/save ───────────────────────────────────────────
+
+    def _load_project_to_panels(self):
+        """Push project data to all panels."""
+        p = self._project
+        self._general_panel.load_from_project(p)
+        self._domain_panel.load_from_project(p)
+        self._fluid_panel.load_from_project(p)
+        self._chemistry_panel.load_from_project(p)
+        self._equilibrium_panel.load_from_project(p)
+        self._micro_panel.load_from_project(p)
+        self._solver_panel.load_from_project(p)
+        self._io_panel.load_from_project(p)
+
+        self._tree.update_project_name(p.name)
+        self._tree.update_substrates([s.name for s in p.substrates])
+        self._tree.update_microbes([m.name for m in p.microbiology.microbes])
+        self._tree.select_node(NODE_GENERAL)
+        self._modified = False
+        self._update_title()
+
+    def _save_panels_to_project(self):
+        """Pull data from all panels into project."""
+        p = self._project
+        self._general_panel.save_to_project(p)
+        self._domain_panel.save_to_project(p)
+        self._fluid_panel.save_to_project(p)
+        self._chemistry_panel.save_to_project(p)
+        self._equilibrium_panel.save_to_project(p)
+        self._micro_panel.save_to_project(p)
+        self._solver_panel.save_to_project(p)
+        self._io_panel.save_to_project(p)
+
+    def _update_title(self):
+        name = self._project.name or "Untitled"
+        mod = " *" if self._modified else ""
+        self.setWindowTitle(f"CompLaB Studio 2.0 - {name}{mod}")
+
+    # ── File actions ────────────────────────────────────────────────
+
+    def _new_project(self):
+        if self._modified and not self._confirm_discard():
+            return
+        dlg = NewProjectDialog(
+            self._config.get("default_project_dir", ""), self)
+        if dlg.exec():
+            self._project = dlg.get_project()
+            # Use the selected directory as the working base so that
+            # run/export targets the right folder even before Save.
+            chosen_dir = dlg.get_directory()
+            if chosen_dir and os.path.isdir(chosen_dir):
+                proj_dir = os.path.join(chosen_dir, self._project.name)
+                os.makedirs(proj_dir, exist_ok=True)
+                self._project_file = os.path.join(
+                    proj_dir, self._project.name + ".complab")
+            else:
+                self._project_file = ""
+            self._load_project_to_panels()
+            self._console.log_info(f"New project: {self._project.name}")
+
+    def _open_project(self):
+        if self._modified and not self._confirm_discard():
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Open Project", "",
+            "CompLaB Project (*.complab);;All Files (*)")
+        if not path:
+            return
+        try:
+            self._project = ProjectManager.load_project(path)
+            self._project_file = path
+            self._config.add_recent(path)
+            self._update_recent_menu()
+            self._load_project_to_panels()
+            self._console.log_success(f"Opened: {path}")
+        except Exception as e:
+            self._console.log_error(f"Failed to open project: {e}")
+            QMessageBox.critical(self, "Open Error", str(e))
+
+    def _save_project(self):
+        if not self._project_file:
+            self._save_project_as()
+            return
+        self._save_panels_to_project()
+        try:
+            ProjectManager.save_project(self._project, self._project_file)
+            self._modified = False
+            self._update_title()
+            self._console.log_success(f"Saved: {self._project_file}")
+        except Exception as e:
+            self._console.log_error(f"Save failed: {e}")
+
+    def _save_project_as(self):
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Save Project As", self._project.name + ".complab",
+            "CompLaB Project (*.complab);;All Files (*)")
+        if not path:
+            return
+        self._project_file = path
+        self._config.add_recent(path)
+        self._update_recent_menu()
+        self._save_project()
+
+    def _import_xml(self):
+        if self._modified and not self._confirm_discard():
+            return
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Import CompLaB.xml", "",
+            "XML Files (*.xml);;All Files (*)")
+        if not path:
+            return
+        try:
+            self._project = ProjectManager.import_xml(path)
+            self._project_file = ""
+            self._load_project_to_panels()
+            self._console.log_success(f"Imported: {path}")
+        except Exception as e:
+            self._console.log_error(f"Import failed: {e}")
+            QMessageBox.critical(self, "Import Error", str(e))
+
+    def _export_xml(self):
+        self._save_panels_to_project()
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export CompLaB.xml", "CompLaB.xml",
+            "XML Files (*.xml);;All Files (*)")
+        if not path:
+            return
+        try:
+            ProjectManager.export_xml(self._project, path)
+            self._console.log_success(f"Exported: {path}")
+            # Deploy kinetics .hh files alongside the XML
+            xml_dir = str(Path(path).parent)
+            deployed = ProjectManager.deploy_kinetics(self._project, xml_dir)
+            for dp in deployed:
+                self._console.log_success(f"Deployed: {dp}")
+            # Show post-export workflow dialog
+            self._show_post_export_guide(path, deployed)
+        except Exception as e:
+            self._console.log_error(f"Export failed: {e}")
+
+    def _update_recent_menu(self):
+        self._recent_menu.clear()
+        recents = self._config.get("recent_projects", [])
+        for path in recents:
+            act = self._recent_menu.addAction(path)
+            act.triggered.connect(lambda checked, p=path: self._open_recent(p))
+        if not recents:
+            act = self._recent_menu.addAction("(no recent projects)")
+            act.setEnabled(False)
+
+    def _open_recent(self, path):
+        if not os.path.exists(path):
+            self._console.log_error(f"File not found: {path}")
+            return
+        try:
+            self._project = ProjectManager.load_project(path)
+            self._project_file = path
+            self._load_project_to_panels()
+            self._console.log_success(f"Opened: {path}")
+        except Exception as e:
+            self._console.log_error(f"Failed to open: {e}")
+
+    # ── Simulation ──────────────────────────────────────────────────
+
+    def _ensure_text_geometry(self, work_dir: str):
+        """Ensure geometry.dat is in TEXT format (one integer per line).
+
+        The C++ solver reads geometry via Palabos ``>>`` operator which
+        expects whitespace-separated integers (text), NOT raw bytes.
+        If a binary file is detected, convert it to text in-place.
+        """
+        import numpy as np
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        for candidate in [
+            os.path.join(work_dir, "input", geom_name),
+            os.path.join(work_dir, geom_name),
+        ]:
+            if not os.path.isfile(candidate):
+                continue
+            expected = d.nx * d.ny * d.nz
+            file_size = os.path.getsize(candidate)
+
+            # If file size == expected, it is likely raw binary (1 byte/voxel).
+            # Text format would be larger (at least 2 bytes per value: digit + newline).
+            if file_size == expected:
+                try:
+                    raw = np.fromfile(candidate, dtype=np.uint8)
+                    if raw.max() <= 10 and raw.size == expected:
+                        np.savetxt(candidate, raw, fmt="%d")
+                        self._console.log_info(
+                            f"Converted {geom_name} from binary to text "
+                            f"({file_size} -> {os.path.getsize(candidate)} bytes)")
+                except Exception as e:
+                    self._console.log_warning(
+                        f"Could not auto-convert geometry: {e}")
+            return
+
+    def _deploy_geometry(self, work_dir: str):
+        """Ensure geometry file exists in the input/ subdirectory.
+
+        The C++ solver reads geometry from <input_path>/<filename>
+        (typically input/geometry.dat).  The domain panel may have browsed
+        a file from an arbitrary location; copy it into the right place.
+        Also copies from work_dir root into input/ if only found at root.
+        """
+        import shutil
+
+        d = self._project.domain
+        geom_name = d.geometry_filename or "geometry.dat"
+        input_subdir = self._project.path_settings.input_path or "input"
+        input_dir = os.path.join(work_dir, input_subdir)
+        dest = os.path.join(input_dir, geom_name)
+
+        # Already in place?
+        if os.path.isfile(dest):
+            return
+
+        # Try the domain panel's browsed file first
+        copied = self._domain_panel.copy_geometry_to_input(input_dir)
+        if copied:
+            self._console.log_info(
+                f"Copied geometry to {copied}")
+            return
+
+        # Fall back: if file exists at work_dir root, copy to input/
+        root_geom = os.path.join(work_dir, geom_name)
+        if os.path.isfile(root_geom):
+            os.makedirs(input_dir, exist_ok=True)
+            shutil.copy2(root_geom, dest)
+            self._console.log_info(
+                f"Copied {geom_name} from project root to {input_subdir}/")
+
+    def _find_executable(self, work_dir: str) -> str:
+        """Auto-detect the complab executable in common locations."""
+        import sys
+        exe_name = "complab.exe" if sys.platform == "win32" else "complab"
+
+        import shutil as _shutil
+
+        # 1. Check user-configured path first (file path or command name)
+        configured = self._config.get("complab_executable", "")
+        if configured:
+            if os.path.isfile(configured):
+                return configured
+            # Try resolving as a command name on PATH
+            resolved = _shutil.which(configured)
+            if resolved:
+                return resolved
+
+        # 2. Search common locations relative to the working directory
+        search_dirs = [
+            work_dir,                                    # project root
+            os.path.join(work_dir, "build"),             # build directory
+            os.path.join(work_dir, "Release"),           # MSVC Release
+            os.path.join(work_dir, "Debug"),             # MSVC Debug
+            os.path.join(work_dir, "GUI", "bin"),        # GUI bundled
+        ]
+        # Also search relative to the GUI directory
+        gui_dir = str(Path(__file__).resolve().parent.parent)
+        search_dirs.append(os.path.join(gui_dir, "bin"))
+        # And one level up from GUI (the repo root)
+        repo_root = str(Path(gui_dir).parent)
+        if repo_root != work_dir:
+            search_dirs.extend([
+                repo_root,
+                os.path.join(repo_root, "build"),
+                os.path.join(repo_root, "Release"),
+            ])
+
+        for d in search_dirs:
+            candidate = os.path.join(d, exe_name)
+            if os.path.isfile(candidate):
+                return candidate
+
+        # 3. Last resort: check system PATH
+        on_path = _shutil.which(exe_name)
+        if on_path:
+            return on_path
+
+        return ""
+
+    def _run_simulation(self):
+        # ── Guard: prevent starting a second simulation ────────────
+        if self._runner and self._runner.isRunning():
+            log.warning("[MAIN] _run_simulation called while runner is "
+                        "still active – ignoring")
+            self._console.log_warning(
+                "A simulation is already running. Stop it first.")
+            return
+
+        log.info("[MAIN] _run_simulation() entered")
+        self._save_panels_to_project()
+
+        # Determine working directory
+        if self._project_file:
+            work_dir = str(Path(self._project_file).parent)
+        else:
+            work_dir = os.getcwd()
+
+        # Auto-detect executable
+        exe = self._find_executable(work_dir)
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not found. Searched project root, "
+                "build/, Release/, and GUI/bin/. "
+                "Set the path in Edit > Preferences, or build with "
+                "'cd build && cmake .. && make'.")
+            return
+
+        self._console.log_info(f"Using executable: {exe}")
+
+        # Export XML first
+        xml_path = os.path.join(work_dir, "CompLaB.xml")
+        try:
+            ProjectManager.export_xml(self._project, xml_path)
+            self._console.log_info(f"Exported {xml_path}")
+            # Deploy kinetics .hh files alongside the XML
+            deployed = ProjectManager.deploy_kinetics(self._project, work_dir)
+            for dp in deployed:
+                self._console.log_info(f"Deployed: {dp}")
+        except Exception as e:
+            self._console.log_error(f"XML export failed: {e}")
+            return
+
+        # Ensure geometry file is in the input/ subdirectory where C++ expects it
+        self._deploy_geometry(work_dir)
+
+        # Ensure geometry is in text format (the C++ solver reads text, not binary)
+        self._ensure_text_geometry(work_dir)
+
+        # Pre-run validation gate: data-model + file-system checks
+        self._load_kinetics_from_disk_if_empty()
+        all_issues = self._project.validate()
+        file_errors = self._project.validate_files(work_dir)
+        all_issues.extend(file_errors)
+        # Separate warnings (non-blocking) from errors (blocking)
+        warnings = [e for e in all_issues if "Warning:" in e]
+        errors = [e for e in all_issues if "Warning:" not in e]
+        for w in warnings:
+            self._console.log_warning(f"  {w}")
+        if errors:
+            self._run_panel.show_validation(errors)
+            self._console.log_error(
+                f"Pre-run validation failed with {len(errors)} error(s):")
+            for e in errors:
+                self._console.log_error(f"  {e}")
+            self._console.log_error(
+                "Fix the issues above before running the simulation.")
+            return
+
+        self._act_run.setEnabled(False)
+        self._act_stop.setEnabled(True)
+
+        # Sync MPI settings from parallel panel before reading run panel config
+        self._sync_mpi_from_parallel()
+
+        # Get MPI config from run panel
+        mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
+
+        # ── Clean up previous runner if it finished ────────────────
+        if self._runner is not None:
+            log.info("[MAIN] Cleaning up previous runner id=%s", id(self._runner))
+            self._runner.wait(2000)
+            self._runner.deleteLater()
+            self._runner = None
+
+        self._runner = SimulationRunner(
+            exe, work_dir, self,
+            mpi_enabled=mpi_enabled,
+            mpi_nprocs=mpi_nprocs,
+            mpi_command=mpi_command,
+        )
+        log.info("[MAIN] New SimulationRunner id=%s created", id(self._runner))
+        self._runner.output_line.connect(self._console.append)
+        self._runner.output_line.connect(self._run_panel.on_output_line)
+        self._runner.progress.connect(self._run_panel.on_progress)
+        self._runner.progress.connect(
+            lambda c, m: self._console.set_progress(c, m))
+        self._runner.finished_signal.connect(self._on_sim_finished)
+        self._runner.diagnostic_report.connect(self._on_diagnostic_report)
+        self._runner.start()
+        log.info("[MAIN] Runner thread started")
+        self._console.set_status("Running...")
+
+    def _stop_simulation(self):
+        log.info("[MAIN] _stop_simulation() called  runner=%s", self._runner)
+        if self._runner:
+            self._runner.cancel()
+
+    def _on_sim_finished(self, code, msg):
+        log.info("[MAIN] _on_sim_finished  code=%d  msg=%s", code, msg)
+        self._run_panel.on_finished(code, msg)
+        self._console.set_status("Ready")
+        self._console.set_progress(0, 0)
+        self._act_run.setEnabled(True)
+        self._act_stop.setEnabled(False)
+        if code == 0:
+            self._console.log_success(msg)
+        else:
+            self._console.log_error(msg)
+
+    def _on_diagnostic_report(self, report: str):
+        """Handle crash diagnostic report: show in console + save to output."""
+        # Forward to the run panel's validation tab
+        self._run_panel.on_diagnostic_report(report)
+
+        # Print a colour-coded version to the console widget
+        self._console.log_diagnostic(report)
+
+        # Save report to the project's output folder
+        output_dir = self._project.path_settings.output_path
+        if not os.path.isabs(output_dir):
+            # Make relative to project file or cwd
+            if self._project_file:
+                base = str(Path(self._project_file).parent)
+            else:
+                base = os.getcwd()
+            output_dir = os.path.join(base, output_dir)
+
+        from .core.xml_diagnostic import save_diagnostic_report
+        saved_path = save_diagnostic_report(report, output_dir)
+        if saved_path:
+            self._console.log_info(
+                f"Crash diagnostic saved: {saved_path}")
+        else:
+            self._console.log_warning(
+                f"Could not save crash diagnostic to {output_dir}")
+
+    def _sync_mpi_from_parallel(self):
+        """Push parallel-panel MPI settings into the run-panel widgets."""
+        pp = self._parallel_panel
+        rp = self._run_panel
+        is_on = pp.is_parallel_enabled()
+        rp.set_mpi_config(
+            enabled=is_on,
+            nprocs=pp.get_num_cores() if is_on else 1,
+            command=pp.get_mpi_command() if is_on else "",
+        )
+
+    def _run_sweep(self, runs: list):
+        """Execute a parameter sweep: run simulation for each value."""
+        if not runs:
+            return
+        self._save_panels_to_project()
+
+        if self._project_file:
+            base_dir = str(Path(self._project_file).parent)
+        else:
+            base_dir = os.getcwd()
+
+        exe = self._find_executable(base_dir)
+        if not exe:
+            self._console.log_error(
+                "CompLaB executable not found. Set path in Edit > Preferences "
+                "or build with 'cd build && cmake .. && make'.")
+            return
+
+        self._sync_mpi_from_parallel()
+        mpi_enabled, mpi_nprocs, mpi_command = self._run_panel.get_mpi_config()
+
+        self._console.log_info(
+            f"Starting parameter sweep: {len(runs)} runs")
+
+        for i, (param_name, value) in enumerate(runs):
+            run_dir = os.path.join(base_dir, f"sweep_{i+1:03d}_{param_name}_{value}")
+            os.makedirs(run_dir, exist_ok=True)
+
+            # Apply swept parameter to project
+            from .panels.sweep_panel import SWEEP_PARAMS
+            if param_name in SWEEP_PARAMS:
+                section, field = SWEEP_PARAMS[param_name]
+                self._apply_sweep_param(section, field, value)
+
+            # Export XML for this run
+            xml_path = os.path.join(run_dir, "CompLaB.xml")
+            try:
+                ProjectManager.export_xml(self._project, xml_path)
+            except Exception as e:
+                self._console.log_error(f"Sweep run {i+1}: XML export failed: {e}")
+                continue
+
+            # Copy geometry file into input/ subdirectory (where C++ expects it)
+            import shutil
+            geom_name = self._project.domain.geometry_filename or "geometry.dat"
+            input_subdir = self._project.path_settings.input_path or "input"
+            input_dir = os.path.join(run_dir, input_subdir)
+            geom_dst = os.path.join(input_dir, geom_name)
+            if not os.path.isfile(geom_dst):
+                # Search source geometry in order: base_dir/input/, base_dir/
+                for src_dir in [
+                    os.path.join(base_dir, input_subdir),
+                    base_dir,
+                ]:
+                    geom_src = os.path.join(src_dir, geom_name)
+                    if os.path.isfile(geom_src):
+                        os.makedirs(input_dir, exist_ok=True)
+                        shutil.copy2(geom_src, geom_dst)
+                        break
+
+            self._console.log_info(
+                f"  Run {i+1}/{len(runs)}: {param_name} = {value} -> {run_dir}")
+
+        self._console.log_success(
+            f"Sweep setup complete. {len(runs)} run directories created in {base_dir}")
+
+    def _apply_sweep_param(self, section: str, field: str, value):
+        """Apply a single swept parameter value to the project."""
+        p = self._project
+        try:
+            if section == "fluid":
+                setattr(p.fluid, field, value)
+            elif section == "iteration":
+                setattr(p.iteration, field, int(value) if "iT" in field else value)
+            elif section == "domain":
+                setattr(p.domain, field, int(value) if field in ("nx", "ny", "nz") else value)
+            elif section == "microbiology":
+                setattr(p.microbiology, field, value)
+            elif section == "io_settings":
+                setattr(p.io_settings, field, int(value))
+        except Exception as e:
+            self._console.log_error(f"Failed to set {section}.{field} = {value}: {e}")
+
+    # ── Validation ──────────────────────────────────────────────────
+
+    def _validate(self):
+        self._save_panels_to_project()
+
+        # If project has no embedded kinetics, try to read from disk
+        self._load_kinetics_from_disk_if_empty()
+
+        errors = self._project.validate()
+
+        # File-system checks: geometry size, on-disk .hh / XML consistency
+        if self._project_file:
+            work_dir = str(Path(self._project_file).parent)
+        else:
+            work_dir = os.getcwd()
+        file_errors = self._project.validate_files(work_dir)
+        errors.extend(file_errors)
+
+        self._run_panel.show_validation(errors)
+        if errors:
+            self._console.log_error(
+                f"Validation: {len(errors)} error(s) found.")
+            for e in errors:
+                self._console.log_error(f"  {e}")
+        else:
+            self._console.log_success("Validation passed - no errors.")
+
+    def _load_kinetics_from_disk_if_empty(self):
+        """If the project has no embedded kinetics source, try to read
+        defineKinetics.hh / defineAbioticKinetics.hh from the project
+        directory so that validation can cross-check them."""
+        if self._project.kinetics_source and self._project.abiotic_kinetics_source:
+            return  # already have both
+
+        if self._project_file:
+            base = str(Path(self._project_file).parent)
+        else:
+            base = os.getcwd()
+
+        if not self._project.kinetics_source:
+            biotic_path = os.path.join(base, "defineKinetics.hh")
+            if os.path.isfile(biotic_path):
+                try:
+                    with open(biotic_path, "r") as f:
+                        self._project.kinetics_source = f.read()
+                    self._console.log_info(
+                        f"Loaded defineKinetics.hh from {biotic_path} for validation")
+                except OSError:
+                    pass
+
+        if not self._project.abiotic_kinetics_source:
+            abiotic_path = os.path.join(base, "defineAbioticKinetics.hh")
+            if os.path.isfile(abiotic_path):
+                try:
+                    with open(abiotic_path, "r") as f:
+                        self._project.abiotic_kinetics_source = f.read()
+                    self._console.log_info(
+                        f"Loaded defineAbioticKinetics.hh from {abiotic_path} for validation")
+                except OSError:
+                    pass
+
+    # ── View toggles ───────────────────────────────────────────────
+
+    def _toggle_console(self):
+        self._console.setVisible(not self._console.isVisible())
+
+    def _clear_3d_scene(self):
+        """Remove all data from the 3D viewer."""
+        self._viewer._remove_geometry()
+
+    # ── Dialogs ─────────────────────────────────────────────────────
+
+    def _open_kinetics_editor(self):
+        self._save_panels_to_project()
+        dlg = KineticsEditorDialog(self)
+        # Pre-load project kinetics source into the editor
+        if self._project.kinetics_source:
+            dlg._biotic_tab._editor.setPlainText(self._project.kinetics_source)
+            dlg._biotic_tab._path_label.setText("(from project template)")
+        if self._project.abiotic_kinetics_source:
+            dlg._abiotic_tab._editor.setPlainText(
+                self._project.abiotic_kinetics_source)
+            dlg._abiotic_tab._path_label.setText("(from project template)")
+        if dlg.exec():
+            # Save any edits back to the project
+            biotic_text = dlg._biotic_tab._editor.toPlainText()
+            abiotic_text = dlg._abiotic_tab._editor.toPlainText()
+            changed = False
+            if biotic_text.strip():
+                if biotic_text != self._project.kinetics_source:
+                    self._project.kinetics_source = biotic_text
+                    changed = True
+            if abiotic_text.strip():
+                if abiotic_text != self._project.abiotic_kinetics_source:
+                    self._project.abiotic_kinetics_source = abiotic_text
+                    changed = True
+            if changed:
+                self._modified = True
+                self._update_title()
+                self._console.log_info("Kinetics source updated from editor.")
+                self._show_kinetics_recompile_reminder()
+
+    def _open_geometry_generator(self):
+        """Open the geometry generator as a GUI dialog."""
+        from .dialogs.geometry_creator_dialog import GeometryCreatorDialog
+        dlg = GeometryCreatorDialog(self._project, self._config, self)
+        dlg.exec()
+        self._console.log_info("Geometry creator closed.")
+
+    def _open_preferences(self):
+        dlg = PreferencesDialog(self._config, self)
+        if dlg.exec():
+            self._console.set_max_lines(
+                self._config.get("max_console_lines", 10000))
+            # Re-apply auto-save timer
+            self._auto_save_timer.stop()
+            if self._config.get("auto_save"):
+                interval = self._config.get("auto_save_interval", 300) * 1000
+                self._auto_save_timer.start(interval)
+
+    def _show_about(self):
+        dlg = AboutDialog(self)
+        dlg.exec()
+
+    # ── Workflow guides ──────────────────────────────────────────────
+
+    def _show_post_export_guide(self, xml_path: str, deployed: list):
+        """Show a post-export dialog with full next-steps workflow."""
+        sm = self._project.simulation_mode
+        needs_kinetics = (
+            (sm.enable_kinetics and sm.biotic_mode) or sm.enable_abiotic_kinetics)
+
+        if not needs_kinetics:
+            # Simple case: no kinetics, just run
+            QMessageBox.information(
+                self, "Export Complete",
+                f"CompLaB.xml saved to:\n  {xml_path}\n\n"
+                "This project does not use kinetics reactions.\n"
+                "You can run the simulation directly — no recompilation "
+                "needed.\n\n"
+                "  Click 'Run Simulation' or run from command line:\n"
+                "    ./complab  (or complab.exe on Windows)")
+            return
+
+        # Build the file list
+        hh_list = "\n".join(f"  - {Path(p).name}" for p in deployed)
+        if not hh_list:
+            hh_list = "  (no .hh files were deployed — check kinetics editor)"
+
+        msg = (
+            f"CompLaB.xml saved to:\n  {xml_path}\n\n"
+            f"Kinetics files deployed:\n{hh_list}\n\n"
+            "═══ WHAT TO DO NEXT ═══\n\n"
+            "Step 1: Copy .hh files to solver source root\n"
+            "   Copy the .hh files from the export directory to your\n"
+            "   CompLaB3D source root (same folder as CMakeLists.txt).\n"
+            "   File names MUST be exactly:\n"
+            "     defineKinetics.hh         (biotic kinetics)\n"
+            "     defineAbioticKinetics.hh  (abiotic kinetics)\n\n"
+            "Step 2: Recompile the solver\n"
+            "   Linux / Mac:\n"
+            "     cd build\n"
+            "     cmake ..\n"
+            "     make -j$(nproc)\n\n"
+            "   Windows (MSYS2/MinGW):\n"
+            "     cd build\n"
+            "     cmake .. -G \"MinGW Makefiles\"\n"
+            "     mingw32-make -j%NUMBER_OF_PROCESSORS%\n\n"
+            "   Windows (Visual Studio):\n"
+            "     cd build\n"
+            "     cmake ..\n"
+            "     cmake --build . --config Release\n\n"
+            "Step 3: Run the NEW executable\n"
+            "   Use the freshly compiled complab binary.\n"
+            "   The old binary will NOT have the new kinetics.\n\n"
+            "NOTE: Every time you change kinetics parameters or switch\n"
+            "templates, you must repeat steps 1-3."
+        )
+        QMessageBox.information(self, "Export Complete — Next Steps", msg)
+
+    def _show_kinetics_recompile_reminder(self):
+        """Show reminder that kinetics changes require recompilation."""
+        QMessageBox.information(
+            self, "Kinetics Updated — Recompilation Required",
+            "Kinetics source code has been updated.\n\n"
+            "IMPORTANT: Because the .hh files are compiled into the\n"
+            "C++ solver at build time, you MUST:\n\n"
+            "  1. Export CompLaB.xml  (File > Export XML)\n"
+            "     This saves the new .hh files alongside the XML.\n\n"
+            "  2. Copy the .hh files to your solver source root\n"
+            "     (same directory as CMakeLists.txt)\n\n"
+            "  3. Recompile:\n"
+            "       cd build && cmake .. && make -j$(nproc)\n\n"
+            "  4. Run with the NEW executable\n\n"
+            "If you skip recompilation, the solver will still use\n"
+            "the OLD kinetics code — your changes will have no effect.")
+
+    def _show_workflow_guide(self):
+        """Show the complete CompLaB Studio workflow guide."""
+        from PySide6.QtWidgets import QTextBrowser
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle("CompLaB Studio - Quick Start Guide")
+        dlg.resize(820, 700)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(8, 8, 8, 8)
+
+        browser = QTextBrowser()
+        browser.setOpenExternalLinks(False)
+        browser.setStyleSheet(
+            "QTextBrowser { background: #1a1a2e; color: #e0e0e0; "
+            "border: none; padding: 12px; }")
+
+        html = (
+            "<style>"
+            "body { font-family: Segoe UI, Arial, sans-serif; font-size: 13pt; "
+            "       line-height: 1.5; color: #e0e0e0; }"
+            "h1 { color: #64b5f6; font-size: 18pt; text-align: center; "
+            "     border-bottom: 2px solid #334155; padding-bottom: 8px; }"
+            "h2 { color: #81c784; font-size: 15pt; margin-top: 18px; }"
+            "h3 { color: #ffb74d; font-size: 13pt; margin-top: 14px; }"
+            "code { background: #263238; color: #80cbc4; padding: 2px 5px; "
+            "       border-radius: 3px; font-size: 12pt; }"
+            "pre { background: #1e293b; color: #94a3b8; padding: 10px; "
+            "      border: 1px solid #334155; border-radius: 4px; "
+            "      font-size: 11pt; }"
+            "table { border-collapse: collapse; width: 100%%; margin: 8px 0; }"
+            "th { background: #263238; color: #81c784; padding: 8px; "
+            "     text-align: left; border: 1px solid #334155; }"
+            "td { padding: 6px 8px; border: 1px solid #334155; }"
+            "tr:nth-child(even) { background: #1e293b; }"
+            ".step { background: #1e293b; border-left: 4px solid #64b5f6; "
+            "        padding: 10px 14px; margin: 10px 0; border-radius: 4px; }"
+            ".warn { background: #3e2723; border-left: 4px solid #ff8a65; "
+            "        padding: 10px 14px; margin: 10px 0; border-radius: 4px; }"
+            "ul, ol { margin: 6px 0; padding-left: 24px; }"
+            "li { margin: 4px 0; }"
+            "</style>"
+
+            "<h1>CompLaB Studio - Quick Start Guide</h1>"
+
+            # ── Available Templates ──
+            "<h2>Available Project Templates</h2>"
+            "<p>Each template is a complete, ready-to-run scenario. "
+            "Use <b>File &gt; New Project</b> to select one:</p>"
+            "<table>"
+            "<tr><th>#</th><th>Template</th><th>Type</th><th>What It Demonstrates</th></tr>"
+            "<tr><td>1</td><td>Flow Only</td><td>Abiotic</td>"
+            "    <td>Pure Navier-Stokes flow, no chemistry</td></tr>"
+            "<tr><td>2</td><td>Diffusion Only</td><td>Abiotic</td>"
+            "    <td>Pure diffusion (Pe=0), no flow or reactions</td></tr>"
+            "<tr><td>3</td><td>Tracer Transport</td><td>Abiotic</td>"
+            "    <td>Flow + advection-diffusion of a passive tracer</td></tr>"
+            "<tr><td>4</td><td>Abiotic Reaction</td><td>Abiotic</td>"
+            "    <td>First-order decay: A &rarr; P</td></tr>"
+            "<tr><td>5</td><td>Abiotic Equilibrium</td><td>Abiotic</td>"
+            "    <td>Equilibrium-only carbonate speciation (no kinetic rxn)</td></tr>"
+            "<tr><td>6</td><td>Biofilm Sessile</td><td>Biotic</td>"
+            "    <td>Single-species sessile biofilm (CA solver)</td></tr>"
+            "<tr><td>7</td><td>Planktonic Bacteria</td><td>Biotic</td>"
+            "    <td>Single-species planktonic bacteria (LBM solver)</td></tr>"
+            "<tr><td>8</td><td>Sessile + Planktonic</td><td>Biotic</td>"
+            "    <td>Both sessile and planktonic microbes together</td></tr>"
+            "<tr><td>9</td><td>Coupled Biotic-Abiotic</td><td>Coupled</td>"
+            "    <td>Biofilm + abiotic reaction running simultaneously</td></tr>"
+            "</table>"
+
+            # ── Step-by-step workflow ──
+            "<h2>Step-by-Step Workflow</h2>"
+
+            "<div class='step'>"
+            "<h3>Step 1 - Create a Project</h3>"
+            "<ol>"
+            "<li><b>File &gt; New Project</b></li>"
+            "<li>Pick a template from the list above</li>"
+            "<li>Choose a save directory - the project folder is created there</li>"
+            "<li>Each template comes with pre-configured parameters and "
+            "matching <code>.hh</code> kinetics files</li>"
+            "</ol>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 2 - Review / Set Parameters</h3>"
+            "<p>Use the panels on the right side of the main window:</p>"
+            "<ul>"
+            "<li><b>Domain</b> - Grid dimensions (nx, ny, nz), voxel size (dx)</li>"
+            "<li><b>Fluid</b> - Pressure gradient (delta_P), relaxation (tau)</li>"
+            "<li><b>Chemistry</b> - Substrates, initial concentrations, "
+            "boundary conditions, diffusion coefficients</li>"
+            "<li><b>Microbiology</b> (biotic only) - Microbe species, "
+            "Monod parameters (Ks, mu_max), solver type (CA or LBM)</li>"
+            "<li><b>Solver</b> - Iteration limits, convergence criteria</li>"
+            "</ul>"
+            "<p>Templates come with sensible defaults - you can run them as-is.</p>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 3 - Generate Geometry</h3>"
+            "<ul>"
+            "<li><b>Tools &gt; Geometry Generator</b> to create a new geometry</li>"
+            "<li>Or browse an existing <code>geometry.dat</code> file</li>"
+            "<li>The file must have exactly <code>nx * ny * nz</code> bytes "
+            "(1 byte per voxel)</li>"
+            "<li>Material codes: 0 = solid, 1 = bounce-back interface, 2 = pore</li>"
+            "<li>For sessile biofilm: additional codes 3-8 for biofilm regions</li>"
+            "<li>The GUI auto-copies the geometry file to <code>input/</code> "
+            "when you click Run</li>"
+            "</ul>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 4 - Validate</h3>"
+            "<ul>"
+            "<li>Click <b>Validate</b> in the Run panel</li>"
+            "<li>Fix all <span style='color:#ef5350;'>errors</span> (red) - "
+            "these block the simulation</li>"
+            "<li><span style='color:#ffa726;'>Warnings</span> (yellow) are "
+            "informational - they don't block</li>"
+            "</ul>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 5 - Kinetics Files (if using reactions)</h3>"
+            "<p>The C++ solver compiles kinetics equations from two header files:</p>"
+            "<ul>"
+            "<li><code>defineKinetics.hh</code> - biotic (Monod) reactions</li>"
+            "<li><code>defineAbioticKinetics.hh</code> - abiotic reactions</li>"
+            "</ul>"
+            "<p><b>BOTH</b> files must always be present (unused ones are no-op stubs).</p>"
+            "<p><b>Option A</b>: Templates auto-generate matching .hh files on export.</p>"
+            "<p><b>Option B</b>: Copy a pre-made pair from the <code>kinetics/</code> "
+            "folder to the source root (next to <code>CMakeLists.txt</code>).</p>"
+            "<p><b>Option C</b>: Edit code via <b>Tools &gt; Kinetics Editor</b>.</p>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 6 - Recompile the Solver</h3>"
+            "<p>Required when you change kinetics code, template, or "
+            "number of substrates/microbes.</p>"
+            "<pre>"
+            "# Linux / Mac:\n"
+            "cd build && cmake .. && make -j$(nproc)\n\n"
+            "# Windows (Visual Studio):\n"
+            "cd build\n"
+            "cmake ..\n"
+            "cmake --build . --config Release\n\n"
+            "# MSYS2 / MinGW:\n"
+            "cd build && cmake .. -G \"MinGW Makefiles\" && mingw32-make"
+            "</pre>"
+            "</div>"
+
+            "<div class='step'>"
+            "<h3>Step 7 - Run the Simulation</h3>"
+            "<ul>"
+            "<li>Click the <b>Run</b> button in the GUI, or from terminal:</li>"
+            "</ul>"
+            "<pre>"
+            "Linux/Mac:  ./complab\n"
+            "Windows:    complab.exe"
+            "</pre>"
+            "<ul>"
+            "<li>Output goes to the <code>output/</code> folder</li>"
+            "<li>A <code>.out</code> log file is auto-saved there</li>"
+            "<li>VTK files can be opened with ParaView for 3D visualization</li>"
+            "</ul>"
+            "</div>"
+
+            # ── When to Recompile ──
+            "<h2>When to Recompile</h2>"
+            "<table>"
+            "<tr><th>Must Recompile</th><th>No Recompile Needed</th></tr>"
+            "<tr><td>"
+            "<ul>"
+            "<li>Kinetics equations (.hh code)</li>"
+            "<li>Switching template</li>"
+            "<li>Adding/removing substrates or microbes</li>"
+            "</ul>"
+            "</td><td>"
+            "<ul>"
+            "<li>Concentrations, BCs, diffusion coefficients</li>"
+            "<li>Domain dimensions (regenerate geometry)</li>"
+            "<li>Iteration count, output settings</li>"
+            "<li>Fluid properties (delta_P, tau)</li>"
+            "</ul>"
+            "<p><i>These are in CompLaB.xml, read at runtime.</i></p>"
+            "</td></tr>"
+            "</table>"
+
+            # ── Material Codes ──
+            "<h2>Material Codes (Geometry File)</h2>"
+            "<table>"
+            "<tr><th>Code</th><th>Material</th><th>Description</th></tr>"
+            "<tr><td>0</td><td>Solid</td><td>Impermeable grain</td></tr>"
+            "<tr><td>1</td><td>Bounce-back</td><td>Fluid-solid interface</td></tr>"
+            "<tr><td>2</td><td>Pore</td><td>Open pore space (fluid)</td></tr>"
+            "<tr><td>3</td><td>Biofilm core (sp.1)</td><td>Microbe species 1</td></tr>"
+            "<tr><td>4</td><td>Biofilm core (sp.2)</td><td>Microbe species 2</td></tr>"
+            "<tr><td>5</td><td>Biofilm core (sp.3)</td><td>Microbe species 3</td></tr>"
+            "<tr><td>6</td><td>Biofilm fringe (sp.1)</td><td>Outer edge of species 1</td></tr>"
+            "<tr><td>7</td><td>Biofilm fringe (sp.2)</td><td>Outer edge of species 2</td></tr>"
+            "<tr><td>8</td><td>Biofilm fringe (sp.3)</td><td>Outer edge of species 3</td></tr>"
+            "</table>"
+
+            # ── Executable ──
+            "<h2>Executable</h2>"
+            "<p>The build target is <code>complab</code> (not complab3d).</p>"
+            "<ul>"
+            "<li>Linux: <code>./complab</code></li>"
+            "<li>Windows: <code>GUI/bin/complab.exe</code> or "
+            "<code>build/Release/complab.exe</code></li>"
+            "</ul>"
+            "<p>Set the path in <b>Edit &gt; Preferences</b> if auto-detect fails.</p>"
+        )
+
+        browser.setHtml(html)
+        lay.addWidget(browser, 1)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        close_btn = QPushButton("Close")
+        close_btn.setFixedWidth(100)
+        close_btn.clicked.connect(dlg.accept)
+        btn_row.addWidget(close_btn)
+        lay.addLayout(btn_row)
+
+        dlg.exec()
+
+    # ── Helpers ─────────────────────────────────────────────────────
+
+    def _confirm_discard(self) -> bool:
+        reply = QMessageBox.question(
+            self, "Unsaved Changes",
+            "Current project has unsaved changes. Discard?",
+            QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+        )
+        return reply == QMessageBox.StandardButton.Discard
+
+    def _auto_save(self):
+        if self._modified and self._project_file:
+            self._save_project()
+            self._console.log_info("Auto-saved.")
+
+    def closeEvent(self, event):
+        if self._modified:
+            reply = QMessageBox.question(
+                self, "Quit",
+                "Save changes before quitting?",
+                QMessageBox.StandardButton.Save
+                | QMessageBox.StandardButton.Discard
+                | QMessageBox.StandardButton.Cancel,
+            )
+            if reply == QMessageBox.StandardButton.Save:
+                self._save_project()
+            elif reply == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+                return
+        if self._runner and self._runner.isRunning():
+            self._runner.cancel()
+            self._runner.wait(3000)
+        event.accept()

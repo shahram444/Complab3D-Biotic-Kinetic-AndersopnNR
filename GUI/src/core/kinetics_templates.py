@@ -1,0 +1,919 @@
+"""Kinetics .hh source code for each project template.
+
+Maps template keys to matching defineKinetics.hh / defineAbioticKinetics.hh
+code that is consistent with the template's XML configuration.
+
+When a user picks a template, the GUI attaches the corresponding .hh code
+to the project. On export the .hh files are deployed alongside CompLaB.xml
+so that the solver can be recompiled with matching kinetics.
+
+CRITICAL: The C++ solver #includes BOTH files unconditionally:
+  #include "../defineKinetics.hh"
+  #include "../defineAbioticKinetics.hh"
+Therefore BOTH files MUST always be provided, even if one is a no-op stub.
+
+The solver (complab.cpp) also calls:
+  KineticsStats::getStats(...)       — from defineKinetics.hh
+  KineticsStats::resetIteration()    — from defineKinetics.hh
+so the KineticsStats namespace MUST be present in every defineKinetics.hh.
+"""
+
+import re
+from typing import Dict, List, Optional, Tuple
+
+# ---------------------------------------------------------------------------
+# Shared namespace blocks (required by the C++ solver)
+# ---------------------------------------------------------------------------
+
+# The C++ solver (complab.cpp:771,787) calls KineticsStats::getStats() and
+# KineticsStats::resetIteration(). This namespace MUST be in defineKinetics.hh.
+_KINETICS_STATS_NAMESPACE = '''\
+
+// ============================================================================
+// DEBUG STATISTICS ACCUMULATOR (required by C++ solver)
+// ============================================================================
+namespace KineticsStats {
+    static double iter_sum_dB = 0.0;
+    static double iter_sum_dDOC = 0.0;
+    static double iter_max_biomass = 0.0;
+    static double iter_max_dB = 0.0;
+    static double iter_min_DOC = 1e30;
+    static long iter_cells_with_biomass = 0;
+    static long iter_cells_with_growth = 0;
+    static long iter_total_calls = 0;
+    static long iter_cells_limited = 0;
+
+    inline void resetIteration() {
+        iter_sum_dB = 0.0;
+        iter_sum_dDOC = 0.0;
+        iter_max_biomass = 0.0;
+        iter_max_dB = 0.0;
+        iter_min_DOC = 1e30;
+        iter_cells_with_biomass = 0;
+        iter_cells_with_growth = 0;
+        iter_total_calls = 0;
+        iter_cells_limited = 0;
+    }
+
+    inline void accumulate(double biomass, double DOC,
+                           double dB_dt, double dDOC_dt,
+                           bool was_limited) {
+        iter_total_calls++;
+        if (biomass > 0.1) {
+            iter_cells_with_biomass++;
+            iter_sum_dB += dB_dt;
+            iter_sum_dDOC += dDOC_dt;
+            if (biomass > iter_max_biomass) iter_max_biomass = biomass;
+            if (dB_dt > iter_max_dB) iter_max_dB = dB_dt;
+            if (DOC < iter_min_DOC && DOC > 0) iter_min_DOC = DOC;
+            if (dB_dt > 0) iter_cells_with_growth++;
+            if (was_limited) iter_cells_limited++;
+        }
+    }
+
+    inline void accumulate(double biomass, double DOC,
+                           double dB_dt, double dDOC_dt) {
+        accumulate(biomass, DOC, dB_dt, dDOC_dt, false);
+    }
+
+    inline void getStats(long& cells_biomass, long& cells_growth,
+                         double& sum_dB, double& max_B,
+                         double& max_dB, double& min_DOC) {
+        cells_biomass = iter_cells_with_biomass;
+        cells_growth = iter_cells_with_growth;
+        sum_dB = iter_sum_dB;
+        max_B = iter_max_biomass;
+        max_dB = iter_max_dB;
+        min_DOC = (iter_min_DOC < 1e20) ? iter_min_DOC : 0.0;
+    }
+
+    inline long getLimitedCells() { return iter_cells_limited; }
+}
+'''
+
+# AbioticKineticsStats is used internally by defineAbioticRxnKinetics
+_ABIOTIC_STATS_NAMESPACE = '''\
+
+// ============================================================================
+// ABIOTIC KINETICS STATISTICS
+// ============================================================================
+namespace AbioticKineticsStats {
+    static double iter_total_reaction = 0.0;
+    static long iter_cells_reacting = 0;
+    static long iter_total_calls = 0;
+
+    inline void resetIteration() {
+        iter_total_reaction = 0.0;
+        iter_cells_reacting = 0;
+        iter_total_calls = 0;
+    }
+
+    inline void accumulate(double total_rate) {
+        iter_total_calls++;
+        if (std::abs(total_rate) > 1e-20) {
+            iter_cells_reacting++;
+            iter_total_reaction += total_rate;
+        }
+    }
+}
+'''
+
+# ---------------------------------------------------------------------------
+# No-op stubs (for templates that only need one type of kinetics)
+# The solver #includes BOTH files unconditionally, so both must compile.
+# ---------------------------------------------------------------------------
+
+_BIOTIC_NOOP = '''\
+// ==========================================================================
+// defineKinetics.hh  --  No-op stub (biotic kinetics not used)
+//
+// Generated by CompLaB Studio.  This project uses abiotic kinetics only.
+// The solver #includes this file unconditionally, so it must exist and
+// compile even though it is never called at runtime.
+// ==========================================================================
+#ifndef DEFINE_KINETICS_HH
+#define DEFINE_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+''' + _KINETICS_STATS_NAMESPACE + '''
+void defineRxnKinetics(
+    std::vector<double> B,
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    std::vector<double>& bioR,
+    plb::plint mask)
+{
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+    for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
+}
+
+#endif
+'''
+
+_ABIOTIC_NOOP = '''\
+// ==========================================================================
+// defineAbioticKinetics.hh  --  No-op stub (abiotic kinetics not used)
+//
+// Generated by CompLaB Studio.  This project uses biotic kinetics only.
+// The solver #includes this file unconditionally, so it must exist and
+// compile even though it is never called at runtime.
+// ==========================================================================
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+''' + _ABIOTIC_STATS_NAMESPACE + '''
+void defineAbioticRxnKinetics(
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    plb::plint mask)
+{
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+}
+
+#endif
+'''
+
+# ---------------------------------------------------------------------------
+# Biotic kinetics .hh templates
+# ---------------------------------------------------------------------------
+
+# 1-substrate, 1-microbe Monod (scenarios 06 + 07)
+_BIOTIC_MONOD_1SUB_1MIC = '''\
+// ==========================================================================
+// defineKinetics.hh  --  Monod kinetics (1 substrate, 1 microbe)
+//
+// Generated by CompLaB Studio
+//   B[0] consumes C[0] via Monod: mu = mu_max * C[0]/(Ks + C[0])
+// ==========================================================================
+#ifndef DEFINE_KINETICS_HH
+#define DEFINE_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+
+namespace KineticParams {
+    constexpr double mu_max      = 0.05;     // [1/s] max growth rate
+    constexpr double Ks           = 1.0e-5;  // [mol/L] half-saturation
+    constexpr double Y            = 0.4;     // [-] yield
+    constexpr double k_decay      = 1.0e-7;  // [1/s] decay
+    constexpr double MIN_CONC     = 1.0e-20;
+    constexpr double MIN_BIOMASS  = 0.1;     // [kg/m3]
+    constexpr double MAX_FRAC     = 0.5;
+    constexpr double dt_kinetics  = 0.0075;  // [s]
+}
+''' + _KINETICS_STATS_NAMESPACE + '''
+void defineRxnKinetics(
+    std::vector<double> B,
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    std::vector<double>& bioR,
+    plb::plint mask)
+{
+    using namespace KineticParams;
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+    for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
+
+    if (B.empty() || C.empty()) return;
+    double biomass = std::max(B[0], 0.0);
+    if (biomass < MIN_BIOMASS) return;
+
+    double DOC_raw = C[0];
+    double DOC = std::max(DOC_raw, MIN_CONC);
+
+    double monod = DOC / (Ks + DOC);
+    double mu = mu_max * monod;
+    double dDOC = -mu * biomass / Y;
+    double dB   = (mu - k_decay) * biomass;
+
+    bool limited = false;
+    double max_rate = DOC * MAX_FRAC / dt_kinetics;
+    if (-dDOC > max_rate) {
+        limited = true;
+        dDOC = -max_rate;
+        double actual_mu = max_rate * Y / biomass;
+        dB = (actual_mu - k_decay) * biomass;
+    }
+
+    if (DOC_raw <= MIN_CONC) {
+        dDOC = 0.0;
+        dB = std::min(dB, -k_decay * biomass);
+    }
+
+    if (subsR.size() > 0) subsR[0] = dDOC;
+    if (bioR.size() > 0)  bioR[0]  = dB;
+    KineticsStats::accumulate(biomass, DOC_raw, dB, dDOC, limited);
+}
+
+#endif
+'''
+
+# 1-substrate, 2-microbe Monod (scenario 08: sessile + planktonic)
+_BIOTIC_MONOD_1SUB_2MIC = '''\
+// ==========================================================================
+// defineKinetics.hh  --  Monod kinetics (2 microbes competing for DOC)
+//
+// Generated by CompLaB Studio
+//   B[0] = Sessile (CA), B[1] = Planktonic (LBM), C[0] = DOC
+// ==========================================================================
+#ifndef DEFINE_KINETICS_HH
+#define DEFINE_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+
+namespace KineticParams {
+    // Sessile (B[0])
+    constexpr double mu_max_s   = 0.05;    // [1/s]
+    constexpr double Ks_s       = 1.0e-5;  // [mol/L]
+    constexpr double Y_s        = 0.4;
+    constexpr double k_decay_s  = 1.0e-7;  // [1/s]
+    // Planktonic (B[1])
+    constexpr double mu_max_p   = 0.03;    // [1/s]
+    constexpr double Ks_p       = 1.0e-5;  // [mol/L]
+    constexpr double Y_p        = 0.35;
+    constexpr double k_decay_p  = 1.0e-7;  // [1/s]
+
+    constexpr double MIN_CONC     = 1.0e-20;
+    constexpr double MIN_BIOMASS  = 0.1;
+    constexpr double MAX_FRAC     = 0.5;
+    constexpr double dt_kinetics  = 0.0075;
+}
+''' + _KINETICS_STATS_NAMESPACE + '''
+void defineRxnKinetics(
+    std::vector<double> B,
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    std::vector<double>& bioR,
+    plb::plint mask)
+{
+    using namespace KineticParams;
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+    for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
+
+    if (B.size() < 2 || C.empty()) return;
+
+    double DOC_raw = C[0];
+    double DOC = std::max(DOC_raw, MIN_CONC);
+    double bio_s = std::max(B[0], 0.0);
+    double bio_p = std::max(B[1], 0.0);
+
+    if (bio_s < MIN_BIOMASS && bio_p < MIN_BIOMASS) return;
+
+    // Unclamped rates
+    double dDOC_s = 0.0, dB_s = 0.0;
+    if (bio_s >= MIN_BIOMASS) {
+        double mu_s = mu_max_s * DOC / (Ks_s + DOC);
+        dDOC_s = -mu_s * bio_s / Y_s;
+        dB_s   = (mu_s - k_decay_s) * bio_s;
+    }
+    double dDOC_p = 0.0, dB_p = 0.0;
+    if (bio_p >= MIN_BIOMASS) {
+        double mu_p = mu_max_p * DOC / (Ks_p + DOC);
+        dDOC_p = -mu_p * bio_p / Y_p;
+        dB_p   = (mu_p - k_decay_p) * bio_p;
+    }
+
+    double dDOC_total = dDOC_s + dDOC_p;
+    bool limited = false;
+    double max_rate = DOC * MAX_FRAC / dt_kinetics;
+    if (-dDOC_total > max_rate) {
+        limited = true;
+        double scale = max_rate / (-dDOC_total);
+        dDOC_s *= scale; dDOC_p *= scale;
+        if (bio_s >= MIN_BIOMASS) dB_s = ((-dDOC_s) * Y_s / bio_s - k_decay_s) * bio_s;
+        if (bio_p >= MIN_BIOMASS) dB_p = ((-dDOC_p) * Y_p / bio_p - k_decay_p) * bio_p;
+        dDOC_total = -max_rate;
+    }
+
+    if (DOC_raw <= MIN_CONC) {
+        dDOC_s = 0.0; dDOC_p = 0.0; dDOC_total = 0.0;
+        if (bio_s >= MIN_BIOMASS) dB_s = std::min(dB_s, -k_decay_s * bio_s);
+        if (bio_p >= MIN_BIOMASS) dB_p = std::min(dB_p, -k_decay_p * bio_p);
+    }
+
+    if (subsR.size() > 0) subsR[0] = dDOC_s + dDOC_p;
+    if (bioR.size() > 0)  bioR[0] = dB_s;
+    if (bioR.size() > 1)  bioR[1] = dB_p;
+    KineticsStats::accumulate(bio_s + bio_p, DOC_raw, dB_s + dB_p, dDOC_total, limited);
+}
+
+#endif
+'''
+
+# 2-substrate, 1-microbe Monod + Byproduct production (scenario 09: coupled)
+_BIOTIC_COUPLED = '''\
+// ==========================================================================
+// defineKinetics.hh  --  Monod kinetics + Byproduct production
+//
+// Generated by CompLaB Studio
+//   B[0] consumes C[0]=DOC, produces C[1]=Byproduct (50% yield)
+//   Byproduct abiotic decay handled in defineAbioticKinetics.hh
+// ==========================================================================
+#ifndef DEFINE_KINETICS_HH
+#define DEFINE_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+
+namespace KineticParams {
+    constexpr double mu_max         = 0.05;     // [1/s]
+    constexpr double Ks             = 1.0e-5;   // [mol/L]
+    constexpr double Y              = 0.4;
+    constexpr double k_decay        = 1.0e-7;   // [1/s]
+    constexpr double BYPRODUCT_YIELD = 0.5;     // 50% DOC -> Byproduct
+    constexpr double MIN_CONC       = 1.0e-20;
+    constexpr double MIN_BIOMASS    = 0.1;
+    constexpr double MAX_FRAC       = 0.5;
+    constexpr double dt_kinetics    = 0.0075;
+}
+''' + _KINETICS_STATS_NAMESPACE + '''
+void defineRxnKinetics(
+    std::vector<double> B,
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    std::vector<double>& bioR,
+    plb::plint mask)
+{
+    using namespace KineticParams;
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+    for (size_t i = 0; i < bioR.size(); ++i) bioR[i] = 0.0;
+
+    if (B.empty() || C.empty()) return;
+    double biomass = std::max(B[0], 0.0);
+    if (biomass < MIN_BIOMASS) return;
+
+    double DOC_raw = C[0];
+    double DOC = std::max(DOC_raw, MIN_CONC);
+
+    double monod = DOC / (Ks + DOC);
+    double mu = mu_max * monod;
+    double dDOC = -mu * biomass / Y;
+    double dB   = (mu - k_decay) * biomass;
+
+    bool limited = false;
+    double max_rate = DOC * MAX_FRAC / dt_kinetics;
+    if (-dDOC > max_rate) {
+        limited = true;
+        dDOC = -max_rate;
+        double actual_mu = max_rate * Y / biomass;
+        dB = (actual_mu - k_decay) * biomass;
+    }
+
+    if (DOC_raw <= MIN_CONC) {
+        dDOC = 0.0;
+        dB = std::min(dB, -k_decay * biomass);
+    }
+
+    double dByproduct = -dDOC * BYPRODUCT_YIELD;
+
+    if (subsR.size() > 0) subsR[0] = dDOC;
+    if (subsR.size() > 1) subsR[1] = dByproduct;
+    if (bioR.size() > 0)  bioR[0]  = dB;
+    KineticsStats::accumulate(biomass, DOC_raw, dB, dDOC, limited);
+}
+
+#endif
+'''
+
+
+# ---------------------------------------------------------------------------
+# Abiotic kinetics .hh templates
+# ---------------------------------------------------------------------------
+
+# First-order decay A -> P (scenario 04)
+_ABIOTIC_FIRST_ORDER = '''\
+// ==========================================================================
+// defineAbioticKinetics.hh  --  First-order decay: A -> Product
+//
+// Generated by CompLaB Studio
+//   C[0] = Reactant, C[1] = Product; rate = k * [A]
+// ==========================================================================
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+
+namespace AbioticParams {
+    constexpr double k_decay     = 1.0e-5;   // [1/s]
+    constexpr double MIN_CONC    = 1.0e-20;
+    constexpr double MAX_FRAC    = 0.5;
+    constexpr double dt_kinetics = 0.0075;    // [s]
+}
+''' + _ABIOTIC_STATS_NAMESPACE + '''
+void defineAbioticRxnKinetics(
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    plb::plint mask)
+{
+    using namespace AbioticParams;
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+
+    if (C.size() < 2 || subsR.size() < 2) return;
+
+    double A = std::max(C[0], 0.0);
+    if (A < MIN_CONC) return;
+
+    double rate = k_decay * A;
+    double max_rate = A * MAX_FRAC / dt_kinetics;
+    if (rate > max_rate) rate = max_rate;
+
+    subsR[0] = -rate;   // Reactant consumed
+    subsR[1] =  rate;   // Product formed
+    AbioticKineticsStats::accumulate(-rate);
+}
+
+#endif
+'''
+
+# Equilibrium-only no-op (scenario 05): all kinetic rates = 0, equilibrium solver does the work
+_ABIOTIC_EQUILIBRIUM_NOOP = '''\
+// ==========================================================================
+// defineAbioticKinetics.hh  --  Equilibrium only (no kinetic reactions)
+//
+// Generated by CompLaB Studio
+//   All speciation handled by equilibrium solver. Kinetic rates = 0.
+// ==========================================================================
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+''' + _ABIOTIC_STATS_NAMESPACE + '''
+void defineAbioticRxnKinetics(
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    plb::plint mask)
+{
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+}
+
+#endif
+'''
+
+# Byproduct first-order decay (scenario 09: abiotic part of coupled)
+_ABIOTIC_BYPRODUCT_DECAY = '''\
+// ==========================================================================
+// defineAbioticKinetics.hh  --  Byproduct first-order decay
+//
+// Generated by CompLaB Studio
+//   C[0] = DOC (not touched), C[1] = Byproduct decays abiotically
+//   Biotic production of Byproduct handled in defineKinetics.hh
+// ==========================================================================
+#ifndef DEFINE_ABIOTIC_KINETICS_HH
+#define DEFINE_ABIOTIC_KINETICS_HH
+
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <iomanip>
+
+namespace AbioticParams {
+    constexpr double k_decay  = 1.0e-5;   // [1/s]
+    constexpr double MIN_CONC = 1.0e-20;
+}
+''' + _ABIOTIC_STATS_NAMESPACE + '''
+void defineAbioticRxnKinetics(
+    std::vector<double> C,
+    std::vector<double>& subsR,
+    plb::plint mask)
+{
+    for (size_t i = 0; i < subsR.size(); ++i) subsR[i] = 0.0;
+
+    // Only Byproduct (C[1]) decays; DOC (C[0]) is not modified here
+    if (C.size() > 1 && C[1] > AbioticParams::MIN_CONC) {
+        double rate = AbioticParams::k_decay * C[1];
+        if (subsR.size() > 1) subsR[1] = -rate;
+        AbioticKineticsStats::accumulate(-rate);
+    }
+}
+
+#endif
+'''
+
+
+# ---------------------------------------------------------------------------
+# Template metadata registry
+# ---------------------------------------------------------------------------
+
+class KineticsInfo:
+    """Metadata about kinetics files for a given project template."""
+
+    __slots__ = (
+        "biotic_hh", "abiotic_hh",
+        "needs_biotic", "needs_abiotic",
+        "biotic_substrate_indices", "biotic_microbe_indices",
+        "abiotic_substrate_indices",
+        "hint",
+    )
+
+    def __init__(
+        self,
+        biotic_hh: Optional[str] = None,
+        abiotic_hh: Optional[str] = None,
+        needs_biotic: bool = False,
+        needs_abiotic: bool = False,
+        biotic_substrate_indices: Optional[List[int]] = None,
+        biotic_microbe_indices: Optional[List[int]] = None,
+        abiotic_substrate_indices: Optional[List[int]] = None,
+        hint: str = "",
+    ):
+        self.biotic_hh = biotic_hh
+        self.abiotic_hh = abiotic_hh
+        self.needs_biotic = needs_biotic
+        self.needs_abiotic = needs_abiotic
+        self.biotic_substrate_indices = biotic_substrate_indices or []
+        self.biotic_microbe_indices = biotic_microbe_indices or []
+        self.abiotic_substrate_indices = abiotic_substrate_indices or []
+        self.hint = hint
+
+
+TEMPLATE_KINETICS: Dict[str, KineticsInfo] = {
+
+    # ── 1-3: No-kinetics templates ───────────────────────────────────
+    # No-op stubs so the solver compiles without reactions.
+
+    "flow_only": KineticsInfo(
+        biotic_hh=_BIOTIC_NOOP,
+        abiotic_hh=_ABIOTIC_NOOP,
+        hint="Flow-only: no kinetics needed. No-op stubs provided.",
+    ),
+
+    "diffusion_only": KineticsInfo(
+        biotic_hh=_BIOTIC_NOOP,
+        abiotic_hh=_ABIOTIC_NOOP,
+        hint="Diffusion-only: no kinetics needed. No-op stubs provided.",
+    ),
+
+    "tracer_transport": KineticsInfo(
+        biotic_hh=_BIOTIC_NOOP,
+        abiotic_hh=_ABIOTIC_NOOP,
+        hint="Tracer transport: no kinetics needed. No-op stubs provided.",
+    ),
+
+    # ── 4: Abiotic first-order decay ────────────────────────────────
+
+    "abiotic_reaction": KineticsInfo(
+        biotic_hh=_BIOTIC_NOOP,
+        abiotic_hh=_ABIOTIC_FIRST_ORDER,
+        needs_abiotic=True,
+        abiotic_substrate_indices=[0, 1],
+        hint=(
+            "Abiotic first-order decay: Reactant -> Product\n"
+            "C[0] = Reactant, C[1] = Product\n"
+            "On-disk copy: kinetics/04_abiotic_reaction/"
+        ),
+    ),
+
+    # ── 5: Abiotic equilibrium (no kinetic reactions) ────────────────
+
+    "abiotic_equilibrium": KineticsInfo(
+        biotic_hh=_BIOTIC_NOOP,
+        abiotic_hh=_ABIOTIC_EQUILIBRIUM_NOOP,
+        needs_abiotic=True,
+        hint=(
+            "Abiotic equilibrium: all speciation by equilibrium solver.\n"
+            "Kinetic rates are zero. 5 substrates: DOC, CO2, HCO3, CO3, H+\n"
+            "On-disk copy: kinetics/05_abiotic_equilibrium/"
+        ),
+    ),
+
+    # ── 6: Biotic sessile (CA) ──────────────────────────────────────
+
+    "biotic_sessile": KineticsInfo(
+        biotic_hh=_BIOTIC_MONOD_1SUB_1MIC,
+        abiotic_hh=_ABIOTIC_NOOP,
+        needs_biotic=True,
+        biotic_substrate_indices=[0],
+        biotic_microbe_indices=[0],
+        hint=(
+            "Sessile biofilm (CA solver), 1 substrate (DOC), 1 microbe\n"
+            "Monod kinetics: mu = mu_max * DOC / (Ks + DOC)\n"
+            "On-disk copy: kinetics/06_biotic_sessile/"
+        ),
+    ),
+
+    # ── 7: Biotic planktonic (LBM) ──────────────────────────────────
+
+    "biotic_planktonic": KineticsInfo(
+        biotic_hh=_BIOTIC_MONOD_1SUB_1MIC,
+        abiotic_hh=_ABIOTIC_NOOP,
+        needs_biotic=True,
+        biotic_substrate_indices=[0],
+        biotic_microbe_indices=[0],
+        hint=(
+            "Planktonic bacteria (LBM solver), 1 substrate (DOC), 1 microbe\n"
+            "Monod kinetics: mu = mu_max * DOC / (Ks + DOC)\n"
+            "On-disk copy: kinetics/07_biotic_planktonic/"
+        ),
+    ),
+
+    # ── 8: Sessile + Planktonic (dual microbe) ──────────────────────
+
+    "biotic_sessile_planktonic": KineticsInfo(
+        biotic_hh=_BIOTIC_MONOD_1SUB_2MIC,
+        abiotic_hh=_ABIOTIC_NOOP,
+        needs_biotic=True,
+        biotic_substrate_indices=[0],
+        biotic_microbe_indices=[0, 1],
+        hint=(
+            "Dual-microbe: sessile (CA) + planktonic (LBM) competing for DOC\n"
+            "B[0] = Sessile, B[1] = Planktonic, C[0] = DOC\n"
+            "On-disk copy: kinetics/08_biotic_sessile_planktonic/"
+        ),
+    ),
+
+    # ── 9: Coupled biotic-abiotic ───────────────────────────────────
+
+    "coupled_biotic_abiotic": KineticsInfo(
+        biotic_hh=_BIOTIC_COUPLED,
+        abiotic_hh=_ABIOTIC_BYPRODUCT_DECAY,
+        needs_biotic=True,
+        needs_abiotic=True,
+        biotic_substrate_indices=[0, 1],
+        biotic_microbe_indices=[0],
+        abiotic_substrate_indices=[1],
+        hint=(
+            "Coupled: biofilm consumes DOC -> produces Byproduct\n"
+            "Byproduct decays abiotically (k = 1e-5 [1/s])\n"
+            "Both defineKinetics.hh and defineAbioticKinetics.hh are active.\n"
+            "On-disk copy: kinetics/09_coupled_biotic_abiotic/"
+        ),
+    ),
+}
+
+
+def get_kinetics_info(template_key: str) -> Optional[KineticsInfo]:
+    """Return kinetics metadata for a template key, or None."""
+    return TEMPLATE_KINETICS.get(template_key)
+
+
+# ---------------------------------------------------------------------------
+# .hh source code analysis (for validation)
+# ---------------------------------------------------------------------------
+
+_INDEX_PATTERN = re.compile(
+    r"\b(C|B|subsR|bioR)\s*\[\s*(\d+)\s*\]"
+)
+
+# Expected C++ function signatures (name only - parameter styles vary)
+_BIOTIC_FUNC_NAME = "defineRxnKinetics"
+_ABIOTIC_FUNC_NAME = "defineAbioticRxnKinetics"
+
+
+def parse_hh_indices(source: str) -> Dict[str, List[int]]:
+    """Parse a .hh source string and return the array indices accessed.
+
+    Returns e.g. {"C": [0, 1], "B": [0], "subsR": [0, 1], "bioR": [0]}.
+    Only indices from non-comment, non-size-check lines are included.
+    """
+    indices: Dict[str, set] = {}
+    for line in source.split("\n"):
+        stripped = line.strip()
+        # Skip comment-only lines
+        if stripped.startswith("//"):
+            continue
+        # Skip lines that are .size() checks  (e.g. if (C.size() > 1))
+        if ".size()" in line:
+            continue
+        for m in _INDEX_PATTERN.finditer(line):
+            arr = m.group(1)
+            idx = int(m.group(2))
+            indices.setdefault(arr, set()).add(idx)
+    return {k: sorted(v) for k, v in indices.items()}
+
+
+def verify_function_signature(source: str, kind: str) -> List[str]:
+    """Verify that a .hh file defines the expected function.
+
+    *kind* is ``"biotic"`` or ``"abiotic"``.
+    Returns a list of error strings (empty = OK).
+    """
+    errors: List[str] = []
+    if not source or not source.strip():
+        return errors  # empty source checked elsewhere
+
+    # Strip block comments  /* ... */
+    stripped = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    # Strip line comments
+    stripped = re.sub(r"//[^\n]*", "", stripped)
+
+    if kind == "biotic":
+        fname = _BIOTIC_FUNC_NAME
+        if fname not in stripped:
+            errors.append(
+                f"[Kinetics] defineKinetics.hh does not define the function "
+                f"'{fname}'. The C++ solver calls this function name exactly. "
+                f"Check spelling and ensure the function is not commented out.")
+        else:
+            # Check it has the right parameter names
+            for param in ("subsR", "bioR"):
+                if param not in stripped:
+                    errors.append(
+                        f"[Kinetics] defineKinetics.hh defines {fname} but "
+                        f"is missing the '{param}' parameter. "
+                        f"Expected signature: void {fname}("
+                        f"vector<double> B, vector<double> C, "
+                        f"vector<double>& subsR, vector<double>& bioR, "
+                        f"plint mask)")
+        # Check KineticsStats namespace (required by solver)
+        if "KineticsStats" not in stripped:
+            errors.append(
+                "[Kinetics] defineKinetics.hh is missing the KineticsStats "
+                "namespace. The C++ solver (complab.cpp) calls "
+                "KineticsStats::getStats() and KineticsStats::resetIteration(). "
+                "Use a template or add the namespace manually.")
+
+    elif kind == "abiotic":
+        fname = _ABIOTIC_FUNC_NAME
+        if fname not in stripped:
+            errors.append(
+                f"[Kinetics] defineAbioticKinetics.hh does not define the "
+                f"function '{fname}'. The C++ solver calls this function "
+                f"name exactly. Check spelling and ensure it is not "
+                f"commented out.")
+        else:
+            if "subsR" not in stripped:
+                errors.append(
+                    f"[Kinetics] defineAbioticKinetics.hh defines {fname} "
+                    f"but is missing the 'subsR' parameter. "
+                    f"Expected signature: void {fname}("
+                    f"vector<double> C, vector<double>& subsR, plint mask)")
+
+    return errors
+
+
+def validate_kinetics_vs_project(
+    biotic_source: Optional[str],
+    abiotic_source: Optional[str],
+    num_substrates: int,
+    num_microbes: int,
+    biotic_mode: bool,
+    enable_kinetics: bool,
+    enable_abiotic: bool,
+) -> List[str]:
+    """Cross-validate kinetics .hh code against the project configuration.
+
+    Returns a list of error/warning strings.
+    """
+    errors: List[str] = []
+
+    # --- Biotic checks ---
+    if enable_kinetics and biotic_mode:
+        if not biotic_source or not biotic_source.strip():
+            errors.append(
+                "[Kinetics] Biotic kinetics enabled but defineKinetics.hh "
+                "is empty or missing. Use a template or write your own code.")
+        else:
+            # Verify function signature
+            errors.extend(verify_function_signature(biotic_source, "biotic"))
+
+            idx = parse_hh_indices(biotic_source)
+
+            # Check substrate indices
+            c_indices = idx.get("C", [])
+            if c_indices:
+                max_c = max(c_indices)
+                if max_c >= num_substrates:
+                    errors.append(
+                        f"[Kinetics] defineKinetics.hh accesses C[{max_c}] "
+                        f"but XML only has {num_substrates} substrate(s) "
+                        f"(valid: C[0]..C[{num_substrates - 1}]). "
+                        f"This WILL crash the solver! "
+                        f"Add more substrates or fix the .hh code.")
+
+            # Check microbe/biomass indices
+            b_indices = idx.get("B", [])
+            if b_indices:
+                max_b = max(b_indices)
+                if max_b >= num_microbes:
+                    errors.append(
+                        f"[Kinetics] defineKinetics.hh accesses B[{max_b}] "
+                        f"but XML only has {num_microbes} microbe(s) "
+                        f"(valid: B[0]..B[{num_microbes - 1}]). "
+                        f"This WILL crash the solver! "
+                        f"Add more microbes or fix the .hh code.")
+
+            # Check subsR indices
+            sr_indices = idx.get("subsR", [])
+            if sr_indices:
+                max_sr = max(sr_indices)
+                if max_sr >= num_substrates:
+                    errors.append(
+                        f"[Kinetics] defineKinetics.hh writes subsR[{max_sr}] "
+                        f"but only {num_substrates} substrate(s) exist. "
+                        f"Out-of-bounds write will corrupt memory!")
+
+            # Check bioR indices
+            br_indices = idx.get("bioR", [])
+            if br_indices:
+                max_br = max(br_indices)
+                if max_br >= num_microbes:
+                    errors.append(
+                        f"[Kinetics] defineKinetics.hh writes bioR[{max_br}] "
+                        f"but only {num_microbes} microbe(s) exist. "
+                        f"Out-of-bounds write will corrupt memory!")
+
+    elif enable_kinetics and not biotic_mode:
+        errors.append(
+            "[Kinetics] enable_kinetics=true but biotic_mode=false. "
+            "Kinetics requires biotic_mode. Use abiotic kinetics instead.")
+
+    # --- Abiotic checks ---
+    if enable_abiotic:
+        if not abiotic_source or not abiotic_source.strip():
+            errors.append(
+                "[Kinetics] Abiotic kinetics enabled but "
+                "defineAbioticKinetics.hh is empty or missing. "
+                "Use a template or write your own code.")
+        else:
+            # Verify function signature
+            errors.extend(verify_function_signature(abiotic_source, "abiotic"))
+
+            idx = parse_hh_indices(abiotic_source)
+
+            c_indices = idx.get("C", [])
+            if c_indices:
+                max_c = max(c_indices)
+                if max_c >= num_substrates:
+                    errors.append(
+                        f"[Kinetics] defineAbioticKinetics.hh accesses "
+                        f"C[{max_c}] but XML only has {num_substrates} "
+                        f"substrate(s) (valid: C[0]..C[{num_substrates - 1}]). "
+                        f"This WILL crash the solver!")
+
+            sr_indices = idx.get("subsR", [])
+            if sr_indices:
+                max_sr = max(sr_indices)
+                if max_sr >= num_substrates:
+                    errors.append(
+                        f"[Kinetics] defineAbioticKinetics.hh writes "
+                        f"subsR[{max_sr}] but only {num_substrates} "
+                        f"substrate(s) exist. Out-of-bounds write!")
+
+    return errors
