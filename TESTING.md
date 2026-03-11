@@ -63,6 +63,7 @@ Run a single file:
 ```bash
 python -m pytest tests/test_kinetics.py -v
 python -m pytest tests/test_simulation_runner.py -v -s
+python -m pytest tests/test_gui_panels.py -v       # GUI panel unit tests
 ```
 
 The GUI tests run fully **headless** -- no display server required. The
@@ -182,10 +183,11 @@ mpirun -np 1 ./complab test_cases/abiotic/test2_first_order_decay.xml
 | **Python** | `test_project_model.py` | 27 | Data model validation (domain, fluid, chemistry) |
 | **Python** | `test_xml_io.py` | 21 | XML/JSON round-trip serialisation |
 | **Python** | `test_simulation_runner.py` | 18 | Subprocess lifecycle (mocked solver) |
+| **Python** | `test_gui_panels.py` | 120+ | GUI panel construction, load/save, signals |
 | **Python** | `test_pipeline_e2e.py` | 93 | End-to-end pipeline from input to output |
 | **Validation** | `test_cases/abiotic/` | 5 | Analytical solutions (diffusion, decay, equilibrium) |
 
-**Total: ~313 automated tests.**
+**Total: ~430+ automated tests.**
 
 ---
 
@@ -698,7 +700,257 @@ output.
 
 ---
 
-## 2.9  Python Tests -- End-to-End Pipeline
+## 2.9  Python Tests -- GUI Panel Unit Tests
+
+**File:** `GUI/tests/test_gui_panels.py`
+**Tests:** 120+
+**What it covers:** Every GUI panel widget -- construction, load/save round-trip,
+signal emission, real-time validation, and cross-panel integration.
+
+### Why GUI panel tests matter
+
+The GUI panels are the user-facing layer between the `CompLaBProject` data model
+and the actual Qt widgets. Each panel has two critical methods:
+
+- `load_from_project(project)` -- populates widgets from the data model
+- `save_to_project(project)` -- writes widget values back to the data model
+
+If these methods have a bug (wrong widget read, forgotten field, type mismatch),
+the user sees correct settings in the GUI but the exported XML contains wrong
+values. The C++ solver then runs with incorrect parameters -- silently producing
+wrong results or crashing. These tests catch such bugs.
+
+### Test architecture
+
+All tests run **headless** using `QT_QPA_PLATFORM=offscreen` (set in
+`conftest.py`). No display server, window manager, or GPU is needed. The
+`qtbot` fixture from `pytest-qt` handles QApplication lifecycle and provides
+signal-waiting helpers.
+
+A shared `_make_test_project()` helper creates a `CompLaBProject` with
+non-default values in every field. This ensures round-trip tests catch fields
+that silently revert to defaults.
+
+### Test classes and what they verify
+
+**TestBasePanel (13 tests):**
+Factory methods and utility functions shared by all panels.
+
+| Test | What it checks |
+|------|----------------|
+| `test_construction` | Panel creates without error, title is set |
+| `test_construction_no_title` | Empty-title panel works |
+| `test_make_line_edit` | Text, placeholder, readonly state |
+| `test_make_spin` | Value, min, max, suffix |
+| `test_make_double_spin` | Value, decimals, suffix |
+| `test_make_combo` | Items, current selection |
+| `test_make_checkbox` | Checked state, label text |
+| `test_make_button` | Text, primary property |
+| `test_make_info_label` | Text, word wrap enabled |
+| `test_add_section` | Section label created with correct text |
+| `test_add_form` | QFormLayout created |
+| `test_set_and_clear_validation` | Error/warning styling applied and cleared |
+| `test_data_changed_signal` | Signal emits correctly |
+
+**TestGeneralPanel (14 tests):**
+Simulation mode radio buttons and paths.
+
+| Test | What it checks |
+|------|----------------|
+| `test_default_mode_is_biotic` | Default radio is "Biotic" |
+| `test_mode_flags_*` (6 tests) | Each radio maps to correct (biotic, kinetics, abiotic) tuple |
+| `test_get_mode_id` | Returns correct integer for current selection |
+| `test_load_save_round_trip` | Biotic mode, diagnostics, paths survive round-trip |
+| `test_load_abiotic_mode` | Abiotic flags select the abiotic radio |
+| `test_load_coupled_mode` | Both biotic+abiotic flags select the coupled radio |
+| `test_load_flow_only` | All-false flags with no substrates select flow_only |
+| `test_data_changed_on_mode_switch` | Signal fires when radio changes |
+| `test_summary_updates_on_mode_change` | Summary label reflects current mode |
+
+**TestDomainPanel (8 tests):**
+Grid dimensions, geometry file analysis, and factorization.
+
+| Test | What it checks |
+|------|----------------|
+| `test_default_values` | nx=50, ny=30, nz=30 |
+| `test_load_save_round_trip` | All domain fields (nx, ny, nz, dx, dy, dz, unit, char_length, geometry, material numbers) |
+| `test_find_factorizations` | Finds valid (nx, ny, nz) triples for a given total |
+| `test_find_factorizations_too_small` | Returns empty for total < 27 |
+| `test_find_factorizations_with_hint` | Respects nz_hint constraint |
+| `test_analyze_dat_file_text` | Counts values in text-format .dat |
+| `test_analyze_dat_file_empty` | Returns 0 for empty file |
+| `test_geometry_loaded_signal` | Signal emits (path, nx, ny, nz) |
+
+**TestFluidPanel (6 tests):**
+Flow parameters and real-time validation.
+
+| Test | What it checks |
+|------|----------------|
+| `test_default_values` | tau = 0.8 |
+| `test_load_save_round_trip` | delta_P, peclet, tau, track_performance |
+| `test_tau_validation_error` | tau < 0.5 shows error styling |
+| `test_tau_validation_warning` | tau > 1.5 shows warning styling |
+| `test_tau_validation_ok` | tau in safe range clears validation |
+| `test_delta_p_validation_negative` | Boundary value handling |
+
+**TestChemistryPanel (9 tests):**
+Substrate list add/remove, editing, and round-trip.
+
+| Test | What it checks |
+|------|----------------|
+| `test_add_substrate` | List count increments, substrate object created |
+| `test_add_multiple_substrates` | 3 substrates added correctly |
+| `test_remove_substrate` | List count decrements, correct item removed |
+| `test_remove_from_empty` | No crash on remove from empty list |
+| `test_substrates_changed_signal` | Signal fires on add |
+| `test_load_save_round_trip` | 2 substrates with all fields (name, concentration, diffusion, BCs) |
+| `test_select_substrate` | Programmatic selection works |
+| `test_editing_updates_name_in_list` | Typing in name field updates list item |
+| `test_load_empty_project` | Empty substrate list handled |
+
+**TestEquilibriumPanel (11 tests):**
+Enable/disable, matrix rebuild, solver parameters.
+
+| Test | What it checks |
+|------|----------------|
+| `test_default_disabled` | Widgets disabled when equilibrium off |
+| `test_enable_toggle` | All solver param widgets enabled |
+| `test_disable_toggle` | Widgets disabled again |
+| `test_set_substrate_names` | Info label shows substrate names |
+| `test_set_substrate_names_empty` | Shows "(none defined)" |
+| `test_rebuild_matrix_no_components` | Error message when no components entered |
+| `test_rebuild_matrix_no_substrates` | Error message when no substrates defined |
+| `test_rebuild_matrix_success` | Correct table dimensions (n_subs x n_comp + logK) |
+| `test_load_save_round_trip` | Components, stoichiometry, logK, solver params (max_iter, tolerance, anderson_depth, beta) |
+| `test_load_disabled_equilibrium` | Checkbox unchecked for disabled equilibrium |
+| `test_data_changed_on_enable` | Signal fires when enabled checkbox toggled |
+
+**TestMicrobiologyPanel (9 tests):**
+Microbe list, solver-type-dependent widget enabling, and round-trip.
+
+| Test | What it checks |
+|------|----------------|
+| `test_add_microbe` | List count increments |
+| `test_add_multiple_microbes` | Multiple microbes added |
+| `test_remove_microbe` | Correct microbe removed |
+| `test_remove_from_empty` | No crash on empty remove |
+| `test_microbes_changed_signal` | Signal fires on add |
+| `test_load_save_round_trip` | Global settings (max_density, threshold, ca_method) + per-microbe fields (name, solver, kinetics, material_number, densities, decay, viscosity, Ks, Vmax, BCs) |
+| `test_solver_type_enables_widgets` | CA: viscosity ratio on, FD: biomass diffusion on |
+| `test_load_empty_microbe_list` | Empty list handled |
+| `test_select_microbe` | Programmatic selection |
+
+**TestSolverPanel (4 tests):**
+Iteration parameters and zero-iteration warnings.
+
+| Test | What it checks |
+|------|----------------|
+| `test_load_save_round_trip` | All 10 iteration fields round-trip correctly |
+| `test_zero_iterations_warning` | NS max_iT1 = 0 shows warning |
+| `test_zero_ade_iterations_warning` | ADE max_iT = 0 shows warning |
+| `test_nonzero_clears_warning` | Restoring a positive value clears warning |
+
+**TestIOPanel (2 tests):**
+VTK interval, checkpoint interval, restart files, filenames.
+
+| Test | What it checks |
+|------|----------------|
+| `test_load_save_round_trip` | All 8 I/O fields (intervals, restart flags, filenames) |
+| `test_default_values` | Default VTK interval = 1000, restart = off |
+
+**TestParallelPanel (10 tests):**
+MPI enable/disable, core selection, warnings, and command preview.
+
+| Test | What it checks |
+|------|----------------|
+| `test_initial_state_disabled` | Slider and spin disabled initially |
+| `test_enable_parallel` | Slider and spin enabled |
+| `test_disable_parallel` | Slider and spin disabled again |
+| `test_slider_spin_sync` | Moving slider updates spin and vice versa |
+| `test_get_num_cores_disabled` | Returns 1 when disabled |
+| `test_data_changed_on_enable` | Signal fires on enable toggle |
+| `test_warnings_all_cores` | Warning when using all cores |
+| `test_validate_for_domain` | Small domain triggers appropriate warning |
+| `test_cmd_preview_serial` | Shows `./complab` when MPI off |
+| `test_cmd_preview_mpi` | Shows `mpirun -np N ./complab` when MPI on |
+
+**TestSweepPanel (8 tests):**
+Parameter sweep preview generation and queueing.
+
+| Test | What it checks |
+|------|----------------|
+| `test_parameter_combo_populated` | Sweep parameter list has entries |
+| `test_generate_linear_preview` | 5-step linear range produces 5 rows |
+| `test_generate_custom_preview` | Custom comma-separated values parsed |
+| `test_generate_custom_empty` | Empty input produces 0 rows |
+| `test_generate_custom_invalid` | Non-numeric input shows error message |
+| `test_clear_preview` | Table cleared, queue button disabled |
+| `test_get_sweep_config` | Returns (section, field, value) tuples |
+| `test_sweep_requested_signal` | Signal fires on queue |
+
+**TestRunPanel (24 tests):**
+MPI configuration, run/stop lifecycle, progress parsing, output line
+parsing, phase detection, convergence residual extraction, validation display,
+diagnostic reports, and exit code analysis.
+
+| Test | What it checks |
+|------|----------------|
+| `test_initial_state` | Ready, run enabled, stop disabled |
+| `test_mpi_toggle` | Enable/disable MPI controls |
+| `test_get_mpi_config` | Returns (enabled, nprocs, path) tuple |
+| `test_set_mpi_config` | Programmatic MPI configuration |
+| `test_on_run_sets_running_state` | Running flag, button states, status text |
+| `test_on_stop_emits_signal` | Stop signal fires |
+| `test_on_progress` | Progress bar and iteration label updated |
+| `test_on_output_line_normal` | Text appears in output widget |
+| `test_on_output_line_max_iT_parse` | `ade_max_iT = N` parsed correctly |
+| `test_on_output_line_iteration_parse` | `iT = N` parsed correctly |
+| `test_on_output_line_phase_detection_*` (3) | NS, ADE, equilibrium phases detected |
+| `test_on_finished_success` | Exit 0: "Completed", buttons reset |
+| `test_on_finished_failure` | Exit 42: "Failed", error summary visible |
+| `test_on_finished_segfault` | Exit -11: segfault analysis shown |
+| `test_show_validation_*` (2) | Valid config vs errors display |
+| `test_on_diagnostic_report` | Crash diagnostic HTML formatted |
+| `test_analyze_exit_code_*` (2) | Known and unknown exit codes |
+| `test_clear_output` | Output text cleared |
+| `test_run_stop_signals` | Both signals fire correctly |
+| `test_ns_residual_parsing` | NS residual extracted from output |
+| `test_ade_residual_parsing` | ADE convergence extracted from output |
+
+**TestPostProcessPanel (8 tests):**
+Output directory browsing, file filtering, and file information display.
+
+| Test | What it checks |
+|------|----------------|
+| `test_set_output_directory` | Files listed from directory |
+| `test_set_empty_directory` | Empty path shows 0 files |
+| `test_set_nonexistent_directory` | Invalid path shows 0 files |
+| `test_filter_vti_only` | VTI filter shows only .vti files |
+| `test_filter_vtk_only` | VTK filter shows only .vtk files |
+| `test_file_selected_signal` | Signal emits file path on load |
+| `test_file_info_display` | File name, type, size shown |
+| `test_file_count_label` | Count label shows correct number |
+
+**TestPanelIntegration (3 tests):**
+Cross-panel data flow.
+
+| Test | What it checks |
+|------|----------------|
+| `test_full_project_round_trip_all_panels` | Load project into all 8 panels, save back, verify every field matches |
+| `test_chemistry_to_equilibrium_sync` | `substrates_changed` signal updates equilibrium panel's substrate info |
+| `test_empty_project_round_trip` | Default project (no substrates/microbes) survives full round-trip |
+
+**TestRunPanelHelpers (2 tests):**
+Utility functions.
+
+| Test | What it checks |
+|------|----------------|
+| `test_escape_html` | `<`, `>`, `&`, `"` escaped correctly |
+| `test_output_max_lines_constant` | Buffer limit is 50000 |
+
+---
+
+## 2.10  Python Tests -- End-to-End Pipeline
 
 **File:** `GUI/tests/test_pipeline_e2e.py`
 **Tests:** 93
@@ -728,7 +980,7 @@ These tests simulate the full pipeline a user follows:
 
 ---
 
-## 2.10  Analytical Validation Cases (Abiotic)
+## 2.11  Analytical Validation Cases (Abiotic)
 
 **Directory:** `test_cases/abiotic/`
 **Tests:** 5
@@ -815,7 +1067,7 @@ dynamics, and long-time convergence to final state ([C] -> 1.0).
 
 ---
 
-## 2.11  Kinetics Scenario Templates (Integration)
+## 2.12  Kinetics Scenario Templates (Integration)
 
 **Directory:** `kinetics/` (9 folders, `01_flow_only/` through `09_coupled_biotic_abiotic/`)
 
@@ -837,7 +1089,7 @@ automated unit tests but serve as **integration test specifications**:
 
 ---
 
-## 2.12  CI Workflows
+## 2.13  CI Workflows
 
 ### `.github/workflows/gui-tests.yml`
 
