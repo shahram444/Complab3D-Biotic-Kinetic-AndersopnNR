@@ -51,15 +51,18 @@ def _detect_system():
         except Exception:
             total_ram_gb = 0.0
 
-    # MPI detection
+    # MPI detection – check platform-preferred command first
     mpi_cmd = ""
-    mpi_path = shutil.which("mpirun")
-    if mpi_path:
-        mpi_cmd = "mpirun"
+    if sys.platform == "win32":
+        _mpi_search_order = [("mpiexec", "mpiexec"), ("mpirun", "mpirun")]
     else:
-        mpi_path = shutil.which("mpiexec")
+        _mpi_search_order = [("mpirun", "mpirun"), ("mpiexec", "mpiexec")]
+    mpi_path = None
+    for cmd_name, cmd_label in _mpi_search_order:
+        mpi_path = shutil.which(cmd_name)
         if mpi_path:
-            mpi_cmd = "mpiexec"
+            mpi_cmd = cmd_label
+            break
 
     return total_cores, total_ram_gb, mpi_cmd, mpi_path or ""
 
@@ -107,7 +110,8 @@ class ParallelPanel(BasePanel):
         self.add_section("MPI Command")
         mpi_form = self.add_form()
 
-        self._mpi_path_edit = QLineEdit(self._mpi_path or "mpirun")
+        _default_mpi = "mpiexec" if sys.platform == "win32" else "mpirun"
+        self._mpi_path_edit = QLineEdit(self._mpi_path or _default_mpi)
         self._mpi_path_edit.setPlaceholderText(
             "Path to mpirun or mpiexec (e.g. /usr/bin/mpirun)")
         self._mpi_path_edit.setToolTip(
@@ -226,8 +230,12 @@ class ParallelPanel(BasePanel):
             self._mpi_path_edit.setText(path)
 
     def _auto_detect_mpi(self):
-        """Scan PATH for known MPI commands."""
-        for cmd in ("mpirun", "mpiexec", "srun"):
+        """Scan PATH for known MPI commands (platform-aware order)."""
+        if sys.platform == "win32":
+            _cmds = ("mpiexec", "mpirun", "srun")
+        else:
+            _cmds = ("mpirun", "mpiexec", "srun")
+        for cmd in _cmds:
             path = shutil.which(cmd)
             if path:
                 self._mpi_cmd = cmd

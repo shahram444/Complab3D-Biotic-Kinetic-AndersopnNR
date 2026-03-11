@@ -12,6 +12,7 @@ Completely rebuilt to provide:
 
 import os
 import re
+import sys
 import time
 import logging
 from collections import deque
@@ -112,8 +113,9 @@ class RunPanel(BasePanel):
         self._nprocs_spin.setEnabled(False)
         mpi_layout.addRow("Number of processes:", self._nprocs_spin)
 
+        _default_mpi = "mpiexec" if sys.platform == "win32" else "mpirun"
         self._mpirun_edit = self.make_line_edit(
-            text="mpirun", placeholder="Path to mpirun (e.g., mpirun, mpiexec)")
+            text=_default_mpi, placeholder="Path to mpirun (e.g., mpirun, mpiexec)")
         self._mpirun_edit.setToolTip(
             "MPI launcher command. Common options:\n"
             "  mpirun  (OpenMPI)\n"
@@ -297,7 +299,12 @@ class RunPanel(BasePanel):
     def _detect_mpi(self):
         """Auto-detect MPI installation."""
         import shutil
-        mpi_commands = ["mpirun", "mpiexec", "srun"]
+        # On Windows (MS-MPI), mpiexec is the standard command; on
+        # Linux / macOS, mpirun (OpenMPI) is more common.
+        if sys.platform == "win32":
+            mpi_commands = ["mpiexec", "mpirun", "srun"]
+        else:
+            mpi_commands = ["mpirun", "mpiexec", "srun"]
         for cmd in mpi_commands:
             path = shutil.which(cmd)
             if path:

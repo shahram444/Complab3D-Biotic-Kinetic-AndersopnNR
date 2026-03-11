@@ -145,9 +145,11 @@ class SimulationRunner(QThread):
                 errors="replace",
                 bufsize=1,
                 # Put child into its own process group so we can kill the
-                # whole MPI tree with os.killpg() instead of just the
-                # launcher.  Only available on POSIX.
-                **({'preexec_fn': os.setsid} if os.name != 'nt' else {}),
+                # whole MPI tree instead of just the launcher.
+                # POSIX:   os.setsid -> killpg()
+                # Windows: CREATE_NEW_PROCESS_GROUP -> taskkill /T
+                **({'preexec_fn': os.setsid} if os.name != 'nt'
+                   else {'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP}),
             )
             log.info("[RUNNER] Subprocess PID=%d  started", self._process.pid)
 
@@ -272,8 +274,9 @@ class SimulationRunner(QThread):
         pid = proc.pid
         log.info("[RUNNER] Killing process tree  pid=%d", pid)
 
-        # 1. Try SIGTERM on the whole group (POSIX only)
+        # 1. Try to terminate the whole process tree
         if os.name != 'nt':
+            # POSIX: send SIGTERM to the process group
             try:
                 pgid = os.getpgid(pid)
                 os.killpg(pgid, signal.SIGTERM)
@@ -282,14 +285,24 @@ class SimulationRunner(QThread):
                 log.warning("[RUNNER] killpg SIGTERM failed: %s", e)
                 proc.terminate()
         else:
-            proc.terminate()
+            # Windows: use taskkill /T to kill the entire process tree
+            # (mpiexec spawns child workers that proc.terminate() misses)
+            try:
+                subprocess.run(
+                    ["taskkill", "/T", "/F", "/PID", str(pid)],
+                    capture_output=True, timeout=10)
+                log.info("[RUNNER] taskkill /T /F /PID %d issued", pid)
+            except Exception as e:
+                log.warning("[RUNNER] taskkill failed: %s – falling back "
+                            "to terminate()", e)
+                proc.terminate()
 
-        # 2. Give the tree a moment to exit, then escalate to SIGKILL
+        # 2. Give the tree a moment to exit, then escalate
         try:
             proc.wait(timeout=5)
-            log.info("[RUNNER] Process exited after SIGTERM")
+            log.info("[RUNNER] Process exited after termination")
         except subprocess.TimeoutExpired:
-            log.warning("[RUNNER] SIGTERM timeout – sending SIGKILL")
+            log.warning("[RUNNER] Termination timeout – escalating")
             if os.name != 'nt':
                 try:
                     os.killpg(os.getpgid(pid), signal.SIGKILL)
@@ -300,7 +313,7 @@ class SimulationRunner(QThread):
             try:
                 proc.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                log.error("[RUNNER] Process still alive after SIGKILL!")
+                log.error("[RUNNER] Process still alive after forced kill!")
 
     # ------------------------------------------------------------------
     # Crash diagnostics
