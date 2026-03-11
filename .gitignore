@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+
+# C++ build artifacts
+tests/cpp/build/
+
+# IDE
+.vscode/
+.idea/
