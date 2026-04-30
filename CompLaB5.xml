@@ -13,6 +13,7 @@
     </simulation_mode>
     <LB_numerics>
         <domain>
+<<<<<<< Updated upstream:CompLaB5.xml
             <nx>100</nx>
             <ny>100</ny>
             <nz>100</nz>
@@ -20,6 +21,15 @@
             <unit>um</unit>
             <characteristic_length>64</characteristic_length>
             <filename>OS_R1_3D_phi08.dat</filename>
+=======
+            <nx>50</nx>
+            <ny>30</ny>
+            <nz>30</nz>
+            <dx>1</dx>
+            <unit>um</unit>
+            <characteristic_length>30</characteristic_length>
+            <filename>geometry.dat</filename>
+>>>>>>> Stashed changes:JOSS_Submit/test_cases/abiotic/test1_pure_diffusion.xml
             <material_numbers>
                 <pore>2</pore>
                 <solid>0</solid>
@@ -47,8 +57,13 @@
             <name_of_substrates>Tracer</name_of_substrates>
             <initial_concentration>0.0</initial_concentration>
             <substrate_diffusion_coefficients>
+<<<<<<< Updated upstream:CompLaB5.xml
                 <in_pore>1.000000e-09</in_pore>
                 <in_biofilm>1.000000e-09</in_biofilm>
+=======
+                <in_pore>1.0e-9</in_pore>
+                <in_biofilm>2.0e-10</in_biofilm>
+>>>>>>> Stashed changes:JOSS_Submit/test_cases/abiotic/test1_pure_diffusion.xml
             </substrate_diffusion_coefficients>
             <left_boundary_type>Dirichlet</left_boundary_type>
             <right_boundary_type>Neumann</right_boundary_type>

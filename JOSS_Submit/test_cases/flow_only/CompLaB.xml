@@ -1,0 +1,119 @@
+<?xml version="1.0" ?>
+<!--
+================================================================================
+CompLaB3D Configuration — Flow Only (Navier-Stokes, No Transport / No Chemistry)
+================================================================================
+PURPOSE:
+  Run ONLY the Navier-Stokes (NS) flow solver.  No substrate transport (ADE),
+  no kinetics, no equilibrium chemistry.  Use this to:
+    - Compute permeability and velocity field of a geometry
+    - Validate the Poiseuille parabolic velocity profile in a straight channel
+    - Generate flow VTK files (nsLattice.*.vtk) for visualization
+    - Pre-converge flow before adding transport in a later run
+
+HOW FLOW-ONLY WORKS IN THE SOLVER:
+  The solver checks at line 401 of complab.cpp:
+      if (ade_maxiTer == 0) { pcout << "[ADE] done.\n"; return 0; }
+  Setting <ade_max_iT>0</ade_max_iT> causes the solver to exit cleanly after
+  the NS phase.  The ADE setup code (line 418+) is never reached, so having
+  zero substrates is safe here.
+
+OUTPUTS:
+  - nsLattice.vtk (or checkpointed binary) — velocity/pressure field
+  - Solver prints: Pe achieved, Mach number, stability report, then exits
+
+DOMAIN:
+  50 × 30 × 30 lattice, dx = 1 µm (change to match your geometry)
+
+RUN:
+  Copy this file as CompLaB.xml to your working directory, then:
+    mpirun -np <N> /path/to/complab
+
+NOTE:
+  The solver always reads "CompLaB.xml" from its current working directory.
+  The geometry file must be at input/geometry.dat relative to CWD.
+================================================================================
+-->
+<parameters>
+
+    <path>
+        <src_path>src</src_path>
+        <input_path>input</input_path>
+        <output_path>output_flow_only</output_path>
+    </path>
+
+    <!-- ════════════════════════════════════════════════════════════════════════
+         SIMULATION MODE — Flow only: disable all chemistry and kinetics
+         ════════════════════════════════════════════════════════════════════════ -->
+    <simulation_mode>
+        <biotic_mode>false</biotic_mode>
+        <enable_kinetics>false</enable_kinetics>
+        <enable_abiotic_kinetics>false</enable_abiotic_kinetics>
+        <enable_validation_diagnostics>false</enable_validation_diagnostics>
+    </simulation_mode>
+
+    <LB_numerics>
+        <domain>
+            <nx>50</nx>
+            <ny>30</ny>
+            <nz>30</nz>
+            <dx>1.0</dx>
+            <unit>um</unit>
+            <characteristic_length>30</characteristic_length>
+            <filename>geometry.dat</filename>
+            <material_numbers>
+                <pore>2</pore>
+                <solid>0</solid>
+                <bounce_back>1</bounce_back>
+            </material_numbers>
+        </domain>
+
+        <!-- Adjust delta_P and Peclet to target your desired flow velocity -->
+        <delta_P>2.0e-3</delta_P>
+        <Peclet>1.0</Peclet>
+        <tau>0.8</tau>
+        <track_performance>false</track_performance>
+
+        <iteration>
+            <!-- NS flow iterations: run until converged -->
+            <ns_max_iT1>100000</ns_max_iT1>
+            <ns_max_iT2>100000</ns_max_iT2>
+            <ns_converge_iT1>1e-8</ns_converge_iT1>
+            <ns_converge_iT2>1e-6</ns_converge_iT2>
+
+            <!-- KEY: ade_max_iT = 0  →  solver exits after NS, skips ALL transport -->
+            <!-- This is the clean flow-only switch (complab.cpp line 401)          -->
+            <ade_max_iT>0</ade_max_iT>
+        </iteration>
+    </LB_numerics>
+
+    <!--
+    NOTE ON CHEMISTRY / MICROBIOLOGY:
+    When ade_max_iT=0, these sections are parsed but never used.
+    You may omit them entirely or leave them as shown below.
+    Do NOT set number_of_substrates to a non-zero value without also
+    setting ade_max_iT > 0, as that would attempt to run transport.
+    -->
+    <chemistry>
+        <number_of_substrates>0</number_of_substrates>
+    </chemistry>
+
+    <microbiology>
+        <number_of_microbes>0</number_of_microbes>
+    </microbiology>
+
+    <equilibrium>
+        <enabled>false</enabled>
+    </equilibrium>
+
+    <IO>
+        <read_NS_file>false</read_NS_file>
+        <read_ADE_file>false</read_ADE_file>
+        <ns_filename>nsLattice</ns_filename>
+        <mask_filename>maskLattice</mask_filename>
+        <!-- save_VTK_interval: NS checkpoints during flow convergence -->
+        <save_VTK_interval>10000</save_VTK_interval>
+        <save_CHK_interval>50000</save_CHK_interval>
+    </IO>
+
+</parameters>
