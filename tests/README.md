@@ -52,7 +52,7 @@ Needs cluster?    NO                       Needs cluster?    NO
 Speed:            ~8 seconds               Speed:            ~60 seconds
 Works on:         Linux, macOS, Windows    Works on:         Linux, macOS, Windows
 
-Count:            382 checks               Count:            526 checks
+Count:            382 checks               Count:            509 checks
 ```
 
 Both levels run entirely without Palabos or MPI — they are available on any
@@ -481,7 +481,7 @@ python -m pytest tests/ -v --tb=short
 
 Expected result:
 ```
-526 passed, 0 failed, 1 skipped
+509 passed
 ```
 
 ---
@@ -509,7 +509,7 @@ actual vs. expected values.
 ### GUI tests — all pass
 
 ```
-526 passed, 0 failed, 1 skipped
+509 passed
 ```
 
 The GUI correctly reads and writes every simulation parameter. If one fails,

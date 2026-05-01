@@ -403,3 +403,4 @@ class ParallelPanel(BasePanel):
                 all_warnings += f"\n  {w}"
             self._warn_lbl.setText(all_warnings.strip())
             self._warn_lbl.setStyleSheet("color: #c0a040;")
+        return extra

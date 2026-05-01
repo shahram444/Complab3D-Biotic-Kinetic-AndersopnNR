@@ -239,7 +239,7 @@ python main.py
 
 ## 5. Test Suite
 
-CompLaB3D has **744+ automated tests** in two categories, all running on GitHub Actions CI.
+CompLaB3D has **891 automated tests** in two categories (382 C++ + 509 Python), all running on GitHub Actions CI.
 
 ### 5.1 C++ Unit Tests — 382 tests (no Palabos required)
 
@@ -277,7 +277,7 @@ Expected result: **382 passed, 0 failed** (~1 second on a laptop).
 
 Full descriptions: `tests/README.md`.
 
-### 5.2 Python / GUI Tests — 362+ tests (no model required)
+### 5.2 Python / GUI Tests — 509 tests (no model required)
 
 ```bash
 cd GUI
@@ -287,7 +287,7 @@ python -m pytest tests/ -v
 QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
 ```
 
-Expected: **362 passed, 5 skipped** (5 skipped require a graphical Qt display; they pass on desktop).
+Expected: **509 passed, 0 failed.**
 
 | Module                      | What is tested                                         | Tests |
 | --------------------------- | ------------------------------------------------------ | ----- |
@@ -415,7 +415,7 @@ pip install PySide6 pytest pytest-qt
 QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
 ```
 
-Expected: **362 passed, 5 skipped.**
+Expected: **509 passed.**
 
 ### Verify the analytical validation dry-run
 
@@ -1634,7 +1634,7 @@ Changes to theme and font take effect instantly without restarting the applicati
 
 ## 36. GUI Test Suite
 
-The GUI ships with 362 automated tests covering all panels, the project data model, XML round-tripping, the kinetics editor, and the simulation runner stub.
+The GUI ships with 509 automated tests covering all panels, the project data model, XML round-tripping, the kinetics editor, and the simulation runner stub.
 
 ```bash
 cd JOSS_Submit/GUI
@@ -1654,7 +1654,7 @@ tests/test_simulation_runner.py   ...    PASSED
 tests/test_templates.py           ...    PASSED
 tests/test_xml_diagnostic.py      ...    PASSED
 tests/test_xml_io.py              ...    PASSED
-362 passed in ~12 s
+509 passed in ~12 s
 ```
 
 On a headless Linux server (CI), run with a virtual framebuffer:
