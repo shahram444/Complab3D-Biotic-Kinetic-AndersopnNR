@@ -1,47 +1,154 @@
-# ── Build artifacts ──────────────────────────────────────────────
+# ============================================================================
+# CompLaB3D / CompLaB Studio — .gitignore
+# ============================================================================
+
+# ---- C++ build artifacts ----
 build/
-complab
-complab.exe
+build-*/
 *.o
+*.obj
+*.so
+*.dll
+*.dylib
 *.a
 *.lib
+*.exe
+complab
+complab.exe
+*.exp
+*.ilk
+*.pdb
+
+# CMake generated files
 CMakeCache.txt
 CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+*.cmake
+!CMakeLists.txt
+!tests/cpp/CMakeLists.txt
 
-# ── Solver output ───────────────────────────────────────────────
-*.vti
-*.chk
-*.out
-output/
-output_planktonic/
-GUI/output/
+# Compiled headers
+*.gch
+*.pch
 
-# ── Python ──────────────────────────────────────────────────────
+# ---- Palabos build outputs ----
+versionControl/palabos-v2.3.0/build/
+ComapLB3D/versionControl/palabos-v2.3.0/build/
+externalLibraries/*/build/
+
+# ---- Python ----
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
 *.egg-info/
 dist/
-*.eggs
+build/
+eggs/
+parts/
+bin/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
 
-# ── Qt / GUI ────────────────────────────────────────────────────
-*.qmlc
-*.jsc
+# ---- Python virtual environments ----
+venv/
+env/
+ENV/
+.venv/
+.env/
 
-# ── IDE / OS ────────────────────────────────────────────────────
+# ---- pytest / coverage ----
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+pytest-cache-files-*/
+
+# ---- Type checkers / linters ----
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.ruff_cache/
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+
+# ---- IDE / editor ----
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.cproject
+.settings/
+
+# ---- OS files ----
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
 
-# ── pytest ──────────────────────────────────────────────────────
-.pytest_cache/
-htmlcov/
-.coverage
+# ---- Solver runtime outputs ----
+output/
+output_*/
+ComapLB3D/output/
+ComapLB3D/output_*/
+*.vti
+*.vtm
+*.pvti
+*.pvd
+*.dat.gz
+checkpoint_*.dat
 
-# ── Logs ────────────────────────────────────────────────────────
+# ---- Logs ----
 *.log
-"build_win/" 
+logs/
+
+# ---- GUI runtime data / generated files ----
+GUI/Webpages/
+GUI/bin/
+GUI/CompLabProjects/*/output/
+GUI/CompLabProjects/*/build/
+GUI/.complab_studio_logs/
+
+# ---- LaTeX (paper) ----
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+paper/*.toc
+# Keep the JOSS draft PDF if hand-built, but ignore CI-generated previews
+paper/paper.pdf
+paper/paper-preview.pdf
+
+# ---- Misc ----
+*.bak
+*.tmp
+*.orig
+*.rej
+node_modules/

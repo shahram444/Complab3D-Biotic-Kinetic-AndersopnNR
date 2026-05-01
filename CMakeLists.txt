@@ -1,19 +1,30 @@
 cmake_minimum_required(VERSION 3.5)
+
 #set the project name
 project(complab)
 enable_language(CXX)
+
 set(EXECUTABLE_NAME "complab")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
+
 #if(NOT CMAKE_BUILD_TYPE)
     #set(CMAKE_BUILD_TYPE "Release")
     #set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 #endif()
+
+
+
+
 if(NOT CMAKE_BUILD_TYPE)
     #set(CMAKE_BUILD_TYPE "Debug")
     set(CMAKE_BUILD_TYPE "Release")
 endif()
+
+
+
 message("Generated with config types: ${CMAKE_CONFIGURATION_TYPES}")
 message(${CMAKE_BUILD_TYPE})
+
 # Compiler flags
 # Append flags: set(CMAKE_XXX_FLAGS "${CMAKE_XXX_FLAGS} ...")
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
@@ -34,109 +45,71 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
 else()
     message( FATAL_ERROR "CXX compiler not recognized. CMake will quit." )
 endif()
+
 option(ENABLE_MPI "Enable MPI" ON)
 if(ENABLE_MPI)
     message("Enabling MPI")
-    if(WIN32 AND MINGW)
-        # MinGW + MS-MPI: manual configuration (find_package doesn't work)
-        set(MSMPI_INC "$ENV{MSMPI_INC}")
-        set(MSMPI_LIB64 "$ENV{MSMPI_LIB64}")
-        if(NOT MSMPI_INC OR NOT MSMPI_LIB64)
-            # Fallback to default paths
-            set(MSMPI_INC "C:/Program Files (x86)/Microsoft SDKs/MPI/Include")
-            set(MSMPI_LIB64 "C:/Program Files (x86)/Microsoft SDKs/MPI/Lib/x64")
-        endif()
-        if(EXISTS "${MSMPI_INC}/mpi.h" AND EXISTS "${MSMPI_LIB64}/msmpi.lib")
-            message("Found MS-MPI: ${MSMPI_INC}")
-            include_directories("${MSMPI_INC}" "${MSMPI_INC}/x64")
-            set(MPI_CXX_LIBRARIES "${MSMPI_LIB64}/msmpi.lib")
-            add_definitions(-DPLB_MPI_PARALLEL)
-            set(MPI_CXX_FOUND TRUE)
-        else()
-            message(FATAL_ERROR "MS-MPI SDK not found. Install from: https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi")
-        endif()
-    else()
-        find_package(MPI REQUIRED)
-        if(MPI_CXX_FOUND)
-            include_directories(${MPI_CXX_INCLUDE_PATH})
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
-            add_definitions(-DPLB_MPI_PARALLEL)
-        endif()
+    find_package(MPI REQUIRED)
+    if(MPI_CXX_FOUND)
+        #set(CMAKE_CXX_COMPILER "${MPI_CXX_COMPILER}")
+        include_directories(${MPI_CXX_INCLUDE_PATH})
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS}")
+        add_definitions(-DPLB_MPI_PARALLEL)
     endif()
 endif()
+
 if(WIN32)
     option(ENABLE_POSIX "Enable POSIX" OFF)
 else()
     option(ENABLE_POSIX "Enable POSIX" ON)
 endif()
+
 if(ENABLE_POSIX)
     message("Enabling POSIX")
     add_definitions(-DPLB_USE_POSIX)
 endif()
+
 if(APPLE)
     add_definitions(-DPLB_MAC_OS_X)
 endif()
+
 if(WIN32 OR CYGWIN)
     add_definitions(-DPLB_WINDOWS)
 endif()
 ###############################################################################
-# Palabos Library
+# Palabos Library — bundled at ComapLB3D/versionControl/palabos-v2.3.0/
+# Paths are relative to this CMakeLists.txt so the build works on any machine
+# without modification (Linux, macOS, Windows).
 ###############################################################################
-# Set PALABOS_ROOT via -DPALABOS_ROOT=/path/to/palabos or environment variable
-# Default: look for palabos in versionControl/ subdirectory
-if(NOT PALABOS_ROOT)
-    if(DEFINED ENV{PALABOS_ROOT})
-        set(PALABOS_ROOT $ENV{PALABOS_ROOT})
-    elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
-        set(PALABOS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
-    else()
-        message(FATAL_ERROR "PALABOS_ROOT is not set. Pass -DPALABOS_ROOT=/path/to/palabos-v2.3.0 or set the PALABOS_ROOT environment variable.")
-    endif()
+
+set(PALABOS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/versionControl/palabos-v2.3.0")
+
+if(NOT EXISTS "${PALABOS_DIR}/src")
+    message(FATAL_ERROR
+        "Palabos source not found at:\n  ${PALABOS_DIR}/src\n"
+        "Make sure the versionControl/palabos-v2.3.0/ folder is present "
+        "in the JOSS_Submit directory.")
 endif()
-message("Using Palabos from: ${PALABOS_ROOT}")
 
-include_directories("/usr/local/include")
-include_directories("${PALABOS_ROOT}/src")
-include_directories("${PALABOS_ROOT}/externalLibraries")
-include_directories("${PALABOS_ROOT}/externalLibraries/Eigen3")
+include_directories("${PALABOS_DIR}/src")
+include_directories("${PALABOS_DIR}/externalLibraries")
+include_directories("${PALABOS_DIR}/externalLibraries/Eigen3")
 
-link_directories("/usr/local/lib")
+file(GLOB_RECURSE PALABOS_SRC "${PALABOS_DIR}/src/*.cpp")
+file(GLOB_RECURSE EXT_SRC     "${PALABOS_DIR}/externalLibraries/tinyxml/*.cpp")
 
-option(REBUILD_PALABOS "Rebuild Palabos library from source (OFF = use pre-built)" OFF)
+add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
 
-if(REBUILD_PALABOS)
-    message("Building Palabos from source...")
-    file(GLOB_RECURSE PALABOS_SRC "${PALABOS_ROOT}/src/*.cpp")
-    file(GLOB_RECURSE EXT_SRC "${PALABOS_ROOT}/externalLibraries/tinyxml/*.cpp")
-    add_library(palabos STATIC ${PALABOS_SRC} ${EXT_SRC})
-else()
-    message("Using pre-built Palabos library (use -DREBUILD_PALABOS=ON to rebuild)")
-    # Look for pre-built library in build directory
-    if(WIN32)
-        set(PALABOS_LIB_NAME "palabos.lib")
-        if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${PALABOS_LIB_NAME}")
-            set(PALABOS_LIB_NAME "libpalabos.a")  # MinGW uses .a
-        endif()
-    else()
-        set(PALABOS_LIB_NAME "libpalabos.a")
-    endif()
 
-    set(PALABOS_LIB_PATH "${CMAKE_CURRENT_BINARY_DIR}/${PALABOS_LIB_NAME}")
-    if(NOT EXISTS "${PALABOS_LIB_PATH}")
-        message(FATAL_ERROR
-            "Pre-built Palabos library not found at ${PALABOS_LIB_PATH}.\n"
-            "Run cmake with -DREBUILD_PALABOS=ON first to build it, then use -DREBUILD_PALABOS=OFF for fast rebuilds.")
-    endif()
-
-    add_library(palabos STATIC IMPORTED)
-    set_target_properties(palabos PROPERTIES IMPORTED_LOCATION "${PALABOS_LIB_PATH}")
-endif()
 ###############################################################################
+
 add_executable(${EXECUTABLE_NAME} "./src/${EXECUTABLE_NAME}.cpp")
+
 # Link with the following libraries
 target_link_libraries(${EXECUTABLE_NAME} palabos)
 #target_link_libraries(${EXECUTABLE_NAME} glpk)
 #target_link_libraries(${EXECUTABLE_NAME} python3.6m)
+
 if(ENABLE_MPI)
     target_link_libraries(${EXECUTABLE_NAME} ${MPI_CXX_LIBRARIES})
 endif()

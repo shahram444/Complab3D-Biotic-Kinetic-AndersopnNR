@@ -1,57 +1,101 @@
 {
   "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
   "@type": "SoftwareSourceCode",
+  "name": "CompLaB3D",
+  "description": "Three-dimensional pore-scale reactive transport model framework and graphical user interface coupling lattice Boltzmann flow with biogeochemical kinetics, equilibrium chemistry, and biofilm dynamics.",
   "identifier": "CompLaB3D",
-  "name": "CompLaB3D: A 3D Pore-Scale Biogeochemical Reactive Transport Simulator",
-  "description": "CompLaB3D is a 3D pore-scale biogeochemical reactive transport simulator coupling Lattice Boltzmann Method (LBM) advection-diffusion with Monod biotic kinetics, abiotic chemical reactions, cellular automata biofilm growth, and Newton-Raphson/Anderson equilibrium solving. It includes CompLaB Studio, a Python GUI for scenario configuration, 3D visualization, and solver management.",
-  "version": "2.1.0",
-  "dateCreated": "2024-01-01",
-  "dateModified": "2026-03-10",
-  "license": "https://spdx.org/licenses/GPL-3.0",
   "codeRepository": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR",
   "issueTracker": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/issues",
-  "programmingLanguage": [
-    "C++",
-    "Python"
-  ],
+  "version": "2.1.0",
+  "datePublished": "2026-03-11",
+  "dateCreated": "2024-01-01",
+  "dateModified": "2026-04-30",
+  "license": "https://spdx.org/licenses/AGPL-3.0-only",
+  "applicationCategory": "Scientific/Engineering",
+  "developmentStatus": "active",
+  "isAccessibleForFree": true,
   "operatingSystem": [
     "Linux",
     "macOS",
     "Windows"
   ],
-  "runtimePlatform": "Python >= 3.10",
-  "softwareRequirements": [
-    "CMake >= 3.5",
-    "MPI (OpenMPI or MPICH)",
-    "Palabos 2.3.0",
-    "PySide6 >= 6.5.0",
-    "NumPy >= 1.24.0",
-    "VTK >= 9.2.0",
-    "Matplotlib >= 3.7.0"
-  ],
-  "author": [
+  "programmingLanguage": [
     {
-      "@type": "Person",
-      "@id": "https://orcid.org/0009-0004-3810-2739",
-      "givenName": "Shahram",
-      "familyName": "Asgari",
-      "affiliation": {
-        "@type": "Organization",
-        "name": "University of Georgia"
-      }
+      "@type": "ComputerLanguage",
+      "name": "C++",
+      "version": "11"
+    },
+    {
+      "@type": "ComputerLanguage",
+      "name": "Python",
+      "version": ">=3.9"
     }
+  ],
+  "runtimePlatform": [
+    "C++ / MPI",
+    "Python 3"
+  ],
+  "softwareRequirements": [
+    "Palabos v2.3.0 (AGPL-3.0)",
+    "MPI (e.g., OpenMPI, MPICH)",
+    "CMake >= 3.5",
+    "PySide6 (GUI)",
+    "VTK (GUI 3D viewer)"
   ],
   "keywords": [
     "lattice Boltzmann method",
     "reactive transport",
+    "pore-scale modeling",
     "biofilm",
-    "pore-scale modelling",
     "biogeochemistry",
-    "computational fluid dynamics",
-    "subsurface hydrology"
+    "equilibrium chemistry",
+    "porous media",
+    "cellular automaton",
+    "MPI",
+    "scientific computing"
   ],
-  "developmentStatus": "active",
-  "referencePublication": "https://doi.org/10.21105/joss.XXXXX",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Shahram",
+      "familyName": "Asgari",
+      "@id": "https://orcid.org/0009-0004-3810-2739",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Department of Marine Sciences, University of Georgia"
+      }
+    },
+    {
+      "@type": "Person",
+      "givenName": "Christof",
+      "familyName": "Meile",
+      "@id": "https://orcid.org/0000-0002-0825-4596",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Department of Marine Sciences, University of Georgia"
+      }
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Shahram",
+      "familyName": "Asgari",
+      "@id": "https://orcid.org/0009-0004-3810-2739"
+    }
+  ],
+  "copyrightHolder": {
+    "@type": "Organization",
+    "name": "University of Georgia Research Foundation, Inc."
+  },
+  "copyrightYear": "2025-2026",
+  "funder": {
+    "@type": "Organization",
+    "name": "U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research, Genomic Science Program"
+  },
+  "funding": "DE-SC0022991",
   "readme": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/blob/main/README.md",
-  "contIntegration": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/actions"
+  "contIntegration": "https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/actions",
+  "buildInstructions": "See README.md sections 3 (installation) and 13 (HPC build).",
+  "referencePublication": "paper/paper.md (JOSS submission, 2026)"
 }
