@@ -1,8 +1,0 @@
-{
-  "tests/test_simulation_runner.py": true,
-  "tests/test_pipeline_e2e.py::TestFullSimulationRun::test_full_pipeline_biofilm": true,
-  "tests/test_pipeline_e2e.py::TestFullSimulationRun::test_full_pipeline_abiotic": true,
-  "tests/test_pipeline_e2e.py::TestFullSimulationRun::test_solver_prints_all_output": true,
-  "tests/test_pipeline_e2e.py::TestFullSimulationRun::test_vti_file_references_in_output": true,
-  "tests/test_pipeline_e2e.py::TestFullSimulationRun::test_simulation_failure_produces_log": true
-}
