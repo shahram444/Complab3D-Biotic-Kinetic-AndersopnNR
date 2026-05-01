@@ -1,8 +1,44 @@
 # CompLaB3D
 
-[![Public since](https://img.shields.io/badge/public%20since-Feb%202026-blue)](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR)
+[![Public since](https://img.shields.io/badge/public%20since-2026--02--05-blue)](https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR)
+[![First commit](https://img.shields.io/badge/first%20commit-2026--02--05-green)](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commit/c51ff499f226b82936b6a57b7a29fbd5d49b54b3)
 
-> **Repository public since 2026-02-05.** This repository has been openly available on GitHub since February 5, 2026. Public history is verifiable via the GitHub API (`GET /repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR` → `created_at`) and via commit timestamps in `git log`.
+## Proof of public availability
+
+This repository has been **publicly available on GitHub since 2026-02-05**.
+You don't have to take our word for it — every claim below is independently verifiable:
+
+| What | Where to verify it yourself |
+|------|------------------------------|
+| Repo `created_at` field | [api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR](https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR) — look for `"created_at": "2026-02-05T15:17:47Z"` |
+| First commit on GitHub | [`c51ff49` — 2026-02-05](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commit/c51ff499f226b82936b6a57b7a29fbd5d49b54b3) |
+| Full commit history | [Commits page](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commits/main/) — scroll to the bottom |
+| Public-since git tag | [`public-since-2026-02-05`](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/releases/tag/public-since-2026-02-05) |
+| Independent web archive | [Wayback Machine snapshots](https://web.archive.org/web/*/github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR) |
+
+**Quick verification from your terminal:**
+
+```bash
+# 1. Repo creation date straight from GitHub's API
+curl -s https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR \
+  | grep -E '"(created_at|pushed_at|visibility)"'
+
+# 2. Earliest commit in the repo (after cloning)
+git clone https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR.git
+cd Complab3D-Biotic-Kinetic-AndersopnNR
+git log --reverse --format="%ai %h %s" | head -1
+# → 2026-02-05 10:18:28 -0500 c51ff49 Add files via upload
+```
+
+Expected API response:
+
+```json
+{
+  "created_at": "2026-02-05T15:17:47Z",
+  "visibility": "public",
+  "pushed_at": "2026-05-01T06:05:14Z"
+}
+```
 
 **A 3D Pore-Scale Biogeochemical Reactive Transport Simulator**
 
