@@ -1,944 +1,423 @@
 # CompLaB3D
 
-**A 3D Pore-Scale Biogeochemical Reactive Transport Simulator**
+**Three-Dimensional Pore-Scale Biogeochemical Reactive Transport Modeling Framework**
 
-CompLaB3D couples Lattice Boltzmann Method (LBM) fluid flow and
-advection-diffusion with biotic/abiotic kinetics, cellular-automata biofilm
-growth, and Newton-Raphson/Anderson equilibrium solving at the pore scale.
+CompLaB3D is an open-source three-dimensional pore-scale reactive transport model that couples Lattice Boltzmann Method (LBM) fluid flow and solute transport with Monod-based microbial kinetics, user-defined abiotic chemical reactions, an Anderson-accelerated equilibrium chemistry model, and a cellular automaton (CA) biofilm model — all MPI-parallelised through the [Palabos](https://palabos.unige.ch/) library.
 
-<<<<<<< Updated upstream
-It ships with **CompLaB Studio 2.1**, a Python GUI for configuring scenarios,
-generating 3D geometries, running the solver, and visualising results.
-=======
-CompLaB3D is an open-source **three-dimensional pore-scale reactive transport solver** that couples Lattice Boltzmann Method (LBM) fluid flow and solute transport with Monod-based microbial kinetics, user-defined abiotic chemical reactions, an Anderson-accelerated equilibrium chemistry solver, and a cellular automaton (CA) biofilm model — all MPI-parallelised through the [Palabos](https://palabos.unige.ch/) library.
-
-**CompLaB Studio** (v2.1.0) is the companion graphical interface: a COMSOL-style 4-panel desktop application built with PySide6 that handles the complete workflow from project setup and geometry generation through simulation launch and 3D post-processing — without ever touching a text editor.
->>>>>>> Stashed changes
+**CompLaB Studio** (v2.1.0) is the companion graphical interface: a desktop application built with PySide6 that handles the complete workflow from project setup and geometry generation through simulation launch and 3D post-processing — without ever touching a text editor.
 
 ---
 
-## Features
+## Table of Contents
 
-<<<<<<< Updated upstream
-- **Navier-Stokes flow** via LBM (Palabos 2.3.0)
-- **Advection-diffusion** for multiple dissolved substrates
-- **Biotic kinetics** (Monod model) for sessile and planktonic microbes
-- **Abiotic kinetics** (first-order decay, bimolecular reactions)
-- **Equilibrium chemistry** solved with Newton-Raphson + Anderson acceleration
-- **Cellular-automata biofilm** growth and detachment
-- **Operator splitting** architecture: Transport, Kinetics, Equilibrium
-- **9 pluggable scenario templates** from flow-only to fully coupled
-- **MPI parallel** execution
-- **VTI output** for ParaView visualisation
-- **CompLaB Studio GUI** with XML editor, 3D viewer, and solver manager
+**[PART 1 — Overview & Reference](#part-1--overview--reference)**
 
-## Repository Layout
-
-```
-CompLaB3D/
-  src/              C++ solver source (complab.cpp)
-  kinetics/         9 kinetics template folders with .hh headers
-  GUI/              CompLaB Studio 2.1 (Python/PySide6)
-    src/core/       Template engine, XML builder, kinetics code-gen
-    src/panels/     GUI panels (substrate, microbe, solver, geometry, ...)
-    tests/          275 automated tests (pytest + pytest-qt)
-  docs/             Technical guide, user tutorial, geometry tutorial
-  tools/            geometry_generator.py utility
-  test_cases/       Abiotic and biotic example configurations
-  CMakeLists.txt    CMake build for the C++ solver
-=======
-1. [Overview and Solver Pipeline](#1-overview-and-solver-pipeline)
+1. [Overview](#1-overview)
 2. [Repository Structure](#2-repository-structure)
 3. [Prerequisites](#3-prerequisites)
-4. [Building the Solver from Source](#4-building-the-solver-from-source)
-5. [Standalone HPC Package (ComapLB3D)](#5-standalone-hpc-package-comaplb3d)
-6. [Running the Solver Without the GUI](#6-running-the-solver-without-the-gui)
-7. [Running CompLaB Studio (GUI)](#7-running-complab-studio-gui)
-8. [XML Configuration Reference](#8-xml-configuration-reference)
-9. [Output Files](#9-output-files)
-10. [Test Suite](#10-test-suite)
-11. [Analytical Validation Cases](#11-analytical-validation-cases)
-12. [Documentation](#12-documentation)
-13. [For JOSS Editors and Reviewers](#13-for-joss-editors-and-reviewers)
-14. [Citation](#14-citation)
-15. [License](#15-license)
-16. [Acknowledgements](#16-acknowledgements)
+4. [Quick Start](#4-quick-start)
+5. [Test Suite](#5-test-suite)
+6. [Analytical Validation Cases](#6-analytical-validation-cases)
+7. [Output Files](#7-output-files)
+8. [Documentation](#8-documentation)
+9. [For JOSS Editors and Reviewers](#9-for-joss-editors-and-reviewers)
+10. [Citation](#10-citation)
+11. [License](#11-license)
+12. [Acknowledgements](#12-acknowledgements)
+
+**[PART 2 — Standalone HPC & Command-Line Guide](#part-2--standalone-hpc--command-line-guide)**
+
+13. [Two Ways to Get the Model](#13-two-ways-to-get-the-model)
+14. [Option A — Standalone Package (ComapLB3D)](#14-option-a--standalone-package-comaplb3d-recommended-for-clusters)
+15. [Option B — Build from Source](#15-option-b--build-from-source-full-repo)
+16. [Configuring a Simulation](#16-configuring-a-simulation)
+17. [Running the Model](#17-running-the-model)
+18. [HPC Job Submission — All Scheduler Types](#18-hpc-job-submission--all-scheduler-types)
+19. [Choosing the Number of MPI Processes](#19-choosing-the-number-of-mpi-processes)
+20. [Startup Output and Stability Report](#20-startup-output-and-stability-report)
+21. [Output Files (Cluster Runs)](#21-output-files-cluster-runs)
+22. [Editing Kinetics and Recompiling](#22-editing-kinetics-and-recompiling)
+23. [Validation Cases — Run-Through Procedure](#23-validation-cases--run-through-procedure)
+24. [HPC / CLI Troubleshooting](#24-hpc--cli-troubleshooting)
+
+**[PART 3 — GUI Workflow Guide (CompLaB Studio)](#part-3--gui-workflow-guide-complab-studio)**
+
+25. [GUI Prerequisites](#25-gui-prerequisites)
+26. [GUI Installation](#26-gui-installation)
+27. [Launching the GUI](#27-launching-the-gui)
+28. [Interface Overview](#28-interface-overview)
+29. [Step-by-Step Workflow](#29-step-by-step-workflow)
+30. [Panel Reference](#30-panel-reference)
+31. [Kinetics Editor](#31-kinetics-editor)
+32. [Running a Simulation from the GUI](#32-running-a-simulation-from-the-gui)
+33. [Post-Processing](#33-post-processing)
+34. [Project Files and XML Export](#34-project-files-and-xml-export)
+35. [Preferences](#35-preferences)
+36. [GUI Test Suite](#36-gui-test-suite)
+37. [GUI Troubleshooting](#37-gui-troubleshooting)
 
 ---
 
-## 1. Overview and Solver Pipeline
+---
+
+# PART 1 — Overview & Reference
+
+---
+
+## 1. Overview
 
 CompLaB3D executes a **10-phase pipeline** on every simulation run:
 
-| Phase | Description |
-|-------|-------------|
-| 1 | Load XML configuration and validate all inputs |
-| 2 | Geometry setup and preprocessing (solid/pore/biofilm classification) |
-| 3 | Navier-Stokes flow field (D3Q19 LBM): initial pressure → permeability → target velocity → corrected pressure → final flow → stability checks (Ma, CFL, τ) |
-| 4 | Reactive transport lattice setup — D3Q7 ADE for each substrate and planktonic biomass species |
-| 5 | NS-ADE velocity field coupling |
-| 6 | **Main simulation loop**: collision → kinetic reactions (Monod/abiotic) → equilibrium chemistry (Anderson-NR PCF) → biomass redistribution (CA/FD) → flow update if geometry changed → streaming |
-| 7 | Write VTI / CHK output files |
-| 8 | Breakthrough curve analysis and spatial moment calculations |
-| 9 | Write summary CSV files |
-| 10 | Finalise and clean up |
+| Phase | Description                                                                                                                                                                                          |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Load XML configuration and validate all inputs                                                                                                                                                       |
+| 2     | Geometry setup and preprocessing (solid / pore / biofilm classification)                                                                                                                             |
+| 3     | Navier-Stokes flow field (D3Q19 LBM): initial pressure → permeability → target velocity → corrected pressure → final flow → stability checks (Ma, CFL, τ)                                            |
+| 4     | Reactive transport lattice setup — D3Q7 ADE for each substrate and planktonic biomass species                                                                                                        |
+| 5     | NS-ADE velocity field coupling                                                                                                                                                                       |
+| 6     | **Main simulation loop**: collision → kinetic reactions (Monod / abiotic) → equilibrium chemistry (Anderson-NR PCF) → biomass redistribution (CA / FD) → flow update if geometry changed → streaming |
+| 7     | Write VTI / CHK output files                                                                                                                                                                         |
+| 8     | Breakthrough curve analysis and spatial moment calculations                                                                                                                                          |
+| 9     | Write summary CSV files                                                                                                                                                                              |
+| 10    | Finalise and clean up                                                                                                                                                                                |
 
-**Simulation modes** (set in `CompLaB.xml`):
+**Simulation modes:**
 
-| Mode | `biotic_mode` | `enable_kinetics` | `enable_abiotic_kinetics` |
-|------|:---:|:---:|:---:|
-| Flow only | false | false | false |
-| Tracer transport | false | false | false |
-| Abiotic reactions | false | false | true |
-| Biotic (sessile CA) | true | true | false |
-| Biotic (planktonic) | true | true | false |
-| Full coupled | true | true | true |
+| Mode                | `biotic_mode` | `enable_kinetics` | `enable_abiotic_kinetics` |
+| ------------------- |:-------------:|:-----------------:|:-------------------------:|
+| Flow only           | false         | false             | false                     |
+| Tracer transport    | false         | false             | false                     |
+| Abiotic reactions   | false         | false             | true                      |
+| Biotic (sessile CA) | true          | true              | false                     |
+| Biotic (planktonic) | true          | true              | false                     |
+| Full coupled        | true          | true              | true                      |
 
 ---
 
 ## 2. Repository Structure
 
 ```
-CompLaB3D/                                       # Repository root
+
 │
-├── src/                                         # C++ solver source
+├── src/                                         # C++ model source
 │   ├── complab.cpp                              # Main entry point (10-phase pipeline)
 │   ├── complab_functions.hh                     # XML parser, geometry I/O, BTC analysis
 │   ├── complab3d_processors.hh                  # LBM collision/streaming processors
-│   ├── complab3d_processors_part1.hh            # NS flow processors
-│   ├── complab3d_processors_part2.hh            # ADE transport processors
-│   ├── complab3d_processors_part3.hh            # Biofilm CA and FD processors
-│   ├── complab3d_processors_part4_eqsolver.hh   # Anderson-NR equilibrium solver
-│   └── complab3d_processors_part4_eqsolver_NR_reserve.hh  # NR reference implementation
+│   ├── complab3d_processors_part1–3.hh          # NS / ADE / biofilm CA+FD processors
+│   └── complab3d_processors_part4_eqsolver.hh  # Anderson-NR equilibrium module
 │
-├── GUI/                                         # CompLaB Studio graphical interface
+├── GUI/                                         # CompLaB Studio (v2.1.0)
 │   ├── main.py                                  # Entry point — splash screen + launch
-│   ├── src/                                     # Active GUI source (v2.1.0)
+│   ├── src/                                     # GUI source
 │   │   ├── main_window.py                       # COMSOL-style 4-panel main window
-│   │   ├── config.py                            # App configuration (theme, font, paths)
-│   │   ├── core/
-│   │   │   ├── project.py                       # CompLaBProject data model
-│   │   │   ├── project_manager.py               # Save/load .complab project files
-│   │   │   ├── simulation_runner.py             # Subprocess launcher + real-time monitoring
-│   │   │   ├── templates.py                     # Six project templates
-│   │   │   ├── kinetics_templates.py            # Built-in rate-law code generators
-│   │   │   └── xml_diagnostic.py                # Crash diagnostic on solver failure
+│   │   ├── core/                                # Project model, XML I/O, simulation runner
 │   │   ├── panels/                              # 13 configuration panels
-│   │   │   ├── base_panel.py                    # Abstract base class for all panels
-│   │   │   ├── general_panel.py                 # Project setup, template selection
-│   │   │   ├── domain_panel.py                  # Grid dimensions, geometry file
-│   │   │   ├── fluid_panel.py                   # Flow parameters, pressure gradient
-│   │   │   ├── chemistry_panel.py               # Substrates, diffusion coefficients, BCs
-│   │   │   ├── equilibrium_panel.py             # Aqueous speciation (log K, stoichiometry)
-│   │   │   ├── microbiology_panel.py            # Microbial populations, Monod parameters
-│   │   │   ├── solver_panel.py                  # Iterations, output frequency, stability
-│   │   │   ├── io_panel.py                      # Paths: executable, output directory
-│   │   │   ├── parallel_panel.py                # MPI: enable, number of processes, mpirun path
-│   │   │   ├── run_panel.py                     # Pre-flight validation + launch + monitoring
-│   │   │   ├── postprocess_panel.py             # Results viewer, time series, ParaView
-│   │   │   └── sweep_panel.py                   # Parameter sweep configuration
-│   │   ├── dialogs/
-│   │   │   ├── new_project_dialog.py            # Template picker
-│   │   │   ├── kinetics_editor_dialog.py        # Code editor with syntax highlighting
-│   │   │   ├── geometry_creator_dialog.py       # Geometry generator (7 medium types)
-│   │   │   ├── preferences_dialog.py            # Theme, font, paths
-│   │   │   └── about_dialog.py
-│   │   └── widgets/
-│   │       ├── model_tree.py                    # Left-panel navigation tree
-│   │       ├── vtk_viewer.py                    # Embedded VTK 3D viewer
-│   │       ├── console_widget.py                # Color-coded console output
-│   │       ├── convergence_plot.py              # Real-time residual plot
-│   │       ├── geometry_preview.py              # 2D geometry preview widget
-│   │       └── collapsible_section.py
-│   ├── tests/                                   # pytest test suite (7 test files)
-│   │   ├── test_gui_panels.py
-│   │   ├── test_kinetics.py
-│   │   ├── test_pipeline_e2e.py
-│   │   ├── test_project_model.py
-│   │   ├── test_simulation_runner.py
-│   │   ├── test_templates.py
-│   │   └── test_xml_io.py
-│   ├── pyproject.toml                           # Package metadata (setuptools)
+│   │   ├── dialogs/                             # New project, kinetics editor, preferences
+│   │   └── widgets/                             # VTK viewer, console, convergence plot
+│   ├── pyproject.toml                           # Python packaging
 │   ├── requirements.txt                         # Runtime dependencies
-│   └── requirements-dev.txt                     # Development/test dependencies
+│   ├── requirements-dev.txt                     # Test/dev dependencies
+│   └── tests/                                   # pytest test suite
 │
-├── ComapLB3D/                                   # Standalone HPC package (see Section 5)
-│   ├── src/                                     # C++ solver source (identical to root src/)
-│   ├── versionControl/                          # Palabos library container
-│   │   └── palabos-v2.3.0/                     # Bundled Palabos (pre-compiled, do not modify)
+├── ComapLB3D/                                   # Standalone HPC package (Palabos bundled)
+│   ├── src/                                     # Identical to root src/
+│   ├── versionControl/palabos-v2.3.0/          # Bundled Palabos (pre-compiled)
 │   ├── CompLaB.xml                              # Simulation template
 │   ├── defineKinetics.hh                        # Biotic kinetics (edit and recompile)
 │   ├── defineAbioticKinetics.hh                 # Abiotic kinetics (edit and recompile)
-│   ├── CMakeLists.txt                           # Build system (see §5.3 for path adaptation)
 │   ├── comp.sh                                  # SLURM job script (UGA Sapelo2)
-│   ├── input/                                   # Geometry input (geometry.dat)
-│   ├── output/                                  # Simulation output
-│   └── build/                                   # CMake build directory
+│   ├── input/                                   # Place geometry.dat here
+│   └── output/                                  # Output VTK/checkpoint files written here
 │
 ├── tests/                                       # C++ unit tests + analytical validation
-│   ├── README.md                                # Test documentation for reviewers
-│   ├── cpp/                                     # 256 C++ GoogleTest unit tests (no Palabos needed)
-│   │   ├── CMakeLists.txt                       # Fetches GoogleTest v1.14 automatically
-│   │   ├── plb_shim.h                           # Palabos-free shim (enables Palabos-free build)
-│   │   ├── complab3d_processors_part4_eqsolver_standalone.hh  # Standalone eq-solver header
-│   │   ├── test_stability.cpp / _extended.cpp
-│   │   ├── test_abiotic_kinetics.cpp / _extended.cpp
-│   │   ├── test_biotic_kinetics.cpp / _extended.cpp
-│   │   ├── test_planktonic_kinetics.cpp / _extended.cpp
-│   │   ├── test_eq_solver.cpp / _extended.cpp
-│   │   ├── test_diagnostics.cpp
-│   │   └── test_lbm_utils.cpp / _extended.cpp
+│   ├── README.md
+│   ├── cpp/                                     # GoogleTest C++ unit tests
 │   └── run_validation.py                        # Analytical validation runner
 │
 ├── test_cases/
 │   ├── abiotic/                                 # 5 analytical validation cases
-│   │   ├── README.md                            # Full description with expected values
-│   │   ├── defineAbioticKinetics_test2.hh       # Kinetics header for test 2
-│   │   ├── defineAbioticKinetics_test3.hh       # Kinetics header for test 3
-│   │   ├── defineAbioticKinetics_test4.hh       # Kinetics header for test 4
-│   │   ├── defineAbioticKinetics_test5.hh       # Kinetics header for test 5
-│   │   ├── test1_pure_diffusion.xml
-│   │   ├── test2_first_order_decay.xml
-│   │   ├── test3_bimolecular.xml
-│   │   ├── test4_reversible.xml
-│   │   └── test5_decay_chain.xml
-│   └── biotic/
-│       ├── CompLaB.xml                          # Biofilm simulation example
-│       └── defineKinetics.hh                    # Monod kinetics for the biofilm case
+│   ├── biotic/                                  # Biofilm simulation example
+│   └── flow_only/                               # Pure flow benchmark
 │
-├── docs/
-│   ├── CompLaB3D_User_Tutorial.md               # Step-by-step tutorial
-│   ├── CompLaB3D_Technical_Guide.md             # Mathematical formulation and algorithms
-│   └── Geometry_Generator_Tutorial.md
-│
-├── paper/
-│   ├── paper.md                                 # JOSS manuscript
-│   ├── paper.bib                                # Bibliography
-│   ├── paper.pdf                                # Compiled manuscript PDF
-│   ├── figure1.png                              # Solver pipeline flowchart
-│   ├── figure2.png                              # GUI workflow flowchart
-│   └── Appendices/                              # Mathematical appendices A, B, C
-│
+├── paper/                                       # JOSS manuscript (paper.md, paper.bib, figures)
 ├── tools/
-│   └── geometry_generator.py                    # Standalone geometry creation utility
-│
-├── .github/workflows/
-│   ├── cpp-tests.yml                            # CI: C++ unit tests (Ubuntu, auto)
-│   ├── gui-tests.yml                            # CI: Python GUI tests (Python 3.10–3.12)
-│   └── draft-pdf.yml                            # CI: JOSS paper PDF compilation
-│
-├── defineKinetics.hh                            # Default biotic kinetics (user-editable)
-├── defineAbioticKinetics.hh                     # Default abiotic kinetics (user-editable)
-├── CompLaB.xml                                  # Biofilm simulation template
-├── CompLaB_planktonic.xml                       # Planktonic simulation template
-├── CITATION.cff                                 # Machine-readable citation
-├── codemeta.json                                # Software metadata
+│   └── geometry_generator.py                    # Standalone CLI geometry generator (v6.0)
+├── .github/workflows/                           # CI: cpp-tests, gui-tests, draft-pdf
+├── defineKinetics.hh
+├── defineAbioticKinetics.hh
+├── CompLaB.xml
+├── CITATION.cff
+├── codemeta.json
 ├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
-├── HOW_TO_RUN_TESTS.txt                         # Quick-start test instructions
-├── JOSS_CHECKLIST.md                            # Submission checklist
-├── TESTING.md                                   # Detailed testing guide
+├── TESTING.md
+├── .gitignore
 └── LICENSE                                      # GNU AGPL v3
->>>>>>> Stashed changes
 ```
 
-## Quick Start
+---
 
-### 1. Build the C++ Solver
+## 3. Prerequisites
 
-<<<<<<< Updated upstream
-**Prerequisites:** C++11 compiler (GCC 9+, Clang 10+, or MSVC 2019+),
-CMake 3.5+, MPI (OpenMPI or MPICH), Palabos 2.3.0.
+### Model (C++ — required to build and run simulations)
+
+| Requirement                          | Minimum version                | Notes                                   |
+| ------------------------------------ | ------------------------------ | --------------------------------------- |
+| C++ compiler                         | GCC 7+ / Clang 5+ / MSVC 2019+ | C++11 required                          |
+| [Palabos](https://palabos.unige.ch/) | 2.2+                           | AGPL-3.0; required at compile time only |
+| OpenMPI or MPICH                     | OpenMPI 4+ / MPICH 3+          | Required for parallel (MPI) runs        |
+| CMake                                | 3.14+                          |                                         |
+
+**Linux (Ubuntu / Debian):**
 
 ```bash
-# Clone with Palabos in versionControl/palabos-v2.3.0, then:
-mkdir build && cd build
-=======
-### 3.1 Solver (C++ — required to run simulations)
-
-| Requirement | Minimum version | Notes |
-|-------------|----------------|-------|
-| C++ compiler | GCC 7+ or Clang 5+ | Must support C++11 |
-| [Palabos](https://palabos.unige.ch/) | 2.2+ | LBM library (AGPL-3.0). **Required at compile time only** |
-| OpenMPI or MPICH | OpenMPI 4+ / MPICH 3+ | Required for parallel runs |
-| GNU Make or CMake | Make 3.81+ / CMake 3.14+ | CMake only needed for C++ unit tests |
-
-**Ubuntu / Debian:**
-```bash
-sudo apt-get update
 sudo apt-get install -y g++ openmpi-bin libopenmpi-dev make cmake git
 ```
 
-**macOS (Homebrew):**
+**macOS:**
+
 ```bash
 brew install gcc open-mpi cmake
 ```
 
-**Download Palabos** (place alongside the repo):
-```bash
-wget https://gitlab.com/unigespc/palabos/-/archive/v2.3.0/palabos-v2.3.0.tar.gz
-tar -xzf palabos-v2.3.0.tar.gz
-mv palabos-v2.3.0 palabos
-```
+**Windows:** Install [MS-MPI](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi) then either Visual Studio with C++ workload or MSYS2/MinGW-w64.
 
-### 3.2 GUI — CompLaB Studio (optional)
+> **Cluster users:** The `ComapLB3D/` folder bundles Palabos v2.3.0 pre-compiled for GCC 11.3 (UGA Sapelo2 / foss/2022a). Most cluster users only need to run `cmake .. && make` — see [Part 2](#part-2--standalone-hpc--command-line-guide).
 
-The GUI is **not required** to run simulations. It is a convenience tool for users who prefer not to edit XML and C++ files by hand.
+### GUI — CompLaB Studio (optional)
 
 | Requirement | Minimum version |
-|-------------|----------------|
-| Python | 3.10+ |
-| PySide6 | 6.5+ |
-| NumPy | 1.24+ |
-| VTK | 9.2+ |
-| Matplotlib | 3.7+ |
+| ----------- | --------------- |
+| Python      | 3.10+           |
+| PySide6     | 6.5+            |
+| NumPy       | 1.24+           |
+| VTK         | 9.2+            |
+| Matplotlib  | 3.7+            |
 
-All Python dependencies install automatically — see Section 7.
+The GUI is **not required** to run simulations. Install with:
+
+```bash
+cd GUI && pip install -r requirements.txt
+```
 
 ---
 
-## 4. Building the Solver from Source
+## 4. Quick Start
 
-The solver uses a `CMakeLists.txt` at the repository root that links against Palabos.
-
-```bash
-# Clone the repository
-git clone https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR.git
-cd Complab3D-Biotic-Kinetic-AndersopnNR
-
-# Configure — tell CMake where Palabos is
-cmake -S . -B build \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DPLB_ROOT=/path/to/palabos
-
-# Build (use -j N for parallel compilation)
-cmake --build build --parallel 4
-```
-
-This produces the `complab` executable inside `build/`.
-
-> **Tip — quick recompile after editing kinetics:**
-> After modifying `defineKinetics.hh` or `defineAbioticKinetics.hh`, just re-run `cmake --build build --parallel 4`. CMake detects the changed header and recompiles only the affected translation units.
-
----
-
-## 5. Standalone HPC Package (ComapLB3D)
-
-The `JOSS_Submit/ComapLB3D/` folder is a **self-contained, batteries-included package** designed for users who want to run CompLaB3D on an HPC cluster or local Linux machine without managing a separate Palabos installation. Palabos v2.3.0 is **bundled inside the folder** under `versionControl/palabos-v2.3.0/` with a pre-compiled static library (`versionControl/palabos-v2.3.0/build/libpalabos.a`) so that only the CompLaB3D solver itself needs to be compiled.
-
-### 5.1 Folder structure
-
-```
-ComapLB3D/
-├── CMakeLists.txt               # Build configuration (edit Palabos paths for your system)
-├── CompLaB.xml                  # Simulation template — edit before running
-├── defineKinetics.hh            # Biotic (Monod) rate expressions — edit and recompile
-├── defineAbioticKinetics.hh     # Abiotic rate expressions — edit and recompile
-├── comp.sh                      # SLURM job script (configured for UGA Sapelo2)
-├── src/                         # CompLaB3D C++ source
-├── versionControl/              # Palabos library container
-│   └── palabos-v2.3.0/         # Bundled Palabos — do NOT delete or recompile
-│       └── build/libpalabos.a  # Pre-compiled static library (GCC 11.3 / foss/2022a)
-├── input/                       # Place geometry.dat here before running
-├── output/                      # Simulation output written here automatically
-└── build/                       # Run cmake from inside this directory
-```
-
-> **Do not delete or recompile anything inside `versionControl/palabos-v2.3.0/`.** The pre-compiled library was built for the UGA Sapelo2 cluster (GCC 11.3, foss/2022a toolchain). For other architectures, see §5.3.
-
-### 5.2 Building on UGA Sapelo2 (and compatible clusters)
+### Option A — Standalone HPC / command-line
 
 ```bash
-# 1. Load required environment modules
-module purge
-module load foss/2022a
-module load CMake/3.24.3-GCCcore-11.3.0
+# 1. Load modules (UGA Sapelo2 example)
+module purge && module load foss/2022a && module load CMake/3.24.3-GCCcore-11.3.0
 
-# 2. Configure and compile
-cd ComapLB3D/build
-cmake ..
-make -j8
+# 2. Build
+cd ComapLB3D/build && cmake .. && make -j8
+
+# 3. Edit CompLaB.xml and place geometry.dat in input/
+
+# 4. Run
+cd ..
+mpirun -np 8 ./complab          # local
+sbatch comp.sh                  # SLURM cluster
 ```
 
-The compiled `complab` binary is placed in `ComapLB3D/` (one level above `build/`), alongside `CompLaB.xml`.
+→ Full cluster guide: [Part 2 — Standalone HPC](#part-2--standalone-hpc--command-line-guide)
 
-### 5.3 Adapting CMakeLists.txt for other systems
-
-`CMakeLists.txt` contains absolute paths pointing to Palabos on the UGA cluster. To use the bundled copy on any other machine, replace those four lines:
-
-```cmake
-# Original (UGA cluster absolute paths) — change these:
-# include_directories("/scratch/sa01687/.../palabos-v2.3.0/src")
-# ...
-
-# Replace with paths to the bundled copy:
-include_directories("../versionControl/palabos-v2.3.0/src")
-include_directories("../versionControl/palabos-v2.3.0/externalLibraries")
-include_directories("../versionControl/palabos-v2.3.0/externalLibraries/Eigen3")
-file(GLOB_RECURSE PALABOS_SRC "../versionControl/palabos-v2.3.0/src/*.cpp")
-file(GLOB_RECURSE EXT_SRC    "../versionControl/palabos-v2.3.0/externalLibraries/tinyxml/*.cpp")
-```
-
-> **Architecture mismatch:** If the pre-compiled `libpalabos.a` was built for a different CPU or ABI, the linker will fail. In that case, delete `palabos-v2.3.0/build/` and recompile Palabos for your system:
-> ```bash
-> cd versionControl/palabos-v2.3.0 && mkdir -p build && cd build
-> cmake .. -DCMAKE_BUILD_TYPE=Release
-> make -j8
-> ```
-> Then proceed with building CompLaB3D as above.
-
-### 5.4 Configuring and running a simulation
-
-Before running, edit the three files in `ComapLB3D/`:
-
-| File | What to change |
-|------|----------------|
-| `CompLaB.xml` | Grid size (nx, ny, nz), Péclet number, substrate parameters, iteration counts |
-| `defineKinetics.hh` | Monod rate expressions for biotic runs — **requires `make -j8` after editing** |
-| `defineAbioticKinetics.hh` | Abiotic chemical rate expressions — **requires `make -j8` after editing** |
-
-Place your geometry file at `input/geometry.dat` (see Section 8 for geometry generation).
-
-**Interactive / local run:**
-```bash
-# Serial
-./complab
-
-# MPI parallel (8 processes)
-mpirun -np 8 ./complab
-```
-
-**SLURM batch submission:**
-```bash
-sbatch comp.sh
-```
-
-The provided `comp.sh` is pre-configured for the UGA Sapelo2 `meile_p` partition. Edit the SLURM directives to match your cluster's queue name, core count, memory, and wall time:
+### Option B — CompLaB Studio GUI
 
 ```bash
-#!/bin/bash
-#SBATCH --job-name=complb
-#SBATCH --partition=meile_p       # change to your partition
-#SBATCH --nodes=1
-#SBATCH --ntasks=8                # MPI ranks (match to your domain size)
-#SBATCH --mem=16gb
-#SBATCH --time=4:00:00            # wall time HH:MM:SS
-#SBATCH --output=%x.%j.out
-#SBATCH --error=%x.%j.err
+# 1. Install
+cd GUI && pip install -r requirements.txt
 
-module purge
-module load foss/2022a            # provides GCC + OpenMPI
-
-cd $SLURM_SUBMIT_DIR
-srun ./complab
-```
-
-Output VTI files and CSV summaries are written to `output/`.
-
----
-
-## 6. Running the Solver Without the GUI
-
-This is the recommended approach for HPC clusters, batch jobs, and reproducibility.
-
-### 6.1 Prepare the three required inputs
-
-**a) XML configuration file**
-
-Copy and edit one of the provided templates:
-```bash
-cp CompLaB.xml my_simulation.xml   # biofilm (biotic) template
-# or
-cp CompLaB_planktonic.xml my_simulation.xml   # planktonic template
-```
-
-The most important settings are in the `<simulation_mode>` block (see Section 8).
-
-**b) Geometry file**
-
-Generate a synthetic pore geometry with the built-in geometry tool:
-```bash
-cd tools
-python geometry_generator.py
-# Follow prompts: choose medium type, set dimensions
-# Output: input/geometry.dat (binary voxel mask)
-```
-
-Or import a segmented micro-CT image stack (BMP/PNG/TIF/JPG) through the same script.
-
-**c) Kinetics headers**
-
-For biotic simulations, edit `defineKinetics.hh` to define your Monod rate expressions.
-For abiotic simulations, edit `defineAbioticKinetics.hh`.
-These headers are compiled into the solver — **rebuild after every edit**.
-
-### 6.2 Serial run
-
-```bash
-./build/complab my_simulation.xml
-```
-
-### 6.3 Parallel run (MPI)
-
-```bash
-# 4 MPI processes
-mpirun -np 4 ./build/complab my_simulation.xml
-
-# SLURM cluster
-srun -n 16 ./build/complab my_simulation.xml
-```
-
-CompLaB3D uses Palabos domain decomposition — the grid is split automatically across processes. Any number of processes is supported; choose a value that divides the domain dimensions evenly for best efficiency.
-
-### 6.4 Startup output
-
-On launch, the solver prints a stability check report:
-
-```
-╔══════════════════════════════════════════════════════════════╗
-║              STABILITY CHECK REPORT                          ║
-╠══════════════════════════════════════════════════════════════╣
-║ Ma = 0.0231 OK   CFL = 0.0400 OK                            ║
-║ tau_NS = 0.8000 OK   tau_ADE = 0.7500 OK                    ║
-║ Pe_grid = 1.2000 OK                                          ║
-╚══════════════════════════════════════════════════════════════╝
-```
-
-If any criterion fails, the solver prints a descriptive error and exits before running.
-
-**Stability criteria enforced:**
-
-| Criterion | Requirement | Physical meaning |
-|-----------|-------------|-----------------|
-| Mach number | Ma < 0.3 (warn) / < 1.0 (hard limit) | Low-velocity incompressible flow |
-| CFL | CFL = u_max < 1.0 | Numerical stability of streaming step |
-| NS relaxation time | 0.5 < τ_NS < 2.0 | Viscosity physically representable |
-| ADE relaxation time | 0.5 < τ_ADE < 2.0 | Diffusivity physically representable |
-| Grid Péclet number | Pe_grid < 2.0 (warn) | Advection does not dominate per lattice cell |
-
----
-
-## 7. Running CompLaB Studio (GUI)
-
-CompLaB Studio is an optional graphical interface for users who prefer not to edit XML and C++ files directly. **The solver must be compiled separately** (Section 4 or 5) before using the GUI to launch simulations.
-
-### 7.1 Install
-
-```bash
-cd GUI
-
-# Recommended: install as an editable package
-pip install -e .
-
-# Or install runtime dependencies only
-pip install -r requirements.txt
-```
-
-### 7.2 Launch
-
-```bash
-# From the GUI/ directory:
+# 2. Launch
 python main.py
-
-# Or, if installed as a package:
-complab-studio
 ```
 
-A splash screen appears for ~3 seconds, then the main window opens.
-
-> **Debug mode:** Set the environment variable `COMPLAB_DEBUG=1` before launching to enable verbose stderr logging alongside the rotating log file at `~/.complab_studio/complab_gui.log`.
-
-### 7.3 Main window layout
-
-The interface uses a **COMSOL-style 4-panel layout** (minimum window size: 1200 × 800 px):
-
-```
-┌─────────────────┬──────────────────────────────┬─────────────────────┐
-│  Model Builder  │                              │  Configuration      │
-│  (navigation    │    VTK 3D Viewer             │  Panel              │
-│   tree)         │    (always visible)          │  (context-sensitive)│
-│                 │                              │                     │
-├─────────────────┴──────────────────────────────┴─────────────────────┤
-│  Console output (color-coded)  │  Real-time convergence residual plot │
-└────────────────────────────────┴─────────────────────────────────────┘
-```
-
-### 7.4 Workflow step by step
-
-1. **New Project** — `File → New Project` → choose one of six templates:
-
-   | Template | Description |
-   |----------|-------------|
-   | Flow Only | NS solver only, no transport |
-   | Flow + Transport | Tracer advection-diffusion |
-   | Flow + Transport + Custom Reactions | Abiotic kinetics |
-   | Flow + Transport + Microbes | Planktonic microbial transport |
-   | Flow + Transport + Reactions + Microbes | Coupled biotic + abiotic |
-   | Flow + Transport + Biofilm | Full CA biofilm simulation |
-
-2. **Domain** — set grid dimensions (Nx, Ny, Nz) and porosity target.
-
-3. **Geometry** — generate a synthetic geometry (7 medium types: sphere packs, Gaussian random fields, parallel plates, fibrous media, etc.) or import a segmented micro-CT image stack. Set initial biofilm distribution (14 spatial scenarios available).
-
-4. **Chemistry** — define dissolved substrates: name, diffusion coefficient, initial concentration, boundary conditions (Dirichlet / Neumann).
-
-5. **Equilibrium** *(optional)* — configure aqueous speciation reactions: component names, stoichiometric matrix, log K values.
-
-6. **Microbiology** — define microbial populations: Monod kinetic parameters (μ_max, K_s, yield, decay), solver type (CA / LBM / FD / kinetics-only), initial biomass.
-
-7. **Kinetics Editor** — choose a built-in rate-law template or write custom C++ expressions:
-
-   | Built-in template | Rate law |
-   |-------------------|----------|
-   | Monod | μ = μ_max × S/(K_s + S) |
-   | Dual-substrate Monod | μ = μ_max × S1/(K1+S1) × S2/(K2+S2) |
-   | Haldane inhibition | μ = μ_max × S/(K_s + S + S²/K_i) |
-   | First-order decay | dA/dt = −k·A |
-   | Bimolecular | dA/dt = dB/dt = −k·A·B |
-   | Reversible | A ⇌ B, K_eq = k_f/k_r |
-   | Mineral dissolution | Rate = k·(1 − Ω) |
-
-8. **Run panel** — pre-flight validation checks all stability criteria before launch. The panel shows real-time iteration count, elapsed time, ETA, NS/ADE residuals, and color-coded console output. MPI settings (number of processes, mpirun path) are configured here.
-
-9. **Post-processing** — open VTI files in the built-in VTK viewer: threshold filters, slice planes, vector glyphs for velocity fields. Click "Open in ParaView" for full-featured visualization.
-
-### 7.5 Preferences
-
-`Edit → Preferences`:
-- **Theme**: dark (default) or light
-- **Font size**: adjustable
-- **Paths**: compiled `complab` executable path, ParaView installation path
+→ Full GUI guide: [Part 3 — GUI Workflow](#part-3--gui-workflow-guide-complab-studio)
 
 ---
 
-## 8. XML Configuration Reference
+## 5. Test Suite
 
-All solver parameters are controlled by a single XML file. The annotated templates `CompLaB.xml` and `CompLaB_planktonic.xml` at the repository root are the best starting point. Key blocks:
+CompLaB3D has **744+ automated tests** in two categories, all running on GitHub Actions CI.
 
-```xml
-<simulation_mode>
-    <biotic_mode>true</biotic_mode>               <!-- true = with microbes -->
-    <enable_kinetics>true</enable_kinetics>         <!-- Monod kinetics on/off -->
-    <enable_abiotic_kinetics>false</enable_abiotic_kinetics>
-    <enable_validation_diagnostics>false</enable_validation_diagnostics> <!-- slow; debug only -->
-</simulation_mode>
+### 5.1 C++ Unit Tests — 382 tests (no Palabos required)
 
-<domain>
-    <nx>50</nx>  <ny>50</ny>  <nz>50</nz>          <!-- lattice dimensions -->
-    <geometry_file>input/geometry.dat</geometry_file>
-</domain>
-
-<numerics>
-    <tau_NS>0.8</tau_NS>            <!-- NS relaxation time → viscosity -->
-    <Pe>2.0</Pe>                    <!-- target Péclet number (sets pressure gradient) -->
-    <max_iterations>50000</max_iterations>
-    <output_frequency>1000</output_frequency>
-    <checkpoint_frequency>5000</checkpoint_frequency>
-</numerics>
-
-<chemistry>
-    <number_of_substrates>2</number_of_substrates>
-    <substrate id="0">
-        <name>DOC</name>
-        <D_pore>1.0e-9</D_pore>           <!-- diffusion in pore fluid [m²/s] -->
-        <D_biofilm>5.0e-10</D_biofilm>    <!-- diffusion in biofilm -->
-        <inlet_concentration>1.0e-4</inlet_concentration>
-    </substrate>
-</chemistry>
-
-<microbiology>
-    <number_of_species>1</number_of_species>
-    <species id="0">
-        <solver_type>CA</solver_type>      <!-- CA, LBM, FD, kinetics_only -->
-        <initial_biomass>0.1</initial_biomass>
-        <B_max>1.0</B_max>
-    </species>
-</microbiology>
-
-<output>
-    <output_path>output/</output_path>
-    <save_velocity>true</save_velocity>
-    <save_geometry>true</save_geometry>
-</output>
-```
-
-Full XML reference: `docs/CompLaB3D_User_Tutorial.md`.
-
----
-
-## 9. Output Files
-
-All output goes to the directory specified by `<output_path>` in the XML:
-
-| File pattern | Format | Content |
-|-------------|--------|---------|
-| `substrate_NNNNNNN.vti` | VTK ImageData | Concentration field at iteration N |
-| `velocity_NNNNNNN.vti` | VTK ImageData | Velocity field (u_x, u_y, u_z) |
-| `biomass_NNNNNNN.vti` | VTK ImageData | Biomass density field |
-| `maskLattice_NNNNNNN.vti` | VTK ImageData | Pore geometry / mask (changes with biofilm) |
-| `checkpoint_NNNNNNN.chk` | Binary | Restart checkpoint (resume interrupted runs) |
-| `btc_*.csv` | CSV | Breakthrough curve time series per substrate |
-| `moments_summary.csv` | CSV | First and second spatial moments of BTCs |
-| `domain_properties.csv` | CSV | Porosity, permeability, Pe, Ma, CFL, τ |
-| `simulation_*.out` | Text | Full solver console log |
-
-VTI files open directly in **ParaView** or the built-in GUI viewer.
-
----
-
-## 10. Test Suite
-
-CompLaB3D has **553+ automated tests** in three categories, all integrated with GitHub Actions CI.
-
-### 10.1 C++ Unit Tests — 256 tests (no Palabos required)
-
-The C++ tests use **GoogleTest v1.14** fetched automatically by CMake via `FetchContent`, plus a Palabos-free shim (`tests/cpp/plb_shim.h`). You do **not** need Palabos or MPI installed to build and run these tests.
+**Linux / macOS:**
 
 ```bash
-cd tests/cpp
-mkdir -p build && cd build
->>>>>>> Stashed changes
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
-```
-
-<<<<<<< Updated upstream
-The executable `complab` is placed in the project root.
-
-To point CMake at a custom Palabos location:
-
-```bash
-cmake .. -DPALABOS_ROOT=/path/to/palabos-v2.3.0
-```
-
-### 2. Install the GUI
-
-**Prerequisites:** Python 3.10+
-
-```bash
-cd GUI
-=======
-Expected result: **256 tests passed, 0 failed** (runtime ~20 seconds on a laptop).
-
-**Test executables and coverage:**
-
-| Executable | What is tested | # Tests |
-|------------|---------------|---------|
-| `test_stability` | Ma, CFL, τ_NS, τ_ADE, Pe_grid bounds | 14 |
-| `test_stability_extended` | Edge cases, boundary values, combined failures | ~20 |
-| `test_abiotic_kinetics` | First-order decay, bimolecular, reversible, decay chain | 8 |
-| `test_abiotic_kinetics_extended` | Multi-species coupling, mass conservation | ~15 |
-| `test_biotic_kinetics` | Monod growth, substrate uptake, biomass yield | 11 |
-| `test_biotic_kinetics_extended` | Haldane inhibition, endogenous decay, clamping | ~20 |
-| `test_planktonic_kinetics` | Suspended biomass transport + Monod | 17 |
-| `test_planktonic_kinetics_extended` | Multi-population, edge cases | ~20 |
-| `test_eq_solver` | Anderson-accelerated NR equilibrium solver, PCF formulation | 27 |
-| `test_eq_solver_extended` | Convergence on stiff systems, log K ranges | ~25 |
-| `test_diagnostics` | Mass balance checking, per-iteration diagnostic output | 21 |
-| `test_lbm_utils` | D3Q7 weights, Darcy velocity, FD Laplacian | 30 |
-| `test_lbm_utils_extended` | Unit conversions, lattice math, boundary conditions | ~28 |
-
-Run a single executable for detailed output:
-```bash
-./test_biotic_kinetics --gtest_verbose
-./test_eq_solver --gtest_filter="*Anderson*"
-```
-
-### 10.2 Python / GUI Tests — 297+ tests
-
-The GUI test suite uses **pytest** and **pytest-qt**, covering all configuration panels, dialogs, kinetics code generation, XML/JSON serialisation, the simulation runner subprocess lifecycle, and full end-to-end pipeline workflows.
-
-```bash
-cd GUI
-
-# Install with dev dependencies
->>>>>>> Stashed changes
-pip install -e ".[dev]"
-complab-studio          # launch the GUI
-# or:  python -m src.main
-```
-
-### 3. Run a Simulation
-
-1. Open CompLaB Studio and pick a template (e.g. *Biotic Sessile*).
-2. Configure substrates, microbes, and solver parameters.
-3. Export the XML and kinetics header.
-4. Run the solver from the GUI's Solver panel or from the terminal:
-
-```bash
-mpirun -np 4 ./complab CompLaB.xml
-```
-
-Results are written to `output/` as VTI files viewable in ParaView.
-
-## Simulation Templates
-
-| # | Template | Type | Description |
-|---|----------|------|-------------|
-| 1 | flow_only | Abiotic | Pure Navier-Stokes flow, no chemistry |
-| 2 | diffusion_only | Abiotic | Pure diffusion (Pe = 0), no reactions |
-| 3 | tracer_transport | Abiotic | Flow + passive tracer, no reactions |
-| 4 | abiotic_reaction | Abiotic | First-order decay: A to Product |
-| 5 | abiotic_equilibrium | Abiotic | Carbonate equilibrium (no kinetic rxn) |
-| 6 | biotic_sessile | Biotic | Sessile biofilm with CA solver, 1 microbe |
-| 7 | biotic_planktonic | Biotic | Planktonic bacteria via LBM, 1 microbe |
-| 8 | biotic_sessile_planktonic | Biotic | Sessile + planktonic, 2 microbes |
-| 9 | coupled_biotic_abiotic | Coupled | Biofilm + abiotic decay simultaneously |
-
-## Testing
-
-```bash
-cd GUI
-python -m pytest tests/ -v
-<<<<<<< Updated upstream
-```
-
-All 275 tests run without the C++ binary (mocked solver). They cover template
-generation, XML building/parsing, kinetics code generation, cross-validation,
-project data model validation, and end-to-end pipeline flows.
-
-## Documentation
-
-| Document | Contents |
-|----------|----------|
-| [Technical Guide](docs/CompLaB3D_Technical_Guide.md) | Monod kinetics, CA biofilm, equilibrium solver internals |
-| [User Tutorial](docs/CompLaB3D_User_Tutorial.md) | Step-by-step GUI walkthrough |
-| [Geometry Tutorial](docs/Geometry_Generator_Tutorial.md) | 3D pore geometry generation |
-| [GUI README](GUI/README.md) | Reviewer/tester quick-start for the Python GUI |
-| [Kinetics README](kinetics/README.md) | Details on each of the 9 scenario templates |
-| [Installation Guide](INSTALL.md) | Platform-specific build and install instructions |
-| [Changelog](CHANGELOG.md) | Version history and release notes |
-
-## How to Cite
-=======
-
-# Run a specific module
-python -m pytest tests/test_kinetics.py -v
-
-# Run with coverage report
-python -m pytest tests/ --cov=src --cov-report=term-missing
-
-# Headless (CI / no display server)
-QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v --tb=short
-```
-
-Expected result: **297+ tests passed, 0 failed** (runtime ~30 seconds).
-
-**Test modules:**
-
-| Module | What is tested | # Tests |
-|--------|---------------|---------|
-| `test_gui_panels.py` | All 13 configuration panels: render, populate, validate | 120+ |
-| `test_kinetics.py` | Code generation for all 7 built-in rate-law templates | 86 |
-| `test_xml_io.py` | XML export/import round-trips, schema validation | 21 |
-| `test_project_model.py` | `CompLaBProject` data model, serialisation to/from JSON | ~30 |
-| `test_simulation_runner.py` | Subprocess launch, cancellation, crash handling, MPI | 18 |
-| `test_templates.py` | All 6 project templates produce valid XML configurations | ~15 |
-| `test_pipeline_e2e.py` | End-to-end: create project → configure → export XML → validate | 93 |
-
-### 10.3 Continuous Integration
-
-All tests run automatically on GitHub Actions on every push:
-
-| Workflow | Trigger | Runs on |
-|----------|---------|---------|
-| `cpp-tests.yml` | Push/PR to `src/`, `tests/cpp/`, `defineKinetics.hh` | Ubuntu latest |
-| `gui-tests.yml` | Push/PR to `GUI/` | Ubuntu, Python 3.10, 3.11, 3.12 |
-| `draft-pdf.yml` | Push/PR to `paper/paper.md`, `paper.bib`, figures | Ubuntu (JOSS editorial bot) |
-
----
-
-## 11. Analytical Validation Cases
-
-Five complete validation cases in `test_cases/abiotic/` let you verify solver correctness against closed-form analytical solutions. Each case runs in a simple 1D channel geometry and finishes in under a minute on a laptop.
-
-| Case | Reaction | Analytical solution | Key check |
-|------|----------|---------------------|-----------|
-| **Test 1** — Pure diffusion | ∂C/∂t = D∇²C | Linear steady-state C(x) = C₀(1 − x/L) | C_left=1, C_mid≈0.5, C_right→0 |
-| **Test 2** — First-order decay | A → products, dA/dt = −k·A | Exponential: A(t) = A₀·e^(−kt), k = 1×10⁻⁴ s⁻¹ | Half-life at t = 6930 s |
-| **Test 3** — Bimolecular | A + B → C, r = k·A·B | Mass conservation: A+B+C = 1.5 mol/L | B exhausted, C = 0.5 mol/L |
-| **Test 4** — Reversible | A ⇌ B, K_eq = k_f/k_r = 2 | Equilibrium: B/A → 2, A_eq = 0.333, B_eq = 0.667 | A+B = 1.0 mol/L constant |
-| **Test 5** — Sequential decay | A → B → C (Bateman) | Transient peak in B at t_max ≈ 6932 s | A+B+C = 1.0 mol/L constant |
-
-### Running a validation case
-
-```bash
-# Step 1 — copy the kinetics header for this test
-cp test_cases/abiotic/defineAbioticKinetics_test2.hh defineAbioticKinetics.hh
-
-# Step 2 — rebuild (required after changing the kinetics header)
-cmake --build build --parallel 4
-
-# Step 3 — generate a channel geometry
-cd tools && python geometry_generator.py && cd ..
-
-# Step 4 — run
-./build/complab test_cases/abiotic/test2_first_order_decay.xml
-
-# Step 5 — visualise
-paraview output_abiotic_test2_decay/substrate*.vti
-```
-
-### Dry-run validation (checks XML and kinetics files without running the solver)
-
-```bash
-python tests/run_validation.py --dry-run
-```
-
-This script verifies that all five XML files and their associated kinetics headers are syntactically correct and internally self-consistent. It runs in seconds with no Palabos or MPI installation required and is part of the CI pipeline (`cpp-tests.yml`).
-
-Full case descriptions with expected output values and troubleshooting: `test_cases/abiotic/README.md`.
-
----
-
-## 12. Documentation
-
-| Document | Location | Audience |
-|----------|----------|---------|
-| User Tutorial | `docs/CompLaB3D_User_Tutorial.md` | New users: installation through first simulation |
-| Technical Guide | `docs/CompLaB3D_Technical_Guide.md` | Developers: full equations, algorithms, data structures |
-| Geometry Generator Tutorial | `docs/Geometry_Generator_Tutorial.md` | Creating synthetic geometries and importing micro-CT data |
-| Testing Guide | `TESTING.md` | All test types, what each covers, CI configuration |
-| JOSS Paper | `paper/paper.md` | Scientific context, state of field, research impact |
-| Mathematical Appendices | `paper/Appendices/` | Appendix A: equilibrium solver; B: CA algorithm; C: GUI details |
-
----
-
-## 13. For JOSS Editors and Reviewers
-
-This section consolidates the JOSS review checklist in one place.
-
-### Licenses
-
-| Component | License | File |
-|-----------|---------|------|
-| Solver (`src/`) | GNU Affero General Public License v3.0 | `LICENSE` |
-| GUI (`GUI/`) | UGA Research Foundation proprietary | `GUI/LICENSE` |
-| Upstream Palabos | AGPL-3.0 (compatible) | https://palabos.unige.ch/ |
-
-### Verify the C++ unit tests (~20 seconds, no Palabos required)
-
-```bash
-cd tests/cpp
-mkdir -p build && cd build
+cd tests/cpp && mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --parallel
 ctest --output-on-failure
 ```
 
-Expected: **256 passed, 0 failed.**
+**Windows (Visual Studio Developer Command Prompt):**
 
-### Verify the GUI tests (~30 seconds)
+```bat
+cd tests\cpp && mkdir build && cd build
+cmake .. -G "Visual Studio 17 2022" -A x64
+cmake --build . --config Release --parallel
+ctest -C Release --output-on-failure
+```
+
+Expected result: **382 passed, 0 failed** (~1 second on a laptop).
+
+| Executable                                                                           | What is tested                                                | Tests   |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------- | ------- |
+| `test_stability` / `_extended`                                                       | Ma, CFL, τ, Pe_grid bounds and edge cases                     | 40      |
+| `test_abiotic_kinetics` / `_extended`                                                | First-order decay, bimolecular, reversible, mass conservation | 50      |
+| `test_biotic_kinetics` / `_extended`                                                 | Monod growth, substrate uptake, Haldane inhibition, decay     | 55      |
+| `test_planktonic_kinetics` / `_extended`                                             | Suspended biomass transport + Monod, multi-population         | 37      |
+| `test_eq_solver` / `_extended`                                                       | Anderson-NR equilibrium model, stiff systems, log K ranges    | 51      |
+| `test_diagnostics`                                                                   | Mass balance checking, diagnostic output                      | 20      |
+| `test_lbm_utils` / `_extended`                                                       | D3Q7 weights, Darcy velocity, FD Laplacian, unit conversions  | 65      |
+| `test_bc`, `test_growth_integration`, `test_diffusion_bc`, `test_reaction_transport` | BCs, Euler integration, 1D profiles, Pe/Da/Thiele             | 64      |
+| **Total**                                                                            |                                                               | **382** |
+
+Full descriptions: `tests/README.md`.
+
+### 5.2 Python / GUI Tests — 362+ tests (no model required)
 
 ```bash
 cd GUI
-pip install -e ".[dev]"
-QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v --tb=short
+pip install PySide6 pytest pytest-qt
+python -m pytest tests/ -v
+# Headless Linux (CI):
+QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
 ```
 
-Expected: **297+ passed, 0 failed.**
+Expected: **362 passed, 5 skipped** (5 skipped require a graphical Qt display; they pass on desktop).
 
-### Verify the analytical validation dry-run (~5 seconds)
+| Module                      | What is tested                                         | Tests |
+| --------------------------- | ------------------------------------------------------ | ----- |
+| `test_project_model.py`     | Parameter validation before XML export                 | 24    |
+| `test_templates.py`         | All 9 built-in templates produce valid configs         | 38    |
+| `test_xml_io.py`            | XML export/import round-trips, schema validation       | 48    |
+| `test_kinetics.py`          | C++ code generation, array-index cross-validation      | 70    |
+| `test_pipeline_e2e.py`      | End-to-end: template → XML → kinetics → fake model run | 87    |
+| `test_xml_diagnostic.py`    | Crash diagnostic module                                | 47    |
+| `test_config.py`            | AppConfig persistence, malformed-JSON recovery         | 36    |
+| `test_simulation_runner.py` | Subprocess launch, cancel, crash, MPI, stdout flood    | ~11   |
+| `test_gui_panels.py`        | All 13 configuration panels: load/save round-trips     | ~80   |
+
+Full descriptions: `GUI/tests/README.md`.
+
+### 5.3 Continuous Integration
+
+| Workflow        | Trigger                                              | Runs on                     |
+| --------------- | ---------------------------------------------------- | --------------------------- |
+| `cpp-tests.yml` | Push/PR to `src/`, `tests/cpp/`, `defineKinetics.hh` | Ubuntu latest               |
+| `gui-tests.yml` | Push/PR to `GUI/`                                    | Ubuntu, Python 3.10–3.12    |
+| `draft-pdf.yml` | Push/PR to `paper/`                                  | Ubuntu (JOSS editorial bot) |
+
+---
+
+## 6. Analytical Validation Cases
+
+Five complete validation cases in `test_cases/abiotic/` verify model correctness against closed-form analytical solutions.
+
+| Case                           | Reaction              | Key check                                   |
+| ------------------------------ | --------------------- | ------------------------------------------- |
+| **Test 1** — Pure diffusion    | ∂C/∂t = D∇²C          | C_left=1, C_mid≈0.5, C_right→0              |
+| **Test 2** — First-order decay | A → products, r = k·A | Half-life at t = 6930 s (k = 1×10⁻⁴ s⁻¹)    |
+| **Test 3** — Bimolecular       | A + B → C, r = k·A·B  | B exhausted, C = 0.5 mol/L; A+B+C conserved |
+| **Test 4** — Reversible        | A ⇌ B, K_eq = 2       | B/A → 2; A+B = 1.0 mol/L constant           |
+| **Test 5** — Sequential decay  | A → B → C (Bateman)   | Transient B peak; A+B+C = 1.0 constant      |
+
+**Dry-run check (no model needed):**
+
+```bash
+python tests/run_validation.py --dry-run
+```
+
+**Full run (Test 2 example):**
+
+```bash
+cp test_cases/abiotic/defineAbioticKinetics_test2.hh defineAbioticKinetics.hh
+cmake --build build --parallel 4
+./build/complab test_cases/abiotic/test2_first_order_decay.xml
+```
+
+Full descriptions: `test_cases/abiotic/README.md`.
+
+---
+
+## 7. Output Files
+
+All output goes to the directory specified by `<output_path>` in the XML:
+
+| File pattern              | Format        | Content                                |
+| ------------------------- | ------------- | -------------------------------------- |
+| `substrate_NNNNNNN.vti`   | VTK ImageData | Concentration field at iteration N     |
+| `velocity_NNNNNNN.vti`    | VTK ImageData | Velocity field (u_x, u_y, u_z)         |
+| `biomass_NNNNNNN.vti`     | VTK ImageData | Biomass density field                  |
+| `maskLattice_NNNNNNN.vti` | VTK ImageData | Pore geometry / mask                   |
+| `checkpoint_NNNNNNN.chk`  | Binary        | Restart checkpoint                     |
+| `btc_*.csv`               | CSV           | Breakthrough curve time series         |
+| `moments_summary.csv`     | CSV           | First and second spatial moments       |
+| `domain_properties.csv`   | CSV           | Porosity, permeability, Pe, Ma, CFL, τ |
+| `simulation_*.out`        | Text          | Full model console log                 |
+
+VTI files open directly in **ParaView** or the built-in GUI viewer.
+
+---
+
+## 8. Documentation
+
+| Document                      | Location                                         |
+| ----------------------------- | ------------------------------------------------ |
+| Top-level README (this file)  | `README.md`                                      |
+| GUI README                    | `GUI/README.md`                                  |
+| Paper README                  | `paper/README.md`                                |
+| C++ Test Descriptions         | `tests/README.md`                                |
+| GUI Test Descriptions         | `GUI/tests/README.md`                            |
+| Combined testing guide        | `TESTING.md`                                     |
+| Contribution guidelines       | `CONTRIBUTING.md`                                |
+| Code of Conduct               | `CODE_OF_CONDUCT.md`                             |
+| JOSS Paper                    | `paper/paper.md`                                 |
+| Annotated XML config template | `CompLaB.xml` (root) and `ComapLB3D/CompLaB.xml` |
+| Annotated kinetics template   | `defineKinetics.hh`, `defineAbioticKinetics.hh`  |
+
+---
+
+## 9. For JOSS Editors and Reviewers
+
+### Licenses
+
+| Component        | License                                | File                      |
+| ---------------- | -------------------------------------- | ------------------------- |
+| Model (`src/`)   | GNU Affero General Public License v3.0 | `LICENSE`                 |
+| GUI (`GUI/`)     | AGPL-3.0 OR commercial (UGARF)         | `GUI/LICENSE`             |
+| Upstream Palabos | AGPL-3.0 (compatible)                  | https://palabos.unige.ch/ |
+
+The GUI is dual-licensed by the University of Georgia Research Foundation:
+AGPL-3.0 for open-source / academic use, or a separate commercial license
+available through <https://uga.flintbox.com/#technologies/aa12627e-b4e4-43dc-b458-ff56d0cb4480>.
+See §11 below for the full license details.
+
+### Verify the C++ unit tests (~1 second, no Palabos required)
+
+```bash
+cd tests/cpp && mkdir -p build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel
+ctest --output-on-failure
+```
+
+Expected: **382 passed, 0 failed.**
+
+### Verify the GUI tests (~12 seconds, no model required)
+
+```bash
+cd GUI
+pip install PySide6 pytest pytest-qt
+QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
+```
+
+Expected: **362 passed, 5 skipped.**
+
+### Verify the analytical validation dry-run
 
 ```bash
 python tests/run_validation.py --dry-run
@@ -946,76 +425,49 @@ python tests/run_validation.py --dry-run
 
 Expected: all 5 cases report OK.
 
-### Compile and run the solver
+### Compile and run the model
 
-Requires Palabos (see Section 3) and MPI. Test 2 (first-order decay, 1D channel) runs in under a minute:
+Requires Palabos and MPI. Test 2 runs in under a minute:
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DPLB_ROOT=/path/to/palabos
 cmake --build build --parallel 4
 cp test_cases/abiotic/defineAbioticKinetics_test2.hh defineAbioticKinetics.hh
-cmake --build build --parallel 4   # recompile with test kinetics
+cmake --build build --parallel 4
 ./build/complab test_cases/abiotic/test2_first_order_decay.xml
 ```
 
-Alternatively, use the standalone `ComapLB3D/` package (Section 5) which requires no separate Palabos installation.
+Alternatively, use the standalone `ComapLB3D/` package (see [Part 2](#part-2--standalone-hpc--command-line-guide)).
 
 ### Verify the JOSS paper PDF
 
-The PDF is compiled on every push via `draft-pdf.yml` (JOSS editorial bot). Download the artifact from the Actions tab, or compile locally with Docker:
-
 ```bash
-docker run --rm \
-  -v $(pwd)/paper:/data \
-  openjournals/inara \
-  -o pdf paper.md
+docker run --rm -v $(pwd)/paper:/data openjournals/inara -o pdf paper.md
 ```
 
 ### JOSS paper sections
 
-| Section | Present | Lines in paper.md |
-|---------|---------|------------------|
-| Summary | ✅ | ~26–30 |
-| Statement of Need | ✅ | ~32–34 |
-| Model Description | ✅ | ~36–96 |
-| State of the Field | ✅ | ~98–100 |
-| Research Impact | ✅ | ~102–104 |
-| AI Usage Disclosure | ✅ | ~106–108 |
-
-### Installation instructions
-Sections 3, 4, 5, and 7 of this README.
-
-### Example usage
-`CompLaB.xml` and `CompLaB_planktonic.xml` at the repository root are fully-annotated ready-to-run templates. The five cases in `test_cases/abiotic/` are minimal working examples with known analytical solutions.
-
-### API / configuration documentation
-Full XML reference in `docs/CompLaB3D_User_Tutorial.md`. Kinetics API documented in the annotated `defineKinetics.hh` and `defineAbioticKinetics.hh` headers.
+| Section             | Present | Lines in paper.md |
+| ------------------- | ------- | ----------------- |
+| Summary             | ✅       | ~26–30            |
+| Statement of Need   | ✅       | ~32–34            |
+| Model Description   | ✅       | ~36–96            |
+| State of the Field  | ✅       | ~98–100           |
+| Research Impact     | ✅       | ~102–104          |
+| AI Usage Disclosure | ✅       | ~106–108          |
 
 ### Community guidelines
-`CONTRIBUTING.md` — how to contribute, report issues, request features.
-`CODE_OF_CONDUCT.md` — Contributor Covenant v2.1.
+
+- `CONTRIBUTING.md` — how to contribute, report issues, request features
+- `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
 
 ---
 
-## 14. Citation
->>>>>>> Stashed changes
+## 10. Citation
 
 If you use CompLaB3D in your research, please cite:
 
 ```bibtex
-<<<<<<< Updated upstream
-@software{complab3d,
-  author    = {Asgari, Shahram},
-  title     = {{CompLaB3D}: A 3D Pore-Scale Biogeochemical Reactive
-               Transport Simulator},
-  version   = {2.1.0},
-  url       = {https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR},
-  license   = {GPL-3.0}
-}
-```
-
-See also [CITATION.cff](CITATION.cff) for machine-readable citation metadata.
-=======
 @article{Asgari:2026,
   title   = {{CompLaB3D}: A Three-Dimensional Pore-Scale Reactive Transport
              Model Framework and Graphical User Interface Coupling Lattice
@@ -1029,32 +481,1247 @@ See also [CITATION.cff](CITATION.cff) for machine-readable citation metadata.
 ```
 
 A machine-readable citation is in `CITATION.cff`.
->>>>>>> Stashed changes
-
-## Contributing
-
-<<<<<<< Updated upstream
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
-before opening a pull request. All participants are expected to follow the
-[Code of Conduct](CODE_OF_CONDUCT.md).
-
-## License
-
-CompLaB3D is released under the
-[GNU General Public License v3.0](LICENSE).
-=======
-## 15. License
-
-**Solver (`src/`):** GNU Affero General Public License v3.0 — see `LICENSE`.
-CompLaB3D is built on [Palabos](https://palabos.unige.ch/) (AGPL-3.0, University of Geneva).
-
-**GUI (`GUI/`):** © 2025–2026 University of Georgia Research Foundation, Inc.
-CompLaB Studio was created by Shahram Asgari and Christof Meile at the Department of Marine Sciences, University of Georgia.
-For licensing inquiries: https://uga.flintbox.com/#technologies/aa12627e-b4e4-43dc-b458-ff56d0cb4480
 
 ---
 
-## 16. Acknowledgements
+## 11. License
 
-CompLaB3D is developed at the **Meile Lab**, Department of Marine Sciences, University of Georgia. The solver is built on the [Palabos](https://palabos.unige.ch/) open-source LBM library (University of Geneva). Development was supported by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research, Genomic Science Program, Award Number DE-SC0022991.
->>>>>>> Stashed changes
+CompLaB3D is distributed under a **dual-component licensing model**: the C++
+model is open-source under the GNU Affero General Public License v3.0, while
+the CompLaB Studio GUI is dual-licensed by the University of Georgia Research
+Foundation (AGPL-3.0 for open-source / academic use, with a separate commercial
+license available).
+
+### Model — `src/` and root `CMakeLists.txt`
+
+GNU Affero General Public License v3.0 — see [`LICENSE`](LICENSE).
+
+CompLaB3D is built on [Palabos](https://palabos.unige.ch/) (AGPL-3.0,
+University of Geneva), included in `versionControl/palabos-v2.3.0/`.
+
+### GUI — `GUI/`
+
+© 2025–2026 University of Georgia Research Foundation, Inc.
+
+CompLaB Studio (the graphical user interface for CompLaB3D, comprising
+everything in this `GUI/` directory) was created by Shahram Asgari and
+Christof Meile at the University of Georgia, Department of Marine Sciences.
+
+The GUI is **dual-licensed** by UGARF:
+
+1. **Open-source / academic use** — GNU Affero General Public License v3.0.
+   Use, copy, modify, and redistribute under the terms of the AGPL-3.0
+   (see [`GUI/LICENSE`](GUI/LICENSE)).
+2. **Commercial license** — Organizations that prefer not to be bound by the
+   AGPL-3.0 copyleft requirements may obtain a separate commercial license.
+
+Please contact us at this link for additional licensing opportunities:
+<https://uga.flintbox.com/#technologies/aa12627e-b4e4-43dc-b458-ff56d0cb4480>
+
+### Summary table
+
+| Component        | License                                                    | File                         |
+| ---------------- | ---------------------------------------------------------- | ---------------------------- |
+| Model (`src/`)   | GNU Affero General Public License v3.0                     | [`LICENSE`](LICENSE)         |
+| GUI (`GUI/`)     | AGPL-3.0 OR commercial (UGARF) | [`GUI/LICENSE`](GUI/LICENSE) |
+| Upstream Palabos | AGPL-3.0 (compatible)                                      | <https://palabos.unige.ch/>  |
+
+---
+
+## 12. Acknowledgements
+
+CompLaB3D is developed at the **Meile Lab**, Department of Marine Sciences, University of Georgia. Development was supported by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research, Genomic Science Program, Award Number DE-SC0022991.
+
+---
+
+---
+
+# PART 2 — Standalone HPC & Command-Line Guide
+
+This section covers everything you need to build and run CompLaB3D on an HPC cluster or local Linux/macOS/Windows machine **without the GUI**. All configuration is done by editing two files: `CompLaB.xml` (parameters) and `defineKinetics.hh` / `defineAbioticKinetics.hh` (rate laws).
+
+---
+
+## 13. Two Ways to Get the Model
+
+|                | Option A — Standalone Package                    | Option B — Build from Source                                              |
+| -------------- | ------------------------------------------------ | ------------------------------------------------------------------------- |
+| **Where**      | `ComapLB3D/` folder in this repo                 | Root `CMakeLists.txt` + download Palabos                                  |
+| **Palabos**    | Bundled and pre-compiled (GCC 11.3 / foss/2022a) | You download and compile Palabos yourself                                 |
+| **Best for**   | UGA Sapelo2, most SLURM clusters running GCC 11+ | Custom architecture, macOS, Windows, or if the pre-compiled library fails |
+| **Difficulty** | `cmake .. && make` — nothing else to install     | More steps, but works anywhere                                            |
+
+---
+
+## 14. Option A — Standalone Package (ComapLB3D): Recommended for Clusters
+
+### 14.1 Package structure
+
+```
+ComapLB3D/
+├── CMakeLists.txt               # Build configuration
+├── CompLaB.xml                  # Simulation parameters — edit before running
+├── defineKinetics.hh            # Biotic (Monod) rate expressions — edit and recompile
+├── defineAbioticKinetics.hh     # Abiotic chemical rate expressions — edit and recompile
+├── comp.sh                      # SLURM job script (configured for UGA Sapelo2)
+├── src/                         # CompLaB3D C++ source (identical to root src/)
+├── versionControl/
+│   └── palabos-v2.3.0/
+│       └── build/libpalabos.a  # Pre-compiled static library — do NOT delete
+├── input/                       # Place geometry.dat here before running
+├── output/                      # Model writes VTI/checkpoint/CSV files here
+└── build/                       # Run cmake from inside this directory
+```
+
+> **Do not delete or recompile anything inside `versionControl/palabos-v2.3.0/`.** The pre-compiled library was built for GCC 11.3 (foss/2022a). For other architectures, see §14.4.
+
+### 14.2 UGA Sapelo2 / GACRC (reference configuration)
+
+This is the exact toolchain the bundled library was compiled with. Everything should work out-of-the-box.
+
+```bash
+# Step 1 — load modules
+module purge
+module load foss/2022a
+module load CMake/3.24.3-GCCcore-11.3.0
+
+# Step 2 — build
+cd ComapLB3D/build
+cmake ..
+make -j8
+
+# Step 3 — configure your simulation
+cd ..
+# Edit CompLaB.xml and (if using kinetics) defineKinetics.hh
+# Place geometry.dat in input/
+
+# Step 4 — submit the job
+sbatch comp.sh
+```
+
+**Monitor your job:**
+
+```bash
+squeue -u $USER               # queue position and status
+sacct -j <JOBID>              # details after completion
+scancel <JOBID>               # cancel
+```
+
+### 14.3 Other SLURM clusters (generic)
+
+The build steps are identical — only the module names change.
+
+```bash
+# Step 1 — find and load available modules
+module avail gcc              # list available GCC versions
+module avail openmpi
+module avail cmake
+
+# Load (adjust version numbers to what your cluster provides):
+module purge
+module load gcc/12.2.0
+module load openmpi/4.1.4
+module load cmake/3.26.0
+
+# Step 2 — build
+cd ComapLB3D/build
+cmake ..
+make -j8
+
+# Step 3 — configure and submit
+cd ..
+sbatch comp.sh
+```
+
+Edit `comp.sh` to match your cluster's partition name, core count, memory, and wall time:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=complb
+#SBATCH --partition=YOUR_PARTITION    # change this
+#SBATCH --nodes=1
+#SBATCH --ntasks=8                    # MPI ranks — match to your domain
+#SBATCH --mem=16gb
+#SBATCH --time=4:00:00                # HH:MM:SS
+#SBATCH --output=%x.%j.out
+#SBATCH --error=%x.%j.err
+
+module purge
+module load foss/2022a                # change to your cluster's module
+
+cd $SLURM_SUBMIT_DIR
+srun ./complab
+```
+
+### 14.4 Adapting CMakeLists.txt for other architectures
+
+`CMakeLists.txt` in `ComapLB3D/` contains absolute paths pointing to Palabos on the UGA cluster. To use the bundled copy on any other machine, replace those lines with relative paths:
+
+```cmake
+# Replace the absolute /scratch/... lines with:
+include_directories("../versionControl/palabos-v2.3.0/src")
+include_directories("../versionControl/palabos-v2.3.0/externalLibraries")
+include_directories("../versionControl/palabos-v2.3.0/externalLibraries/Eigen3")
+file(GLOB_RECURSE PALABOS_SRC "../versionControl/palabos-v2.3.0/src/*.cpp")
+file(GLOB_RECURSE EXT_SRC    "../versionControl/palabos-v2.3.0/externalLibraries/tinyxml/*.cpp")
+```
+
+> **Architecture mismatch:** If the linker fails because `libpalabos.a` was built for a different CPU or ABI, delete `palabos-v2.3.0/build/` and recompile Palabos for your system:
+> 
+> ```bash
+> cd versionControl/palabos-v2.3.0 && mkdir -p build && cd build
+> cmake .. -DCMAKE_BUILD_TYPE=Release
+> make -j8
+> ```
+> 
+> Then proceed with `cmake .. && make -j8` in `ComapLB3D/build/`.
+
+---
+
+## 15. Option B — Build from Source (Full Repo)
+
+Use this if you want to build from the root `CMakeLists.txt` and manage Palabos yourself, or if you're on macOS / Windows.
+
+### 15.1 Download Palabos
+
+**Linux / macOS:**
+
+```bash
+wget https://gitlab.com/unigespc/palabos/-/archive/v2.3.0/palabos-v2.3.0.tar.gz
+tar -xzf palabos-v2.3.0.tar.gz
+```
+
+**Windows:** Download the zip from [gitlab.com/unigespc/palabos](https://gitlab.com/unigespc/palabos/-/releases) and extract manually.
+
+### 15.2 Build — Linux and macOS
+
+```bash
+git clone https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR.git
+cd Complab3D-Biotic-Kinetic-AndersopnNR/JOSS_Submit
+
+cmake -S . -B build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DPLB_ROOT=/path/to/palabos-v2.3.0
+
+cmake --build build --parallel 4
+```
+
+This produces `build/complab`.
+
+### 15.3 Build — Windows (Visual Studio)
+
+```bat
+cmake -S . -B build ^
+      -G "Visual Studio 17 2022" -A x64 ^
+      -DCMAKE_BUILD_TYPE=Release ^
+      -DPLB_ROOT=C:\path\to\palabos-v2.3.0
+
+cmake --build build --config Release --parallel 4
+```
+
+Executable: `build\Release\complab.exe`.
+
+### 15.4 Build — Windows (MSYS2 MinGW-w64)
+
+Open the **MSYS2 MinGW64** shell:
+
+```bash
+# Install tools if not already installed:
+pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-make
+
+# Build:
+cd JOSS_Submit
+mkdir build && cd build
+cmake .. -G "MinGW Makefiles" \
+         -DCMAKE_BUILD_TYPE=Release \
+         -DPLB_ROOT=/c/path/to/palabos-v2.3.0
+mingw32-make -j4
+```
+
+### 15.5 HPC Cluster — module-based (generic)
+
+```bash
+# Step 1 — load modules
+module purge
+module load gcc/11.3.0
+module load openmpi/4.1.4
+module load cmake/3.24.0
+
+# Step 2 — build
+cd JOSS_Submit
+cmake -S . -B build \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DPLB_ROOT=/path/to/palabos-v2.3.0
+cmake --build build --parallel 8
+```
+
+---
+
+## 16. Configuring a Simulation
+
+Every CompLaB3D simulation is controlled by three files.
+
+### 16.1 CompLaB.xml — simulation parameters
+
+The annotated template at the repo root is the best starting point. Key blocks:
+
+```xml
+<simulation_mode>
+    <biotic_mode>true</biotic_mode>             <!-- true = with microbes -->
+    <enable_kinetics>true</enable_kinetics>
+    <enable_abiotic_kinetics>false</enable_abiotic_kinetics>
+</simulation_mode>
+
+<LB_numerics>
+    <domain>
+        <nx>50</nx>  <ny>50</ny>  <nz>50</nz>   <!-- lattice dimensions -->
+        <dx>1.0e-6</dx>                          <!-- grid spacing [m] -->
+        <characteristic_length>30</characteristic_length>
+        <filename>geometry.dat</filename>
+        <material_numbers>
+            <pore>2</pore>    <solid>0</solid>   <bounce_back>1</bounce_back>
+        </material_numbers>
+    </domain>
+    <Peclet>2.0</Peclet>            <!-- target Péclet number -->
+    <tau>0.8</tau>                  <!-- NS relaxation time → viscosity -->
+    <iteration>
+        <ns_max_iT1>100000</ns_max_iT1>
+        <ade_max_iT>10000000</ade_max_iT>
+        <ade_converge_iT>1e-8</ade_converge_iT>
+    </iteration>
+</LB_numerics>
+
+<chemistry>
+    <number_of_substrates>1</number_of_substrates>
+    <substrate0>
+        <name_of_substrates>DOC</name_of_substrates>
+        <initial_concentration>0.0</initial_concentration>
+        <substrate_diffusion_coefficients>
+            <in_pore>1.0e-9</in_pore>        <!-- [m²/s] -->
+            <in_biofilm>5.0e-10</in_biofilm>
+        </substrate_diffusion_coefficients>
+        <left_boundary_type>Dirichlet</left_boundary_type>
+        <left_boundary_condition>1.0e-4</left_boundary_condition>
+        <right_boundary_type>Neumann</right_boundary_type>
+        <right_boundary_condition>0.0</right_boundary_condition>
+    </substrate0>
+</chemistry>
+```
+
+Full XML reference: see the annotated `CompLaB.xml` template at the repo root.
+
+### 16.2 Kinetics headers
+
+For **biotic** simulations, edit `defineKinetics.hh` to define your Monod rate expressions. For **abiotic** simulations, edit `defineAbioticKinetics.hh`. These headers are compiled into the model — **you must rebuild after every edit** (see §22).
+
+### 16.3 Geometry file
+
+Place `geometry.dat` in the `input/` folder (relative to where `CompLaB.xml` lives). The file is a text file with one integer per line representing the material number of each voxel, in Fortran-order (z fastest):
+
+```
+material[x=0,y=0,z=0]
+material[x=0,y=0,z=1]
+...
+```
+
+Material number meanings (set in `<material_numbers>` in the XML):
+
+| Value | Meaning                       |
+| ----- | ----------------------------- |
+| 0     | Solid (no-slip wall)          |
+| 1     | Bounce-back boundary          |
+| 2     | Pore fluid                    |
+| 3+    | Biofilm region (user-defined) |
+
+**Generate a synthetic geometry:**
+
+Two options:
+
+1. **GUI** — CompLaB Studio's Geometry Creator (Tools → Geometry Creator) supports
+   seven synthetic medium types (sphere pack, slit pore, open channel, etc.) and
+   imports segmented micro-CT image stacks (BMP/PNG/TIF). See [Part 3](#part-3--gui-workflow-guide-complab-studio).
+
+2. **Standalone CLI script** — `tools/geometry_generator.py` (v6.0) provides the
+   same functionality from the command line, with three generators (abiotic
+   porous media, sessile biofilm, image-stack converter):
+   
+   ```bash
+   cd tools
+   python geometry_generator.py
+   # Follow the guided menu: choose generator type and parameters
+   # Output: <project>/input/geometry.dat
+   ```
+
+---
+
+## 17. Running the Model
+
+### 17.1 Serial run
+
+**Linux / macOS:**
+
+```bash
+./complab                        # reads CompLaB.xml in current directory
+```
+
+**Windows:**
+
+```bat
+complab.exe
+```
+
+### 17.2 MPI parallel run
+
+**Linux / macOS:**
+
+```bash
+mpirun -np 8 ./complab           # 8 MPI processes
+srun -n 16 ./complab             # SLURM launcher (inside a job script)
+```
+
+**Windows (MS-MPI):**
+
+```bat
+mpiexec -n 4 complab.exe
+```
+
+CompLaB3D uses Palabos domain decomposition — the grid is split automatically across all processes. Any number of processes is supported; choose a value that divides the domain dimensions evenly (see §7).
+
+---
+
+## 18. HPC Job Submission — All Scheduler Types
+
+### 18.1 SLURM (most common)
+
+```bash
+sbatch comp.sh
+squeue -u $USER               # monitor
+scancel <JOBID>               # cancel
+sacct -j <JOBID>              # completed job details
+scontrol show job <JOBID>     # full info including node
+```
+
+### 18.2 PBS / Torque (older university clusters, some national facilities)
+
+PBS uses `qsub` instead of `sbatch` and `#PBS` directives.
+
+```bash
+# Build (identical to SLURM):
+module purge
+module load gcc/11.3.0 openmpi/4.1.4 cmake/3.24.0
+cd ComapLB3D/build && cmake .. && make -j8
+cd ..
+
+# Submit:
+qsub comp_pbs.sh
+```
+
+Create `comp_pbs.sh`:
+
+```bash
+#!/bin/bash
+#PBS -N complb
+#PBS -q normal                    # change to your queue name
+#PBS -l nodes=1:ppn=8             # 1 node, 8 cores
+#PBS -l mem=16gb
+#PBS -l walltime=4:00:00
+#PBS -o complb.out
+#PBS -e complb.err
+
+module purge
+module load gcc/11.3.0
+module load openmpi/4.1.4
+
+cd $PBS_O_WORKDIR
+mpirun -np 8 ./complab
+```
+
+PBS monitoring:
+
+```bash
+qstat -u $USER                # list your jobs
+qdel <JOBID>                  # cancel
+qstat -f <JOBID>              # detailed job info
+```
+
+### 18.3 LSF (IBM Spectrum LSF — national labs, some universities)
+
+LSF uses `bsub` and `#BSUB` directives.
+
+```bash
+# Build (identical):
+module purge
+module load gcc/11.3.0 openmpi/4.1.4 cmake/3.24.0
+cd ComapLB3D/build && cmake .. && make -j8
+cd ..
+
+# Submit:
+bsub < comp_lsf.sh
+```
+
+Create `comp_lsf.sh`:
+
+```bash
+#!/bin/bash
+#BSUB -J complb
+#BSUB -q normal
+#BSUB -n 8                        # total MPI tasks
+#BSUB -R "span[hosts=1]"          # all tasks on one node
+#BSUB -M 16000                    # memory in MB
+#BSUB -W 4:00                     # wall time HH:MM
+#BSUB -o complb.%J.out
+#BSUB -e complb.%J.err
+
+module purge
+module load gcc/11.3.0
+module load openmpi/4.1.4
+
+mpirun -np 8 ./complab
+```
+
+LSF monitoring:
+
+```bash
+bjobs                             # running and pending jobs
+bkill <JOBID>                     # cancel
+bhist -l <JOBID>                  # completed job history
+```
+
+---
+
+## 19. Choosing the Number of MPI Processes
+
+CompLaB3D uses Palabos domain decomposition and supports any number of MPI ranks. For best performance, choose a rank count that divides the domain dimensions (nx, ny, nz) approximately evenly.
+
+| Domain size     | Suggested MPI ranks | Approximate voxels per rank |
+| --------------- | ------------------- | --------------------------- |
+| 50 × 50 × 50    | 4–8                 | ~15 000 – 30 000            |
+| 100 × 100 × 100 | 8–16                | ~60 000 – 125 000           |
+| 200 × 200 × 200 | 32–64               | ~125 000 (optimal)          |
+| 400 × 400 × 400 | 128–256             | ~250 000                    |
+
+Edit `#SBATCH --ntasks` (or PBS `ppn`, LSF `-n`) and the `mpirun -np` / `srun -n` value to match.
+
+---
+
+## 20. Startup Output and Stability Report
+
+On launch, CompLaB3D prints a banner, configuration summary, and stability check:
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                            CompLaB3D                                 ║
+║       Three-Dimensional Biogeochemical Reactive Transport Model     ║
+╚══════════════════════════════════════════════════════════════════════╝
+...
+╔════════════════════════════════════════════════════════════╗
+║              STABILITY CHECK REPORT                        ║
+╠════════════════════════════════════════════════════════════╣
+║ Ma = 0.0231 OK   CFL = 0.0400 OK                          ║
+║ tau_NS = 0.8000 OK   tau_ADE = 0.7500 OK                  ║
+║ Pe_grid = 1.2000 OK                                        ║
+╚════════════════════════════════════════════════════════════╝
+```
+
+If any criterion fails the model prints a descriptive error and exits before any computation.
+
+**Stability criteria enforced:**
+
+| Criterion           | Requirement                    | Physical meaning                             |
+| ------------------- | ------------------------------ | -------------------------------------------- |
+| Mach number         | Ma < 0.3 (warn) / < 1.0 (hard) | Low-velocity incompressible flow             |
+| CFL                 | CFL = u_max < 1.0              | Numerical stability of streaming step        |
+| NS relaxation time  | 0.5 < τ_NS < 2.0               | Viscosity physically representable           |
+| ADE relaxation time | 0.5 < τ_ADE < 2.0              | Diffusivity physically representable         |
+| Grid Péclet number  | Pe_grid < 2.0 (warn)           | Advection does not dominate per lattice cell |
+
+---
+
+## 21. Output Files (Cluster Runs)
+
+All output goes to the `output/` folder (relative to where CompLaB.xml lives).
+This duplicates the field list from §7 with the cluster-specific notes added:
+
+| File                      | Format        | Content                                                       |
+| ------------------------- | ------------- | ------------------------------------------------------------- |
+| `substrate_NNNNNNN.vti`   | VTK ImageData | Concentration field at iteration N                            |
+| `velocity_NNNNNNN.vti`    | VTK ImageData | Velocity field (u_x, u_y, u_z)                                |
+| `biomass_NNNNNNN.vti`     | VTK ImageData | Biomass density field                                         |
+| `maskLattice_NNNNNNN.vti` | VTK ImageData | Pore geometry / biofilm mask                                  |
+| `checkpoint_NNNNNNN.chk`  | Binary        | Restart checkpoint (use with `read_NS_file`, `read_ADE_file`) |
+| `btc_*.csv`               | CSV           | Breakthrough curve time series per substrate                  |
+| `moments_summary.csv`     | CSV           | First and second spatial moments                              |
+| `domain_properties.csv`   | CSV           | Porosity, permeability, Pe, Ma, CFL, τ                        |
+| `simulation_*.out`        | Text          | Full model console log                                        |
+
+Open VTI files in **ParaView** (`File → Open → select all substrate*.vti → Apply Filters`).
+
+---
+
+## 22. Editing Kinetics and Recompiling
+
+The rate law functions live in C++ header files that are compiled **into** the model binary. Every time you edit them, you must rebuild.
+
+**Biotic (Monod) kinetics** — `defineKinetics.hh`:
+
+```cpp
+// Rate of substrate uptake by microbe 0 from substrate 0:
+void computeKinetics(T* C, T* B, T* rates) {
+    T mu_max = 1.5e-5;   // [1/s]  maximum specific growth rate
+    T K_s    = 1.0e-4;   // [mol/L] half-saturation constant
+    rates[0] = -mu_max * C[0] / (K_s + C[0]) * B[0];  // substrate consumption
+    rates[1] =  mu_max * C[0] / (K_s + C[0]) * B[0];  // biomass growth
+}
+```
+
+**Abiotic kinetics** — `defineAbioticKinetics.hh`:
+
+```cpp
+void computeAbioticKinetics(T* C, T* rates) {
+    T k = 1.0e-4;   // [1/s]  first-order decay constant
+    rates[0] = -k * C[0];
+}
+```
+
+After editing, rebuild:
+
+```bash
+# If using ComapLB3D/ standalone package:
+cd ComapLB3D/build && make -j8
+
+# If using root CMakeLists.txt:
+cmake --build build --parallel 4
+```
+
+CMake detects the changed header and recompiles only the affected translation unit.
+
+---
+
+## 23. Validation Cases — Run-Through Procedure
+
+Five complete validation cases in `test_cases/abiotic/` verify model correctness against closed-form analytical solutions (overview in §6). This section gives the full HPC run-through. Each case runs in a simple 1D channel geometry in under a minute.
+
+| Case              | XML file                      | Kinetics header                      |
+| ----------------- | ----------------------------- | ------------------------------------ |
+| Pure diffusion    | `test1_pure_diffusion.xml`    | *(none — abiotic kinetics disabled)* |
+| First-order decay | `test2_first_order_decay.xml` | `defineAbioticKinetics_test2.hh`     |
+| Bimolecular       | `test3_bimolecular.xml`       | `defineAbioticKinetics_test3.hh`     |
+| Reversible        | `test4_reversible.xml`        | `defineAbioticKinetics_test4.hh`     |
+| Sequential decay  | `test5_decay_chain.xml`       | `defineAbioticKinetics_test5.hh`     |
+
+**Run Test 2 (first-order decay):**
+
+```bash
+# 1. Copy the kinetics header
+cp test_cases/abiotic/defineAbioticKinetics_test2.hh defineAbioticKinetics.hh
+
+# 2. Rebuild
+cmake --build build --parallel 4
+
+# 3. Run
+./build/complab test_cases/abiotic/test2_first_order_decay.xml
+
+# 4. Visualise in ParaView
+paraview output_abiotic_test2_decay/substrate*.vti
+```
+
+**Dry-run check (XML + kinetics syntax only, no model needed):**
+
+```bash
+python tests/run_validation.py --dry-run
+```
+
+Expected output values and physical interpretation: `test_cases/abiotic/README.md`.
+
+---
+
+## 24. HPC / CLI Troubleshooting
+
+| Symptom                                                        | Likely cause                                    | Fix                                                                       |
+| -------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
+| `cmake ..` fails with "Palabos not found"                      | `PLB_ROOT` path wrong                           | Set `-DPLB_ROOT=/absolute/path/to/palabos`                                |
+| `make` fails: "undefined reference to `MPI_...`"               | MPI not loaded                                  | `module load openmpi` before building                                     |
+| Linker fails: "incompatible architecture" on pre-built library | CPU/ABI mismatch                                | Delete `versionControl/palabos-v2.3.0/build/` and recompile Palabos       |
+| Model exits immediately: "CompLaB.xml not found"               | Run from wrong directory                        | `cd` to the folder that contains `CompLaB.xml` before running             |
+| Model exits: "geometry.dat not found"                          | Geometry file missing                           | Place it at `input/geometry.dat` (relative to CompLaB.xml)                |
+| Model exits: "tau invalid"                                     | τ outside (0.5, 2.0]                            | Adjust `<tau>` in XML or change `<Peclet>` to get a different diffusivity |
+| Results diverge / NaN                                          | CFL or Ma exceeded                              | Reduce `<delta_P>` or `<Peclet>`                                          |
+| Job runs too slowly                                            | Too few MPI ranks or too many (memory overhead) | See §7 for recommended rank counts                                        |
+| Recompile needed but `make` says "Nothing to do"               | CMake doesn't detect header change              | `touch defineKinetics.hh` then `make -j8`                                 |
+
+---
+
+---
+
+# PART 3 — GUI Workflow Guide (CompLaB Studio)
+
+CompLaB Studio is a desktop application that lets you configure, launch, and post-process CompLaB3D simulations without touching the command line. It is built with PySide6 and follows a COMSOL-style panel layout: one click per physics module, then press **Run**.
+
+---
+
+## 25. GUI Prerequisites
+
+| Requirement     | Minimum version | Notes                                                                                   |
+| --------------- | --------------- | --------------------------------------------------------------------------------------- |
+| Python          | 3.10            | 3.11+ recommended                                                                       |
+| PySide6         | 6.5.0           | Qt6 bindings                                                                            |
+| NumPy           | 1.24.0          | Array ops                                                                               |
+| VTK             | 9.2.0           | 3-D output viewer                                                                       |
+| Matplotlib      | 3.7.0           | Convergence plots                                                                       |
+| CompLaB3D model | any             | Must be compiled separately (see [Part 2](#part-2--standalone-hpc--command-line-guide)) |
+
+The GUI does **not** include the C++ model. You must build (or obtain) the `complab` (Linux/macOS) or `complab.exe` (Windows) binary before pressing **Run**. On Windows, build in an MSYS2 MinGW64 shell; on Linux/macOS, use CMake + GCC/Clang.
+
+---
+
+## 26. GUI Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-org/CompLaB3D.git
+cd CompLaB3D/JOSS_Submit/GUI
+
+# Install runtime dependencies
+pip install -r requirements.txt
+
+# (Optional) install development/testing extras
+pip install -r requirements-dev.txt
+```
+
+`requirements.txt` contains:
+
+```
+PySide6>=6.5.0
+numpy>=1.24.0
+vtk>=9.2.0
+matplotlib>=3.7.0
+```
+
+> **Conda users:** `conda install -c conda-forge pyside6 vtk matplotlib numpy` works equally well; the pip step above is not required.
+
+> **Windows note:** If PySide6 or VTK wheels fail to install, ensure you are using Python 3.10–3.12 (64-bit) and have the latest pip: `python -m pip install --upgrade pip`.
+
+---
+
+## 27. Launching the GUI
+
+```bash
+cd JOSS_Submit/GUI
+python main.py
+```
+
+Or, if installed as a package:
+
+```bash
+complab-studio
+```
+
+The application window opens at approximately 1400 × 900 pixels. On first launch it shows the **New Project** dialog automatically.
+
+---
+
+## 28. Interface Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Menu bar:  File │ Edit │ Simulation │ Tools │ Help             │
+├──────────┬──────────────────────────────────┬───────────────────┤
+│  Model   │                                  │                   │
+│  Tree    │   Configuration Panels           │  Run / Console    │
+│  (left)  │   (center — scrollable tabs)     │  (right)          │
+│          │                                  │                   │
+│  • General│  Domain → Geometry → Chemistry  │  ▶ Run Simulation │
+│  • Domain │  → Equilibrium → Microbiology   │  Console output   │
+│  • Geom  │  → Model → I/O → Parallel      │  Convergence plot │
+│  • Chem  │  → Post-process                  │  Stop / Save log  │
+│  • ...   │                                  │                   │
+└──────────┴──────────────────────────────────┴───────────────────┘
+```
+
+Clicking any item in the **Model Tree** (left) jumps to the corresponding panel (center). Changes in any panel are reflected immediately in the model tree and in the project data — there is no separate "Apply" button.
+
+---
+
+## 29. Step-by-Step Workflow
+
+### Step 1 — Create or open a project
+
+**File → New Project** (or `Ctrl+N`) opens the **New Project** wizard.
+
+Select one of nine built-in templates:
+
+| Template                             | Physics active                          |
+| ------------------------------------ | --------------------------------------- |
+| Flow Only                            | Navier-Stokes (no ADE, no reactions)    |
+| Diffusion Only                       | Pure ADE (Pe = 0, no reactions)         |
+| Tracer Transport (Flow + Diffusion)  | NS + ADE passive tracer                 |
+| Abiotic Reaction (First-Order Decay) | NS + ADE + abiotic kinetics             |
+| Abiotic Equilibrium (Carbonate)      | NS + ADE + equilibrium speciation       |
+| Biofilm — Sessile (CA Model)         | NS + ADE + biotic CA                    |
+| Planktonic Bacteria (LBM Model)      | NS + ADE + biotic LBM                   |
+| Sessile + Planktonic (Dual Microbe)  | NS + ADE + CA + LBM                     |
+| Coupled Biotic-Abiotic               | NS + ADE + biotic CA + abiotic kinetics |
+
+The right-hand panel of the wizard shows a **Template Details** summary, lists which kinetics `.hh` files are required, allows you to preview the generated C++ code, and gives step-by-step compilation instructions for that template.
+
+Give the project a name and choose a save directory, then click **Create**. The project folder is created immediately and contains:
+
+```
+<project_name>/
+├── <project_name>.complab     ← project JSON (GUI state)
+├── CompLaB.xml                ← model input (auto-generated on Run)
+├── defineKinetics.hh          ← biotic kinetics (if applicable)
+├── defineAbioticKinetics.hh   ← abiotic kinetics (if applicable)
+├── input/
+│   └── geometry.dat           ← porous geometry voxel file
+└── output/                    ← VTI / CHK files written by model
+```
+
+To open an existing project: **File → Open Project** and select the `.complab` file.
+
+---
+
+### Step 2 — Domain panel
+
+Set the lattice dimensions and physical units.
+
+| Field                             | Description                                 |
+| --------------------------------- | ------------------------------------------- |
+| Nx / Ny / Nz                      | Grid size in voxels                         |
+| dx                                | Voxel edge length (μm, nm, or m)            |
+| Characteristic length             | Used to compute the Péclet number           |
+| Geometry file                     | Path to `geometry.dat` (integer voxel mask) |
+| Pore / Solid / Bounce-back labels | Integer codes in `geometry.dat`             |
+
+The **Geometry Preview** button opens an interactive 3-D view of the loaded `geometry.dat` so you can verify the porous structure before running.
+
+---
+
+### Step 3 — Geometry panel
+
+Use the built-in **Geometry Creator** dialog (**Tools → Geometry Creator**) to generate standard test geometries or import a custom one.
+
+Available generators:
+
+- **Open channel** — fully open rectangular tube (all pore voxels)
+- **Sphere pack** — random or structured sphere packing
+- **Slit pore** — flat plate channel with adjustable aperture
+- **Import raw** — load an external integer-valued 3-D array
+
+Generated geometries are saved as `input/geometry.dat` (space-delimited integers, one slice per block, `0` = solid, `1` = bounce-back (wall), `2` = pore).
+
+---
+
+### Step 4 — Fluid panel
+
+Set Navier-Stokes parameters.
+
+| Field                 | Description                                                                       |
+| --------------------- | --------------------------------------------------------------------------------- |
+| ΔP (delta_P)          | Pressure drop across the domain (LB units)                                        |
+| Péclet number         | Pe = U·L / D; controls advection vs. diffusion                                    |
+| Tau (relaxation time) | LBM relaxation; must satisfy 0.5 < τ ≤ 2.0; τ = 0.8 is stable for most geometries |
+| Track performance     | Write per-step timing to log                                                      |
+
+> **Stability rule:** τ = 1/(Re/Pe + 0.5) internally; for tracer runs with Pe ≈ 1–10 and τ = 0.8 the model is unconditionally stable. Avoid τ < 0.6 unless Re is very small.
+
+---
+
+### Step 5 — Chemistry panel
+
+Add one or more substrates and configure each one's transport and boundary conditions.
+
+**Add / Remove** buttons manage the substrate list. Selecting a substrate in the list loads its properties into the editor below.
+
+| Field                 | Description                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Name                  | Label used in XML and VTK outputs                                                                                                    |
+| Initial concentration | Uniform initial value (mol/L or dimensionless)                                                                                       |
+| Diffusion in pore     | Molecular diffusivity in open pore space (m²/s)                                                                                      |
+| Diffusion in biofilm  | Effective diffusivity inside biofilm (typically 0.2–0.5× pore value). Written to XML always; ignored by model in abiotic/tracer runs |
+| Left / Right BC type  | Dirichlet (fixed concentration) or Neumann (zero-flux)                                                                               |
+| Left / Right BC value | Concentration for Dirichlet; always 0.0 for Neumann                                                                                  |
+
+Typical setup for a reactive transport run:
+
+- Left BC: Dirichlet = inlet concentration
+- Right BC: Neumann = 0 (outflow, no-flux condition)
+
+---
+
+### Step 6 — Equilibrium panel (optional)
+
+Enable carbonate-type equilibrium speciation. This is only needed if your system includes fast acid-base reactions that should be treated as instantaneous equilibria rather than kinetic reactions.
+
+| Field                | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| Enable equilibrium   | Toggle                                          |
+| Component names      | Species names (e.g., HCO3-, H+)                 |
+| Stoichiometry matrix | One row per substrate, one column per component |
+| Log K values         | Log₁₀ of equilibrium constants                  |
+
+For most reactive transport problems this panel can be left disabled.
+
+---
+
+### Step 7 — Microbiology panel (biotic runs only)
+
+Visible only when **Biotic Mode** is enabled on the General panel.
+
+**Global settings:**
+
+| Field                      | Description                                                 |
+| -------------------------- | ----------------------------------------------------------- |
+| Maximum biomass density    | Carrying capacity (g/m³ or mol/m³)                          |
+| Biofilm fraction threshold | Volume fraction at which voxel is classified as biofilm     |
+| CA method                  | Spreading rule for CA biofilm growth (`half` or `fraction`) |
+
+**Per-microbe settings** (Add / Remove buttons manage the microbe list):
+
+| Field                      | Description                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Name                       | Label for this microbial species                                                                                   |
+| Model type                 | `CA` (sessile biofilm) or `LBM` (planktonic)                                                                       |
+| Reaction type              | `kinetics` (Monod)                                                                                                 |
+| Material number            | Voxel codes in `geometry.dat` where microbes are seeded (space-separated integers; leave blank for LBM planktonic) |
+| Initial densities          | Biomass density at each seeding location (one per material number)                                                 |
+| Decay coefficient          | First-order endogenous decay rate (1/s)                                                                            |
+| Viscosity ratio in biofilm | How much biofilm increases local fluid viscosity                                                                   |
+| Half-saturation constants  | Ks for each substrate (space-separated, one per substrate)                                                         |
+| Maximum uptake flux        | qmax for each substrate (space-separated)                                                                          |
+| Left / Right BC type       | Dirichlet or Neumann for the biomass field                                                                         |
+| Left BC value              | Inlet biomass concentration (Dirichlet only)                                                                       |
+
+---
+
+### Step 8 — Model panel
+
+| Field                              | Description                                              |
+| ---------------------------------- | -------------------------------------------------------- |
+| NS max iterations (phase 1)        | Navier-Stokes iterations before convergence check begins |
+| NS max iterations (phase 2)        | Maximum NS iterations after phase 1                      |
+| NS convergence tolerance (phase 1) | Velocity residual threshold for phase 1 end              |
+| NS convergence tolerance (phase 2) | Velocity residual threshold for final convergence        |
+| ADE max iterations                 | Maximum advection-diffusion iterations                   |
+| ADE convergence tolerance          | Concentration residual threshold                         |
+
+For a first test run, the defaults from the selected template are appropriate. Increase ADE iterations for long reactive transport simulations.
+
+---
+
+### Step 9 — I/O panel
+
+| Field               | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| VTK output interval | Write `.vti` files every N ADE steps           |
+| Checkpoint interval | Write `.chk` restart file every N steps        |
+| Output directory    | Relative or absolute path (default: `output/`) |
+
+---
+
+### Step 10 — Parallel panel
+
+Configure MPI decomposition for multi-core runs.
+
+| Field                   | Description                                            |
+| ----------------------- | ------------------------------------------------------ |
+| Number of MPI processes | Total MPI ranks (`-np` value passed to `mpirun`)       |
+| Domain decomposition    | Automatic (Palabos chooses) or manual (Nx×Ny×Nz ranks) |
+
+For workstation runs, set **Number of MPI processes** to the number of physical CPU cores. For single-core testing, use 1.
+
+> The model always uses MPI even for `np = 1`. Ensure `mpirun` (OpenMPI or MPICH) is in your `PATH`.
+
+---
+
+## 30. Panel Reference
+
+Quick lookup of all panels and what they control:
+
+| Panel        | Key parameters                                                                  |
+| ------------ | ------------------------------------------------------------------------------- |
+| General      | Simulation mode (biotic/abiotic), enable kinetics flags, validation diagnostics |
+| Domain       | Grid dimensions, dx, geometry file, voxel labels                                |
+| Geometry     | Geometry creator / importer                                                     |
+| Fluid        | ΔP, Pe, τ, performance tracking                                                 |
+| Chemistry    | Substrates: name, C₀, D_pore, D_biofilm, BCs                                    |
+| Equilibrium  | Fast equilibrium speciation (carbonate system)                                  |
+| Microbiology | Microbes: model type, Monod parameters, BCs                                     |
+| Model        | NS and ADE iteration counts and tolerances                                      |
+| I/O          | VTK interval, checkpoint interval, output directory                             |
+| Parallel     | MPI process count, domain decomposition                                         |
+| Sweep        | (Advanced) Parameter sweep over any XML field                                   |
+| Post-process | Built-in VTK slice viewer and convergence plot                                  |
+| Run          | Launch / stop simulation, real-time console, log export                         |
+
+---
+
+## 31. Kinetics Editor
+
+Open via **Tools → Kinetics Editor** or the **Edit Kinetics** button on the Run panel.
+
+The Kinetics Editor is a syntax-highlighted C++ code editor for `defineKinetics.hh` (biotic Monod reactions) and `defineAbioticKinetics.hh` (abiotic first-order or arbitrary reactions). These files are `#include`d directly into the model at compile time.
+
+**Workflow:**
+
+1. Open the Kinetics Editor.
+
+2. Edit the reaction rate expressions. The substrate concentration array is `C[i]` (indexed in the same order as the Chemistry panel). The microbe density array is `B[i]`.
+
+3. Click **Save** — the `.hh` file is written to the project directory.
+
+4. **Recompile the model** in your build directory:
+   
+   ```bash
+   # Copy .hh files to model source root
+   cp defineKinetics.hh       /path/to/CompLaB3D/src/../
+   cp defineAbioticKinetics.hh /path/to/CompLaB3D/src/../
+   
+   # Recompile
+   cd /path/to/CompLaB3D/build
+   cmake ..
+   make -j$(nproc)
+   ```
+
+5. Point the GUI to the newly compiled executable in **Preferences → General → CompLaB executable**.
+
+> **Important:** Every time you change kinetics, you must recompile. The GUI cannot recompile for you; it only edits and saves the source file.
+
+The New Project wizard shows template kinetics code as a preview (click **Preview defineKinetics.hh**) so you can understand the expected structure before editing.
+
+---
+
+## 32. Running a Simulation
+
+### Pre-flight checks
+
+When you click **▶ Run Simulation**, the GUI performs these checks automatically before launching the model:
+
+1. Verifies the CompLaB executable exists and is executable.
+2. Exports `CompLaB.xml` to the project directory.
+3. Deploys `geometry.dat` to `input/geometry.dat` if not already present.
+4. Checks that `defineKinetics.hh` and `defineAbioticKinetics.hh` exist (if kinetics are enabled).
+5. Validates that τ is in the safe range (0.5, 2.0].
+
+If any check fails, an error dialog lists what is missing before any model process is started.
+
+### Launch command
+
+The GUI runs:
+
+```bash
+mpirun -np <N> <complab_executable> CompLaB.xml
+```
+
+from the project directory. Standard output and stderr are captured and displayed in the console widget in real time.
+
+### During a run
+
+The **Run panel** (right column) shows:
+
+- **Console** — scrollable live output from the model, colour-coded (warnings in amber, errors in red).
+- **Convergence plot** — residual vs. iteration, updated every model output line. Two curves: NS (blue) and ADE (orange).
+- **Stop** button — sends SIGTERM to the model process; partial output files are retained.
+- **Save Log** button — writes the full console output to a `.out` file in the project `output/` directory.
+
+### Output files written by the model
+
+| File                                    | Description                                    |
+| --------------------------------------- | ---------------------------------------------- |
+| `output/nsLatticeFinal1_XXXXXXX.vti`    | NS velocity field at final iteration           |
+| `output/adeLatticeFinal_N_XXXXXXX.vti`  | ADE concentration field for substrate N        |
+| `output/biomassFinal_M_XXXXXXX.vti`     | Biomass field for microbe M (biotic only)      |
+| `output/inputGeom.vti`                  | Geometry voxel field (written once at startup) |
+| `output/nsLattice.chk`                  | NS checkpoint (restart file)                   |
+| `output/simulation_TIMESTAMP.out`       | Full model log                                 |
+| `output/crash_diagnostic_TIMESTAMP.txt` | Diagnostic dump on abnormal exit               |
+
+All `.vti` files use VTK Image Data format and can be opened in [ParaView](https://www.paraview.org/) or the built-in viewer.
+
+---
+
+## 33. Post-Processing
+
+### Built-in viewer
+
+The **Post-process panel** provides a lightweight 3-D slice viewer powered by VTK.
+
+1. Click **Load VTI** and select any `.vti` file from the `output/` directory.
+2. Use the **X / Y / Z slice** sliders to navigate through the volume.
+3. Choose the scalar field to display from the drop-down (velocity magnitude, concentration, biomass density, etc.).
+4. Click **Export PNG** to save the current slice as an image.
+
+The convergence plot (residual vs. iteration) can be exported as PDF via **File → Export Convergence Plot**.
+
+### ParaView (recommended for publication figures)
+
+For full-featured visualization — volume rendering, streamlines, animations — open the `.vti` files in [ParaView](https://www.paraview.org/) (free, cross-platform).
+
+```
+File → Open → select output/nsLatticeFinal1_*.vti
+Apply
+Filters → Slice → set normal and origin
+Filters → Warp By Scalar (for concentration isosurfaces)
+```
+
+All CompLaB3D `.vti` files use SI units internally. The model writes the `dx` spacing into the VTK header so ParaView displays physical coordinates automatically.
+
+---
+
+## 34. Project Files and XML Export
+
+### `.complab` project file
+
+The project is saved as a JSON file (`<name>.complab`) that stores the complete GUI state: all panel values, substrate list, microbe list, preferences snapshot, and the paths to kinetics files. This file is the source of truth for the GUI; `CompLaB.xml` is always regenerated from it before a run.
+
+Save: **File → Save** (`Ctrl+S`)
+Save As: **File → Save As** (`Ctrl+Shift+S`)
+
+Auto-save can be enabled in **Preferences → General** with a configurable interval (30–3600 s).
+
+### Manual XML export
+
+To export `CompLaB.xml` without launching a run (e.g., to transfer to a cluster):
+
+**Simulation → Export XML** (`Ctrl+E`)
+
+The exported file is a fully self-contained model input. Copy it along with `defineKinetics.hh`, `defineAbioticKinetics.hh`, and `input/geometry.dat` to any machine that has the compiled model.
+
+### XML structure (key sections)
+
+```xml
+<CompLaB>
+  <simulation_mode> ... </simulation_mode>   <!-- biotic, kinetics flags -->
+  <domain> ... </domain>                     <!-- nx, ny, nz, dx, geometry file -->
+  <fluid> ... </fluid>                       <!-- delta_P, Pe, tau -->
+  <substrates>
+    <substrate id="0"> ... </substrate>      <!-- name, C0, D_pore, D_biofilm, BCs -->
+  </substrates>
+  <microbiology> ... </microbiology>         <!-- microbes, Monod params -->
+  <equilibrium> ... </equilibrium>           <!-- log-K matrix (optional) -->
+  <iterations> ... </iterations>             <!-- NS/ADE max iT, tolerances -->
+  <io> ... </io>                             <!-- VTK/CHK intervals, output dir -->
+  <parallel> ... </parallel>                 <!-- MPI decomposition -->
+</CompLaB>
+```
+
+---
+
+## 35. Preferences
+
+Open via **Edit → Preferences** (`Ctrl+,`).
+
+### General tab
+
+| Setting                   | Description                                                                                                |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| CompLaB executable        | Absolute path to the compiled model binary. Leave blank to auto-detect `complab` / `complab.exe` on `PATH` |
+| Default project directory | Default save location for new projects                                                                     |
+| Enable auto-save          | Periodically save the `.complab` file                                                                      |
+| Auto-save interval        | Seconds between auto-saves (30–3600)                                                                       |
+
+### Display tab
+
+| Setting           | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| Font size         | Application font size in points (8–18 pt); applied immediately |
+| Max console lines | Maximum lines retained in the run console (500–100 000)        |
+| Theme             | Dark (default) or Light; applied immediately on save           |
+
+Changes to theme and font take effect instantly without restarting the application.
+
+---
+
+## 36. GUI Test Suite
+
+The GUI ships with 362 automated tests covering all panels, the project data model, XML round-tripping, the kinetics editor, and the simulation runner stub.
+
+```bash
+cd JOSS_Submit/GUI
+pip install -r requirements-dev.txt   # adds pytest and pytest-qt
+pytest tests/ -v
+```
+
+Expected output:
+
+```
+tests/test_config.py              ...    PASSED
+tests/test_gui_panels.py          ...    PASSED   (requires display or Xvfb)
+tests/test_kinetics.py            ...    PASSED
+tests/test_pipeline_e2e.py        ...    PASSED
+tests/test_project_model.py       ...    PASSED
+tests/test_simulation_runner.py   ...    PASSED
+tests/test_templates.py           ...    PASSED
+tests/test_xml_diagnostic.py      ...    PASSED
+tests/test_xml_io.py              ...    PASSED
+362 passed in ~12 s
+```
+
+On a headless Linux server (CI), run with a virtual framebuffer:
+
+```bash
+Xvfb :99 -screen 0 1280x1024x24 &
+DISPLAY=:99 pytest tests/ -v
+```
+
+---
+
+## 37. GUI Troubleshooting
+
+| Problem                              | Likely cause                                | Fix                                                                                                       |
+| ------------------------------------ | ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ModuleNotFoundError: PySide6`       | Dependencies not installed                  | `pip install -r requirements.txt`                                                                         |
+| `ModuleNotFoundError: vtkmodules`    | VTK not installed                           | `pip install vtk` (Python 3.10–3.12 only)                                                                 |
+| Window opens but panels are blank    | Qt platform plugin missing (Linux headless) | Set `DISPLAY=:0` or install `libxcb-util-dev`                                                             |
+| "CompLaB executable not found" error | Model not compiled or path not set          | Build the model (see [Part 2](#part-2--standalone-hpc--command-line-guide)), then set path in Preferences |
+| "mpirun: command not found"          | MPI not installed                           | Install `openmpi` or `mpich` via package manager                                                          |
+| Model crashes immediately (Windows)  | omega=0 bug in older builds                 | Rebuild model from latest source; this bug is patched                                                     |
+| Model crashes immediately (Linux)    | Wrong MPI library version                   | Recompile with the same MPI library that is on `PATH`                                                     |
+| Run panel shows no output            | Executable did not start                    | Check the crash diagnostic file in `output/`                                                              |
+| VTI file empty / zero bytes          | Model exited before writing output          | Lower the VTK interval or increase max iterations                                                         |
+| Geometry preview is black            | `geometry.dat` not found or all-solid       | Check file path in Domain panel; verify at least one voxel = 2 (pore)                                     |
+| Kinetics changes not reflected       | `.hh` files modified but model not recompiled | Recompile the model after every kinetics edit (see §31)                                                 |
+| Auto-save conflicts with manual save | Race condition on network drives            | Use a local project directory; auto-save is safe on local SSD                                             |
+| Theme does not switch                | Qt style cache                              | Restart the application                                                                                   |
+| `pytest` GUI tests fail on macOS     | Qt accessibility security prompt            | Run tests from a terminal launched via Finder, not SSH                                                    |
+
+---
+
+## Proof of public availability
+
+[![Public since](https://img.shields.io/badge/public%20since-2026--02--05-blue)](https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR)
+[![First commit](https://img.shields.io/badge/first%20commit-2026--02--05-green)](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commit/c51ff499f226b82936b6a57b7a29fbd5d49b54b3)
+
+This repository has been **publicly available on GitHub since 2026-02-05**.
+You don't have to take my word for it — every claim below is independently verifiable:
+
+| What | Where to verify it yourself |
+|------|------------------------------|
+| Repo `created_at` field | [api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR](https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR) — look for `"created_at": "2026-02-05T15:17:47Z"` |
+| First commit on GitHub | [`c51ff49` — 2026-02-05](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commit/c51ff499f226b82936b6a57b7a29fbd5d49b54b3) |
+| Full commit history | [Commits page](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commits/main/) — scroll to the bottom |
+| Independent web archive | [Wayback Machine snapshots](https://web.archive.org/web/*/github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR) |
+
+**Quick verification from your terminal:**
+
+```bash
+# 1. Repo creation date straight from GitHub's API
+curl -s https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR \
+  | grep -E '"(created_at|pushed_at|visibility)"'
+
+# 2. Earliest commit in the repo (after cloning)
+git clone https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR.git
+cd Complab3D-Biotic-Kinetic-AndersopnNR
+git log --reverse --format="%ai %h %s" | head -1
+# → 2026-02-05 10:18:28 -0500 c51ff49 Add files via upload
+```
+
+**Expected API response:**
+
+```json
+{
+  "created_at": "2026-02-05T15:17:47Z",
+  "visibility": "public",
+  "pushed_at": "2026-05-01T06:05:14Z"
+}
+```
