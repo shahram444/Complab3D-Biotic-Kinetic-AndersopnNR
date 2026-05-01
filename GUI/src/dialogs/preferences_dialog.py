@@ -91,8 +91,9 @@ class PreferencesDialog(QDialog):
 
         self._theme_combo = QComboBox()
         self._theme_combo.addItems(["Dark", "Light"])
-        current_theme = self._config.get("theme", "Dark")
-        idx = self._theme_combo.findText(current_theme)
+        current_theme = self._config.get("theme", "dark")
+        # Match lowercase config value to capitalized combo text
+        idx = self._theme_combo.findText(current_theme, Qt.MatchFlag.MatchFixedString)
         if idx >= 0:
             self._theme_combo.setCurrentIndex(idx)
 
@@ -143,7 +144,8 @@ class PreferencesDialog(QDialog):
         if not app:
             return
         styles_dir = Path(__file__).parent.parent.parent / "styles"
-        if theme_name == "Light":
+        name = theme_name.lower()
+        if name == "light":
             style_path = styles_dir / "light.qss"
         else:
             style_path = styles_dir / "theme.qss"
@@ -176,7 +178,7 @@ class PreferencesDialog(QDialog):
         self._config.set("auto_save_interval", self._auto_interval.value())
         self._config.set("font_size", self._font_size.value())
         self._config.set("max_console_lines", self._max_console.value())
-        self._config.set("theme", self._theme_combo.currentText())
+        self._config.set("theme", self._theme_combo.currentText().lower())
         self._config.save()
 
         # Apply live - font first, then theme
