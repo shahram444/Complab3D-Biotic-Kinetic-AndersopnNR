@@ -241,7 +241,7 @@ python main.py
 
 CompLaB3D has **744+ automated tests** in two categories, all running on GitHub Actions CI.
 
-### 5.1 C++ Unit Tests — 382 tests (no Palabos required)
+### 5.1 C++ Unit Tests — 33 tests (no Palabos required)
 
 **Linux / macOS:**
 
@@ -261,23 +261,18 @@ cmake --build . --config Release --parallel
 ctest -C Release --output-on-failure
 ```
 
-Expected result: **382 passed, 0 failed** (~1 second on a laptop).
+Expected result: **33 passed, 0 failed** (~1 second on a laptop).
 
-| Executable                                                                           | What is tested                                                | Tests   |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------- | ------- |
-| `test_stability` / `_extended`                                                       | Ma, CFL, τ, Pe_grid bounds and edge cases                     | 40      |
-| `test_abiotic_kinetics` / `_extended`                                                | First-order decay, bimolecular, reversible, mass conservation | 50      |
-| `test_biotic_kinetics` / `_extended`                                                 | Monod growth, substrate uptake, Haldane inhibition, decay     | 55      |
-| `test_planktonic_kinetics` / `_extended`                                             | Suspended biomass transport + Monod, multi-population         | 37      |
-| `test_eq_solver` / `_extended`                                                       | Anderson-NR equilibrium model, stiff systems, log K ranges    | 51      |
-| `test_diagnostics`                                                                   | Mass balance checking, diagnostic output                      | 20      |
-| `test_lbm_utils` / `_extended`                                                       | D3Q7 weights, Darcy velocity, FD Laplacian, unit conversions  | 65      |
-| `test_bc`, `test_growth_integration`, `test_diffusion_bc`, `test_reaction_transport` | BCs, Euler integration, 1D profiles, Pe/Da/Thiele             | 64      |
-| **Total**                                                                            |                                                               | **382** |
+| Executable               | What is tested                                                | Tests  |
+| ------------------------ | ------------------------------------------------------------- | ------ |
+| `test_stability`         | Ma, CFL, τ, Pe_grid bounds and edge cases                     | 14     |
+| `test_abiotic_kinetics`  | First-order decay, bimolecular, reversible, mass conservation | 8      |
+| `test_biotic_kinetics`   | Monod growth, substrate uptake, Haldane inhibition, decay     | 11     |
+| **Total**                |                                                               | **33** |
 
 Full descriptions: `tests/README.md`.
 
-### 5.2 Python / GUI Tests — 362+ tests (no model required)
+### 5.2 Python / GUI Tests — 509 tests (no model required)
 
 ```bash
 cd GUI
@@ -287,7 +282,7 @@ python -m pytest tests/ -v
 QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
 ```
 
-Expected: **362 passed, 5 skipped** (5 skipped require a graphical Qt display; they pass on desktop).
+Expected: **509 passed, 0 failed.**
 
 | Module                      | What is tested                                         | Tests |
 | --------------------------- | ------------------------------------------------------ | ----- |
@@ -405,7 +400,7 @@ cmake --build . --parallel
 ctest --output-on-failure
 ```
 
-Expected: **382 passed, 0 failed.**
+Expected: **33 passed, 0 failed.**
 
 ### Verify the GUI tests (~12 seconds, no model required)
 
@@ -415,7 +410,7 @@ pip install PySide6 pytest pytest-qt
 QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
 ```
 
-Expected: **362 passed, 5 skipped.**
+Expected: **509 passed.**
 
 ### Verify the analytical validation dry-run
 
@@ -1634,7 +1629,7 @@ Changes to theme and font take effect instantly without restarting the applicati
 
 ## 36. GUI Test Suite
 
-The GUI ships with 362 automated tests covering all panels, the project data model, XML round-tripping, the kinetics editor, and the simulation runner stub.
+The GUI ships with 509 automated tests covering all panels, the project data model, XML round-tripping, the kinetics editor, and the simulation runner stub.
 
 ```bash
 cd JOSS_Submit/GUI
@@ -1654,7 +1649,7 @@ tests/test_simulation_runner.py   ...    PASSED
 tests/test_templates.py           ...    PASSED
 tests/test_xml_diagnostic.py      ...    PASSED
 tests/test_xml_io.py              ...    PASSED
-362 passed in ~12 s
+509 passed in ~12 s
 ```
 
 On a headless Linux server (CI), run with a virtual framebuffer:

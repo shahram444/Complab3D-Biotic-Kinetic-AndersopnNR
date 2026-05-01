@@ -160,3 +160,4 @@ class BasePanel(QWidget):
         widget.setProperty("validation", "")
         widget.style().unpolish(widget)
         widget.style().polish(widget)
+        widget.setToolTip("")

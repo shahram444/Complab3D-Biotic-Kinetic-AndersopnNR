@@ -30,7 +30,8 @@ class AppConfig:
             try:
                 with open(self._path, "r") as f:
                     stored = json.load(f)
-                self._data.update(stored)
+                if isinstance(stored, dict):
+                    self._data.update(stored)
             except (json.JSONDecodeError, OSError):
                 pass
 

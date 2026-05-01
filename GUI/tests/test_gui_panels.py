@@ -221,23 +221,23 @@ class TestGeneralPanel:
 
     def test_mode_flags_biotic(self, qtbot):
         panel = self._make(qtbot)
-        panel._set_mode_from_flags(biotic=True, kinetics=True, abiotic=False,
-                                    flow_only=False, diffusion=False, transport=False)
+        panel._set_mode_from_flags(biotic=True, kinetics=True, abiotic=False)
         flags = panel._get_mode_flags()
         assert flags is not None
 
     def test_mode_flags_abiotic(self, qtbot):
         panel = self._make(qtbot)
-        panel._set_mode_from_flags(biotic=False, kinetics=False, abiotic=True,
-                                    flow_only=False, diffusion=False, transport=False)
+        panel._set_mode_from_flags(biotic=False, kinetics=False, abiotic=True)
         p = _new_project()
         panel.save_to_project(p)
         assert p.simulation_mode.enable_abiotic_kinetics is True
 
     def test_mode_flags_flow_only(self, qtbot):
         panel = self._make(qtbot)
+        # Flow-only is inferred when no kinetics flags are set, no substrates,
+        # and there is a non-zero pressure drop.
         panel._set_mode_from_flags(biotic=False, kinetics=False, abiotic=False,
-                                    flow_only=True, diffusion=False, transport=False)
+                                   delta_P=1.0, peclet=1.0, num_subs=0)
         p = _new_project()
         panel.save_to_project(p)
         assert p.simulation_mode.biotic_mode is False
@@ -245,8 +245,7 @@ class TestGeneralPanel:
 
     def test_mode_flags_coupled(self, qtbot):
         panel = self._make(qtbot)
-        panel._set_mode_from_flags(biotic=True, kinetics=True, abiotic=True,
-                                    flow_only=False, diffusion=False, transport=False)
+        panel._set_mode_from_flags(biotic=True, kinetics=True, abiotic=True)
         p = _new_project()
         panel.save_to_project(p)
         assert p.simulation_mode.biotic_mode is True
