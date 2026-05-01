@@ -26,7 +26,7 @@
 | GUI source (new v2.1) | `GUI/src/` | ✅ Active version |
 | GUI launch script | `GUI/main.py` | ✅ Present |
 | GUI packaging | `GUI/pyproject.toml`, `requirements*.txt` | ✅ Present |
-| C++ unit tests | `tests/cpp/` | ✅ 33 GoogleTest tests |
+| C++ unit tests | `tests/cpp/` | ✅ 382 GoogleTest tests |
 | Analytical validation | `test_cases/abiotic/` | ✅ 5 validation cases |
 | Python GUI tests | `GUI/tests/` | ✅ 500+ pytest tests |
 | CI — C++ tests | `.github/workflows/cpp-tests.yml` | ✅ Present |
@@ -102,7 +102,7 @@ Fill in:
 - Upstream dependency (Palabos): AGPL-3.0 (compatible with solver license)
 
 ### Automated tests
-- 33 C++ unit tests via GoogleTest (`tests/cpp/`) — run without Palabos
+- 382 C++ unit tests via GoogleTest (`tests/cpp/`) — run without Palabos
 - 500+ Python/GUI tests via pytest (`GUI/tests/`)
 - 5 analytical validation cases (`test_cases/abiotic/`)
 - All tests run on GitHub Actions CI (see badges in README)

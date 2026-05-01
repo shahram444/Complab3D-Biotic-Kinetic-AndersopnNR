@@ -52,7 +52,7 @@ Needs cluster?    NO                       Needs cluster?    NO
 Speed:            ~8 seconds               Speed:            ~60 seconds
 Works on:         Linux, macOS, Windows    Works on:         Linux, macOS, Windows
 
-Count:            33 checks                Count:            509 checks
+Count:            382 checks               Count:            509 checks
 ```
 
 Both levels run entirely without Palabos or MPI — they are available on any
@@ -154,7 +154,7 @@ ctest --output-on-failure
 
 Expected result:
 ```
-100% tests passed, 0 tests failed out of 33
+100% tests passed, 0 tests failed out of 382
 Total Test time (real) =  7.83 sec
 ```
 
@@ -183,7 +183,7 @@ cmake --build . --parallel
 ctest --output-on-failure
 ```
 
-Expected: `100% tests passed, 0 tests failed out of 33`
+Expected: `100% tests passed, 0 tests failed out of 382`
 
 > **Apple Silicon (M1/M2/M3):** Tests compile natively on ARM. If cmake
 > complains about architecture, add `-DCMAKE_OSX_ARCHITECTURES=arm64`.
@@ -491,7 +491,7 @@ Expected result:
 ### Unit tests — all pass
 
 ```
-100% tests passed, 0 tests failed out of 33
+100% tests passed, 0 tests failed out of 382
 Total Test time (real) =  7.83 sec
 ```
 

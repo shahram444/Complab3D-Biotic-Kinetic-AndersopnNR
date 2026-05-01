@@ -239,9 +239,9 @@ python main.py
 
 ## 5. Test Suite
 
-CompLaB3D has **744+ automated tests** in two categories, all running on GitHub Actions CI.
+CompLaB3D has **891 automated tests** in two categories (382 C++ + 509 Python), all running on GitHub Actions CI.
 
-### 5.1 C++ Unit Tests — 33 tests (no Palabos required)
+### 5.1 C++ Unit Tests — 382 tests (no Palabos required)
 
 **Linux / macOS:**
 
@@ -261,14 +261,19 @@ cmake --build . --config Release --parallel
 ctest -C Release --output-on-failure
 ```
 
-Expected result: **33 passed, 0 failed** (~1 second on a laptop).
+Expected result: **382 passed, 0 failed** (~1 second on a laptop).
 
-| Executable               | What is tested                                                | Tests  |
-| ------------------------ | ------------------------------------------------------------- | ------ |
-| `test_stability`         | Ma, CFL, τ, Pe_grid bounds and edge cases                     | 14     |
-| `test_abiotic_kinetics`  | First-order decay, bimolecular, reversible, mass conservation | 8      |
-| `test_biotic_kinetics`   | Monod growth, substrate uptake, Haldane inhibition, decay     | 11     |
-| **Total**                |                                                               | **33** |
+| Executable                                                                           | What is tested                                                | Tests   |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------- | ------- |
+| `test_stability` / `_extended`                                                       | Ma, CFL, τ, Pe_grid bounds and edge cases                     | 40      |
+| `test_abiotic_kinetics` / `_extended`                                                | First-order decay, bimolecular, reversible, mass conservation | 50      |
+| `test_biotic_kinetics` / `_extended`                                                 | Monod growth, substrate uptake, Haldane inhibition, decay     | 55      |
+| `test_planktonic_kinetics` / `_extended`                                             | Suspended biomass transport + Monod, multi-population         | 37      |
+| `test_eq_solver` / `_extended`                                                       | Anderson-NR equilibrium model, stiff systems, log K ranges    | 51      |
+| `test_diagnostics`                                                                   | Mass balance checking, diagnostic output                      | 20      |
+| `test_lbm_utils` / `_extended`                                                       | D3Q7 weights, Darcy velocity, FD Laplacian, unit conversions  | 65      |
+| `test_bc`, `test_growth_integration`, `test_diffusion_bc`, `test_reaction_transport` | BCs, Euler integration, 1D profiles, Pe/Da/Thiele             | 64      |
+| **Total**                                                                            |                                                               | **382** |
 
 Full descriptions: `tests/README.md`.
 
@@ -400,7 +405,7 @@ cmake --build . --parallel
 ctest --output-on-failure
 ```
 
-Expected: **33 passed, 0 failed.**
+Expected: **382 passed, 0 failed.**
 
 ### Verify the GUI tests (~12 seconds, no model required)
 
