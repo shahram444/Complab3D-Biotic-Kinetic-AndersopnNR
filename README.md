@@ -1,5 +1,9 @@
 # CompLaB3D
 
+[![Public since](https://img.shields.io/badge/public%20since-Feb%202026-blue)](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR)
+
+> **Repository public since 2026-02-05.** This repository has been openly available on GitHub since February 5, 2026. Public history is verifiable via the GitHub API (`GET /repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR` → `created_at`) and via commit timestamps in `git log`.
+
 **A 3D Pore-Scale Biogeochemical Reactive Transport Simulator**
 
 CompLaB3D couples Lattice Boltzmann Method (LBM) fluid flow and
