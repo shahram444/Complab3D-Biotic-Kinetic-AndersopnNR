@@ -1,13 +1,6 @@
 cff-version: 1.2.0
-title: >-
-  CompLaB3D: A 3D Pore-Scale Biogeochemical Reactive Transport
-  Simulator
-message: >-
-  If you use this software, please cite it using the metadata
-  from this file.
+message: "If you use this software, please cite it as below."
 type: software
-<<<<<<< Updated upstream
-=======
 title: "CompLaB3D"
 abstract: "Three-dimensional pore-scale biogeochemical reactive transport solver coupling Lattice Boltzmann methods with Monod kinetics, abiotic reactions, and equilibrium chemistry."
 version: 2.1.0
@@ -21,42 +14,11 @@ keywords:
   - pore-scale modeling
   - biogeochemistry
   - equilibrium chemistry
->>>>>>> Stashed changes
 authors:
-  - given-names: Shahram
-    family-names: Asgari
-    affiliation: University of Georgia
+  - family-names: Asgari
+    given-names: Shahram
     orcid: "https://orcid.org/0009-0004-3810-2739"
-repository-code: >-
-  https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR
-url: >-
-  https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR
-license: GPL-3.0
-version: "2.1.0"
-date-released: "2026-03-10"
-keywords:
-  - lattice-boltzmann
-  - reactive-transport
-  - biofilm
-  - pore-scale
-  - biogeochemistry
-  - computational-fluid-dynamics
-abstract: >-
-  CompLaB3D is a 3D pore-scale biogeochemical reactive transport
-  simulator coupling Lattice Boltzmann Method (LBM) advection-diffusion
-  with Monod biotic kinetics, abiotic chemical reactions, cellular
-  automata biofilm growth, and Newton-Raphson/Anderson equilibrium
-  solving. It includes CompLaB Studio, a Python GUI for scenario
-  configuration, 3D visualization, and solver management.
-preferred-citation:
-  type: article
-  title: >-
-    CompLaB3D: A 3D Pore-Scale Biogeochemical Reactive Transport
-    Simulator with an Integrated GUI
-  authors:
-    - given-names: Shahram
-      family-names: Asgari
-      affiliation: University of Georgia
-      orcid: "https://orcid.org/0009-0004-3810-2739"
-  journal: Journal of Open Source Software
-  year: 2026
+    affiliation: "University of Georgia"
+  - family-names: Meile
+    given-names: Christof
+    affiliation: "University of Georgia"
