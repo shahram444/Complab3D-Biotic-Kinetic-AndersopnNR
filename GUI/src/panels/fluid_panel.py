@@ -16,9 +16,9 @@ class FluidPanel(BasePanel):
 
         self.delta_P = self.make_double_spin(2e-3, 0, 1e6, 8)
         self.delta_P.setToolTip(
-            "Pressure gradient across the domain (lattice units).\n"
+            "Pressure difference across the domain (lattice units).\n"
             "Set to 0 for no flow (diffusion only).")
-        form.addRow("Pressure gradient (delta_P):", self.delta_P)
+        form.addRow("Pressure difference (delta_P):", self.delta_P)
 
         self.peclet = self.make_double_spin(1.0, 0, 1e6, 4)
         self.peclet.setToolTip(
@@ -68,10 +68,10 @@ class FluidPanel(BasePanel):
         val = self.delta_P.value()
         if val < 0:
             self.set_validation(self.delta_P, "error",
-                                "Pressure gradient cannot be negative.")
+                                "Pressure difference cannot be negative.")
         elif val > 0.1:
             self.set_validation(self.delta_P, "warning",
-                                "High pressure gradient may cause instability.")
+                                "High pressure difference may cause instability.")
         else:
             self.clear_validation(self.delta_P)
 
