@@ -1,5 +1,10 @@
 # CompLaB3D Test Cases
 
+**Authors:** Shahram Asgari and Christof Meile  
+**Affiliation:** Meile Lab, Department of Marine Sciences, University of Georgia (UGA), Athens, GA, USA  
+**Contact:** [shahram.asgari@uga.edu](mailto:shahram.asgari@uga.edu)
+
+
 Eight simulation configurations that exercise every major capability of the
 solver. Each case is run **manually** — you copy the right files into a working
 directory and launch the solver yourself. This gives you full control over
