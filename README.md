@@ -2,6 +2,12 @@
 
 **Three-Dimensional Pore-Scale Biogeochemical Reactive Transport Modeling Framework**
 
+**Authors:** Shahram Asgari and Christof Meile  
+**Affiliation:** Meile Lab, Department of Marine Sciences, University of Georgia (UGA), Athens, GA, USA  
+**Contact:** [shahram.asgari@uga.edu](mailto:shahram.asgari@uga.edu)
+
+The 3-D extension presented here was created by Shahram Asgari and Christof Meile (Meile Lab, UGA). Its 2-D predecessor *CompLaB v1.0* was developed by Heewon Jung, Hyun-Seob Song, and Christof Meile.
+
 CompLaB3D is an open-source three-dimensional pore-scale reactive transport model that couples Lattice Boltzmann Method (LBM) fluid flow and solute transport with Monod-based microbial kinetics, user-defined abiotic chemical reactions, an Anderson-accelerated equilibrium chemistry model, and a cellular automaton (CA) biofilm model — all MPI-parallelised through the [Palabos](https://palabos.unige.ch/) library.
 
 **CompLaB Studio** (v2.1.0) is the companion graphical interface: a desktop application built with PySide6 that handles the complete workflow from project setup and geometry generation through simulation launch and 3D post-processing — without ever touching a text editor.
@@ -1673,55 +1679,4 @@ DISPLAY=:99 pytest tests/ -v
 | `ModuleNotFoundError: PySide6`       | Dependencies not installed                  | `pip install -r requirements.txt`                                                                         |
 | `ModuleNotFoundError: vtkmodules`    | VTK not installed                           | `pip install vtk` (Python 3.10–3.12 only)                                                                 |
 | Window opens but panels are blank    | Qt platform plugin missing (Linux headless) | Set `DISPLAY=:0` or install `libxcb-util-dev`                                                             |
-| "CompLaB executable not found" error | Model not compiled or path not set          | Build the model (see [Part 2](#part-2--standalone-hpc--command-line-guide)), then set path in Preferences |
-| "mpirun: command not found"          | MPI not installed                           | Install `openmpi` or `mpich` via package manager                                                          |
-| Model crashes immediately (Windows)  | omega=0 bug in older builds                 | Rebuild model from latest source; this bug is patched                                                     |
-| Model crashes immediately (Linux)    | Wrong MPI library version                   | Recompile with the same MPI library that is on `PATH`                                                     |
-| Run panel shows no output            | Executable did not start                    | Check the crash diagnostic file in `output/`                                                              |
-| VTI file empty / zero bytes          | Model exited before writing output          | Lower the VTK interval or increase max iterations                                                         |
-| Geometry preview is black            | `geometry.dat` not found or all-solid       | Check file path in Domain panel; verify at least one voxel = 2 (pore)                                     |
-| Kinetics changes not reflected       | `.hh` files modified but model not recompiled | Recompile the model after every kinetics edit (see §31)                                                 |
-| Auto-save conflicts with manual save | Race condition on network drives            | Use a local project directory; auto-save is safe on local SSD                                             |
-| Theme does not switch                | Qt style cache                              | Restart the application                                                                                   |
-| `pytest` GUI tests fail on macOS     | Qt accessibility security prompt            | Run tests from a terminal launched via Finder, not SSH                                                    |
-
----
-
-## Proof of public availability
-
-[![Public since](https://img.shields.io/badge/public%20since-2026--02--05-blue)](https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR)
-[![First commit](https://img.shields.io/badge/first%20commit-2026--02--05-green)](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commit/c51ff499f226b82936b6a57b7a29fbd5d49b54b3)
-
-This repository has been **publicly available on GitHub since 2026-02-05**.
-You don't have to take my word for it — every claim below is independently verifiable:
-
-| What | Where to verify it yourself |
-|------|------------------------------|
-| Repo `created_at` field | [api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR](https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR) — look for `"created_at": "2026-02-05T15:17:47Z"` |
-| First commit on GitHub | [`c51ff49` — 2026-02-05](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commit/c51ff499f226b82936b6a57b7a29fbd5d49b54b3) |
-| Full commit history | [Commits page](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR/commits/main/) — scroll to the bottom |
-| Independent web archive | [Wayback Machine snapshots](https://web.archive.org/web/*/github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR) |
-
-**Quick verification from your terminal:**
-
-```bash
-# 1. Repo creation date straight from GitHub's API
-curl -s https://api.github.com/repos/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR \
-  | grep -E '"(created_at|pushed_at|visibility)"'
-
-# 2. Earliest commit in the repo (after cloning)
-git clone https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR.git
-cd Complab3D-Biotic-Kinetic-AndersopnNR
-git log --reverse --format="%ai %h %s" | head -1
-# → 2026-02-05 10:18:28 -0500 c51ff49 Add files via upload
-```
-
-**Expected API response:**
-
-```json
-{
-  "created_at": "2026-02-05T15:17:47Z",
-  "visibility": "public",
-  "pushed_at": "2026-05-01T06:05:14Z"
-}
-```
+| "CompLaB execut
