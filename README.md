@@ -1,5 +1,9 @@
 # CompLaB3D
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19964835.svg)](https://doi.org/10.5281/zenodo.19964835)
+[![Public since](https://img.shields.io/badge/Public%20since-Feb%202026-blue)](https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR)
+[![License](https://img.shields.io/badge/License-AGPL%20v3-blue)](LICENSE)
+
 **Three-Dimensional Pore-Scale Biogeochemical Reactive Transport Modeling Framework**
 
 **Authors:** Shahram Asgari and Christof Meile  
