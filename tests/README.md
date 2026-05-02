@@ -1,617 +1,608 @@
-# CompLaB3D Test Suite
+# CompLaB Studio GUI Test Suite
 
-**What the tests verify:** Two automated test layers cover 900+ checks across
-every physics function and every GUI panel — confirming that the correct number
-comes out of each calculation and that the interface correctly reads and writes
-all simulation parameters.
+**Authors:** Shahram Asgari and Christof Meile  
+**Affiliation:** Meile Lab, Department of Marine Sciences, University of Georgia (UGA), Athens, GA, USA  
+**Contact:** [shahram.asgari@uga.edu](mailto:shahram.asgari@uga.edu)
 
-For manually running complete simulations (flow-only, diffusion, abiotic
-kinetics, equilibrium chemistry, biotic growth), see
-**[`test_cases/README.md`](../test_cases/README.md)**.
 
----
 
-## Table of Contents
 
-1. [Two Levels of Testing — Overview](#1-two-levels-of-testing--overview)
-2. [Level 1: Unit Tests — Individual Physics Functions (C++)](#2-level-1-unit-tests--individual-physics-functions-c)
-   - [How Unit Tests Work](#how-unit-tests-work)
-   - [Prerequisites](#prerequisites-unit-tests)
-   - [Step-by-Step: Linux](#step-by-step-linux-unit-tests)
-   - [Step-by-Step: macOS](#step-by-step-macos-unit-tests)
-   - [Step-by-Step: Windows](#step-by-step-windows-unit-tests)
-   - [What Each Test File Covers](#what-each-test-file-covers)
-3. [Level 2: GUI Tests — Graphical Interface (Python)](#3-level-2-gui-tests--graphical-interface-python)
-   - [How GUI Tests Work](#how-gui-tests-work)
-   - [Prerequisites](#prerequisites-gui-tests)
-   - [Step-by-Step: All Platforms](#step-by-step-all-platforms-gui-tests)
-4. [Interpreting Results](#4-interpreting-results)
-5. [Troubleshooting](#5-troubleshooting)
+**What the tests actually do:** Every time someone changes the GUI code,
+362+ automated checks run in about one second. Each check verifies a specific
+behaviour of the GUI -- that a parameter is correctly saved, that an error
+is correctly detected before the simulation starts, that a crash report
+correctly identifies the cause. This prevents bugs from silently corrupting
+your simulation setup.
 
 ---
 
-## 1. Two Levels of Testing — Overview
+## What Does the GUI Do, and What Can Go Wrong?
 
-```
-LEVEL 1 — UNIT TESTS                      LEVEL 2 — GUI TESTS
-──────────────────────────────────────     ────────────────────────────────────
-files:  tests/cpp/*.cpp                    files:  GUI/tests/test_*.py
-tool:   GoogleTest (C++)                   tool:   pytest (Python)
+CompLaB Studio is a graphical interface that helps you:
 
-Question:                                  Question:
-"Does this physics function                "Does the GUI correctly
- return the right number?"                  save/load all parameters?"
+1. Set up simulation parameters (domain size, flow velocity, substrate
+   properties, microbial kinetics, geochemical equilibria)
+2. Export those parameters as `CompLaB.xml` -- the file the C++ solver reads
+3. Deploy `defineKinetics.hh` and `defineAbioticKinetics.hh` alongside the XML
+4. Launch the solver and monitor its progress in real time
 
-What runs:                                 What runs:
-One function from one .hh header,          Python tests of GUI panels,
-called directly with known inputs          project I/O, and XML templates
+There are three places where things can go wrong silently:
 
-Needs Palabos?    NO                       Needs Palabos?    NO
-Needs MPI?        NO                       Needs MPI?        NO
-Needs cluster?    NO                       Needs cluster?    NO
-Speed:            ~8 seconds               Speed:            ~60 seconds
-Works on:         Linux, macOS, Windows    Works on:         Linux, macOS, Windows
+- **Data loss in the GUI**: you type a value in one panel, save the project,
+  re-open it, and the value is gone because the load/save code has a bug
+- **Invalid XML exported**: the XML is syntactically correct but contains a
+  value that causes the C++ solver to crash with an opaque error code
+- **Wrong kinetics deployed**: the substrate/microbe count in the XML does not
+  match what the `.hh` kinetics code accesses (C[2] when only 1 substrate
+  is defined causes heap corruption)
 
-Count:            382 checks               Count:            526 checks
-```
-
-Both levels run entirely without Palabos or MPI — they are available on any
-laptop or workstation.
-
-A unit test confirms that the Monod rate function returns the right number when
-called with specific inputs. A GUI test confirms that the rate constants a user
-enters in the interface are actually written to the XML and read back correctly.
-
-To confirm the solver produces correct concentration fields in a real 3-D
-domain, see the simulation cases in **`test_cases/README.md`**.
+The test suite is designed to catch all three categories.
 
 ---
 
-## 2. Level 1: Unit Tests — Individual Physics Functions (C++)
+## Running the Tests (One Minute, No Solver Required)
 
-### How Unit Tests Work
+The commands below are identical on Linux, macOS, and Windows.
+Use **Terminal** on Linux/macOS, or **Command Prompt / PowerShell** on Windows.
 
-CompLaB3D's physics lives in **header files** (`.hh` files) that are included
-by the solver:
+### Step 1 — Install Python 3.10 or later
 
-```
-complab.cpp  →  #include "defineKinetics.hh"           (Monod kinetics)
-             →  #include "defineAbioticKinetics.hh"    (abiotic reactions)
-             →  #include "complab_functions.hh"         (geometry, I/O, stability)
-             →  #include "complab3d_processors.hh"      (LBM operators)
-             →  ... Palabos, MPI, OpenMP ...
-```
+- **Linux (Ubuntu/Debian):** `sudo apt install python3 python3-pip`
+- **macOS:** download from [python.org](https://www.python.org/downloads/)
+  or `brew install python`
+- **Windows:** download from [python.org](https://www.python.org/downloads/).
+  On the first installer screen, tick **"Add Python to PATH"** before clicking Install.
 
-The main program needs Palabos and MPI. The **physics functions in the header
-files do not** — they are pure mathematics. The unit tests include exactly the
-same headers the solver uses, call exactly the same functions, and compare the
-results to known-correct values:
+Verify it worked: `python --version` should print `Python 3.10.x` or higher.
 
-```cpp
-// test_biotic_kinetics.cpp  (the actual test file — no simplifications)
-#include "defineKinetics.hh"     // ← the real production header
-
-TEST(BioticKinetics, HalfSaturationPoint) {
-    // When [DOC] = Ks, the Monod growth rate must equal mu_max / 2 (by definition)
-    double DOC = Ks;
-    double mu  = mu_max * DOC / (Ks + DOC);
-    EXPECT_NEAR(mu, mu_max / 2.0, 1e-12);
-}
-```
-
-**The one workaround: `plb_shim.h`**
-
-The kinetics headers use one Palabos type: `plb::plint` (a 64-bit integer).
-Without Palabos installed, the compiler would refuse to build. `tests/cpp/plb_shim.h`
-substitutes for the entire Palabos library with four lines:
-
-```cpp
-namespace plb {
-    typedef long long int plint;   // identical type, no Palabos needed
-}
-```
-
-Everything else is real production code — no mocking, no stubs.
-
-**GoogleTest** is downloaded automatically by CMake on the first build.
-
----
-
-### Prerequisites: Unit Tests
-
-| What you need | Linux | macOS | Windows |
-|---|---|---|---|
-| C++ compiler | GCC (usually pre-installed) | Xcode Command Line Tools | MinGW-w64 or Visual Studio |
-| CMake 3.14+ | `sudo apt install cmake` | `brew install cmake` | cmake.org installer |
-| Internet | First build only (downloads GoogleTest) | First build only | First build only |
-| Palabos | **NOT needed** | **NOT needed** | **NOT needed** |
-| MPI | **NOT needed** | **NOT needed** | **NOT needed** |
-
----
-
-### Step-by-Step: Linux (Unit Tests)
-
-**Step 1 — Verify compiler and CMake**
-```bash
-g++ --version     # any modern version (GCC 9+ recommended)
-cmake --version   # need 3.14 or higher
-```
-
-If either is missing:
-```bash
-sudo apt-get install build-essential cmake   # Ubuntu / Debian
-sudo dnf install gcc-c++ cmake               # Fedora / RHEL
-```
-
-**Step 2 — Configure, compile, and run**
-```bash
-cd /path/to/JOSS_Submit/tests/cpp
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --parallel
-ctest --output-on-failure
-```
-
-Expected result:
-```
-100% tests passed, 0 tests failed out of 382
-Total Test time (real) =  7.83 sec
-```
-
-**Run just one test suite:**
-```bash
-ctest -R biotic_kinetics --output-on-failure
-```
-
-**Run one specific check by name:**
-```bash
-./test_biotic_kinetics --gtest_filter="*HalfSaturation*"
-```
-
----
-
-### Step-by-Step: macOS (Unit Tests)
+### Step 2 — Install the required packages (first run only)
 
 ```bash
-xcode-select --install        # installs clang / g++
-brew install cmake            # or download .dmg from cmake.org
-
-cd /path/to/JOSS_Submit/tests/cpp
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --parallel
-ctest --output-on-failure
-```
-
-Expected: `100% tests passed, 0 tests failed out of 382`
-
-> **Apple Silicon (M1/M2/M3):** Tests compile natively on ARM. If cmake
-> complains about architecture, add `-DCMAKE_OSX_ARCHITECTURES=arm64`.
-
----
-
-### Step-by-Step: Windows (Unit Tests)
-
-Two options: **Option A (MinGW)** works from a regular Command Prompt and is
-simpler. **Option B (Visual Studio)** suits users who already have VS installed.
-
-#### Option A — MinGW-w64 (Recommended)
-
-**Step 1 — Install MSYS2 and MinGW** (skip if `g++ --version` already works)
-
-Download the installer from [msys2.org](https://www.msys2.org/). In the MSYS2
-MINGW64 shell that opens, run:
-```bash
-pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-make
-```
-
-**Step 2 — Add MinGW to Windows PATH**
-
-Search "Edit environment variables" → `Path` → `Edit` → `New`:
-```
-C:\msys64\mingw64\bin
-```
-Close and reopen any Command Prompt windows.
-
-**Step 3 — Install CMake** from [cmake.org/download](https://cmake.org/download/).
-During installation select **"Add CMake to the system PATH for all users"**.
-
-**Step 4 — Open a regular Command Prompt** (not MSYS2, not Developer Prompt):
-```cmd
-cd C:\path\to\JOSS_Submit\tests\cpp
-mkdir build && cd build
-cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-cmake --build . --parallel
-ctest --output-on-failure
-```
-
-> Always use `-G "MinGW Makefiles"` to avoid the default Visual Studio
-> generator. Must be run from a regular Command Prompt, not the MSYS2 shell.
-
-**Run one check by name:**
-```cmd
-test_biotic_kinetics.exe --gtest_filter="*HalfSaturation*"
-```
-
----
-
-#### Option B — Visual Studio Community
-
-**Step 1** — Install [Visual Studio Community](https://visualstudio.microsoft.com/vs/community/)
-with **Desktop development with C++** workload.
-
-**Step 2** — Install CMake (cmake.org).
-
-**Step 3** — Open the **Developer Command Prompt for VS** from the Start menu
-(not a regular terminal — `cl.exe` is only on PATH in this prompt).
-
-**Step 4:**
-```cmd
-cd C:\path\to\JOSS_Submit\tests\cpp
-mkdir build && cd build
-cmake .. -G "Visual Studio 17 2022" -A x64
-cmake --build . --config Release --parallel
-ctest -C Release --output-on-failure
-```
-
-> Use `-G "Visual Studio 16 2019"` if you have VS 2019. Run `cmake --help`
-> to list all available generators.
-
-**Run one check by name:**
-```cmd
-Release\test_biotic_kinetics.exe --gtest_filter="*HalfSaturation*"
-```
-
----
-
-### What Each Test File Covers
-
-#### `test_stability.cpp` and `test_stability_extended.cpp` — 40 checks
-
-**Solver source tested:** `src/complab.cpp` → `performStabilityChecks()`
-
-CompLaB3D checks five dimensionless numbers before any simulation starts and
-refuses to run if any falls outside the stable range.
-
-| Parameter | Stable range | What a violation means |
-|---|---|---|
-| LBM relaxation time τ_NS | 0.5 < τ < 2.0 | τ ≤ 0.5 → negative kinematic viscosity |
-| LBM relaxation time τ_ADE | 0.5 < τ < 2.0 | τ ≤ 0.5 → negative effective diffusivity |
-| Mach number Ma = u/c_s | Ma < 0.3 | Compressibility errors corrupt flow |
-| CFL number | u_max < 1 lattice unit/step | Information travels faster than lattice |
-| Grid Péclet number Pe_grid | Pe_grid < 2 | Numerical diffusion dominates |
-
----
-
-#### `test_abiotic_kinetics.cpp` and `test_abiotic_kinetics_extended.cpp` — 50 checks
-
-**Solver source tested:** `defineAbioticKinetics.hh` → `defineAbioticRxnKinetics()`
-
-The default abiotic reaction is first-order decay: dA/dt = −k·A with k = 10⁻⁵/s.
-Checks include sign (A is consumed), proportionality (doubling [A] doubles the
-rate), zero-concentration behaviour, rate clamping (no more than 50% consumed
-per step), and finite output across 25 orders of magnitude.
-
----
-
-#### `test_biotic_kinetics.cpp` and `test_biotic_kinetics_extended.cpp` — 55 checks
-
-**Solver source tested:** `defineKinetics.hh` → `defineRxnKinetics()` (sessile branch)
-
-```
-µ      = µ_max × DOC / (Ks + DOC)     Monod growth rate [1/s]
-dB/dt  = (µ − k_decay) × B            biomass change [kg/m³/s]
-dDOC/dt = −µ × B / Y                  DOC consumed [mol/L/s]
-```
-
-Parameters: µ_max = 1.0/s, k_decay = 10⁻⁹/s, Ks = 10⁻⁵ mol/L, Y = 0.4
-
-The most important check is the **yield mass balance**:
-```
-dB/dt = −dDOC/dt × Y − k_decay × B   (must hold at every single call)
-```
-If Y or dt_kinetics is changed without updating the rate function, this fails
-immediately before the mistake reaches any simulation output.
-
----
-
-#### `test_planktonic_kinetics.cpp` and `test_planktonic_kinetics_extended.cpp` — 37 checks
-
-**Solver source tested:** `defineKinetics.hh` (planktonic branch)
-
-The same checks as the sessile biofilm branch, applied to suspended
-(free-swimming) cells. Planktonic cells use different parameters (µ_max = 0.5/s,
-k_decay = 10⁻⁷/s, PLANKTONIC_DILUTION_FACTOR = 0.1). The same
-`defineRxnKinetics()` handles both via a branch — these tests verify that branch.
-
----
-
-#### `test_eq_solver.cpp` and `test_eq_solver_extended.cpp` — 51 checks
-
-**Solver source tested:** `complab3d_processors_part4_eqsolver_standalone.hh`
-
-The geochemical equilibrium solver (Anderson-Accelerated Newton-Raphson with
-PCF formulation) enforces chemical equilibrium at each time step. Three layers:
-linear algebra building blocks (QR decomposition, triangular solve), mass
-action chemistry, and the critical **component conservation** check (total moles
-of each element conserved to 0.01% after redistribution).
-
----
-
-#### `test_diagnostics.cpp` — 20 checks
-
-**Solver source tested:** `defineKinetics.hh` → `KineticsStats`, `KineticsDiagnostics`
-
-Per-iteration statistics: biomass produced, DOC consumed, CO₂ generated, active
-and rate-limited cell counts. Checks counter reset, accumulation, yield
-consistency over 100 calls.
-
----
-
-#### `test_lbm_utils.cpp` and `test_lbm_utils_extended.cpp` — 65 checks
-
-**Solver source tested:** `complab3d_processors.hh`, `complab_functions.hh`
-
-D3Q7 lattice encoding for all scalar transport fields. The key check is the
-**encode→decode round-trip**: every concentration value must survive encoding
-and decoding to within 10⁻¹². Also checks weight normalisation, Laplacian of a
-constant field = 0, Darcy flow calibration, and LBM physics constants.
-
----
-
-#### `test_bc.cpp` — 22 checks
-
-**Solver source tested:** D3Q7 boundary condition processors
-
-Dirichlet (Anti-Bounce-Back), Neumann (zero gradient), and Periodic boundary
-conditions. Checks that ABB recovers the exact boundary concentration, Neumann
-gives zero gradient, and periodic BC conserves mass exactly.
-
----
-
-#### `test_growth_integration.cpp` — 18 checks
-
-**Solver source tested:** `defineKinetics.hh` (Euler time integration)
-
-Multi-step integration: growth phase (B grows, DOC falls), DOC depletion (cells
-switch to decay), mass balance over 100 steps, sessile vs. planktonic rate
-difference.
-
----
-
-#### `test_diffusion_bc.cpp` — 20 checks
-
-**Solver source tested:** `complab_functions.hh` (diffusivity helpers)
-
-Effective diffusivity in pore space and biofilm, and analytical validation
-against the exact 1D reactive-diffusion steady-state profile (Thiele modulus
-solution).
-
----
-
-#### `test_reaction_transport.cpp` — 26 checks
-
-**Solver source tested:** multiple headers (dimensionless numbers, operator splitting)
-
-Péclet, Damköhler, and Thiele numbers. The **operator splitting** check: the
-transport sub-step moves substrate without creating or destroying it, then the
-reaction sub-step removes the correct amount.
-
----
-
-## 3. Level 2: GUI Tests — Graphical Interface (Python)
-
-### How GUI Tests Work
-
-The GUI is a PySide6 desktop application. Its test suite uses pytest to verify
-that every panel correctly reads and writes project parameters, that XML files
-are generated with the right structure, that templates apply correctly, and that
-the simulation pipeline wires together properly.
-
-Tests are split into two groups:
-
-- **Non-Qt tests** (`test_project_model.py`, `test_templates.py`, `test_xml_io.py`,
-  `test_kinetics.py`, `test_pipeline_e2e.py`, `test_xml_diagnostic.py`,
-  `test_config.py`): pure Python logic — no display needed, run on any machine.
-
-- **Qt-dependent tests** (`test_gui_panels.py`, `test_simulation_runner.py`):
-  instantiate real PySide6 widgets. On Linux they require a virtual display or
-  the `offscreen` platform backend.
-
----
-
-### Prerequisites: GUI Tests
-
-| What you need | How to get it |
-|---|---|
-| Python 3.10 or higher | python.org installer (or system Python) |
-| PySide6 | `pip install PySide6` |
-| pytest | `pip install pytest` |
-| Linux only: system Qt libraries | `sudo apt-get install -y libegl1 libgl1 libdbus-1-3` |
-
-> **Linux note:** The required package is `libgl1`, **not** `libgl1-mesa-glx`.
-> The older name was removed in Ubuntu 22.04. Installing the wrong name causes
-> an "EGL / OpenGL not found" error even though PySide6 itself installed correctly.
-
----
-
-### Step-by-Step: All Platforms (GUI Tests)
-
-**Step 1 — Install Python packages**
-```bash
-cd /path/to/JOSS_Submit/GUI
+cd GUI
 pip install PySide6 pytest pytest-qt
 ```
 
-On Linux, also install system libraries:
+On some Linux systems pip may refuse to install into the system Python.
+If you see an "externally managed environment" error, use a virtual environment:
+
 ```bash
-sudo apt-get install -y libegl1 libgl1 libdbus-1-3
+python -m venv venv
+source venv/bin/activate        # Linux / macOS
+venv\Scripts\activate           # Windows (Command Prompt)
+pip install PySide6 pytest pytest-qt
 ```
 
-**Step 2 — Run the non-Qt tests (works everywhere, no display needed)**
+### Step 3 — Run the tests
+
 ```bash
-cd /path/to/JOSS_Submit/GUI
+python -m pytest tests/ -v
+```
+
+**Expected output:**
+
+```
+362 passed, 5 skipped in 1.02s
+```
+
+The 5 skipped tests are the full end-to-end simulation runner tests
+(TestFullSimulationRun). These use a fake solver subprocess and require
+a graphical Qt backend. They run correctly on Linux with a display,
+macOS, and **Windows**. On headless CI servers, set `QT_QPA_PLATFORM=offscreen`
+(done automatically by conftest.py).
+
+No C++ compiler, no MPI, no Palabos, and no actual simulation runs are
+needed for any of the 362 non-skipped tests.
+
+---
+
+## Test Files and What Each Covers
+
+There are 9 test files. Each is described below in plain terms -- what
+physical or software concept it protects.
+
+---
+
+### test_project_model.py -- Parameter Validation Before Export
+
+**Source tested:** src/core/project.py -- the CompLaBProject data model
+and its validate() method.
+
+**What is being tested:** Before the GUI exports CompLaB.xml, it runs
+validate() to check that all user-entered values are physically and logically
+consistent. This test file verifies that validate() correctly catches every
+known category of error.
+
+**Why this matters:** The C++ solver does not produce helpful error messages
+when given bad input -- it either crashes with a heap-corruption code or
+silently produces wrong results. The GUI's job is to catch problems before the
+solver ever sees them.
+
+**Checks performed:**
+
+| Category     | What is flagged                                                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Domain       | nx = 0 (no lattice sites); dx < 0 (negative spacing); unit not in ["um","mm","m"]                                                                    |
+| Fluid        | tau < 0.5 or tau > 2.0 (LBM unstable); delta_P < 0 (unphysical pressure)                                                                             |
+| Substrates   | Duplicate names; negative initial concentration; D_biofilm > D_pore (physically impossible -- EPS always reduces diffusivity); invalid boundary type |
+| Microbiology | Biotic mode enabled with zero microbes; CA solver with no material number; solver_type not in ["CA","LBM"]                                           |
+| Equilibrium  | Enabled with no components; stoichiometry matrix row count != substrate count                                                                        |
+| Cross-checks | Kinetics enabled but no substrates; abiotic kinetics enabled but no substrates                                                                       |
+
+**What PASS means:** Every category of user input error is detected and
+reported with a helpful message before the solver starts. A failure here means
+a malformed XML will be silently exported, leading to an opaque crash.
+
+---
+
+### test_templates.py -- Simulation Starting Points
+
+**Source tested:** src/core/templates.py -- all 9 built-in simulation templates.
+
+**What is being tested:** When a user opens CompLaB Studio for the first time,
+they choose from 9 pre-configured templates. Each template sets up a complete,
+self-consistent simulation. These tests verify that every template produces a
+valid configuration with no blocking errors.
+
+**The 9 templates:**
+
+| Template               | Physics                          | Substrates            | Microbes     |
+| ---------------------- | -------------------------------- | --------------------- | ------------ |
+| Flow only              | Navier-Stokes flow, no chemistry | 0                     | 0            |
+| Diffusion only         | Pure Fickian diffusion, Pe = 0   | 1 (Tracer)            | 0            |
+| Tracer transport       | Advection-diffusion, Pe = 1      | 1 (Tracer)            | 0            |
+| Abiotic reaction       | First-order decay A -> B         | 2 (Reactant, Product) | 0            |
+| Abiotic equilibrium    | Carbonate speciation             | 5 (species)           | 0            |
+| Biotic sessile         | Biofilm growth on surfaces       | 1 (DOC)               | 1 (CA)       |
+| Biotic planktonic      | Suspended microbial growth       | 1 (DOC)               | 1 (LBM)      |
+| Sessile + planktonic   | Biofilm + suspended cells        | 1 (DOC)               | 2 (CA + LBM) |
+| Coupled biotic-abiotic | Biofilm + abiotic reaction       | 2 (DOC, byproduct)    | 1 (CA)       |
+
+**Key checks:**
+
+- Each template passes validate() with zero errors (ready to run out of the box)
+- Simulation mode flags match the template type (biotic_mode, enable_kinetics)
+- Substrate count and names match the template description
+- Microbe solver type matches (CA for sessile, LBM for planktonic)
+- Both defineKinetics.hh and defineAbioticKinetics.hh are attached, even
+  for templates that don't use kinetics (the solver requires both files unconditionally)
+
+**What PASS means:** Any user who picks a template and clicks "Run" without
+changing any parameters will get a valid, working simulation. A failure means
+a template is broken out of the box.
+
+---
+
+### test_xml_io.py -- XML and Project File Serialisation
+
+**Source tested:** src/core/project_manager.py -- XML export/import and
+JSON project save/load.
+
+**What is being tested:** Two file formats:
+
+1. CompLaB.xml: The configuration file read by the C++ solver. Its
+   structure must exactly match what the solver's XML parser (TinyXML) expects.
+   Every field name, tag hierarchy, and value format must be correct.
+
+2. .complab JSON: The GUI's own project file, which stores everything
+   needed to restore the full GUI state including kinetics source code.
+
+**XML structure checks:**
+
+- Root element is <parameters> (solver crashes if this is wrong)
+- All 7 required sections present: path, simulation_mode, LB_numerics,
+  chemistry, microbiology, equilibrium, IO
+- Substrate and microbe counts in <number_of_substrates> match the number
+  of <substrate{i}> child elements
+- Boolean values are the strings "true" / "false" (not Python True/False)
+- Floating-point values use scientific notation correctly (1.000000e-09)
+
+**Round-trip checks (export then re-import):**
+
+For all 9 templates, the following fields must survive export then import unchanged:
+domain dimensions (nx, ny, nz, dx), fluid tau, substrate names and diffusion
+coefficients, boundary condition types, simulation mode flags, microbe names
+and solver types, equilibrium stoichiometry matrix, log K values.
+
+**What PASS means:** The XML exported by the GUI is structurally correct for
+the C++ solver, and no data is lost when a project is saved and reopened.
+
+---
+
+### test_kinetics.py -- Kinetics C++ Code Generation
+
+**Source tested:** src/core/kinetics_templates.py -- the system that generates
+defineKinetics.hh and defineAbioticKinetics.hh C++ source code.
+
+**What is being tested:** The kinetics .hh files are user-editable C++ code
+that is compiled as part of the solver. If the generated code is syntactically
+invalid or accesses the wrong array indices, the solver either fails to compile
+or crashes at runtime.
+
+**Code validity checks (for all 9 template kinetics):**
+
+- Include guards present (#ifndef, #define, #endif)
+- Required function name defineRxnKinetics is present (solver calls this by name)
+- Required namespace KineticsStats is present (solver calls getStats() unconditionally)
+- Both defineKinetics.hh and defineAbioticKinetics.hh are non-empty
+
+**Array-index cross-validation:**
+
+The validate_kinetics_vs_project() function parses the C++ source and extracts
+which array indices are accessed (C[0], B[1], subsR[2], etc.), then checks
+them against the actual substrate and microbe counts in the project.
+
+Example: biotic_sessile template uses C[0] and B[0].
+  Project has 1 substrate and 1 microbe -> indices 0..0 are valid -> OK.
+
+Example: user edits kinetics to access C[2] but project has only 1 substrate.
+  Index 2 >= substrate count 1 -> flagged as out-of-bounds -> error reported
+  before compilation even starts.
+
+**What PASS means:** All template kinetics files are valid C++, and the
+cross-validation system correctly catches index mismatches before compilation.
+
+---
+
+### test_simulation_runner.py -- Subprocess Lifecycle
+
+**Source tested:** src/core/simulation_runner.py -- the Qt thread that
+launches the C++ solver as a subprocess.
+
+**What is being tested:** The subprocess management layer is the most complex
+component in the GUI. It must launch the solver and read its output line by line
+without blocking, parse iteration progress, handle crashes, cancel on user
+request, and handle edge cases including stdout flooding, partial final lines,
+MPI process groups, and Qt garbage collection.
+
+**How it works (no real solver needed):**
+Each test writes a small Python script that mimics the C++ solver's output
+format. The SimulationRunner runs this fake solver and the test verifies
+the signals it emits.
+
+| Test scenario             | What is verified                                            |
+| ------------------------- | ----------------------------------------------------------- |
+| Normal completion         | exit code 0; all progress events captured; log file written |
+| Stdout flood (5000 lines) | reader keeps up; process exits cleanly                      |
+| Cancel after 3 iterations | process is actually dead (not just signal sent)             |
+| MPI path wrong            | exit code -1; "not found" in error message                  |
+| Solver exits 42           | exit code 42 captured and reported correctly                |
+| SIGSEGV (segfault)        | exit code -11 captured; crash diagnostic triggered          |
+| No geometry file          | exit code -1; "not found" in output                         |
+| Qt garbage collection     | parent reference prevents premature destruction             |
+
+**What PASS means:** The simulation runner handles all subprocess lifecycle
+events correctly.
+
+---
+
+### test_pipeline_e2e.py -- Full End-to-End Workflow
+
+**Source tested:** All of src/core/ together -- project model, templates,
+XML export, kinetics deployment, file validation, simulation runner.
+
+**What is being tested:** The complete workflow from choosing a template through
+running a simulation, exercising every component in sequence.
+
+**The workflow covered:**
+
+```
+1. Create project from template
+2. Construct a geometry.dat file (controlled voxel counts)
+3. validate() -- check all settings
+4. Export CompLaB.xml
+5. Deploy defineKinetics.hh and defineAbioticKinetics.hh
+6. validate_files() -- check exported files match project settings
+7. Run SimulationRunner with fake solver
+8. Verify: exit code, progress events, log file created
+```
+
+**Geometry file validation:** validate_files() checks that geometry.dat
+has exactly nx * ny * nz lines. A mismatch between the geometry file and the
+XML domain dimensions is the single most common cause of heap-corruption crashes.
+
+| Geometry test        | What it catches                                   |
+| -------------------- | ------------------------------------------------- |
+| Correct size passes  | No false positives                                |
+| Wrong size flagged   | User changed nx in GUI but not the geometry file  |
+| Missing file flagged | User forgot to create the geometry before running |
+
+**What PASS means:** The entire workflow from GUI setup to simulation start
+is internally consistent. Every component hands off correctly to the next.
+
+---
+
+### test_xml_diagnostic.py -- Crash Diagnostic Analysis
+
+**Source tested:** src/core/xml_diagnostic.py -- the module that analyses
+CompLaB.xml after a solver crash.
+
+**What is being tested:** When the C++ solver crashes with an opaque exit code
+(e.g. Windows 0xC0000374 = Heap Corruption), the diagnostic module reads the
+XML and kinetics headers to identify the most likely root cause. This produces
+a human-readable report rather than leaving the user with a bare exit code.
+
+**Exit codes that are mapped to explanations:**
+
+| Exit code   | Error type                    | Most likely cause                |
+| ----------- | ----------------------------- | -------------------------------- |
+| -1073740940 | Heap Corruption (0xC0000374)  | Geometry file size != nx*ny*nz   |
+| -1073741819 | Access Violation (0xC0000005) | Null pointer in kinetics code    |
+| -11         | Segmentation Fault (SIGSEGV)  | Array out-of-bounds access       |
+| 134         | Abort (SIGABRT)               | Internal assertion failure       |
+| 1           | Configuration Error           | Bad XML value rejected by solver |
+
+**What the diagnostic checks:**
+
+- Geometry file byte count vs. nx*ny*nz (supports binary and text formats)
+- C[n] and B[n] array accesses in kinetics .hh vs. substrate/microbe count
+- tau <= 0.5 produces negative LBM viscosity
+- nx < 3 means no interior lattice cells exist
+- Required XML sections missing (path, simulation_mode, LB_numerics, IO)
+- half_saturation_constants count != substrate count
+- All-Neumann + zero initial concentration means no substrate enters the domain
+
+**What the tests verify:**
+
+- Known exit codes produce the correct error-type label in the report
+- Missing XML file produces an error message, not a Python exception
+- Malformed XML produces a parse-error message, not a Python exception
+- Geometry size mismatch is flagged; correct geometry size passes cleanly
+- C[2] in kinetics with only 1 substrate is flagged
+- C[99] in a comment is NOT flagged (comment stripping works correctly)
+- The diagnostic report always contains the required sections
+- save_diagnostic_report() creates the file and returns its path
+
+**Bug fixed during testing:** The original save_diagnostic_report() had
+os.makedirs() outside the exception handler, so it could crash instead of
+returning "" on failure. The test found the bug; the fix was applied to
+xml_diagnostic.py.
+
+**Why this was not tested before:** xml_diagnostic.py is a 522-line module
+that is only invoked after a crash, making it hard to test manually. These
+47 tests exercise the diagnostic logic systematically for the first time.
+
+---
+
+### test_config.py -- Application Settings Persistence
+
+**Source tested:** src/config.py -- the AppConfig class.
+
+**What is being tested:** The GUI stores user preferences (solver executable
+path, recent project list, theme, font size) as a JSON file at
+~/.complab_studio/config.json. These settings are read at startup and written
+at shutdown. If they are corrupted or lost, the user has to reconfigure from
+scratch.
+
+**Checks performed:**
+
+| Category           | What is verified                                                               |
+| ------------------ | ------------------------------------------------------------------------------ |
+| Defaults           | Every setting has the correct default value on first run                       |
+| Get/Set            | set(key, value) is immediately reflected by get(key)                           |
+| Persistence        | Saved values survive creating a new AppConfig instance (simulates app restart) |
+| Recent projects    | Newest at index 0; duplicates moved to front; list capped at 10 entries        |
+| add_recent() saves | Re-opening the GUI shows the updated list (add_recent calls save())            |
+| Malformed JSON     | Corrupted config file falls back to defaults -- GUI still starts               |
+| Truncated JSON     | Partial JSON file falls back to defaults                                       |
+| Wrong JSON type    | JSON array instead of object falls back to defaults                            |
+| Missing file       | Fresh install with no config file starts with all defaults                     |
+| Partial config     | Config from older GUI version merges correctly with new defaults               |
+
+**Bug fixed during testing:** The original _load() method caught
+json.JSONDecodeError and OSError but not TypeError, which is raised when the
+config file contains a valid JSON array [1, 2, 3] instead of an object {...}.
+This would crash the GUI at startup. The test found the bug; the fix (adding
+TypeError and ValueError to the except clause) was applied to config.py.
+
+**What PASS means:** The GUI always starts cleanly regardless of config file
+state, and user preferences are reliably saved and restored.
+
+---
+
+## Test Count Summary
+
+| Test file                 | Checks           | Qt needed?   |
+| ------------------------- | ---------------- | ------------ |
+| test_project_model.py     | 24               | No           |
+| test_templates.py         | 38               | No           |
+| test_xml_io.py            | 48               | No           |
+| test_kinetics.py          | 70               | No           |
+| test_pipeline_e2e.py      | 82 (+ 5 with Qt) | 5 tests only |
+| test_simulation_runner.py | ~11              | Yes (all)    |
+| test_gui_panels.py        | ~80              | Yes (all)    |
+| test_xml_diagnostic.py    | 47               | No           |
+| test_config.py            | 36               | No           |
+| **Total without Qt**      | **~362**         |              |
+| **Total with Qt**         | **~458**         |              |
+
+The "without Qt" tests run anywhere: headless CI, WSL, any Python 3.10+
+environment. The "with Qt" tests additionally require PySide6 to be installed
+with a working EGL/OpenGL backend (standard on Linux desktops, macOS, Windows).
+
+---
+
+## Prerequisites and Installation
+
+| Requirement | Minimum | How to check                                           | Works on          |
+| ----------- | ------- | ------------------------------------------------------ | ----------------- |
+| Python      | 3.10+   | `python --version`                                     | Linux, macOS, Windows |
+| PySide6     | 6.5+    | `python -c "import PySide6; print(PySide6.__version__)"` | Linux, macOS, Windows |
+| pytest      | 7.4+    | `python -m pytest --version`                           | Linux, macOS, Windows |
+| pytest-qt   | 4.2+    | listed in: `python -m pytest --version` (plugins)      | Linux, macOS, Windows |
+
+```bash
+# Install everything in one step:
+pip install PySide6 pytest pytest-qt
+
+# Or, if you have a requirements file:
+pip install -r requirements.txt -r requirements-dev.txt
+
+# Verify Qt works (needed for panel and runner tests):
+python -c "from PySide6.QtWidgets import QApplication; app = QApplication([]); print('OK')"
+```
+
+**No C++ solver needed.** All subprocess-dependent tests use a Python script
+as a fake solver that mimics the real solver's output format.
+
+**PySide6 on Windows** bundles its own Qt libraries and OpenGL backend — no
+extra installation is required. Just `pip install PySide6` and the GUI tests
+will find everything they need automatically.
+
+---
+
+## Running Specific Tests
+
+```bash
+# All tests (requires Qt for full count):
+python -m pytest tests/ -v
+
+# Only tests that don't need Qt (fast, works anywhere):
 python -m pytest tests/test_project_model.py tests/test_templates.py \
   tests/test_xml_io.py tests/test_kinetics.py tests/test_pipeline_e2e.py \
-  tests/test_xml_diagnostic.py tests/test_config.py -v --tb=short
-```
+  tests/test_xml_diagnostic.py tests/test_config.py -v
 
-**Step 3 — Run the Qt-dependent tests**
+# One specific test class:
+python -m pytest tests/test_project_model.py::TestValidationFluid -v
 
-Linux (headless / no display):
-```bash
-QT_QPA_PLATFORM=offscreen python -m pytest tests/test_simulation_runner.py \
-  tests/test_gui_panels.py -v --tb=short
-```
+# One specific test:
+python -m pytest tests/test_xml_diagnostic.py::TestGeometrySizeCheck::test_mismatched_geometry_flagged_as_error -v
 
-Windows and macOS (normal desktop session):
-```bash
-python -m pytest tests/test_simulation_runner.py tests/test_gui_panels.py \
-  -v --tb=short
-```
-
-**Step 4 — Run everything at once**
-```bash
-# Linux
-QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v --tb=short
-
-# Windows / macOS
-python -m pytest tests/ -v --tb=short
-```
-
-Expected result:
-```
-526 passed, 0 failed, 1 skipped
+# All tests matching a name pattern:
+python -m pytest tests/ -k "round_trip" -v
+python -m pytest tests/ -k "kinetics" -v
+python -m pytest tests/ -k "geometry" -v
 ```
 
 ---
 
-## 4. Interpreting Results
+## Interpreting Test Output
 
-### Unit tests — all pass
+**All tests pass:**
 
 ```
-100% tests passed, 0 tests failed out of 382
-Total Test time (real) =  7.83 sec
+362 passed in 1.02s
 ```
 
-Every individual physics function returns the correct number. If one fails,
-re-run it verbosely:
+Every verified behaviour is correct.
+
+**A test fails:**
+
+```
+FAILED tests/test_xml_io.py::TestXMLRoundTrip::test_substrate_names_survive
+  AssertionError: assert 'DOC' == 'substrate_0'
+```
+
+The message shows actual vs. expected values. In this example, the substrate
+name was not preserved through an XML export/import cycle -- look at
+export_xml() or import_xml() in project_manager.py for where substrate names
+are written or read.
+
+**An ImportError on collection (Linux only):**
+
+```
+ERROR tests/test_gui_panels.py -- ImportError: libEGL.so.1: cannot open shared object file
+```
+
+This is a Linux-only issue. PySide6 is installed but the system OpenGL/EGL
+library is missing. Fix:
 ```bash
-ctest -R failing_test_name --output-on-failure -V
-# or run the binary directly:
-./test_biotic_kinetics --gtest_filter="*FailingName*"
+sudo apt install libegl1    # Ubuntu / Debian
 ```
-
-The failure message gives the test name, source file, line number, and the
-actual vs. expected values.
-
-### GUI tests — all pass
-
-```
-526 passed, 0 failed, 1 skipped
-```
-
-The GUI correctly reads and writes every simulation parameter. If one fails,
-run just that test file:
+This error does **not** occur on macOS or Windows — PySide6 bundles its own
+graphics backend on those platforms. If you are on a headless Linux server
+(no display at all), run only the non-Qt tests:
 ```bash
-python -m pytest GUI/tests/test_xml_io.py -v --tb=long
+python -m pytest tests/test_project_model.py tests/test_templates.py \
+  tests/test_xml_io.py tests/test_kinetics.py tests/test_pipeline_e2e.py \
+  tests/test_xml_diagnostic.py tests/test_config.py -v
 ```
-
-### What to do if a test fails
-
-The most common causes:
-
-| Symptom | Likely cause |
-|---|---|
-| One unit test fails, all others pass | Parameter changed in `.hh` file without updating the formula |
-| All kinetics tests fail | Wrong `defineKinetics.hh` or `defineAbioticKinetics.hh` on the include path |
-| GUI tests: SyntaxError at collection | `parallel_panel.py` has unterminated string literal (missing `")` — get latest file) |
-| GUI tests: AttributeError `isChe` | `fluid_panel.py` has truncated method name — get latest file |
-| Qt tests: "platform" or "display" error | Add `QT_QPA_PLATFORM=offscreen` on Linux |
 
 ---
 
-## 5. Troubleshooting
+## Continuous Integration
 
-### Unit Tests
+GitHub Actions runs on every push that touches GUI/:
 
-**`cmake` not found**
-```bash
-# Linux
-sudo apt install cmake
-# macOS
-brew install cmake
-# Windows: download from cmake.org, tick "Add to PATH"
+```yaml
+QT_QPA_PLATFORM=offscreen python -m pytest tests/ -v
+# across Python 3.10, 3.11, 3.12
 ```
 
-**`g++` not found**
-```bash
-# Linux
-sudo apt install build-essential
-# macOS
-xcode-select --install
-# Windows MinGW: add C:\msys64\mingw64\bin to PATH
-# Windows MSVC: use Developer Command Prompt for VS
-```
-
-**Windows: cmake generates Visual Studio project but you want MinGW**
-```cmd
-cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release
-```
-Run from a regular Command Prompt, not from the MSYS2 shell.
-
-**cmake: "No internet" / cannot fetch GoogleTest**
-
-Download the source manually from
-[github.com/google/googletest/releases](https://github.com/google/googletest/releases),
-extract it, then edit `tests/cpp/CMakeLists.txt` to point `SOURCE_DIR` to
-your local copy.
-
-**Windows MSVC: "ctest: No tests were found"**
-```cmd
-ctest -C Release --output-on-failure
-```
-Always pass `-C Release` for MSVC builds.
-
-**One test fails, all others pass**
-```bash
-./test_biotic_kinetics --gtest_filter="*FailingName*"
-```
-The output shows actual vs. expected values and the source line. The most
-common cause: a parameter in `defineKinetics.hh` or `defineAbioticKinetics.hh`
-was changed without updating the rate formula.
+The GUI Tests badge on the main README reflects the most recent run.
 
 ---
 
-### GUI Tests
+## Troubleshooting
 
-**`libGL error` or `EGL not found` on Linux**
+### All Platforms
+
+**ModuleNotFoundError: No module named 'src'**
+You must run pytest from the `GUI/` directory, not from the repo root:
 ```bash
-sudo apt-get install -y libegl1 libgl1 libdbus-1-3
-```
-Note: `libgl1`, not the obsolete `libgl1-mesa-glx`.
-
-**`SyntaxError: unterminated string literal` when collecting tests**
-`GUI/src/panels/parallel_panel.py` has the pre-fix bug. Get the latest file.
-
-**`AttributeError: 'QCheckBox' has no attribute 'isChe'`**
-`GUI/src/panels/fluid_panel.py` has a truncated method name. Get the latest file.
-
-**Qt tests fail with "display" or "platform" error on a headless server**
-```bash
-QT_QPA_PLATFORM=offscreen python -m pytest tests/test_gui_panels.py -v
+cd GUI
+python -m pytest tests/ -v
 ```
 
-**`pip install` fails with "externally managed environment" (Ubuntu 23.04+)**
+**fixture 'qtbot' not found**
 ```bash
-python -m venv .venv && source .venv/bin/activate
+pip install pytest-qt
+```
+
+**test_templates.py fails with unexpected validation errors**
+```bash
+python -m pytest tests/test_templates.py -v -s
+```
+The `assert len(errors) == 0, f"Unexpected errors: {errors}"` message shows
+exactly which validation check failed and what value triggered it.
+
+**test_xml_diagnostic.py fails with format mismatch**
+The diagnostic output format was changed. Tests check for specific strings
+like `[Geometry]`, `[Kinetics]`, `HOW TO FIX`. If these were renamed in
+xml_diagnostic.py, update the corresponding assertions in test_xml_diagnostic.py.
+
+---
+
+### Linux Only
+
+**ImportError: libEGL.so.1**
+```bash
+sudo apt install libegl1    # Ubuntu / Debian
+```
+This is not needed on macOS or Windows.
+
+**"externally managed environment" error from pip**
+Use a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate
 pip install PySide6 pytest pytest-qt
+python -m pytest tests/ -v
 ```
 
 ---
 
-*For running complete simulations manually (flow-only, diffusion, kinetics,
-equilibrium, biofilm growth), see [`test_cases/README.md`](../test_cases/README.md).*
+### Windows Only
 
-*For building the solver with Palabos and MPI, see the main `README.md`.*
+**"python" is not recognized**
+Python was not added to PATH during installation. Re-run the Python installer
+and tick **"Add Python to PATH"**, or add `C:\Users\YourName\AppData\Local\Programs\Python\Python311`
+to PATH manually via Start → "Edit environment variables".
+
+**pip install fails with SSL error**
+Update pip first:
+```bat
+python -m pip install --upgrade pip
+```
+
+**Tests hang or Qt window appears briefly then closes**
+This is normal on Windows during the Qt-dependent tests. The window is the
+offscreen Qt application created during the test run. It closes automatically
+when the test ends.
+
+---
+
+For the mathematical description of the simulation physics, see
+docs/CompLaB3D_Technical_Guide.md. For how to run the C++ unit tests,
+see tests/README.md at the repository root.
+
+
