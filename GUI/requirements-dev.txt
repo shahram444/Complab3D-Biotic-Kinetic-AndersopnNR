@@ -1,6 +1,4 @@
-# Runtime dependencies
--r requirements.txt
-
-# Testing
-pytest>=7.4.0
-pytest-qt>=4.2.0
+PySide6>=6.5.0
+numpy>=1.24.0
+vtk>=9.2.0
+matplotlib>=3.7.0
