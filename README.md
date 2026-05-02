@@ -10,8 +10,6 @@
 **Affiliation:** Meile Lab, Department of Marine Sciences, University of Georgia (UGA), Athens, GA, USA  
 **Contact:** [shahram.asgari@uga.edu](mailto:shahram.asgari@uga.edu)
 
-The 3-D extension presented here was created by Shahram Asgari and Christof Meile (Meile Lab, UGA). Its 2-D predecessor *CompLaB v1.0* was developed by Heewon Jung, Hyun-Seob Song, and Christof Meile.
-
 CompLaB3D is an open-source three-dimensional pore-scale reactive transport model that couples Lattice Boltzmann Method (LBM) fluid flow and solute transport with Monod-based microbial kinetics, user-defined abiotic chemical reactions, an Anderson-accelerated equilibrium chemistry model, and a cellular automaton (CA) biofilm model — all MPI-parallelised through the [Palabos](https://palabos.unige.ch/) library.
 
 **CompLaB Studio** (v2.1.0) is the companion graphical interface: a desktop application built with PySide6 that handles the complete workflow from project setup and geometry generation through simulation launch and 3D post-processing — without ever touching a text editor.
