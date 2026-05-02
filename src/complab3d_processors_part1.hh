@@ -1,15 +1,27 @@
 /* This file is a part of the CompLaB program.
  *
- * The CompLaB softare is developed since 2022 by the University of Georgia
- * (United States) and Chungnam National University (South Korea).
+ * The CompLaB3D software (3-D pore-scale extension) is developed since 2024
+ * by the University of Georgia (United States, Meile Lab, Department of
+ * Marine Sciences). The original 2-D CompLaB v1.0 was a collaboration of
+ * the University of Georgia and Chungnam National University (South Korea).
  * 
+ * The CompLaB3D extension (3-D pore-scale model with biotic/abiotic
+ * kinetics, Anderson-Accelerated Newton-Raphson PCF equilibrium chemistry,
+ * and the CompLaB Studio GUI) is developed by Shahram Asgari and
+ * Christof Meile (Meile Lab) at the University of Georgia. The 2-D
+ * predecessor (CompLaB v1.0) was developed by Heewon Jung et al.
+ *
  * Contact:
- * Heewon Jung
- * Department of Geological Sciences 
- * Chungnam National University
- * 99 Daehak-ro, Yuseong-gu
- * Daejeon 34134, South Korea
- * hjung@cnu.ac.kr
+ * Shahram Asgari
+ * Department of Marine Sciences (Meile Lab)
+ * University of Georgia
+ * Athens, GA 30602, USA
+ * shahram.asgari@uga.edu
+ *
+ * Christof Meile
+ * Department of Marine Sciences
+ * University of Georgia
+ * Athens, GA 30602, USA
  *
  * The most recent release of CompLaB can be downloaded at 
  * https://bitbucket.org/MeileLab/complab/downloads/
