@@ -1,5 +1,10 @@
 # CompLaB Studio GUI Test Suite
 
+**Authors:** Shahram Asgari and Christof Meile  
+**Affiliation:** Meile Lab, Department of Marine Sciences, University of Georgia (UGA), Athens, GA, USA  
+**Contact:** [shahram.asgari@uga.edu](mailto:shahram.asgari@uga.edu)
+
+
 
 
 **What the tests actually do:** Every time someone changes the GUI code,
