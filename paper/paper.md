@@ -107,8 +107,12 @@ The present work introduces the full biotic and geochemical capabilities and the
 
 AI language tools were used for editorial assistance. CompLaB3D source code was tested and debugged with the assistance of AI tools. AI was also used to help write inline code comments. All AI-generated content was reviewed and verified by the authors for correctness.
 
+# Software Availability
+
+The CompLaB3D source code reviewed for this submission (release v1.0.1, including CompLaB Studio v2.1.0) is permanently archived at Zenodo: <https://doi.org/10.5281/zenodo.19964835>. The active development repository is hosted at <https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR>.
+
 # Acknowledgements
 
-The authors thank Dr. Heewon Jung for valuable input. This work was supported by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research, Genomic Science Program under Award Number DE-SC0022991.
+CompLaB3D extends the two-dimensional CompLaB v1.0 framework developed by Heewon Jung, Hyun-Seob Song, and Christof Meile [@Jung2023]; the authors thank Dr. Heewon Jung for the foundational 2-D implementation and for valuable input during the design of the 3-D extension. This work was supported by the U.S. Department of Energy, Office of Science, Office of Biological and Environmental Research, Genomic Science Program under Award Number DE-SC0022991.
 
 # References
