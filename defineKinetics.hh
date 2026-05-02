@@ -2,6 +2,15 @@
  * defineKinetics.hh - EXTREME GROWTH VERSION (BIOFILM)
  * CompLaB3D - University of Georgia
  *
+ * Authors:     Shahram Asgari (shahram.asgari@uga.edu)
+ *              Christof Meile
+ * Laboratory:  Meile Lab, Department of Marine Sciences
+ * Institution: University of Georgia (UGA), Athens, GA, USA
+ *
+ * The 2-D predecessor (CompLaB v1.0) was developed by Heewon Jung et al.
+ * The 3-D extension and biotic / abiotic / planktonic kinetics in this
+ * file are part of the CompLaB3D project led by Asgari and Meile.
+ *
  * CHANGES FOR EXTREME GROWTH:
  *   - mu_max increased from 0.05 to 1.0 (20x faster)
  *   - k_decay reduced to 1.0e-9 (less die-off)

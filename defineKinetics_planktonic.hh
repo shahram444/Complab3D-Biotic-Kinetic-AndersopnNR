@@ -2,6 +2,15 @@
  * defineKinetics_planktonic.hh - PLANKTONIC BACTERIA VERSION
  * CompLaB3D - University of Georgia
  *
+ * Authors:     Shahram Asgari (shahram.asgari@uga.edu)
+ *              Christof Meile
+ * Laboratory:  Meile Lab, Department of Marine Sciences
+ * Institution: University of Georgia (UGA), Athens, GA, USA
+ *
+ * The 2-D predecessor (CompLaB v1.0) was developed by Heewon Jung et al.
+ * The 3-D extension and planktonic kinetics in this file are part of
+ * the CompLaB3D project led by Asgari and Meile.
+ *
  * PLANKTONIC MODE CHARACTERISTICS:
  *   - Free-floating bacteria transported by advection-diffusion
  *   - Lower maximum growth rate than sessile biofilm cells

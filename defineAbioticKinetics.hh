@@ -2,6 +2,15 @@
  * defineAbioticKinetics.hh - ABIOTIC KINETICS (NO MICROBES)
  * CompLaB3D - University of Georgia
  *
+ * Authors:     Shahram Asgari (shahram.asgari@uga.edu)
+ *              Christof Meile
+ * Laboratory:  Meile Lab, Department of Marine Sciences
+ * Institution: University of Georgia (UGA), Athens, GA, USA
+ *
+ * The 2-D predecessor (CompLaB v1.0) was developed by Heewon Jung et al.
+ * The 3-D extension and abiotic kinetics are part of the CompLaB3D
+ * project led by Asgari and Meile.
+ *
  * This file defines chemical reactions between substrates WITHOUT biomass.
  * Examples:
  *   - First-order decay: dC/dt = -k * C
