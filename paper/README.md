@@ -1,5 +1,10 @@
 # CompLaB3D — JOSS Paper Submission Materials
 
+**Authors:** Shahram Asgari and Christof Meile  
+**Affiliation:** Meile Lab, Department of Marine Sciences, University of Georgia (UGA), Athens, GA, USA  
+**Contact:** [shahram.asgari@uga.edu](mailto:shahram.asgari@uga.edu)
+
+
 This folder contains the source files for the JOSS paper *"CompLaB3D: A
 Three-Dimensional Pore-Scale Reactive Transport Model Framework and
 Graphical User Interface Coupling Lattice Boltzmann Flow with Biogeochemical
