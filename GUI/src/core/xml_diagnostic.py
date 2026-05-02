@@ -118,11 +118,13 @@ def diagnose_crash(xml_path: str, exit_code: int,
     input_path = _xml_text(root, ".//path/input_path", "input")
     xml_dir = str(Path(xml_path).parent)
 
-    # Try several possible locations for the geometry file
+    # Try several possible locations for the geometry file. Only resolve
+    # paths relative to the XML's own directory: a cwd-relative fallback
+    # would silently pick up unrelated geometry.dat files left in the
+    # working directory (e.g. while running the test suite).
     geom_candidates = [
         os.path.join(xml_dir, input_path, geom_fname),
         os.path.join(xml_dir, geom_fname),
-        os.path.join(input_path, geom_fname),
     ]
     geom_file = None
     for c in geom_candidates:
@@ -510,11 +512,11 @@ def save_diagnostic_report(report: str, output_dir: str) -> str:
 
     Returns the path of the saved file, or empty string on failure.
     """
-    os.makedirs(output_dir, exist_ok=True)
-    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"crash_diagnostic_{ts}.txt"
-    filepath = os.path.join(output_dir, filename)
     try:
+        os.makedirs(output_dir, exist_ok=True)
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"crash_diagnostic_{ts}.txt"
+        filepath = os.path.join(output_dir, filename)
         with open(filepath, "w") as f:
             f.write(report)
         return filepath
