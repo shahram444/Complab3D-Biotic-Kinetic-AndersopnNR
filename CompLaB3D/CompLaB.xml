@@ -224,6 +224,10 @@
         <bio_filename>bioLattice</bio_filename>
         <save_VTK_interval>500</save_VTK_interval>
         <save_CHK_interval>5000</save_CHK_interval>
+        <!-- debug_updRxn: true/1/yes/on enables [UPD_RXN] per-voxel debug prints
+             from update_rxnLattices (complab3d_processors_part1.hh).
+             Use only for debugging — very verbose. Default: false -->
+        <debug_updRxn>false</debug_updRxn>
     </IO>
 
 </parameters>
