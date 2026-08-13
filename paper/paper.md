@@ -109,7 +109,7 @@ AI language tools were used for editorial assistance. CompLaB3D source code was 
 
 # Software Availability
 
-The CompLaB3D source code reviewed for this submission (release v1.0.1, including CompLaB Studio v2.1.0) is permanently archived at Zenodo: <https://doi.org/10.5281/zenodo.19964835>. The active development repository is hosted at <https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR>.
+The CompLaB3D source code reviewed for this submission (release v1.1.0, including CompLaB Studio v2.1.0) is permanently archived at Zenodo: <https://doi.org/10.5281/zenodo.19964834>. The active development repository is hosted at <https://github.com/shahram444/Complab3D-Biotic-Kinetic-AndersopnNR>.
 
 # Acknowledgements
 
