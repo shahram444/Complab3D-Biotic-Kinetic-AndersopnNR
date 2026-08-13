@@ -52,6 +52,8 @@
 #include "complab3d_processors.hh"
 #include "../defineKinetics.hh"        // For KineticsStats namespace - in project root
 #include "../defineAbioticKinetics.hh" // For abiotic kinetics (substrate-only reactions)
+#include <algorithm>
+#include <cctype>
 
 #include <chrono>
 #include <string>
@@ -105,6 +107,10 @@ void printStabilityReport(const StabilityReport& report) {
 int main(int argc, char **argv) {
 
     plbInit(&argc, &argv);
+    /* [FLUSH-FIX 2026-07-24] On a SLURM cluster stdout->file is block-buffered, so pcout lines
+     * that end in "\n" (Phase 3 setup, the per-iteration ITERATION block) sit unflushed for a long
+     * time and the run LOOKS frozen even though it is progressing. unitbuf flushes after every write. */
+    std::cout << std::unitbuf;
     global::timer("total").start();
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -208,6 +214,37 @@ int main(int argc, char **argv) {
     if (erck!=0) { return -1; }
     pcout << "  [OK] XML configuration loaded and validated\n";
 
+    // ============================================================================
+    // [IMMOBILE] Per-substrate <immobile>true</immobile> (default false).
+    //   An immobile species never advects/diffuses/streams/collides -- it only
+    //   receives its reaction source term (stable at any diffusivity, incl. D=0).
+    // ============================================================================
+    std::vector<bool> vec_immobile(num_of_substrates, false);
+    try {
+        XMLreader immdoc("CompLaB.xml");
+        for (plint iS = 0; iS < num_of_substrates; ++iS) {
+            std::string chemname = "substrate" + std::to_string(iS);
+            try {
+                std::string tmp;
+                immdoc["parameters"]["chemistry"][chemname]["immobile"].read(tmp);
+                std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](unsigned char c){ return std::tolower(c); });
+                if (tmp.compare("true")==0 || tmp.compare("1")==0 || tmp.compare("yes")==0) vec_immobile[iS]=true;
+            } catch (PlbIOException&) { /* flag absent -> mobile (default) */ }
+        }
+    } catch (PlbIOException&) { /* no XML re-read -> all mobile */ }
+    {
+        plint nimm=0; for (plint iS=0; iS<num_of_substrates; ++iS) if (vec_immobile[iS]) ++nimm;
+        pcout << "  [IMMOBILE] immobile (solid-phase) substrates: " << nimm << " of " << num_of_substrates << "\n";
+        for (plint iS=0; iS<num_of_substrates; ++iS) if (vec_immobile[iS])
+            pcout << "    - substrate" << iS << " (" << vec_subs_names[iS] << "): IMMOBILE (reaction source only)\n";
+    }
+
+    // NOTE: this build has the precipitation / pore-clogging feature REMOVED.
+    //   Minerals still form and accumulate wherever your kinetics create them --
+    //   an <immobile> substrate is still immobile and still a reaction sink -- but
+    //   a full voxel no longer converts to solid and the pore geometry never
+    //   changes.  See README_NO_PRECIPITATION.md.
+
     plint rxn_count = kns_count;
 
     // ════════════════════════════════════════════════════════════════════════════
@@ -255,6 +292,105 @@ int main(int argc, char **argv) {
         eqSolver.setTolerance(1e-10);
         eqSolver.setAndersonDepth(4);
         pcout << "  [EQ] Solver configured: Anderson+PCF, tol=1e-10, maxiter=200\n\n";
+        if (!vec_c0.empty()) {
+            std::vector<T> _c0chk(vec_c0.begin(), vec_c0.end());
+            for (size_t _i=0;_i<_c0chk.size();++_i) _c0chk[_i]=std::max(_c0chk[_i], EquilibriumChemistry<T>::MIN_CONC);
+            std::vector<T> _eqc = eqSolver.calculate_species_concentrations(_c0chk);
+            const T _MINC = EquilibriumChemistry<T>::MIN_CONC;
+            // ---- solved pH (free H+ species is named "Hp") ----
+            T _pH = -1.0;
+            for (size_t i=0;i<vec_subs_names.size() && i<_eqc.size();++i) if (vec_subs_names[i]=="Hp") { _pH = -std::log10(std::max(_eqc[i], _MINC)); break; }
+            if (!eqSolver.didConverge()) {
+                // ---- Locate the EXACT culprit from the solver's own mass balance ----
+                size_t _ncmp = eq_component_names.size();
+                size_t _nsp  = vec_subs_names.size();
+                std::vector<T> _Ttar(_ncmp, 0.0), _Tsol(_ncmp, 0.0);
+                for (size_t j=0;j<_ncmp;++j){
+                    for (size_t i=0;i<_nsp && i<eq_stoich_matrix.size();++i){
+                        if (j>=eq_stoich_matrix[i].size()) continue;
+                        T s = eq_stoich_matrix[i][j];
+                        if (std::abs(s) <= 1e-10) continue;   // species i does not contain component j
+                        T ci  = (i<_c0chk.size())? std::max(std::min(_c0chk[i], (T)10.0), _MINC) : _MINC;
+                        T cei = (i<_eqc.size())?   std::max(std::min(_eqc[i],   (T)10.0), _MINC) : _MINC;
+                        _Ttar[j] += s*ci;   // TOTAL you asked for (from CompLaB.xml)
+                        _Tsol[j] += s*cei;  // TOTAL the solver could actually hold
+                    }
+                    if (_Ttar[j] < _MINC) _Ttar[j] = _MINC;
+                    if (_Tsol[j] < _MINC) _Tsol[j] = _MINC;
+                }
+                // worst REAL component (absent/zero-total components are handled by the solver guard)
+                int _wj = -1; T _wrel = -1.0;
+                for (size_t j=0;j<_ncmp;++j){
+                    if (_Ttar[j] <= _MINC*10.0) continue;              // absent from this water
+                    T rel = std::abs(_Tsol[j]-_Ttar[j]) / _Ttar[j];   // relative mass-balance violation
+                    if (rel > _wrel){ _wrel = rel; _wj = (int)j; }
+                }
+                std::string _cn = (_wj>=0)? eq_component_names[_wj] : std::string("(unknown)");
+                int _csub = -1;
+                for (size_t i=0;i<_nsp;++i) if (vec_subs_names[i]==_cn){ _csub=(int)i; break; }
+
+                pcout << "\n╔═══════════════════════════════════════════════════════════════════════╗\n";
+                if (_wj < 0 || _wrel < 1e-4) {
+                    // Every REAL component balances -> the leftover residual is the harmless
+                    // zero-total-component artifact. If you still see this, the RUNNING BINARY
+                    // predates the zero-total fix in complab3d_processors_part4_eqsolver.hh.
+                    pcout << "║  NOTE: your INITIAL water is actually FEASIBLE - every real component balances.\n";
+                    pcout << "║  This warning is only the zero-total-component artifact, which means the BINARY\n";
+                    pcout << "║  you are running was built BEFORE the equilibrium fix. Rebuild to clear it:\n";
+                    pcout << "║      cd build && make clean && make\n";
+                    if (_pH>=0.0) pcout << "║  (solved pH = " << std::fixed << _pH << ", which is correct - nothing to change in CompLaB.xml.)\n";
+                } else {
+                    pcout << "║  INPUT ERROR (non-fatal): the equilibrium chemistry in CompLaB.xml is INFEASIBLE.\n";
+                    pcout << "║  The speciation solver could not satisfy mass balance for your STARTING water.\n";
+                    pcout << "║  (global residual=" << std::scientific << eqSolver.getLastResidual() << ", used " << eqSolver.getLastIterations() << "/" << eqSolver.getMaxIterations() << " iters)\n";
+                    pcout << "║\n";
+                    pcout << "║  WHAT IS WRONG  (exact culprit, computed from the solver's own mass balance):\n";
+                    pcout << "║    Component  '" << _cn << "'  (equilibrium component #" << _wj << ") does NOT conserve mass.\n";
+                    pcout << "║    You asked for TOTAL " << _cn << " = " << std::scientific << _Ttar[_wj] << " M,\n";
+                    pcout << "║    but the only self-consistent speciation the solver can reach holds " << std::scientific << _Tsol[_wj] << " M\n";
+                    pcout << "║    -> mass-balance violation = " << std::fixed << (_wrel*100.0) << " %  (this is what blocks convergence).\n";
+                    if (_pH>=0.0) pcout << "║    Solver best-effort pH for this water = " << std::fixed << _pH << " .\n";
+                    pcout << "║\n";
+                    pcout << "║  WHY  (physical cause):\n";
+                    if (_Tsol[_wj] < _Ttar[_wj]) {
+                        pcout << "║    You are DEMANDING more '" << _cn << "' than the logK/stoichiometry in CompLaB.xml can hold\n";
+                        pcout << "║    in solution at the pH set by the other components. Its free ion hits the numerical floor,\n";
+                        pcout << "║    so the requested total can never be stored -> the fixed point cannot close.\n";
+                    } else {
+                        pcout << "║    The species built from '" << _cn << "' already EXCEED the total you asked for at this pH;\n";
+                        pcout << "║    the logK values make '" << _cn << "' too abundant for the total you set.\n";
+                    }
+                    pcout << "║\n";
+                    pcout << "║  WHICH INPUT TO FIX  (file -> block -> parameter):\n";
+                    pcout << "║    File:      CompLaB.xml\n";
+                    if (_csub>=0) {
+                        pcout << "║    Block:     <substrate" << _csub << ">   (name = " << _cn << ")\n";
+                        pcout << "║    Parameter: <initial_concentration>  (currently " << std::scientific << vec_c0[_csub] << " M)\n";
+                        if (_cn=="Hp") {
+                            pcout << "║    NOTE: 'Hp' is the TOTAL proton (TOTH), NOT free H+. For pH-7 water it is ~1.9e-3, not 1e-7.\n";
+                            pcout << "║    FIX:  set <initial_concentration> AND <left_boundary_condition> for <substrate" << _csub << "> to the\n";
+                            pcout << "║          total proton of your recipe (protons carried by CO2/H2PO4/NH4/HS... ~1.9e-3 for this water).\n";
+                        } else if (_Tsol[_wj] < _Ttar[_wj]) {
+                            pcout << "║    FIX:  LOWER <initial_concentration> (and <left_boundary_condition>) for <substrate" << _csub << ">\n";
+                            pcout << "║          to a value the chemistry can hold, OR add the missing product/mineral species for '" << _cn << "',\n";
+                            pcout << "║          OR correct this species' logK. (This is pure XML equilibrium data - defineKinetics is NOT involved.)\n";
+                        } else {
+                            pcout << "║    FIX:  RAISE <initial_concentration> (and <left_boundary_condition>) for <substrate" << _csub << ">,\n";
+                            pcout << "║          OR correct the logK of the '" << _cn << "' species so it is less abundant at this pH.\n";
+                        }
+                    } else {
+                        pcout << "║    Parameter: the <initial_concentration> of the <substrate*> whose name is '" << _cn << "'.\n";
+                    }
+                }
+                pcout << "║\n";
+                pcout << "║  The run will CONTINUE; chemistry for the affected component is untrustworthy until fixed.\n";
+                pcout << "╚═══════════════════════════════════════════════════════════════════════╝\n";
+            } else {
+                pcout << "  [EQ] Initial-composition feasibility: converged (iters=" << eqSolver.getLastIterations() << ", residual=" << std::scientific << eqSolver.getLastResidual();
+                if (_pH>=0.0) pcout << ", pH=" << std::fixed << _pH;
+                pcout << ").\n";
+            }
+        }
     }
 
     std::string str_inputDir=input_path, str_outputDir=output_path;
@@ -391,6 +527,22 @@ int main(int argc, char **argv) {
         
         StabilityReport stability = performStabilityChecks(PoreMaxUx, nsLatticeTau, tau_ADE_fixed, D_lattice_fixed);
         printStabilityReport(stability);
+        if (!stability.all_ok) {
+            pcout << "\n╔══════════════════════════════════════════════════════════════════════════╗\n";
+            pcout << "║  INPUT ERROR - stability check FAILED before the run started. Fix CompLaB.xml:\n";
+            if (!stability.Ma_ok)      pcout << "║    Ma = " << stability.Ma << " (must be < 1; aim <= 0.02): lower deltaP or Pe.\n";
+            if (!stability.CFL_ok)     pcout << "║    CFL = " << stability.CFL << " (must be < 1): lower deltaP or Pe.\n";
+            if (!stability.tau_NS_ok)  pcout << "║    tau_NS = " << stability.tau_NS << " (must be 0.5-2): adjust tau / viscosity in CompLaB.xml.\n";
+            if (!stability.tau_ADE_ok) pcout << "║    tau_ADE = " << stability.tau_ADE << " (must be 0.5-2): adjust solute diffusivity in CompLaB.xml.\n";
+            pcout << "╚══════════════════════════════════════════════════════════════════════════╝\n";
+            return -1;
+        }
+        else if (stability.has_warnings) {
+            pcout << "  [STABILITY] INPUT WARNING: ";
+            if (stability.Ma_warning)  pcout << "Ma=" << stability.Ma << ">0.3 (flow re-solves may diverge; lower deltaP/Pe in CompLaB.xml). ";
+            if (!stability.Pe_grid_ok) pcout << "Pe_grid=" << stability.Pe_grid << ">2 (advection may overshoot into negatives; lower Pe or raise diffusivity in CompLaB.xml). ";
+            pcout << "\n";
+        }
 
         T Ma = PoreMaxUx/sqrt(RXNDES<T>::cs2);
         if (Ma > 1) { pcout << "  [NS] ERROR: Ma=" << Ma << " > 1\n"; return -1; }
@@ -632,10 +784,12 @@ int main(int argc, char **argv) {
         if (soluteDindex == 1) applyProcessingFunctional(new updateSoluteDynamics3D<T,RXNDES>(num_of_substrates, bounce_back, no_dynamics, pore_dynamics, substrOMEGAinbFilm, substrOMEGAinPore), vec_substr_lattices[0].getBoundingBox(), substrate_lattices);
         if (bmassDindex == 1) applyProcessingFunctional(new updateBiomassDynamics3D<T,RXNDES>((plint)vec_bFree_lattices.size(), bounce_back, no_dynamics, pore_dynamics, bioOMEGAinbFilm, bioOMEGAinPore), vec_bFree_lattices[0].getBoundingBox(), planktonic_lattices);
         applyProcessingFunctional(new updateNsLatticesDynamics3D<T,NSDES,T,RXNDES>(nsLatticeOmega, vec_permRatio[0], pore_dynamics, no_dynamics, bounce_back), nsLattice.getBoundingBox(), nsLattice, maskLattice);
+        pcout << "  [ADE] Biofilm mask changed geometry -> re-solving flow (up to " << ns_maxiTer_1 << " steps)...\n";
         for (plint iT2 = 0; iT2 < ns_maxiTer_1; ++iT2) {
             nsLattice.collideAndStream();
             ns_convg1.takeValue(getStoredAverageEnergy(nsLattice),false);
-            if (ns_convg1.hasConverged()) break;
+            if (ns_convg1.hasConverged()) { pcout << "  [ADE] flow re-solve converged at " << iT2 << "\n"; break; }
+            if (iT2 % 5000 == 0 && iT2 > 0) pcout << "  [ADE] flow re-solve ... " << iT2 << "/" << ns_maxiTer_1 << "\n";
         }
     }
     if (read_NS_file==0 || (read_NS_file==1 && ns_rerun_iT0>0)) {
@@ -650,10 +804,11 @@ int main(int argc, char **argv) {
     if (Pe > thrd) {
         pcout << "  [ADE] Coupling NS-ADE lattices...\n";
         for (plint iS = 0; iS < num_of_substrates; ++iS) {
+            if (vec_immobile[iS]) continue;   // [immobile] no advection coupling
             latticeToPassiveAdvDiff(nsLattice, vec_substr_lattices[iS], vec_substr_lattices[iS].getBoundingBox());
         }
         tmpIT0=0;
-        for (plint iM = 0; iM < num_of_substrates; ++iM) {
+        for (plint iM = 0; iM < num_of_microbes; ++iM) {
             if (solver_type[iM] == 3) {
                 latticeToPassiveAdvDiff(nsLattice, vec_bFree_lattices[tmpIT0], vec_bFree_lattices[tmpIT0].getBoundingBox());
                 ++tmpIT0;
@@ -661,10 +816,12 @@ int main(int argc, char **argv) {
         }
         pcout << "  [ADE] Stabilizing (10000 iter)...\n";
         for (plint iT=0; iT<10000; ++iT) {
-            for (plint iS = 0; iS < num_of_substrates; ++iS) vec_substr_lattices[iS].collideAndStream();
+            if (iT % 1000 == 0) pcout << "  [ADE] stabilizing ... " << iT << "/10000  (" << global::timer("total").getTime() << " s elapsed)\n";
+            for (plint iS = 0; iS < num_of_substrates; ++iS) if (!vec_immobile[iS]) vec_substr_lattices[iS].collideAndStream();
             for (size_t iM = 0; iM < vec_bFree_lattices.size(); ++iM) vec_bFree_lattices[iM].collideAndStream();
         }
-        for (plint iS = 0; iS < num_of_substrates; ++iS) applyProcessingFunctional(new stabilizeADElattice3D<T,RXNDES,int>(vec_c0[iS], pore_dynamics, bio_dynamics), vec_substr_lattices[iS].getBoundingBox(), vec_substr_lattices[iS], geometry);
+        pcout << "  [ADE] Stabilization done.\n";
+        for (plint iS = 0; iS < num_of_substrates; ++iS) if (!vec_immobile[iS]) applyProcessingFunctional(new stabilizeADElattice3D<T,RXNDES,int>(vec_c0[iS], pore_dynamics, bio_dynamics), vec_substr_lattices[iS].getBoundingBox(), vec_substr_lattices[iS], geometry);
         for (size_t iM = 0; iM < vec_bFree_lattices.size(); ++iM) applyProcessingFunctional(new stabilizeADElattice3D<T,RXNDES,int>(vec_b0_free[iM], pore_dynamics, bio_dynamics), vec_bFree_lattices[iM].getBoundingBox(), vec_bFree_lattices[iM], geometry);
     }
 
@@ -699,6 +856,10 @@ int main(int argc, char **argv) {
     bool ns_saturate=0, percolationFlag=0;
 
     for (; iT < ade_maxiTer; ++iT) {
+        /* [HEARTBEAT 2026-07-24] lightweight liveness line between the (every-VTI) ITERATION blocks,
+         * explicitly flushed so you can see the reactive loop is advancing even with buffered stdout. */
+        if (iT > 0 && iT % 50 == 0 && (ade_VTI_iTer <= 0 || iT % ade_VTI_iTer != 0))
+            pcout << "  [ade] iter " << iT << "/" << ade_maxiTer << "  (" << global::timer("total").getTime() << " s elapsed)\n";
         // ════════════════════════════════════════════════════════════════════════
         // VTI OUTPUT AND DIAGNOSTICS
         // ════════════════════════════════════════════════════════════════════════
@@ -794,7 +955,7 @@ int main(int argc, char **argv) {
         if (track_performance == 1) global::timer("cns").restart();
         
         // Collision
-        for (plint iS = 0; iS < num_of_substrates; ++iS) vec_substr_lattices[iS].collide();
+        for (plint iS = 0; iS < num_of_substrates; ++iS) if (!vec_immobile[iS]) vec_substr_lattices[iS].collide();
         if (lb_count > 0) {
             for (plint iM = 0; iM < num_of_microbes; ++iM) {
                 if (solver_type[iM]==3) {
@@ -823,7 +984,11 @@ int main(int argc, char **argv) {
         // Abiotic kinetics (substrate-only reactions without microbes)
         if (enable_abiotic_kinetics && num_of_substrates > 0) {
             if (track_performance == 1) global::timer("abiotic_kns").restart();
-            // Calculate abiotic reaction rates
+            // Calculate abiotic reaction rates.
+            //   The surface-gated variant (surfaceAbioticKinetics3D), which fired the
+            //   reaction only on wall-adjacent voxels to mimic heterogeneous
+            //   nucleation, lived in precipitationVOP.hh and went with it.  Abiotic
+            //   reactions now run in every pore voxel.
             applyProcessingFunctional(new run_abiotic_kinetics<T,RXNDES>(nx, num_of_substrates, ade_dt, no_dynamics, bounce_back),
                                       vec_substr_lattices[0].getBoundingBox(), ptr_abiotic_kns_lattices);
             // Apply concentration changes
@@ -920,9 +1085,233 @@ int main(int argc, char **argv) {
         if (ca_count > 0) {
             applyProcessingFunctional(new updateLocalMaskNtotalLattices3D<T,RXNDES>(nx, ny, nz, caLlen, bounce_back, no_dynamics, bio_dynamics, pore_dynamics, thrd_bFilmFrac, max_bMassRho), vec_bFilm_lattices[0].getBoundingBox(), ptr_ca_lattices);
             T globalBmax = computeMax(*computeDensity(totalbFilmLattice));
-            if (std::isnan(globalBmax)) { pcout << "\n  [CA] ERROR: NaN at iter=" << iT << "\n"; return -1; }
+            if (std::isnan(globalBmax) || std::isinf(globalBmax)) { pcout << "\n  [CA] ERROR: non-finite biomass (NaN/Inf) at iter=" << iT << " -- stopping cleanly\n"; percolationFlag = 1; }
+            // [CA-FAIL] 2D-style hard stop: on an unresolvable CA state, dump every field and terminate with an explicit reason report.
+            auto dumpAllFields = [&](const std::string& reason, plint pushSweeps, plint ageSweeps) {
+                T _bmax = computeMax(*computeDensity(totalbFilmLattice));
+                T _bavg = computeAverage(*computeDensity(totalbFilmLattice));
+                T _bsum = computeSum(*computeDensity(totalbFilmLattice));
+                // ---- measure the true state at failure so the cause is DETERMINED, not guessed ----
+                T _cs = std::sqrt(1.0/3.0);
+                T _umax = 0.0, _MaNow = 0.0; bool _flowFinite = true;
+                if (Pe > thrd) {
+                    _umax = computeMax(*computeVelocityNorm(nsLattice, Box3D(1,nx-2,0,ny-1,0,nz-1)));
+                    _MaNow = _umax / _cs;
+                    if (!std::isfinite(_umax)) _flowFinite = false;
+                }
+                T _worstMin = 0.0; std::string _worstSp = "(none)"; bool _chemFinite = true; plint _worstIdx = -1;
+                for (plint iS = 0; iS < num_of_substrates; ++iS) {
+                    T _mn = computeMin(*computeDensity(vec_substr_lattices[iS]));
+                    if (!std::isfinite(_mn)) _chemFinite = false;
+                    if (_mn < _worstMin) { _worstMin = _mn; _worstSp = vec_subs_names[iS]; _worstIdx = iS; }
+                }
+                bool _bmassFinite = std::isfinite(_bmax);
+                T _capRatio = (max_bMassRho > 0.0) ? (_bmax / max_bMassRho) : 0.0;
+                // ---- decide the ONE root cause. Ordering matters: a diverged flow corrupts advection,
+                // which then poisons chemistry and biomass, so flow-divergence is checked first as the upstream root. ----
+                std::string _CAT, _WHY1, _WHY2, _WHY3, _SOL1, _SOL2, _PLAIN, _PFIX;
+                if (!_flowFinite || _MaNow > 0.3) {
+                    _CAT  = "FLOW / PRESSURE-DRIVE  (LBM Mach instability from deltaP + geometry)";
+                    _WHY1 = "The Navier-Stokes flow field went unstable: peak velocity pushes the Mach number past the LBM limit.";
+                    _WHY2 = "LBM is only stable for Ma < ~0.1 and blows up past ~0.3. The pressure drop deltaP drives fluid through";
+                    _WHY3 = "the tight pore throats too fast; the biofilm mask-flip flow re-solve then amplified it into overflow.";
+                    _SOL1 = "Lower the drive so Ma <= 0.02: scale deltaP_new = deltaP * (0.02 / Ma_now), or reduce the target Pe.";
+                    _SOL2 = "Also helps: raise tau_NS toward 1.0 (more numerical viscosity), or widen throats (higher permeability).";
+                    _PLAIN = "The water was pushed through the narrow pore channels faster than this simulation method can handle, so the flow calculation blew up: velocities jumped to impossible values and wrecked everything downstream.";
+                    _PFIX  = "Push the water more gently - lower the pressure difference (or the target flow speed) until the flow is slow enough to stay stable, or use a geometry with wider channels.";
+                } else if (!_bmassFinite || _capRatio > 10.0) {
+                    _CAT  = "BIOMASS  (kinetics growth blow-up)";
+                    _WHY1 = "Biomass integrated far beyond its physical carrying cap (max/cap ratio is shown in the evidence below).";
+                    _WHY2 = "The flow is still finite, so this is a reaction-integration blow-up, not a hydraulic one: the growth";
+                    _WHY3 = "increment per step is too large (per-day rate constants applied per-second ~ 86,400x), overshooting the cap.";
+                    _SOL1 = "Shrink the reactive step: smaller dx, convert the per-day rate constants to per-second, or cap per-step growth.";
+                    _SOL2 = "Confirm the f_cap carrying-capacity limiter is active for every biofilm pool in defineKinetics.hh.";
+                    _PLAIN = "The microbes were told to grow by a huge amount in a single step, far more than is physically possible, so the biomass number exploded. This normally means the growth rates are applied too fast (daily rates used as if per-second).";
+                    _PFIX  = "Slow the growth calculation down - use smaller time steps or convert the daily rate constants to per-second, and make sure the biomass-cap limiter is switched on.";
+                } else if (!_chemFinite || _worstMin < -1.0e-4) {
+                    _CAT  = "CHEMISTRY  (equilibrium speciation produced negative concentrations)";
+                    _WHY1 = "Speciation produced unphysical negative mass (the most-negative species is named in the evidence below).";
+                    _WHY2 = "The flow is finite and biomass is near cap, so the fault is chemical: the reaction/advection step removed";
+                    _WHY3 = "more of a species than was locally present, or the bulk composition handed to the EQ solver is infeasible.";
+                    _SOL1 = "Shrink the reactive step (smaller dx / lower rate constants) or tighten the equilibrium tolerance.";
+                    _SOL2 = "Clamp solutes to >= 0 after the reaction step, and verify the initial composition is charge-balanced.";
+                    _PLAIN = "A dissolved species (" + _worstSp + ") ended up with a NEGATIVE amount here, which is physically impossible. The proof section below pins down which step actually made it negative - the chemistry solver, a reaction, or the transport that carries species through the pores.";
+                    _PFIX  = "Stop values dropping below zero right after each transport step, take smaller time steps so nothing overshoots, and keep concentration gradients gentle. The proof section below names the exact step to fix.";
+                } else {
+                    _CAT  = "GEOMETRY  (pore-throat clogging deadlock)";
+                    _WHY1 = "Biofilm filled pore voxels to the cap, but the push/pull CA cannot move the excess anywhere: those";
+                    _WHY2 = "voxels are boxed in by solid grain / bounce-back wall / other capped biofilm, so no open pore neighbour";
+                    _WHY3 = "can receive it. Flow is finite and chemistry is physical, so the pore throats themselves are too narrow.";
+                    _SOL1 = "Use a looser/coarser geometry with wider throats (fewer dead-end pores), or raise resolution (smaller dx)";
+                    _SOL2 = "so the CA has more pore voxels to spread into; or lower growth so biofilm does not saturate the throats.";
+                    _PLAIN = "The microbes filled a pore completely and had nowhere left to expand, because that pore is boxed in by solid grains on every side. The program kept trying to push the extra biomass somewhere and never could, so it stopped.";
+                    _PFIX  = "Give the biomass more room - use a looser grain packing with wider gaps, use a finer grid so there are more pore cells, or slow the growth so pores do not fill so fast.";
+                }
+                pcout << "\n";
+                // ---- pinpoint the exact voxel of the offending quantity (MPI-safe: each Box3D reduction is global) ----
+                auto _locate = [&](MultiScalarField3D<T>& fld, bool findMax, plint& gx, plint& gy, plint& gz)->T {
+                    T tgt = findMax ? computeMax(fld) : computeMin(fld);
+                    gx=0; gy=0; gz=0;
+                    for (plint x=0;x<nx;++x){ T v=findMax?computeMax(fld,Box3D(x,x,0,ny-1,0,nz-1)):computeMin(fld,Box3D(x,x,0,ny-1,0,nz-1)); if(v==tgt){gx=x;break;} }
+                    for (plint y=0;y<ny;++y){ T v=findMax?computeMax(fld,Box3D(gx,gx,y,y,0,nz-1)):computeMin(fld,Box3D(gx,gx,y,y,0,nz-1)); if(v==tgt){gy=y;break;} }
+                    for (plint z=0;z<nz;++z){ T v=findMax?computeMax(fld,Box3D(gx,gx,gy,gy,z,z)):computeMin(fld,Box3D(gx,gx,gy,gy,z,z)); if(v==tgt){gz=z;break;} }
+                    return tgt;
+                };
+                auto _valAt = [&](const std::string& nm, plint x, plint y, plint z)->T {
+                    for (plint iS=0;iS<num_of_substrates;++iS) if (vec_subs_names[iS]==nm) return computeMax(*computeDensity(vec_substr_lattices[iS]), Box3D(x,x,y,y,z,z));
+                    return 0.0;
+                };
+                plint _gx=0,_gy=0,_gz=0; T _locVal=0.0; std::string _locWhat="(n/a)";
+                if (_CAT[0]=='C') { auto _f=computeDensity(vec_substr_lattices[_worstIdx>=0?_worstIdx:0]); _locVal=_locate(*_f,false,_gx,_gy,_gz); _locWhat=_worstSp+" (most negative)"; }
+                else if (_CAT[0]=='F') { auto _f=computeVelocityNorm(nsLattice); _locVal=_locate(*_f,true,_gx,_gy,_gz); _locWhat="peak velocity |u|"; }
+                else { auto _f=computeDensity(totalbFilmLattice); _locVal=_locate(*_f,true,_gx,_gy,_gz); _locWhat="peak biofilm biomass"; }
+                T _mcode = computeMax(*computeDensity(maskLattice), Box3D(_gx,_gx,_gy,_gy,_gz,_gz));
+                T _bHere = computeMax(*computeDensity(totalbFilmLattice), Box3D(_gx,_gx,_gy,_gy,_gz,_gz));
+                T _uHere = (Pe>thrd) ? computeMax(*computeVelocityNorm(nsLattice, Box3D(_gx,_gx,_gy,_gy,_gz,_gz))) : 0.0;
+                std::string _face = (_gx<=2) ? "INLET face (x low)" : ((_gx>=nx-3) ? "OUTLET face (x high)" : "interior (mid-domain)");
+                // ---- evidence for WHY a concentration is negative: reaction increment, pre-reaction value, and an equilibrium re-solve AT the voxel ----
+                bool _isPrimary=false; T _dChere=0.0, _preC=0.0;
+                bool _eqConv=true, _eqDone=false; plint _eqIters=0; T _eqResid=0.0, _eqOut=0.0;
+                if (_CAT[0]=='C' && _worstIdx>=0) {
+                    for (size_t _c=0;_c<eq_component_names.size();++_c) if (eq_component_names[_c]==_worstSp) _isPrimary=true;
+                    _dChere = computeMax(*computeDensity(dC[_worstIdx]), Box3D(_gx,_gx,_gy,_gy,_gz,_gz));
+                    _preC   = _locVal - _dChere;
+                    if (useEquilibrium) {
+                        std::vector<T> _cc(num_of_substrates);
+                        for (plint iS=0; iS<num_of_substrates; ++iS) { T _c0=computeMax(*computeDensity(vec_substr_lattices[iS]), Box3D(_gx,_gx,_gy,_gy,_gz,_gz)); _cc[iS]=std::max(_c0, EquilibriumChemistry<T>::MIN_CONC); }
+                        std::vector<T> _eqc = eqSolver.calculate_species_concentrations(_cc);
+                        _eqConv = eqSolver.didConverge(); _eqIters = eqSolver.getLastIterations(); _eqResid = eqSolver.getLastResidual();
+                        _eqOut = (_worstIdx < (plint)_eqc.size()) ? _eqc[_worstIdx] : 0.0; _eqDone=true;
+                    }
+                }
+                // ---- input-level evidence: cell-Peclet, gradient steepness, suggested deltaP ----
+                T _peCell = (D_lattice_fixed>1e-30) ? (_uHere / D_lattice_fixed) : 0.0;
+                T _dPfix  = (_MaNow>1e-30) ? (deltaP * 0.02 / _MaNow) : deltaP;
+                T _spMax=0.0, _spAvg=0.0, _gradRatio=0.0;
+                if (_CAT[0]=='C' && _worstIdx>=0) {
+                    _spMax = computeMax(*computeDensity(vec_substr_lattices[_worstIdx]));
+                    _spAvg = computeAverage(*computeDensity(vec_substr_lattices[_worstIdx]));
+                    _gradRatio = (std::abs(_spAvg)>1e-30) ? (_spMax/std::abs(_spAvg)) : 0.0;
+                }
+                pcout << "╔══════════════════════════════════════════════════════════════════════════╗\n";
+                pcout << "║  SIMULATION FAILED — the solver DETERMINED the cause from the state below   \n";
+                pcout << "╠══════════════════════════════════════════════════════════════════════════╣\n";
+                pcout << "║  ROOT CAUSE : " << _CAT << "\n";
+                pcout << "║  Trigger    : " << reason << "\n";
+                pcout << "║  Iteration  : " << iT << "   |   time = " << std::scientific << std::setprecision(4) << iT*ade_dt << std::fixed << " s\n";
+                pcout << "║  Sweeps     : push-pull " << pushSweeps << "  |  age " << ageSweeps << "\n";
+                pcout << "╟──────────────────────────────────────────────────────────────────────────╢\n";
+                pcout << "║  IN PLAIN ENGLISH - what triggered the failure:\n";
+                pcout << "║    " << _PLAIN << "\n";
+                pcout << "║  IN PLAIN ENGLISH - the solution:\n";
+                pcout << "║    " << _PFIX << "\n";
+                pcout << "╟──────────────────────────────────────────────────────────────────────────╢\n";
+                pcout << "║  WHY IT FAILED (read directly from the fields at failure):\n";
+                pcout << "║    " << _WHY1 << "\n";
+                pcout << "║    " << _WHY2 << "\n";
+                pcout << "║    " << _WHY3 << "\n";
+                pcout << "║  HOW TO FIX:\n";
+                pcout << "║    " << _SOL1 << "\n";
+                pcout << "║    " << _SOL2 << "\n";
+                pcout << "╟──────────────────────────────────────────────────────────────────────────╢\n";
+                pcout << "║  WHERE (the exact voxel the solver pinpointed):\n";
+                pcout << "║    Worst voxel  : (x=" << _gx << ", y=" << _gy << ", z=" << _gz << ")  in domain " << nx << "x" << ny << "x" << nz << "\n";
+                pcout << "║    Position     : " << _face << "\n";
+                pcout << "║    Offender     : " << _locWhat << " = " << std::scientific << std::setprecision(4) << _locVal << "\n";
+                pcout << "║    Local state  : mask-code=" << _mcode << " ; biomass=" << _bHere << " kg/m3" << (_bHere>0.0?" [biofilm voxel]":" [open pore]") << " ; |u|=" << _uHere << "\n";
+                pcout << "║    S-system here: HS=" << _valAt("HS",_gx,_gy,_gz) << " SO4=" << _valAt("SO4",_gx,_gy,_gz) << " H2S=" << _valAt("H2S",_gx,_gy,_gz) << " Hp=" << _valAt("Hp",_gx,_gy,_gz) << " Fe2=" << _valAt("Fe2",_gx,_gy,_gz) << std::fixed << "\n";
+                if (_CAT[0]=='C' && _worstIdx>=0) {
+                    pcout << "╟──────────────────────────────────────────────────────────────────────────╢\n";
+                    pcout << "║  WHY THE VALUE IS NEGATIVE (deduced from the run, with proof):\n";
+                    pcout << "║    " << _worstSp << (_isPrimary?" is a PRIMARY component":" is a SECONDARY (equilibrium-computed) species") << ".\n";
+                    pcout << "║    Stored value here = " << std::scientific << std::setprecision(4) << _locVal << " ; reaction increment dC = " << _dChere << " ; value just before the reaction ~ " << _preC << ".\n";
+                    if (_eqDone) {
+                        pcout << "║    Equilibrium re-solve AT this voxel: converged=" << (_eqConv?"YES":"NO") << " ; iters=" << _eqIters << "/" << eqSolver.getMaxIterations() << " ; residual=" << _eqResid << " (tol=" << eqSolver.getTolerance() << ").\n";
+                        pcout << "║    Solver clamped output for " << _worstSp << " here = " << _eqOut << "  (the solver clamps its output to >= 1e-30, so it CANNOT emit a negative).\n";
+                    }
+                    if (_eqDone && !_eqConv) {
+                        pcout << "║    PROOF: the equilibrium solver did NOT converge here (residual=" << std::scientific << std::setprecision(4) << _eqResid << " >> tol " << eqSolver.getTolerance() << "),\n";
+                        pcout << "║    and it also failed to converge on your INITIAL CompLaB.xml water at startup. The speciation is\n";
+                        pcout << "║    therefore unreliable and IS the source of the negative. Cell-Peclet here is " << std::fixed << std::setprecision(2) << _peCell << " (advection is\n";
+                        pcout << "║    negligible below 2), so this is a CHEMISTRY-INPUT problem, not transport and not kinetics.\n";
+                        pcout << "║    EASY FIX: make the CompLaB.xml equilibrium composition feasible (initial concentrations, logK,\n";
+                        pcout << "║    stoichiometry, charge balance) so the solver converges - start from the startup INPUT WARNING above.\n";
+                    } else if (_eqDone && _dChere < 0.0 && _preC >= 0.0) {
+                        pcout << "║    PROOF: the equilibrium solver converged to a non-negative value here, so it is not the source.\n";
+                        pcout << "║      -> a KINETICS reaction removed more than was present (before reaction ~" << std::scientific << std::setprecision(4) << _preC << ", dC=" << _dChere << "),\n";
+                        pcout << "║         driving it below zero. EASY FIX: smaller reactive step, or cap consumption to the amount available.\n";
+                    } else if (_eqDone && _eqOut >= 0.0 && _locVal < 0.0) {
+                        pcout << "║    PROOF: the equilibrium solver converged to a non-negative value and no reaction consumed it (dC~0),\n";
+                        pcout << "║    so the negative came from the TRANSPORT (LBM advection-diffusion) step.\n";
+                        if (_peCell > 2.0) {
+                            pcout << "║      -> cell-Peclet=" << std::fixed << std::setprecision(2) << _peCell << " (>2): advection overshoot across a steep gradient.\n";
+                            pcout << "║      EASY FIX: clamp densities >= 0 after the stream step, or lower Pe so advection stops overshooting.\n";
+                        } else {
+                            pcout << "║      -> cell-Peclet=" << std::fixed << std::setprecision(2) << _peCell << " (<2, advection weak): a diffusion / boundary transport artifact.\n";
+                            pcout << "║      EASY FIX: clamp densities >= 0 after the stream step; check boundary / initial values in CompLaB.xml.\n";
+                        }
+                    }
+                    pcout << std::fixed;
+                }
+                pcout << "║  EVIDENCE (why this category and not the others):\n";
+                pcout << "║    FLOW      : Ma_now = " << std::scientific << std::setprecision(4) << _MaNow << "  (LBM limit ~0.1) ; u_max = " << _umax << " ; deltaP = " << deltaP << " ; k = " << permeability << "\n";
+                pcout << "║    BIOMASS   : max = " << _bmax << " kg/m3 = " << std::fixed << std::setprecision(2) << _capRatio << "x cap ; mean = " << std::scientific << std::setprecision(4) << _bavg << " ; total = " << _bsum << "\n";
+                pcout << "║    CHEMISTRY : most-negative solute = " << _worstSp << " at " << _worstMin << " M  (physical floor = 0)\n";
+                pcout << "║    FINITE?   : flow=" << (_flowFinite?"yes":"NO") << "  biomass=" << (_bmassFinite?"yes":"NO") << "  chem=" << (_chemFinite?"yes":"NO") << std::fixed << "\n";
+                pcout << "╟──────────────────────────────────────────────────────────────────────────╢\n";
+                pcout << "║  WHICH INPUT TO FIX (this is a configuration issue, not a code bug):\n";
+                if (_CAT[0]=='F') {
+                    pcout << "║    File      : CompLaB.xml\n";
+                    pcout << "║    Parameter : deltaP (currently " << std::scientific << std::setprecision(4) << deltaP << ")\n";
+                    pcout << "║    Change to : " << _dPfix << "   [= deltaP * 0.02 / Ma_now ; targets Ma ~ 0.02]\n";
+                    pcout << "║    Or        : use a looser geometry.dat (wider throats raise permeability, now k=" << permeability << ").\n";
+                }
+                else if (_CAT[0]=='C') {
+                    pcout << "║    Cell-Peclet at this voxel = " << std::fixed << std::setprecision(2) << _peCell << " (advection-dominated if > 2) ; gradient(" << _worstSp << ") max/avg = " << _gradRatio << "x\n";
+                    if (_eqDone && !_eqConv) {
+                        pcout << "║    Cause     : the equilibrium solver did NOT converge here - infeasible chemistry (it also failed on the initial water at startup).\n";
+                        pcout << "║    File      : CompLaB.xml (equilibrium block)\n";
+                        pcout << "║    Fix       : make initial concentrations / logK / stoichiometry feasible and charge-balanced so the solver converges.\n";
+                    } else if (_dChere < 0.0 && _preC >= 0.0) {
+                        pcout << "║    Cause     : a KINETICS reaction removed more " << _worstSp << " than was present (dC=" << std::scientific << std::setprecision(4) << _dChere << ").\n";
+                        pcout << "║    File      : defineKinetics.hh (biotic)  or  defineAbioticKinetics.hh (abiotic)\n";
+                        pcout << "║    Fix #1    : lower the rate constant (Vmax/k) of the reaction consuming " << _worstSp << ".\n";
+                        pcout << "║    Fix #2    : reduce dx in CompLaB.xml (smaller reactive step ; now dx=" << dx << ").\n";
+                    } else {
+                        pcout << "║    Cause     : TRANSPORT of a steep gradient (solver +ve, value <0 before reaction ; cell-Peclet shown above).\n";
+                        pcout << "║    File      : CompLaB.xml\n";
+                        pcout << "║    Fix #1    : lower Pe from " << std::scientific << std::setprecision(4) << Pe << " to <= " << (Pe*0.3) << " (or clamp densities >=0 after the stream step)\n";
+                        pcout << "║    Fix #2    : reduce the initial-concentration contrast of " << _worstSp << " (smooth the " << std::fixed << std::setprecision(1) << _gradRatio << "x cliff)\n";
+                    }
+                }
+                else if (_CAT[0]=='B') {
+                    pcout << "║    File      : defineKinetics.hh\n";
+                    pcout << "║    Parameter : growth rate (Vmax) of the fastest-growing microbe (biomass hit " << std::fixed << std::setprecision(2) << _capRatio << "x cap)\n";
+                    pcout << "║    Fix #1    : lower that Vmax ; confirm the f_cap limiter is active in defineKinetics.hh.\n";
+                    pcout << "║    Fix #2    : reduce dx in CompLaB.xml (smaller step ; now dx=" << std::scientific << std::setprecision(4) << dx << ").\n";
+                }
+                else {
+                    pcout << "║    File      : geometry.dat (pore throats too tight)  or  CompLaB.xml\n";
+                    pcout << "║    Fix #1    : use a looser packing / wider gaps in geometry.dat.\n";
+                    pcout << "║    Fix #2    : raise Bmax (max_bMassRho=" << std::scientific << std::setprecision(4) << max_bMassRho << ") in CompLaB.xml, or lower growth in defineKinetics.hh.\n";
+                }
+                pcout << std::fixed;
+                pcout << "╚══════════════════════════════════════════════════════════════════════════╝\n";
+                pcout << "  [CA-FAIL] Writing full VTI snapshot (all species, microbes, mask, age, flow) at iter=" << iT << "...\n";
+                plint _a=0, _b=0;
+                for (plint iS = 0; iS < num_of_substrates; ++iS) { writeAdvVTI(vec_substr_lattices[iS], iT, vec_subs_names[iS]+"_"); }
+                for (plint iM = 0; iM < num_of_microbes; ++iM) {
+                    if (bmass_type[iM]==1) { writeAdvVTI(vec_bFilm_lattices[_a], iT, vec_microbes_names[iM]+"_"); ++_a; }
+                    else { writeAdvVTI(vec_bFree_lattices[_b], iT, vec_microbes_names[iM]+"_"); ++_b; }
+                }
+                if (Pe > thrd) { writeNsVTI(nsLattice, iT, "nsLattice_"); }
+                writeAdvVTI(maskLattice, iT, mask_filename+"_");
+                writeAdvVTI(ageLattice, iT, "ageLattice_");
+                pcout << "  [CA-FAIL] All snapshot files written at iter=" << iT << ". Terminating simulation.\n";
+            };
             plint whilecount=0;
-            if (globalBmax - max_bMassRho > thrd) {
+            T prevBmax = globalBmax; plint stall = 0;   // [CA-ROBUST] progress tracker: stop early if biomass genuinely cannot drain (buried / precipitated-over / biofilm-boxed cells)
+            if (!percolationFlag && globalBmax - max_bMassRho > thrd) {
                 diag_ca_triggers++;
                 if (track_performance == 1) global::timer("ca").restart();
                 while (globalBmax - max_bMassRho > thrd) {
@@ -933,6 +1322,12 @@ int main(int argc, char **argv) {
                     applyProcessingFunctional(new updateLocalMaskNtotalLattices3D<T,RXNDES>(nx, ny, nz, caLlen, bounce_back, no_dynamics, bio_dynamics, pore_dynamics, thrd_bFilmFrac, max_bMassRho), vec_bFilm_lattices[0].getBoundingBox(), ptr_ca_lattices);
                     globalBmax = computeMax(*computeDensity(totalbFilmLattice));
                     diag_ca_redistributions++;
+                    // [CA-ROBUST] if a sweep no longer lowers the biofilm max, the remaining excess is boxed in
+                    // (wall corner, FeS-sealed throat, or surrounded by full biofilm). Leave those cells full and
+                    // stop early instead of grinding the full 2000 sweeps. Threshold spans the age-update interval (50).
+                    if (globalBmax > prevBmax - thrd) { if (++stall >= 100) { dumpAllFields("PUSH-PULL stalled: biofilm cannot spread (buried/clogged cells at cap; no drainage in 100 sweeps)", whilecount, 0); return -1; } }
+                    else stall = 0;
+                    prevBmax = globalBmax;
                     if (whilecount%50 == 0) {
                         plint diff = 1, whilecount1 = 0;
                         while (diff != 0) {
@@ -941,10 +1336,10 @@ int main(int argc, char **argv) {
                             plint new_totAge = util::roundToInt(computeAverage(*computeDensity(ageLattice))*nx*ny*nz);
                             diff = new_totAge-old_totAge;
                             ++whilecount1;
-                            if (whilecount1 > 1000) { pcout << "\n  [CA] ERROR: Stuck in age loop\n"; exit(EXIT_FAILURE); }
+                            if (whilecount1 > 1000) { dumpAllFields("AGE-DISTANCE relaxation did not settle (>1000 sub-sweeps)", whilecount, whilecount1); return -1; }
                         }
                     }
-                    if (whilecount > 2000) { pcout << "\n  [CA] ERROR: Stuck in push-pull loop\n"; exit(EXIT_FAILURE); }
+                    if (whilecount > 1000) { dumpAllFields("PUSH-PULL redistribution did not settle (>1000 sweeps)", whilecount, 0); return -1; }
                     ++whilecount;
                 }
                 if (track_performance == 1) { catime+=global::timer("ca").getTime(); global::timer("ca").stop(); }
@@ -984,7 +1379,11 @@ int main(int argc, char **argv) {
                         if (outletvel > thrd) ns_saturate = 0;
                         else { pcout << "\n  [NS] Percolation limit reached at iter=" << iT << "\n"; percolationFlag = 1; }
                     }
-                    for (plint iS = 0; iS < num_of_substrates; ++iS) latticeToPassiveAdvDiff(nsLattice, vec_substr_lattices[iS], vec_substr_lattices[iS].getBoundingBox());
+                    // [NS-ROBUST] catch flow divergence (NaN/Inf energy) from near-complete clogging: stop cleanly
+                    // instead of coupling a non-finite velocity into the solutes/biomass (which then segfaults the CA).
+                    { T nsE = getStoredAverageEnergy(nsLattice); if (std::isnan(nsE) || std::isinf(nsE)) { pcout << "\n  [NS] Flow solve diverged at iter=" << iT << " (pore clogged / Ma runaway); stopping cleanly with last valid data.\n"; percolationFlag = 1; } }
+                    if (!percolationFlag) {
+                    for (plint iS = 0; iS < num_of_substrates; ++iS) if (!vec_immobile[iS]) latticeToPassiveAdvDiff(nsLattice, vec_substr_lattices[iS], vec_substr_lattices[iS].getBoundingBox());
                     if (lb_count > 0) {
                         for (plint iM = 0; iM < num_of_microbes; ++iM) {
                             if (solver_type[iM]==3) {
@@ -992,6 +1391,7 @@ int main(int argc, char **argv) {
                                 else latticeToPassiveAdvDiff(nsLattice, vec_bFree_lattices[loctrack[iM]], vec_bFree_lattices[loctrack[iM]].getBoundingBox());
                             }
                         }
+                    }
                     }
                     if (track_performance == 1) { nstime += global::timer("NS").getTime(); global::timer("NS").stop(); }
                 }
@@ -1001,7 +1401,7 @@ int main(int argc, char **argv) {
 
         // Streaming
         if (track_performance == 1) global::timer("cns").restart();
-        for (plint iS = 0; iS < num_of_substrates; ++iS) vec_substr_lattices[iS].stream();
+        for (plint iS = 0; iS < num_of_substrates; ++iS) if (!vec_immobile[iS]) vec_substr_lattices[iS].stream();
         if (lb_count > 0) {
             for (plint iM = 0; iM < num_of_microbes; ++iM) {
                 if (solver_type[iM]==3) {
