@@ -33,7 +33,7 @@ A graphical user interface, CompLaB Studio, provides configuration panels coveri
 
 Pore-scale reactive transport modeling is essential for understanding coupled flow, transport, and biogeochemical reactions in subsurface environments [@Blunt2013; @Molins2015; @Steefel2005]. Existing pore-scale simulation frameworks lack integrated support for coupled flow, transport, biogeochemical reactions, biofilm dynamics, and equilibrium chemistry, features that are more commonly available in continuum-scale reactive transport codes such as CrunchFlow [@Steefel2015] or PFLOTRAN [@Lichtner2015], a gap that is filled by CompLaB3D. An integrated GUI makes the software accessible to a broad target audience, including researchers in subsurface biogeochemistry, geomicrobiology, and environmental engineering.
 
-# Model Description
+# Software design
 
 ## Fluid Flow Solver
 
