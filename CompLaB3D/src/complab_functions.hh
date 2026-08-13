@@ -55,6 +55,10 @@
 using namespace plb;
 typedef double T;
 
+// [UPD_RXN] debug-print toggle, defined in complab3d_processors_part1.hh.
+//   Set here from CompLaB.xml <IO><debug_updRxn> during initialize_complab().
+extern bool g_updRxn_debug;
+
 #define NSDES descriptors::D3Q19Descriptor // Cs2 = 1/3
 #define RXNDES descriptors::AdvectionDiffusionD3Q7Descriptor // Cs2 = 1/3
 #define COMPLAB_THRD 1e-14
@@ -1197,6 +1201,10 @@ int initialize_complab( char *&main_path, char *&src_path, char *&input_path, ch
         catch (PlbIOException& exception) { ade_VTK_iTer=1000; }
         try { doc["parameters"]["IO"]["save_CHK_interval"].read(ade_CHK_iTer); }
         catch (PlbIOException& exception) { ade_CHK_iTer=1000000; }
+        try { std::string dbg; doc["parameters"]["IO"]["debug_updRxn"].read(dbg);
+              std::transform(dbg.begin(), dbg.end(), dbg.begin(), [](unsigned char c){ return std::tolower(c); });
+              g_updRxn_debug = (dbg=="1"||dbg=="true"||dbg=="yes"||dbg=="on"); }
+        catch (PlbIOException& exception) { g_updRxn_debug=false; }
 
         // ════════════════════════════════════════════════════════════════════════════
         // EQUILIBRIUM CHEMISTRY PARSING
